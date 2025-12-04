@@ -51,10 +51,13 @@ git push
 1. In the same Railway project, click "+ New"
 2. Select "GitHub Repo"
 3. Choose your `tamil-works-db` repository
-4. Railway will detect Dockerfile and build backend
-5. Configure backend:
-   - **Root Directory**: Leave as `/` (Dockerfile is in root)
-   - **Service Name**: `backend` (optional)
+4. Railway will show deployment configuration
+5. **IMPORTANT**: Configure backend service settings:
+   - Click on the service → **Settings** tab
+   - Scroll to **Source** section
+   - Set **Root Directory**: `webapp/backend`
+   - Railway will auto-detect the Dockerfile
+   - Click **Deploy** if not already deploying
 
 #### Backend Environment Variables:
 Click on backend service → "Variables" tab → Add:
@@ -99,9 +102,13 @@ psql "YOUR_DATABASE_URL" -f sql/complete_setup.sql
 1. In the same Railway project, click "+ New"
 2. Select "GitHub Repo"
 3. Choose your `tamil-works-db` repository again
-4. Configure frontend service:
-   - **Root Directory**: `webapp/frontend`
-   - **Service Name**: `frontend` (optional)
+4. Railway will show deployment configuration
+5. **IMPORTANT**: Configure frontend service settings:
+   - Click on the service → **Settings** tab
+   - Scroll to **Source** section
+   - Set **Root Directory**: `webapp/frontend`
+   - Railway will auto-detect the Dockerfile
+   - Click **Deploy** if not already deploying
 
 #### Frontend Environment Variables:
 Click on frontend service → "Variables" tab → Add:
@@ -276,8 +283,12 @@ Just push your code to GitHub, follow the 7 steps above, and Railway will handle
 
 **Three Railway Services in Your Project:**
 1. **PostgreSQL** - Database service
-2. **Backend** - FastAPI application (Dockerfile in root)
-3. **Frontend** - Vue.js + Nginx (Dockerfile in `webapp/frontend/`)
+2. **Backend** - FastAPI application
+   - Root Directory: `webapp/backend`
+   - Dockerfile: `webapp/backend/Dockerfile`
+3. **Frontend** - Vue.js + Nginx
+   - Root Directory: `webapp/frontend`
+   - Dockerfile: `webapp/frontend/Dockerfile`
 
 **Key Variables:**
 - Backend: `DATABASE_URL`, `ALLOWED_ORIGINS`
