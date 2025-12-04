@@ -467,7 +467,9 @@ def main():
                              "postgresql://postgres:postgres@localhost/tamil_literature_db")
 
     # Directory path
-    sangam_dir = r"C:\Mathan\Tamil\Tamil-Source-TamilConcordence\2_Sangam_Litrature"
+    script_dir = Path(__file__).parent
+    project_dir = script_dir.parent
+    sangam_dir = project_dir / "Tamil-Source-TamilConcordence" / "2_Sangam_Litrature"
 
     # Allow database URL as command line argument
     if len(sys.argv) > 1:

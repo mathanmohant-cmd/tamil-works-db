@@ -288,7 +288,9 @@ def main():
     db_connection = os.getenv('DATABASE_URL', "postgresql://postgres:password@localhost/tamil_literature")
 
     # Text file path
-    text_file = r"C:\Mathan\Tamil\Tamil-Source-TamilConcordence\3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு\திருக்குறள்.txt"
+    script_dir = Path(__file__).parent
+    project_dir = script_dir.parent
+    text_file = project_dir / "Tamil-Source-TamilConcordence" / "3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு" / "திருக்குறள்.txt"
 
     # Allow database URL as command line argument
     if len(sys.argv) > 1:
