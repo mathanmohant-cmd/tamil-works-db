@@ -4,14 +4,11 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Copy backend requirements file
-COPY webapp/backend/requirements.txt .
+# Copy entire webapp/backend directory
+COPY webapp/backend ./
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy backend application code
-COPY webapp/backend/ .
 
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
