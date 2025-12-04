@@ -29,6 +29,28 @@ class ThirukkuralParser:
         # Work ID for Thirukkural
         self.work_id = 3
 
+        # Ensure Thirukkural work exists
+        self._ensure_work_exists()
+
+    def _ensure_work_exists(self):
+        """Ensure Thirukkural work exists in works table"""
+        self.cursor.execute("SELECT work_id FROM works WHERE work_id = %s", (self.work_id,))
+        if not self.cursor.fetchone():
+            print("  Creating Thirukkural work entry...")
+            self.cursor.execute("""
+                INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                self.work_id,
+                'Thirukkural',
+                'திருக்குறள்',
+                '4th - 5th century CE',
+                'Thiruvalluvar',
+                'திருவள்ளுவர்',
+                'Classic Tamil text on ethics, politics, and love - 1,330 couplets'
+            ))
+            self.conn.commit()
+
     def _build_kural_mapping(self) -> Dict[int, Dict]:
         """Build mapping from kural number to Paal/Iyal/Adhikaram"""
         mapping = {}
