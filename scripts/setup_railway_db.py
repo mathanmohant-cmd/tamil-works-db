@@ -90,6 +90,86 @@ def run_sql_file(connection_string, sql_file_path, description):
         print(f"✗ Error: {e}")
         return False
 
+def check_existing_schema(connection_string):
+    """Check if our tables already exist"""
+    import psycopg2
+
+    try:
+        conn = psycopg2.connect(connection_string)
+        cursor = conn.cursor()
+
+        # Check if works table exists
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = 'works'
+            );
+        """)
+        table_exists = cursor.fetchone()[0]
+
+        if not table_exists:
+            cursor.close()
+            conn.close()
+            return None
+
+        # Get counts
+        cursor.execute("SELECT COUNT(*) FROM works;")
+        work_count = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM verses;")
+        verse_count = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM words;")
+        word_count = cursor.fetchone()[0]
+
+        cursor.close()
+        conn.close()
+
+        return {
+            'works': work_count,
+            'verses': verse_count,
+            'words': word_count
+        }
+
+    except Exception:
+        return None
+
+def drop_tables(connection_string):
+    """Drop our project tables and views"""
+    import psycopg2
+
+    print("\nDropping existing tables and views...")
+    try:
+        conn = psycopg2.connect(connection_string)
+        cursor = conn.cursor()
+
+        # Drop views first (they depend on tables)
+        cursor.execute("""
+            DROP VIEW IF EXISTS word_details CASCADE;
+            DROP VIEW IF EXISTS verse_hierarchy CASCADE;
+        """)
+
+        # Drop tables in reverse order of dependencies
+        cursor.execute("""
+            DROP TABLE IF EXISTS cross_references CASCADE;
+            DROP TABLE IF EXISTS commentaries CASCADE;
+            DROP TABLE IF EXISTS words CASCADE;
+            DROP TABLE IF EXISTS lines CASCADE;
+            DROP TABLE IF EXISTS verses CASCADE;
+            DROP TABLE IF EXISTS sections CASCADE;
+            DROP TABLE IF EXISTS works CASCADE;
+        """)
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("✓ Tables and views dropped successfully")
+        return True
+    except Exception as e:
+        print(f"✗ Error dropping tables: {e}")
+        return False
+
 def verify_setup(connection_string):
     """Verify the database setup"""
     import psycopg2
@@ -183,6 +263,26 @@ def main():
     if not test_connection(connection_string):
         print("\nPlease check your connection string and try again.")
         return
+
+    # Check if schema already exists
+    existing = check_existing_schema(connection_string)
+    if existing:
+        print("\n" + "="*70)
+        print("⚠ EXISTING SCHEMA DETECTED")
+        print("="*70)
+        print(f"\nFound existing Tamil literature database with:")
+        print(f"  - Works: {existing['works']}")
+        print(f"  - Verses: {existing['verses']}")
+        print(f"  - Words: {existing['words']}")
+
+        response = input("\nDrop existing tables and rebuild? (yes/no): ").strip().lower()
+        if response not in ['yes', 'y']:
+            print("Setup cancelled.")
+            return
+
+        if not drop_tables(connection_string):
+            print("\n✗ Failed to drop existing tables")
+            return
 
     # Get SQL file path
     script_dir = Path(__file__).parent
