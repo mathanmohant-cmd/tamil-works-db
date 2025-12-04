@@ -1,0 +1,247 @@
+{
+  "work": {
+    "work_id": 3,
+    "work_name": "Thirukkural",
+    "work_name_tamil": "திருக்குறள்",
+    "author": "Thiruvalluvar",
+    "author_tamil": "திருவள்ளுவர்",
+    "period": "4th - 5th century CE",
+    "description": "Classic Tamil text on ethics, politics, and love"
+  },
+  "structure": {
+    "paals": [
+      {
+        "paal_id": 1,
+        "paal_name": "Aram",
+        "paal_name_tamil": "அறத்துப்பால்",
+        "paal_number": 1,
+        "description": "Book of Virtue",
+        "iyals": [
+          {
+            "iyal_id": 1,
+            "iyal_name": "Payiram",
+            "iyal_name_tamil": "பாயிரம்",
+            "iyal_number": 1,
+            "adhikarams": [
+              {"num": 1, "name": "Kadavul Vazhthu", "tamil": "கடவுள் வாழ்த்து", "kurals": [1, 10]},
+              {"num": 2, "name": "Vaan Sirappu", "tamil": "வான்சிறப்பு", "kurals": [11, 20]},
+              {"num": 3, "name": "Neethar Perumai", "tamil": "நீத்தார் பெருமை", "kurals": [21, 30]},
+              {"num": 4, "name": "Aran Valiyuruthal", "tamil": "அறன் வலியுறுத்தல்", "kurals": [31, 40]}
+            ]
+          },
+          {
+            "iyal_id": 2,
+            "iyal_name": "Illaram",
+            "iyal_name_tamil": "இல்லறவியல்",
+            "iyal_number": 2,
+            "adhikarams": [
+              {"num": 5, "name": "Il Vazhkai", "tamil": "இல்வாழ்க்கை", "kurals": [41, 50]},
+              {"num": 6, "name": "Vazhkai Thunai Nalam", "tamil": "வாழ்க்கைத் துணைநலம்", "kurals": [51, 60]},
+              {"num": 7, "name": "Makkat Peru", "tamil": "மக்கட்பேறு", "kurals": [61, 70]},
+              {"num": 8, "name": "Anbudaimai", "tamil": "அன்புடைமை", "kurals": [71, 80]},
+              {"num": 9, "name": "Virunthombal", "tamil": "விருந்தோம்பல்", "kurals": [81, 90]},
+              {"num": 10, "name": "Iniyavai Kooral", "tamil": "இனியவை கூறல்", "kurals": [91, 100]},
+              {"num": 11, "name": "Sein Nandri Arithal", "tamil": "செய்ந்நன்றியறிதல்", "kurals": [101, 110]},
+              {"num": 12, "name": "Naduvu Nilaimai", "tamil": "நடுவு நிலைமை", "kurals": [111, 120]},
+              {"num": 13, "name": "Adakkam Udaimai", "tamil": "அடக்கம் உடைமை", "kurals": [121, 130]},
+              {"num": 14, "name": "Ozhukkam Udaimai", "tamil": "ஒழுக்கம் உடைமை", "kurals": [131, 140]},
+              {"num": 15, "name": "Piranil Vizhayamai", "tamil": "பிறனில் விழையாமை", "kurals": [141, 150]},
+              {"num": 16, "name": "Poraiyudaimai", "tamil": "பொறையுடைமை", "kurals": [151, 160]},
+              {"num": 17, "name": "Azhukkaaramai", "tamil": "அழுக்காறாமை", "kurals": [161, 170]},
+              {"num": 18, "name": "Vekkaamai", "tamil": "வெஃகாமை", "kurals": [171, 180]},
+              {"num": 19, "name": "Purankoramai", "tamil": "புறங்கூறாமை", "kurals": [181, 190]},
+              {"num": 20, "name": "Payanila Sollamal", "tamil": "பயனில சொல்லாமை", "kurals": [191, 200]},
+              {"num": 21, "name": "Theevinaiyacham", "tamil": "தீவினையச்சம்", "kurals": [201, 210]},
+              {"num": 22, "name": "Oppuravarithal", "tamil": "ஒப்புரவறிதல்", "kurals": [211, 220]},
+              {"num": 23, "name": "Eekai", "tamil": "ஈ.கை", "kurals": [221, 230]},
+              {"num": 24, "name": "Pugazh", "tamil": "புகழ்", "kurals": [231, 240]}
+            ]
+          },
+          {
+            "iyal_id": 3,
+            "iyal_name": "Thuravam",
+            "iyal_name_tamil": "துறவறவியல்",
+            "iyal_number": 3,
+            "adhikarams": [
+              {"num": 25, "name": "Aruludaimai", "tamil": "அருளுடைமை", "kurals": [241, 250]},
+              {"num": 26, "name": "Pulal Maruthal", "tamil": "புலால் மறுத்தல்", "kurals": [251, 260]},
+              {"num": 27, "name": "Thavam", "tamil": "தவம்", "kurals": [261, 270]},
+              {"num": 28, "name": "Kooda Ozhukkam", "tamil": "கூடா ஒழுக்கம்", "kurals": [271, 280]},
+              {"num": 29, "name": "Kallamai", "tamil": "கள்ளாமை", "kurals": [281, 290]},
+              {"num": 30, "name": "Vaaimai", "tamil": "வாய்மை", "kurals": [291, 300]},
+              {"num": 31, "name": "Vegulamai", "tamil": "வெகுளாமை", "kurals": [301, 310]},
+              {"num": 32, "name": "Inna Seiyamai", "tamil": "இன்னா செய்யாமை", "kurals": [311, 320]},
+              {"num": 33, "name": "Kollamai", "tamil": "கொல்லாமை", "kurals": [321, 330]},
+              {"num": 34, "name": "Nilaiyamai", "tamil": "நிலையாமை", "kurals": [331, 340]},
+              {"num": 35, "name": "Thuravu", "tamil": "துறவு", "kurals": [341, 350]},
+              {"num": 36, "name": "Mei Unarthal", "tamil": "மெய்யுணர்தல்", "kurals": [351, 360]},
+              {"num": 37, "name": "Ava Aaruthal", "tamil": "அவா அறுத்தல்", "kurals": [361, 370]}
+            ]
+          },
+          {
+            "iyal_id": 4,
+            "iyal_name": "Oozh",
+            "iyal_name_tamil": "ஊழியல்",
+            "iyal_number": 4,
+            "adhikarams": [
+              {"num": 38, "name": "Oozh", "tamil": "ஊழ்", "kurals": [371, 380]}
+            ]
+          }
+        ]
+      },
+      {
+        "paal_id": 2,
+        "paal_name": "Porul",
+        "paal_name_tamil": "பொருட்பால்",
+        "paal_number": 2,
+        "description": "Book of Polity",
+        "iyals": [
+          {
+            "iyal_id": 5,
+            "iyal_name": "Arasu",
+            "iyal_name_tamil": "அரசியல்",
+            "iyal_number": 5,
+            "adhikarams": [
+              {"num": 39, "name": "Iraimatchi", "tamil": "இறைமாட்சி", "kurals": [381, 390]},
+              {"num": 40, "name": "Kalvi", "tamil": "கல்வி", "kurals": [391, 400]},
+              {"num": 41, "name": "Kallamai", "tamil": "கல்லாமை", "kurals": [401, 410]},
+              {"num": 42, "name": "Kelvi", "tamil": "கேள்வி", "kurals": [411, 420]},
+              {"num": 43, "name": "Arivudaimai", "tamil": "அறிவுடைமை", "kurals": [421, 430]},
+              {"num": 44, "name": "Kuttram Kadithal", "tamil": "குற்றங்கடிதல்", "kurals": [431, 440]},
+              {"num": 45, "name": "Periyarai Thunai Kodal", "tamil": "பெரியாரைத் துணைக்கோடல்", "kurals": [441, 450]},
+              {"num": 46, "name": "Sitrinam Seramai", "tamil": "சிற்றினம் சேராமை", "kurals": [451, 460]},
+              {"num": 47, "name": "Therinthu Seyal Vagai", "tamil": "தெரிந்து செயல்வகை", "kurals": [461, 470]},
+              {"num": 48, "name": "Vali Arithal", "tamil": "வலியறிதல்", "kurals": [471, 480]},
+              {"num": 49, "name": "Kaalam Arithal", "tamil": "காலமறிதல்", "kurals": [481, 490]},
+              {"num": 50, "name": "Idana Rithal", "tamil": "இடனறிதல்", "kurals": [491, 500]},
+              {"num": 51, "name": "Therinthu Thelithal", "tamil": "தெரிந்து தெளிதல்", "kurals": [501, 510]},
+              {"num": 52, "name": "Therinthu Vinaiyadal", "tamil": "தெரிந்து வினையாடல்", "kurals": [511, 520]},
+              {"num": 53, "name": "Sutram Thazhal", "tamil": "சுற்றந் தழால்", "kurals": [521, 530]},
+              {"num": 54, "name": "Pochavamai", "tamil": "பொச்சாவாமை", "kurals": [531, 540]},
+              {"num": 55, "name": "Sengonmai", "tamil": "செங்கோன்மை", "kurals": [541, 550]},
+              {"num": 56, "name": "Kodugonmai", "tamil": "கொடுங்கோன்மை", "kurals": [551, 560]},
+              {"num": 57, "name": "Veruvanda Seiyamai", "tamil": "வெருவந்த செய்யாமை", "kurals": [561, 570]},
+              {"num": 58, "name": "Kannottam", "tamil": "கண்ணோட்டம்", "kurals": [571, 580]},
+              {"num": 59, "name": "Otradal", "tamil": "ஒற்றாடல்", "kurals": [581, 590]},
+              {"num": 60, "name": "Ukkam Udaimai", "tamil": "ஊக்கம் உடைமை", "kurals": [591, 600]},
+              {"num": 61, "name": "Madi Inmai", "tamil": "மடி இன்மை", "kurals": [601, 610]},
+              {"num": 62, "name": "Aalvinai Udaimai", "tamil": "ஆள்வினை உடைமை", "kurals": [611, 620]},
+              {"num": 63, "name": "Idukan Azhiyamai", "tamil": "இடுக்கண் அழியாமை", "kurals": [621, 630]}
+            ]
+          },
+          {
+            "iyal_id": 6,
+            "iyal_name": "Amaichu",
+            "iyal_name_tamil": "அமைச்சியல்",
+            "iyal_number": 6,
+            "adhikarams": [
+              {"num": 64, "name": "Amaichu", "tamil": "அமைச்சு", "kurals": [631, 640]},
+              {"num": 65, "name": "Solvanmai", "tamil": "சொல்வன்மை", "kurals": [641, 650]},
+              {"num": 66, "name": "Vinai Thuimai", "tamil": "வினைத் தூய்மை", "kurals": [651, 660]},
+              {"num": 67, "name": "Vinaithitpam", "tamil": "வினைத்திட்பம்", "kurals": [661, 670]},
+              {"num": 68, "name": "Vinai Seyalvagai", "tamil": "வினை செயல்வகை", "kurals": [671, 680]},
+              {"num": 69, "name": "Thootu", "tamil": "தூது", "kurals": [681, 690]},
+              {"num": 70, "name": "Mannarai Sernthozhugal", "tamil": "மன்னரைச் சேர்ந்து ஒழுகல்", "kurals": [691, 700]},
+              {"num": 71, "name": "Kuripparithal", "tamil": "குறிப்பறிதல்", "kurals": [701, 710]},
+              {"num": 72, "name": "Avai Arithal", "tamil": "அவை அறிதல்", "kurals": [711, 720]},
+              {"num": 73, "name": "Avai Anjamai", "tamil": "அவை அஞ்சாமை", "kurals": [721, 730]},
+              {"num": 74, "name": "Naadu", "tamil": "நாடு", "kurals": [731, 740]},
+              {"num": 75, "name": "Aran", "tamil": "அரண்", "kurals": [741, 750]},
+              {"num": 76, "name": "Porul Seyalvagai", "tamil": "பொருள் செயல்வகை", "kurals": [751, 760]},
+              {"num": 77, "name": "Padai Matchi", "tamil": "படை மாட்சி", "kurals": [761, 770]},
+              {"num": 78, "name": "Padai Cheruku", "tamil": "படைச் செருக்கு", "kurals": [771, 780]},
+              {"num": 79, "name": "Natpu", "tamil": "நட்பு", "kurals": [781, 790]},
+              {"num": 80, "name": "Natpu Aaraithal", "tamil": "நட்பாராய்தல்", "kurals": [791, 800]},
+              {"num": 81, "name": "Pazhaimai", "tamil": "பழைமை", "kurals": [801, 810]},
+              {"num": 82, "name": "Thee Natpu", "tamil": "தீ நட்பு", "kurals": [811, 820]},
+              {"num": 83, "name": "Kooda Natpu", "tamil": "கூடா நட்பு", "kurals": [821, 830]},
+              {"num": 84, "name": "Pethamai", "tamil": "பேதைமை", "kurals": [831, 840]},
+              {"num": 85, "name": "Pullarivaanmai", "tamil": "புல்லறிவாண்மை", "kurals": [841, 850]},
+              {"num": 86, "name": "Ikal", "tamil": "இகல்", "kurals": [851, 860]},
+              {"num": 87, "name": "Pakaimaatchi", "tamil": "பகை மாட்சி", "kurals": [861, 870]},
+              {"num": 88, "name": "Pakaithirandherithal", "tamil": "பகைத்திறம் தெரிதல்", "kurals": [871, 880]},
+              {"num": 89, "name": "Utpakai", "tamil": "உட்பகை", "kurals": [881, 890]},
+              {"num": 90, "name": "Periyaraip Pilaiyamai", "tamil": "பெரியாரைப் பிழையாமை", "kurals": [891, 900]},
+              {"num": 91, "name": "Penvalic Ceral", "tamil": "பெண்வழிச் சேறல்", "kurals": [901, 910]},
+              {"num": 92, "name": "Varaivin Makalir", "tamil": "வரைவின் மகளிர்", "kurals": [911, 920]},
+              {"num": 93, "name": "Kallunnamai", "tamil": "கள்ளுண்ணாமை", "kurals": [921, 930]},
+              {"num": 94, "name": "Soothu", "tamil": "சூது", "kurals": [931, 940]},
+              {"num": 95, "name": "Marundhu", "tamil": "மருந்து", "kurals": [941, 950]}
+            ]
+          },
+          {
+            "iyal_id": 7,
+            "iyal_name": "Ozhipu",
+            "iyal_name_tamil": "ஒழிபியல்",
+            "iyal_number": 7,
+            "adhikarams": [
+              {"num": 96, "name": "Kudimai", "tamil": "குடிமை", "kurals": [951, 960]},
+              {"num": 97, "name": "Maanam", "tamil": "மானம்", "kurals": [961, 970]},
+              {"num": 98, "name": "Perumai", "tamil": "பெருமை", "kurals": [971, 980]},
+              {"num": 99, "name": "Saandraanmai", "tamil": "சான்றாண்மை", "kurals": [981, 990]},
+              {"num": 100, "name": "Panpudaimai", "tamil": "பண்புடைமை", "kurals": [991, 1000]},
+              {"num": 101, "name": "Nandriyil Selvam", "tamil": "நன்றியில் செல்வம்", "kurals": [1001, 1010]},
+              {"num": 102, "name": "Naanudaimai", "tamil": "நாணுடைமை", "kurals": [1011, 1020]},
+              {"num": 103, "name": "Kudiseyal Vagai", "tamil": "குடிசெயல் வகை", "kurals": [1021, 1030]},
+              {"num": 104, "name": "Vuzhavu", "tamil": "உழவு", "kurals": [1031, 1040]},
+              {"num": 105, "name": "Nalkuravu", "tamil": "நல்குரவு", "kurals": [1041, 1050]},
+              {"num": 106, "name": "Iravu", "tamil": "இரவு", "kurals": [1051, 1060]},
+              {"num": 107, "name": "Iravacham", "tamil": "இரவச்சம்", "kurals": [1061, 1070]},
+              {"num": 108, "name": "Kayamai", "tamil": "கயமை", "kurals": [1071, 1080]}
+            ]
+          }
+        ]
+      },
+      {
+        "paal_id": 3,
+        "paal_name": "Inbam",
+        "paal_name_tamil": "காமத்துப்பால்",
+        "paal_number": 3,
+        "description": "Book of Love",
+        "iyals": [
+          {
+            "iyal_id": 8,
+            "iyal_name": "Kalavu",
+            "iyal_name_tamil": "களவியல்",
+            "iyal_number": 8,
+            "adhikarams": [
+              {"num": 109, "name": "Thagai Ananguruthal", "tamil": "தகை அணங்குறுத்தல்", "kurals": [1081, 1090]},
+              {"num": 110, "name": "Kuripparithal", "tamil": "குறிப்பறிதல்", "kurals": [1091, 1100]},
+              {"num": 111, "name": "Punarchi Magizhthal", "tamil": "புணர்ச்சி மகிழ்தல்", "kurals": [1101, 1110]},
+              {"num": 112, "name": "Nalam Punainthu Uraithal", "tamil": "நலம் புனைந்து உரைத்தல்", "kurals": [1111, 1120]},
+              {"num": 113, "name": "Kathal Sirapuraithal", "tamil": "காதற் சிறப்புரைத்தல்", "kurals": [1121, 1130]},
+              {"num": 114, "name": "Naanuth Thuravuraithal", "tamil": "நாணுத் துறவுரைத்தல்", "kurals": [1131, 1140]},
+              {"num": 115, "name": "Alar Arivuruthal", "tamil": "அலர் அறிவுறுத்தல்", "kurals": [1141, 1150]}
+            ]
+          },
+          {
+            "iyal_id": 9,
+            "iyal_name": "Karpu",
+            "iyal_name_tamil": "கற்பியல்",
+            "iyal_number": 9,
+            "adhikarams": [
+              {"num": 116, "name": "Pirivu Aatraamai", "tamil": "பிரிவு ஆற்றாமை", "kurals": [1151, 1160]},
+              {"num": 117, "name": "Padarmelindh Thirangal", "tamil": "படர்மெலிந் திரங்கல்", "kurals": [1161, 1170]},
+              {"num": 118, "name": "Kan Vithuppazhithal", "tamil": "கண் விதுப்பழிதல்", "kurals": [1171, 1180]},
+              {"num": 119, "name": "Pasapuru Paruvaral", "tamil": "பசப்புறு பருவரல்", "kurals": [1181, 1190]},
+              {"num": 120, "name": "Thanippadar Miguthi", "tamil": "தனிப்படர் மிகுதி", "kurals": [1191, 1200]},
+              {"num": 121, "name": "Ninainthavar Pulambal", "tamil": "நினைந்தவர் புலம்பல்", "kurals": [1201, 1210]},
+              {"num": 122, "name": "Kanavunilai Uraithal", "tamil": "கனவுநிலை உரைத்தல்", "kurals": [1211, 1220]},
+              {"num": 123, "name": "Pozhuthukandu Irangal", "tamil": "பொழுதுகண்டு இரங்கல்", "kurals": [1221, 1230]},
+              {"num": 124, "name": "Uruppunalan Azhithal", "tamil": "உறுப்புநலன் அழிதல்", "kurals": [1231, 1240]},
+              {"num": 125, "name": "Nenjodu Kilaththal", "tamil": "நெஞ்சொடு கிளத்தல்", "kurals": [1241, 1250]},
+              {"num": 126, "name": "Niraiyazhithal", "tamil": "நிறையழிதல்", "kurals": [1251, 1260]},
+              {"num": 127, "name": "Avarvayin Vithumbal", "tamil": "அவர்வயின் விதும்பல்", "kurals": [1261, 1270]},
+              {"num": 128, "name": "Kuriparivuruththal", "tamil": "குறிப்பறிவுறுத்தல்", "kurals": [1271, 1280]},
+              {"num": 129, "name": "Punarchi Vithumbal", "tamil": "புணர்ச்சி விதும்பல்", "kurals": [1281, 1290]},
+              {"num": 130, "name": "Nenjodu Pulaththal", "tamil": "நெஞ்சொடு புலத்தல்", "kurals": [1291, 1300]},
+              {"num": 131, "name": "Pulavi", "tamil": "புலவி", "kurals": [1301, 1310]},
+              {"num": 132, "name": "Pulavi Nunukkam", "tamil": "புலவி நுணுக்கம்", "kurals": [1311, 1320]},
+              {"num": 133, "name": "Voodaluvagai", "tamil": "ஊடலுவகை", "kurals": [1321, 1330]}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

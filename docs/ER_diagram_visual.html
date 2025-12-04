@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamil Literary Works Database - ER Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .diagram-container {
+            position: relative;
+            width: 100%;
+            height: 1200px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            overflow: auto;
+        }
+
+        .table-box {
+            position: absolute;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-width: 220px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .table-row {
+            padding: 8px 12px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .table-row .key-icon {
+            margin-right: 8px;
+            font-weight: bold;
+            min-width: 25px;
+        }
+
+        /* Color schemes for different tables */
+        .works { top: 50px; left: 580px; }
+        .works .table-header { background: #3b82f6; }
+
+        .sections { top: 250px; left: 200px; }
+        .sections .table-header { background: #10b981; }
+
+        .verses { top: 250px; left: 900px; }
+        .verses .table-header { background: #f59e0b; }
+
+        .lines { top: 600px; left: 900px; }
+        .lines .table-header { background: #ef4444; }
+
+        .words { top: 850px; left: 900px; }
+        .words .table-header { background: #8b5cf6; }
+
+        .commentaries { top: 600px; left: 200px; }
+        .commentaries .table-header { background: #14b8a6; }
+
+        .cross-refs { top: 600px; left: 550px; }
+        .cross-refs .table-header { background: #f97316; }
+
+        .views { top: 950px; left: 250px; }
+        .views .table-header { background: #6b7280; }
+        .views { border-style: dashed; }
+
+        /* Relationship lines */
+        .relation-line {
+            position: absolute;
+            background: #666;
+            z-index: -1;
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin-right: 30px;
+            margin-bottom: 10px;
+        }
+
+        .legend-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+
+        .note strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .table-box {
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tamil Literary Works Database - Entity Relationship Diagram</h1>
+
+        <div class="diagram-container">
+            <svg id="relation-svg">
+                <!-- Relationships will be drawn here -->
+                <!-- works -> sections -->
+                <line x1="690" y1="200" x2="310" y2="250" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowblue)"/>
+                <text x="500" y="220" fill="#3b82f6" font-size="12">1:N</text>
+
+                <!-- works -> verses -->
+                <line x1="690" y1="200" x2="1010" y2="250" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowblue)"/>
+                <text x="850" y="220" fill="#3b82f6" font-size="12">1:N</text>
+
+                <!-- sections -> sections (self-ref) -->
+                <path d="M 420 280 Q 480 200 420 320" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowgreen)"/>
+                <text x="440" y="260" fill="#10b981" font-size="12">parent-child (1:N)</text>
+
+                <!-- sections -> verses -->
+                <line x1="420" y1="350" x2="900" y2="350" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="650" y="345" fill="#666" font-size="12">1:N</text>
+
+                <!-- verses -> lines -->
+                <line x1="1010" y1="470" x2="1010" y2="600" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="1020" y="540" fill="#666" font-size="12">1:N</text>
+
+                <!-- lines -> words -->
+                <line x1="1010" y1="770" x2="1010" y2="850" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="1020" y="810" fill="#666" font-size="12">1:N</text>
+
+                <!-- verses -> commentaries -->
+                <line x1="900" y1="350" x2="310" y2="600" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="600" y="470" fill="#666" font-size="12">1:N</text>
+
+                <!-- verses -> cross_references (source) -->
+                <line x1="1010" y1="470" x2="660" y2="600" stroke="#f97316" stroke-width="2" marker-end="url(#arroworange)"/>
+                <text x="830" y="530" fill="#f97316" font-size="12">N:N source</text>
+
+                <!-- cross_references -> verses (target) -->
+                <path d="M 750 650 Q 850 550 900 400" stroke="#f97316" stroke-width="2" stroke-dasharray="5,5" fill="none" marker-end="url(#arroworange)"/>
+                <text x="800" y="520" fill="#f97316" font-size="12">target</text>
+
+                <!-- Define arrow markers -->
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#666" />
+                    </marker>
+                    <marker id="arrowblue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6" />
+                    </marker>
+                    <marker id="arrowgreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#10b981" />
+                    </marker>
+                    <marker id="arroworange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#f97316" />
+                    </marker>
+                </defs>
+            </svg>
+
+            <!-- WORKS table -->
+            <div class="table-box works">
+                <div class="table-header">WORKS</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> work_id</div>
+                <div class="table-row"><span class="key-icon"></span> work_name</div>
+                <div class="table-row"><span class="key-icon"></span> work_name_tamil</div>
+                <div class="table-row"><span class="key-icon"></span> period</div>
+                <div class="table-row"><span class="key-icon"></span> author</div>
+                <div class="table-row"><span class="key-icon"></span> author_tamil</div>
+                <div class="table-row"><span class="key-icon"></span> description</div>
+            </div>
+
+            <!-- SECTIONS table -->
+            <div class="table-box sections">
+                <div class="table-header">SECTIONS (Hierarchical)</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> section_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> work_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> parent_section_id</div>
+                <div class="table-row"><span class="key-icon"></span> level_type</div>
+                <div class="table-row"><span class="key-icon"></span> level_type_tamil</div>
+                <div class="table-row"><span class="key-icon"></span> section_number</div>
+                <div class="table-row"><span class="key-icon"></span> section_name</div>
+                <div class="table-row"><span class="key-icon"></span> section_name_tamil</div>
+                <div class="table-row"><span class="key-icon"></span> sort_order</div>
+            </div>
+
+            <!-- VERSES table -->
+            <div class="table-box verses">
+                <div class="table-header">VERSES</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> verse_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> work_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> section_id</div>
+                <div class="table-row"><span class="key-icon"></span> verse_number</div>
+                <div class="table-row"><span class="key-icon"></span> verse_type</div>
+                <div class="table-row"><span class="key-icon"></span> verse_type_tamil</div>
+                <div class="table-row"><span class="key-icon"></span> meter</div>
+                <div class="table-row"><span class="key-icon"></span> total_lines</div>
+                <div class="table-row"><span class="key-icon"></span> sort_order</div>
+            </div>
+
+            <!-- LINES table -->
+            <div class="table-box lines">
+                <div class="table-header">LINES</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> line_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> verse_id</div>
+                <div class="table-row"><span class="key-icon"></span> line_number</div>
+                <div class="table-row"><span class="key-icon"></span> line_text</div>
+                <div class="table-row"><span class="key-icon"></span> line_text_transliteration</div>
+                <div class="table-row"><span class="key-icon"></span> line_text_translation</div>
+            </div>
+
+            <!-- WORDS table -->
+            <div class="table-box words">
+                <div class="table-header">WORDS</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> word_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> line_id</div>
+                <div class="table-row"><span class="key-icon"></span> word_position</div>
+                <div class="table-row"><span class="key-icon"></span> word_text</div>
+                <div class="table-row"><span class="key-icon"></span> word_root</div>
+                <div class="table-row"><span class="key-icon"></span> word_type</div>
+                <div class="table-row"><span class="key-icon"></span> sandhi_split</div>
+                <div class="table-row"><span class="key-icon"></span> meaning</div>
+            </div>
+
+            <!-- COMMENTARIES table -->
+            <div class="table-box commentaries">
+                <div class="table-header">COMMENTARIES</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> commentary_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> verse_id</div>
+                <div class="table-row"><span class="key-icon"></span> commentator</div>
+                <div class="table-row"><span class="key-icon"></span> commentator_tamil</div>
+                <div class="table-row"><span class="key-icon"></span> commentary_text</div>
+                <div class="table-row"><span class="key-icon"></span> commentary_period</div>
+            </div>
+
+            <!-- CROSS_REFERENCES table -->
+            <div class="table-box cross-refs">
+                <div class="table-header">CROSS_REFERENCES</div>
+                <div class="table-row"><span class="key-icon">🔑 PK</span> reference_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> source_verse_id</div>
+                <div class="table-row"><span class="key-icon">🔗 FK</span> target_verse_id</div>
+                <div class="table-row"><span class="key-icon"></span> reference_type</div>
+                <div class="table-row"><span class="key-icon"></span> notes</div>
+            </div>
+
+            <!-- VIEWS -->
+            <div class="table-box views">
+                <div class="table-header">VIEWS (Materialized)</div>
+                <div class="table-row"><span class="key-icon">📊</span> verse_hierarchy</div>
+                <div class="table-row"><span class="key-icon">📊</span> word_details</div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <span class="legend-icon" style="background: #3b82f6;"></span>
+                <span>🔑 PK = Primary Key</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon" style="background: #10b981;"></span>
+                <span>🔗 FK = Foreign Key</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon" style="background: #666;"></span>
+                <span>Solid Line = One-to-Many (1:N)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon" style="background: #f97316; border: 2px dashed #333;"></span>
+                <span>Dashed Line = Many-to-Many (N:N)</span>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Key Features:</strong>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>Hierarchical Structure:</strong> The SECTIONS table is self-referencing, allowing unlimited depth (Paal → Iyal → Adhikaram)</li>
+                <li><strong>Word-Level Granularity:</strong> Every word is stored individually with position, root form, and linguistic metadata</li>
+                <li><strong>Cross-References:</strong> Many-to-many relationship between verses for textual analysis</li>
+                <li><strong>Views:</strong> Pre-computed queries for efficient data access (verse_hierarchy, word_details)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
