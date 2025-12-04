@@ -456,12 +456,12 @@ export default {
 
       // Reload all occurrences of this specific word from backend
       loading.value = true
+      error.value = null  // Clear any previous errors
       try {
         const params = {
           q: wordText,
           match_type: 'exact',  // Exact match for selected word
-          word_position: 'beginning',
-          limit: 1000,  // Get more results for selected word
+          limit: 500,  // Maximum allowed by backend
           offset: 0
         }
 
