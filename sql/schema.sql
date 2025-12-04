@@ -201,68 +201,13 @@ INNER JOIN verses v ON l.verse_id = v.verse_id
 INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id;
 
 -- ============================================================================
--- SAMPLE DATA INSERTION
--- ============================================================================
-
--- Insert the five major works
-INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description) VALUES
-(1, 'Tolkappiyam', 'தொல்காப்பியம்', '3rd century BCE - 5th century CE', 'Tolkappiyar', 'தொல்காப்பியர்', 'Ancient Tamil grammar and poetics text'),
-(2, 'Sangam Literature', 'சங்க இலக்கியம்', '300 BCE - 300 CE', 'Various', 'பல்வேறு புலவர்கள்', 'Collection of classical Tamil poetry'),
-(3, 'Thirukkural', 'திருக்குறள்', '4th - 5th century CE', 'Thiruvalluvar', 'திருவள்ளுவர்', 'Classic Tamil text on ethics, politics, and love'),
-(4, 'Silapathikaram', 'சிலப்பதிகாரம்', '5th - 6th century CE', 'Ilango Adigal', 'இளங்கோ அடிகள்', 'Epic tale of Kannagi and Kovalan'),
-(5, 'Kambaramayanam', 'கம்பராமாயணம்', '12th century CE', 'Kambar', 'கம்பர்', 'Tamil version of the Ramayana');
-
--- Example: Thirukkural structure
--- Level 1: Paal
-INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order) VALUES
-(1, 3, NULL, 'paal', 'பால்', 1, 'Aram', 'அறத்துப்பால்', 1),
-(2, 3, NULL, 'paal', 'பால்', 2, 'Porul', 'பொருட்பால்', 2),
-(3, 3, NULL, 'paal', 'பால்', 3, 'Inbam', 'காமத்துப்பால்', 3);
-
--- Level 2: Iyal (example under Aram)
-INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order) VALUES
-(4, 3, 1, 'iyal', 'இயல்', 1, 'Pāyiram', 'பாயிரம்', 1),
-(5, 3, 1, 'iyal', 'இயல்', 2, 'Īlaram', 'இல்லறவியல்', 2);
-
--- Level 3: Adhikaram (example under Pāyiram)
-INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order) VALUES
-(6, 3, 4, 'adhikaram', 'அதிகாரம்', 1, 'Kadavul Vazhthu', 'கடவுள் வாழ்த்து', 1),
-(7, 3, 4, 'adhikaram', 'அதிகாரம்', 2, 'Vaan Sirappu', 'வான் சிறப்பு', 2);
-
--- Example verse (Kural 1)
-INSERT INTO verses (verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order) VALUES
-(1, 3, 6, 1, 'kural', 'குறள்', 2, 1);
-
--- Lines for Kural 1
-INSERT INTO lines (line_id, verse_id, line_number, line_text, line_text_transliteration, line_text_translation) VALUES
-(1, 1, 1, 'அகர முதல எழுத்தெல்லாம் ஆதி', 'Akara mudala ezhutthellām ādhi', 'As the letter A is first of all letters'),
-(2, 1, 2, 'பகவன் முதற்றே உலகு', 'Bhagavan mudhatre ulagu', 'So God is first of all the world');
-
--- Words for Line 1 of Kural 1
-INSERT INTO words (word_id, line_id, word_position, word_text, word_text_transliteration, word_root, word_type) VALUES
-(1, 1, 1, 'அகர', 'akara', 'அ', 'noun'),
-(2, 1, 2, 'முதல', 'mudala', 'முதல்', 'adjective'),
-(3, 1, 3, 'எழுத்தெல்லாம்', 'ezhutthellām', 'எழுத்து + எல்லாம்', 'noun'),
-(4, 1, 4, 'ஆதி', 'ādhi', 'ஆதி', 'noun');
-
--- Words for Line 2 of Kural 1
-INSERT INTO words (word_id, line_id, word_position, word_text, word_text_transliteration, word_root, word_type) VALUES
-(5, 2, 1, 'பகவன்', 'bhagavan', 'பகவன்', 'noun'),
-(6, 2, 2, 'முதற்றே', 'mudhatre', 'முதல்', 'adverb'),
-(7, 2, 3, 'உலகு', 'ulagu', 'உலகு', 'noun');
-
--- Example: Kambaramayanam structure
--- Level 1: Kandam
-INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order) VALUES
-(100, 5, NULL, 'kandam', 'காண்டம்', 1, 'Bala Kandam', 'பால காண்டம்', 1),
-(101, 5, NULL, 'kandam', 'காண்டம்', 2, 'Ayodhya Kandam', 'அயோத்திய காண்டம்', 2);
-
--- Level 2: Padalam (example under Bala Kandam)
-INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order) VALUES
-(102, 5, 100, 'padalam', 'படலம்', 1, 'Nagar Padalam', 'நகர படலம்', 1);
-
--- ============================================================================
 -- COMMON QUERY EXAMPLES
+-- ============================================================================
+--
+-- Note: No sample data is inserted by default. Use parser scripts to populate:
+--   - python scripts/thirukkural_parser.py
+--   - python scripts/sangam_parser.py
+--
 -- ============================================================================
 
 -- Query 1: Find all occurrences of a specific word
