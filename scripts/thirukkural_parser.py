@@ -32,6 +32,22 @@ class ThirukkuralParser:
         # Ensure Thirukkural work exists
         self._ensure_work_exists()
 
+        # Get starting IDs for batch insert
+        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
+        self.next_section_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
+        self.next_verse_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
+        self.next_line_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
+        self.next_word_id = self.cursor.fetchone()[0] + 1
+
+        # Cache for created sections
+        self.section_cache = {}
+
     def _ensure_work_exists(self):
         """Ensure Thirukkural work exists in works table"""
         self.cursor.execute("SELECT work_id FROM works WHERE work_id = %s", (self.work_id,))
@@ -73,7 +89,12 @@ class ThirukkuralParser:
                               section_name_tamil: str) -> int:
         """Get existing section or create new one, return section_id"""
 
-        # Check if section exists
+        # Create cache key
+        cache_key = (parent_id, level_type, section_number)
+        if cache_key in self.section_cache:
+            return self.section_cache[cache_key]
+
+        # Check if section exists in database
         self.cursor.execute("""
             SELECT section_id FROM sections
             WHERE work_id = %s
@@ -84,13 +105,15 @@ class ThirukkuralParser:
 
         result = self.cursor.fetchone()
         if result:
-            return result[0]
+            section_id = result[0]
+            self.section_cache[cache_key] = section_id
+            return section_id
 
-        # Create new section - get max section_id to generate next one
-        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) + 1 FROM sections")
-        new_section_id = self.cursor.fetchone()[0]
+        # Create new section using pre-allocated ID
+        new_section_id = self.next_section_id
+        self.next_section_id += 1
 
-        # Calculate sort_order (order within same parent and level)
+        # Calculate sort_order
         self.cursor.execute("""
             SELECT COALESCE(MAX(sort_order), 0) + 1
             FROM sections
@@ -105,13 +128,12 @@ class ThirukkuralParser:
             (section_id, work_id, parent_section_id, level_type, level_type_tamil,
              section_number, section_name, section_name_tamil, sort_order)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING section_id
         """, (new_section_id, self.work_id, parent_id, level_type, level_type + '_tamil',
               section_number, section_name, section_name_tamil, sort_order))
 
-        section_id = self.cursor.fetchone()[0]
-        print(f"  Created section: {level_type} #{section_number} - {section_name_tamil} (ID: {section_id})")
-        return section_id
+        print(f"  Created section: {level_type} #{section_number} - {section_name_tamil} (ID: {new_section_id})")
+        self.section_cache[cache_key] = new_section_id
+        return new_section_id
 
     def parse_words(self, line_text: str) -> List[Dict]:
         """
@@ -278,9 +300,9 @@ class ThirukkuralParser:
     def _save_kural(self, kural_num: int, lines: List[str], adhikaram_section_id: int) -> None:
         """Save a single kural with its lines and words to database"""
 
-        # Get max verse_id to generate next one
-        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) + 1 FROM verses")
-        new_verse_id = self.cursor.fetchone()[0]
+        # Use pre-allocated verse_id
+        verse_id = self.next_verse_id
+        self.next_verse_id += 1
 
         # Calculate sort_order for this verse within section
         self.cursor.execute("""
@@ -294,42 +316,37 @@ class ThirukkuralParser:
         self.cursor.execute("""
             INSERT INTO verses (verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING verse_id
-        """, (new_verse_id, self.work_id, adhikaram_section_id, kural_num, 'kural', 'குறள்', len(lines), verse_sort_order))
+        """, (verse_id, self.work_id, adhikaram_section_id, kural_num, 'kural', 'குறள்', len(lines), verse_sort_order))
 
-        verse_id = self.cursor.fetchone()[0]
-
-        # Progress indicator every 100 kurals
+        # Progress indicator and batch commit every 100 kurals
         if kural_num % 100 == 0:
-            print(f"    Progress: Kural {kural_num}/1330")
+            self.conn.commit()
+            print(f"    Progress: Kural {kural_num}/1330 (committed)")
 
         # Insert lines and words
         for line_num, line_text in enumerate(lines, start=1):
-            # Get max line_id
-            self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) + 1 FROM lines")
-            new_line_id = self.cursor.fetchone()[0]
+            # Use pre-allocated line_id
+            line_id = self.next_line_id
+            self.next_line_id += 1
 
             # Create line
             self.cursor.execute("""
                 INSERT INTO lines (line_id, verse_id, line_number, line_text)
                 VALUES (%s, %s, %s, %s)
-                RETURNING line_id
-            """, (new_line_id, verse_id, line_num, line_text))
-
-            line_id = self.cursor.fetchone()[0]
+            """, (line_id, verse_id, line_num, line_text))
 
             # Parse and insert words
             words = self.parse_words(line_text)
             for word_data in words:
-                # Get max word_id
-                self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) + 1 FROM words")
-                new_word_id = self.cursor.fetchone()[0]
+                # Use pre-allocated word_id
+                word_id = self.next_word_id
+                self.next_word_id += 1
 
                 self.cursor.execute("""
                     INSERT INTO words
                     (word_id, line_id, word_position, word_text, sandhi_split)
                     VALUES (%s, %s, %s, %s, %s)
-                """, (new_word_id, line_id, word_data['word_position'],
+                """, (word_id, line_id, word_data['word_position'],
                       word_data['word_text'],
                       word_data.get('sandhi_split')))
 
