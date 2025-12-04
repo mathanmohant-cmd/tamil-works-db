@@ -64,17 +64,31 @@ class ThirukkuralParser:
         if result:
             return result[0]
 
-        # Create new section
+        # Create new section - get max section_id to generate next one
+        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) + 1 FROM sections")
+        new_section_id = self.cursor.fetchone()[0]
+
+        # Calculate sort_order (order within same parent and level)
+        self.cursor.execute("""
+            SELECT COALESCE(MAX(sort_order), 0) + 1
+            FROM sections
+            WHERE work_id = %s
+              AND parent_section_id IS NOT DISTINCT FROM %s
+              AND level_type = %s
+        """, (self.work_id, parent_id, level_type))
+        sort_order = self.cursor.fetchone()[0]
+
         self.cursor.execute("""
             INSERT INTO sections
-            (work_id, parent_section_id, level_type, level_type_tamil,
-             section_number, section_name, section_name_tamil)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            (section_id, work_id, parent_section_id, level_type, level_type_tamil,
+             section_number, section_name, section_name_tamil, sort_order)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING section_id
-        """, (self.work_id, parent_id, level_type, level_type + '_tamil',
-              section_number, section_name, section_name_tamil))
+        """, (new_section_id, self.work_id, parent_id, level_type, level_type + '_tamil',
+              section_number, section_name, section_name_tamil, sort_order))
 
         section_id = self.cursor.fetchone()[0]
+        print(f"  Created section: {level_type} #{section_number} - {section_name_tamil} (ID: {section_id})")
         return section_id
 
     def parse_words(self, line_text: str) -> List[Dict]:
@@ -242,34 +256,58 @@ class ThirukkuralParser:
     def _save_kural(self, kural_num: int, lines: List[str], adhikaram_section_id: int) -> None:
         """Save a single kural with its lines and words to database"""
 
+        # Get max verse_id to generate next one
+        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) + 1 FROM verses")
+        new_verse_id = self.cursor.fetchone()[0]
+
+        # Calculate sort_order for this verse within section
+        self.cursor.execute("""
+            SELECT COALESCE(MAX(sort_order), 0) + 1
+            FROM verses
+            WHERE section_id = %s
+        """, (adhikaram_section_id,))
+        verse_sort_order = self.cursor.fetchone()[0]
+
         # Create verse
         self.cursor.execute("""
-            INSERT INTO verses (section_id, verse_number)
-            VALUES (%s, %s)
+            INSERT INTO verses (verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING verse_id
-        """, (adhikaram_section_id, kural_num))
+        """, (new_verse_id, self.work_id, adhikaram_section_id, kural_num, 'kural', 'குறள்', len(lines), verse_sort_order))
 
         verse_id = self.cursor.fetchone()[0]
 
+        # Progress indicator every 100 kurals
+        if kural_num % 100 == 0:
+            print(f"    Progress: Kural {kural_num}/1330")
+
         # Insert lines and words
         for line_num, line_text in enumerate(lines, start=1):
+            # Get max line_id
+            self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) + 1 FROM lines")
+            new_line_id = self.cursor.fetchone()[0]
+
             # Create line
             self.cursor.execute("""
-                INSERT INTO lines (verse_id, line_number, line_text)
-                VALUES (%s, %s, %s)
+                INSERT INTO lines (line_id, verse_id, line_number, line_text)
+                VALUES (%s, %s, %s, %s)
                 RETURNING line_id
-            """, (verse_id, line_num, line_text))
+            """, (new_line_id, verse_id, line_num, line_text))
 
             line_id = self.cursor.fetchone()[0]
 
             # Parse and insert words
             words = self.parse_words(line_text)
             for word_data in words:
+                # Get max word_id
+                self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) + 1 FROM words")
+                new_word_id = self.cursor.fetchone()[0]
+
                 self.cursor.execute("""
                     INSERT INTO words
-                    (line_id, word_position, word_text, sandhi_split)
-                    VALUES (%s, %s, %s, %s)
-                """, (line_id, word_data['word_position'],
+                    (word_id, line_id, word_position, word_text, sandhi_split)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (new_word_id, line_id, word_data['word_position'],
                       word_data['word_text'],
                       word_data.get('sandhi_split')))
 
