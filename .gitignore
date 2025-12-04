@@ -55,3 +55,7 @@ PRN
 AUX
 com[1-9]
 lpt[1-9]
+
+# Tamil source text files (keep locally, not in git)
+Tamil-Source-TamilConcordence/
+works-text/
