@@ -155,6 +155,26 @@ class SangamParser:
         self.conn = psycopg2.connect(db_connection_string)
         self.cursor = self.conn.cursor()
 
+    def _ensure_work_exists(self, work_info: Dict):
+        """Ensure work exists in works table"""
+        work_id = work_info['work_id']
+        self.cursor.execute("SELECT work_id FROM works WHERE work_id = %s", (work_id,))
+        if not self.cursor.fetchone():
+            print(f"  Creating work entry: {work_info['work_name_tamil']}...")
+            self.cursor.execute("""
+                INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                work_id,
+                work_info['work_name'],
+                work_info['work_name_tamil'],
+                '300 BCE - 300 CE',
+                'Various',
+                'பல்வேறு புலவர்கள்',
+                work_info['description']
+            ))
+            self.conn.commit()
+
     def parse_words(self, line_text: str) -> List[Dict]:
         """
         Parse line into words following Professor Pandiaraja's principles
@@ -226,7 +246,9 @@ class SangamParser:
         """
         print(f"\nParsing {work_info['work_name_tamil']} (Thogai - Poetry Collection)...")
 
-        work_id = self.get_or_create_work(work_info)
+        # Ensure work exists first
+        self._ensure_work_exists(work_info)
+        work_id = work_info['work_id']
 
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -301,7 +323,9 @@ class SangamParser:
         """
         print(f"\nParsing {work_info['work_name_tamil']} (Padal - Continuous Poem)...")
 
-        work_id = self.get_or_create_work(work_info)
+        # Ensure work exists first
+        self._ensure_work_exists(work_info)
+        work_id = work_info['work_id']
 
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -363,6 +387,7 @@ class SangamParser:
                 (section_id, work_id, parent_section_id, level_type, section_number, section_name, sort_order)
                 VALUES (%s, %s, NULL, 'Poems', 1, 'Main Collection', 1)
             """, (section_id, work_id))
+            print(f"  Created root section (ID: {section_id})")
 
         # Create verse (poem) with explicit verse_id
         self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) + 1 FROM verses")
@@ -372,6 +397,10 @@ class SangamParser:
             INSERT INTO verses (verse_id, work_id, section_id, verse_number, total_lines, sort_order)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (verse_id, work_id, section_id, poem_num, len(lines), poem_num))
+
+        # Progress indicator every 50 poems
+        if poem_num % 50 == 0:
+            print(f"    Progress: Poem {poem_num}")
 
         # Insert lines and words
         for line_num, line_text in enumerate(lines, start=1):
