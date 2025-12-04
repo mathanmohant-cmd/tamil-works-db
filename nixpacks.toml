@@ -4,8 +4,8 @@ nixPkgs = ["python312"]
 [phases.install]
 cmds = [
     "python --version",
-    "pip --version",
-    "pip install -r requirements.txt"
+    "python -m pip --version",
+    "python -m pip install -r requirements.txt"
 ]
 
 [phases.build]
