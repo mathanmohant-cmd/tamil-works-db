@@ -42,6 +42,60 @@ npm run build
 
 Built files will be in `dist/` directory.
 
+## Docker Deployment
+
+### Build Docker Image
+
+```bash
+# From the frontend directory
+docker build -t tamil-words-frontend .
+```
+
+### Run Docker Container
+
+```bash
+# Run with default settings (port 80)
+docker run -p 80:80 tamil-words-frontend
+
+# Run on custom port
+docker run -p 8080:80 tamil-words-frontend
+```
+
+### Build with Custom Backend URL
+
+The frontend needs to know the backend API URL at build time. You can set it as a build argument:
+
+```bash
+# Build with production backend URL
+docker build --build-arg VITE_API_URL=https://your-backend.railway.app -t tamil-words-frontend .
+```
+
+To use build arguments, update the Dockerfile to accept it:
+
+```dockerfile
+# Add before RUN npm run build:
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+```
+
+### Railway Deployment
+
+1. **Using Railway CLI:**
+   ```bash
+   railway login
+   railway link
+   railway variables set VITE_API_URL=https://your-backend.railway.app
+   railway up
+   ```
+
+2. **Using GitHub Integration:**
+   - Push frontend code to GitHub
+   - Connect repository to Railway
+   - Set build environment variable in Railway dashboard:
+     - Key: `VITE_API_URL`
+     - Value: `https://your-backend.railway.app`
+   - Railway will automatically build and deploy
+
 ## Project Structure
 
 ```

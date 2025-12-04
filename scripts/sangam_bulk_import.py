@@ -96,18 +96,27 @@ class SangamBulkImporter:
         self.conn = psycopg2.connect(db_connection_string)
         self.cursor = self.conn.cursor()
 
-        # Data containers
-        self.works = []
+        # Get existing max IDs from database
+        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
+        self.section_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
+        self.verse_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
+        self.line_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
+        self.word_id = self.cursor.fetchone()[0] + 1
+
+        print(f"  Starting IDs: section={self.section_id}, verse={self.verse_id}, line={self.line_id}, word={self.word_id}")
+
+        # Data containers (reset per work)
         self.sections = []
         self.verses = []
         self.lines = []
         self.words = []
-
-        # ID counters
-        self.section_id = 1
-        self.verse_id = 1
-        self.line_id = 1
-        self.word_id = 1
+        self.works = []
 
         # Section cache
         self.section_cache = {}
@@ -135,6 +144,14 @@ class SangamBulkImporter:
                             'author', 'author_tamil', 'description'])
             self.conn.commit()
             print(f"  Created {len(self.works)} work entries")
+
+    def _reset_data_containers(self):
+        """Clear data containers for next work"""
+        self.sections = []
+        self.verses = []
+        self.lines = []
+        self.words = []
+        self.section_cache = {}
 
     def _get_or_create_section_id(self, work_id, parent_id=None):
         """Get or create root section for work"""
@@ -268,8 +285,11 @@ class SangamBulkImporter:
                 })
 
     def parse_directory(self, directory_path: Path):
-        """Phase 1: Parse all files in directory"""
-        print(f"\nPhase 1: Parsing Sangam literature files...")
+        """Parse and import works one at a time with per-work rollback"""
+        print(f"\nParsing Sangam literature files...")
+
+        success_count = 0
+        failed_works = []
 
         for filename, work_info in self.SANGAM_WORKS.items():
             file_path = directory_path / filename
@@ -277,49 +297,84 @@ class SangamBulkImporter:
                 print(f"  Skipping {filename} (not found)")
                 continue
 
-            if work_info['type'] == 'thogai':
-                self.parse_thogai_file(file_path, work_info)
-            else:
-                self.parse_padal_file(file_path, work_info)
+            # Check if work already imported
+            self.cursor.execute("""
+                SELECT COUNT(*) FROM verses WHERE work_id = %s
+            """, (work_info['work_id'],))
+            existing_count = self.cursor.fetchone()[0]
 
-        print(f"\n✓ Phase 1 complete: Parsed all files")
-        print(f"  - Sections: {len(self.sections)}")
-        print(f"  - Verses: {len(self.verses)}")
-        print(f"  - Lines: {len(self.lines)}")
-        print(f"  - Words: {len(self.words)}")
+            if existing_count > 0:
+                print(f"  Skipping {work_info['work_name_tamil']} (already imported: {existing_count} verses)")
+                continue
 
-    def bulk_insert(self):
-        """Phase 2: Bulk insert using COPY"""
-        print("\nPhase 2: Bulk inserting into database...")
+            try:
+                print(f"\n{'='*70}")
+                print(f"Processing: {work_info['work_name_tamil']} (ID: {work_info['work_id']})")
+                print(f"{'='*70}")
+
+                # Phase 1: Parse file into memory
+                if work_info['type'] == 'thogai':
+                    self.parse_thogai_file(file_path, work_info)
+                else:
+                    self.parse_padal_file(file_path, work_info)
+
+                # Phase 2: Bulk insert for this work
+                self._bulk_insert_work(work_info['work_name_tamil'])
+
+                # Commit this work
+                self.conn.commit()
+                print(f"✓ {work_info['work_name_tamil']} imported successfully")
+                success_count += 1
+
+            except Exception as e:
+                # Rollback this work
+                self.conn.rollback()
+                print(f"✗ Failed to import {work_info['work_name_tamil']}: {e}")
+                failed_works.append((work_info['work_name_tamil'], str(e)))
+
+            finally:
+                # Clear data containers for next work
+                self._reset_data_containers()
+
+        # Summary
+        print(f"\n{'='*70}")
+        print(f"Import Summary:")
+        print(f"  ✓ Successfully imported: {success_count} works")
+        if failed_works:
+            print(f"  ✗ Failed: {len(failed_works)} works")
+            for work_name, error in failed_works:
+                print(f"    - {work_name}: {error}")
+        print(f"{'='*70}")
+
+    def _bulk_insert_work(self, work_name: str):
+        """Bulk insert single work using COPY"""
+        print(f"  Inserting into database...")
 
         # Insert sections
         if self.sections:
-            print(f"  Inserting {len(self.sections)} sections...")
+            print(f"    - {len(self.sections)} sections...")
             self._bulk_copy('sections', self.sections,
                            ['section_id', 'work_id', 'parent_section_id', 'level_type', 'level_type_tamil',
                             'section_number', 'section_name', 'section_name_tamil', 'sort_order'])
 
         # Insert verses
         if self.verses:
-            print(f"  Inserting {len(self.verses)} verses...")
+            print(f"    - {len(self.verses)} verses...")
             self._bulk_copy('verses', self.verses,
                            ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
                             'verse_type_tamil', 'total_lines', 'sort_order'])
 
         # Insert lines
         if self.lines:
-            print(f"  Inserting {len(self.lines)} lines...")
+            print(f"    - {len(self.lines)} lines...")
             self._bulk_copy('lines', self.lines,
                            ['line_id', 'verse_id', 'line_number', 'line_text'])
 
         # Insert words
         if self.words:
-            print(f"  Inserting {len(self.words)} words...")
+            print(f"    - {len(self.words)} words...")
             self._bulk_copy('words', self.words,
                            ['word_id', 'line_id', 'word_position', 'word_text', 'sandhi_split'])
-
-        self.conn.commit()
-        print("✓ Phase 2 complete: All data inserted")
 
     def _bulk_copy(self, table_name, data, columns):
         """Use COPY for bulk insert"""
@@ -352,7 +407,7 @@ def main():
     # Directory path
     script_dir = Path(__file__).parent
     project_dir = script_dir.parent
-    sangam_dir = project_dir / "Tamil-Source-TamilConcordence" / "2_Sangam_Litrature"
+    sangam_dir = project_dir / "Tamil-Source-TamilConcordence" / "2_Sangam_Literature"
 
     print("="*70)
     print("Sangam Literature Bulk Import - Fast 2-Phase Import")
@@ -365,7 +420,6 @@ def main():
     try:
         importer._ensure_works_exist()
         importer.parse_directory(sangam_dir)
-        importer.bulk_insert()
         print("\n✓ Import complete!")
     finally:
         importer.close()

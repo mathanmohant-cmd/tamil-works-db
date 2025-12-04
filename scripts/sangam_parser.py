@@ -498,7 +498,7 @@ def main():
     # Directory path
     script_dir = Path(__file__).parent
     project_dir = script_dir.parent
-    sangam_dir = project_dir / "Tamil-Source-TamilConcordence" / "2_Sangam_Litrature"
+    sangam_dir = project_dir / "Tamil-Source-TamilConcordence" / "2_Sangam_Literature"
 
     # Allow database URL as command line argument
     if len(sys.argv) > 1:
