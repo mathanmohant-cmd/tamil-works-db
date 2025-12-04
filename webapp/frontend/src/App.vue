@@ -3,11 +3,19 @@
     <!-- Header -->
     <header class="app-header">
       <h1>தமிழ் இலக்கிய சொல் தேடல் | Tamil Literary Words Search</h1>
+
+      <!-- Navigation -->
+      <nav class="main-nav">
+        <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Home</button>
+        <button @click="currentPage = 'search'" :class="{active: currentPage === 'search'}">Search</button>
+        <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About Us</button>
+      </nav>
+
       <!-- Database Summary -->
-      <div class="database-summary" v-if="stats">
+      <div class="database-summary" v-if="stats && currentPage === 'search'">
         <span>{{ stats.total_works }} Works | {{ stats.total_verses }} Verses | {{ stats.total_words.toLocaleString() }} Words | {{ stats.distinct_words.toLocaleString() }} Distinct Words</span>
       </div>
-      <div class="header-bottom">
+      <div class="header-bottom" v-if="currentPage === 'search'">
         <div class="search-section">
           <div class="search-row">
             <div class="search-box">
@@ -89,6 +97,14 @@
       </div>
     </header>
 
+    <!-- Home Page -->
+    <Home v-if="currentPage === 'home'" />
+
+    <!-- About Page -->
+    <About v-if="currentPage === 'about'" />
+
+    <!-- Search Page -->
+    <div v-if="currentPage === 'search'" class="search-page">
     <!-- Collapsible Filters -->
     <div class="filters-panel" v-show="filtersExpanded">
       <div class="filter-group" v-if="works.length">
@@ -254,16 +270,28 @@
         </main>
       </div>
     </div>
+    </div>
+    <!-- End Search Page -->
+
   </div>
 </template>
 
 <script>
 import { ref, onMounted, watch, computed } from 'vue'
 import api from './api.js'
+import Home from './Home.vue'
+import About from './About.vue'
 
 export default {
   name: 'App',
+  components: {
+    Home,
+    About
+  },
   setup() {
+    // Page navigation
+    const currentPage = ref('home')
+
     // State
     const searchQuery = ref('')
     const matchType = ref('partial')
@@ -423,8 +451,41 @@ export default {
       selectedWord.value = word
     }
 
-    const selectWordFromList = (wordText) => {
+    const selectWordFromList = async (wordText) => {
       selectedWordText.value = wordText
+
+      // Reload all occurrences of this specific word from backend
+      loading.value = true
+      try {
+        const params = {
+          q: wordText,
+          match_type: 'exact',  // Exact match for selected word
+          word_position: 'beginning',
+          limit: 1000,  // Get more results for selected word
+          offset: 0
+        }
+
+        // Apply same work filters as current search
+        if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
+          params.work_ids = selectedWorks.value.join(',')
+        }
+
+        const response = await api.searchWords(params)
+
+        // Replace search results with exact matches for this word
+        searchResults.value = {
+          ...response.data,
+          search_term: wordText,
+          match_type: 'exact'
+        }
+
+        // Clear selected word so all results show
+        selectedWord.value = null
+      } catch (err) {
+        error.value = 'Failed to load word occurrences: ' + err.message
+      } finally {
+        loading.value = false
+      }
     }
 
     // Computed: Get unique words with counts from backend (already sorted)
@@ -671,6 +732,7 @@ export default {
     }
 
     return {
+      currentPage,
       searchQuery,
       matchType,
       wordPosition,
