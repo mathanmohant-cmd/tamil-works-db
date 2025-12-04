@@ -203,6 +203,44 @@ def health_check():
         }
 
 
+@app.get("/debug/sample-words")
+def debug_sample_words():
+    """Debug endpoint - get sample words from database"""
+    try:
+        with db.get_connection() as conn:
+            with conn.cursor() as cur:
+                # Check if word_details view exists
+                cur.execute("""
+                    SELECT table_name
+                    FROM information_schema.views
+                    WHERE table_name = 'word_details'
+                """)
+                view_exists = cur.fetchone()
+
+                # Get sample words directly from words table
+                cur.execute("""
+                    SELECT word_id, word_text, line_id
+                    FROM words
+                    LIMIT 10
+                """)
+                sample_words = [dict(zip(['word_id', 'word_text', 'line_id'], row)) for row in cur.fetchall()]
+
+                # Try querying word_details view
+                word_details_sample = []
+                if view_exists:
+                    cur.execute("SELECT * FROM word_details LIMIT 5")
+                    columns = [desc[0] for desc in cur.description]
+                    word_details_sample = [dict(zip(columns, row)) for row in cur.fetchall()]
+
+                return {
+                    "word_details_view_exists": bool(view_exists),
+                    "sample_words_from_table": sample_words,
+                    "sample_from_word_details_view": word_details_sample
+                }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
