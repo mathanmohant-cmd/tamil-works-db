@@ -35,6 +35,9 @@
                   </li>
                 </ul>
               </div>
+              <button @click="performSearch" class="search-button" :disabled="loading">
+                {{ loading ? 'Searching...' : 'Search' }}
+              </button>
             </div>
           </div>
           <!-- Work Filter Radio Buttons -->
@@ -134,16 +137,8 @@
     <!-- Main Content -->
     <div class="main-container">
       <!-- Welcome Message -->
-      <div v-if="!searchResults && !loading" class="welcome">
+      <div v-if="!searchResults && !loading && currentPage === 'search'" class="welcome">
         <h2>Welcome to Tamil Literary Words Search</h2>
-        <p>Search for words across classical Tamil literature including:</p>
-        <ul>
-          <li>Tolkāppiyam (தொல்காப்பியம்)</li>
-          <li>Sangam Literature (சங்க இலக்கியம்)</li>
-          <li>Thirukkural (திருக்குறள்)</li>
-          <li>Silapathikaram (சிலப்பதிகாரம்)</li>
-          <li>Kambaramayanam (கம்பராமாயணம்)</li>
-        </ul>
         <p>Enter a Tamil word in the search box to begin.</p>
       </div>
 
@@ -372,6 +367,9 @@ export default {
         error.value = 'Please enter a search term'
         return
       }
+
+      // Switch to search page to show results
+      currentPage.value = 'search'
 
       loading.value = true
       error.value = null
