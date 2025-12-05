@@ -20,10 +20,6 @@
         </blockquote>
 
         <p>We extend our heartfelt thanks to Prof. P. Pandiaraja for granting us permission to build upon his work. <strong>His scholarship is not only a resource but an enduring inspiration.</strong></p>
-
-        <footer class="tribute-footer">
-          <p>Created with respect and gratitude.</p>
-        </footer>
       </section>
     </article>
   </div>
@@ -47,8 +43,9 @@ export default {
   border-radius: 14px;
   box-shadow: 0 10px 30px rgba(11, 33, 65, 0.08);
   padding: 32px;
-  line-height: 1.7;
+  line-height: 1.8;
   color: #122233;
+  font-size: 16px;
 }
 
 .tribute-header {
@@ -57,7 +54,7 @@ export default {
 
 .tribute-header h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 26px;
   color: #07203a;
   font-weight: 700;
 }
@@ -65,7 +62,7 @@ export default {
 .lead {
   margin: 6px 0 0;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .content {
@@ -77,7 +74,7 @@ export default {
   margin-top: 18px;
   margin-bottom: 6px;
   color: #0b3b5c;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
 }
 
 .content p {
@@ -104,16 +101,7 @@ export default {
   border-radius: 8px;
   color: #0b3b5c;
   font-style: italic;
-}
-
-.tribute-footer {
-  margin-top: 22px;
-  color: #6b7280;
-  font-size: 13px;
-}
-
-.tribute-footer p {
-  margin: 0;
+  font-size: 16px;
 }
 
 @media (max-width: 768px) {
