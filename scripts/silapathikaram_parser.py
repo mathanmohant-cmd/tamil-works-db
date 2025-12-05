@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Silapathikaram Parser for Tamil Literature Database
+Silapathikaram Parser for Tamil Literature Database - Bulk COPY Import
 
 This script parses Silapathikaram text files and imports them into the database.
+Uses 2-phase bulk import for high performance.
 
 Structure:
 - Work: Silapathikaram (சிலப்பதிகாரம்)
@@ -20,6 +21,8 @@ import os
 import re
 import sys
 import psycopg2
+import csv
+import io
 from pathlib import Path
 
 # Kandam files (ordered)
@@ -54,8 +57,6 @@ def parse_kandam_file(file_path):
     Returns:
     {
         'kandam_name_tamil': str,
-        'kandam_name_english': str,
-        'kandam_number': int,
         'sections': [
             {
                 'number': int,
@@ -71,7 +72,7 @@ def parse_kandam_file(file_path):
         ]
     }
     """
-    print(f"Parsing file: {file_path}")
+    print(f"  Parsing file: {file_path.name}")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -156,139 +157,232 @@ def simple_word_split(line):
     return words
 
 
-def insert_silapathikaram(conn, source_dir):
-    """Insert Silapathikaram into the database."""
-    cur = conn.cursor()
+class SilapathikaramBulkImporter:
+    def __init__(self, db_connection_string: str, source_dir: Path):
+        """Initialize bulk importer"""
+        self.conn = psycopg2.connect(db_connection_string)
+        self.cursor = self.conn.cursor()
+        self.source_dir = source_dir
 
-    try:
-        # 1. Insert or get work
+        # Data containers for bulk insert
+        self.sections = []
+        self.verses = []
+        self.lines = []
+        self.words = []
+
+        # ID counters
+        self.section_id = 1
+        self.verse_id = 1
+        self.line_id = 1
+        self.word_id = 1
+        self.work_id = None
+
+    def _ensure_work_exists(self):
+        """Ensure Silapathikaram work exists"""
         work_name_tamil = 'சிலப்பதிகாரம்'
         work_name_english = 'Silapathikaram'
 
-        # Get next available work_id
-        cur.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
-        work_id = cur.fetchone()[0]
-
         # Check if work already exists by name
-        cur.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
-        existing = cur.fetchone()
+        self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
+        existing = self.cursor.fetchone()
 
         if existing:
-            work_id = existing[0]
-            print(f"Work {work_name_tamil} already exists (ID: {work_id})")
+            self.work_id = existing[0]
+            print(f"Work {work_name_tamil} already exists (ID: {self.work_id})")
         else:
+            # Get next available work_id
+            self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
+            self.work_id = self.cursor.fetchone()[0]
+
             print(f"Creating work entry for {work_name_tamil}...")
-            cur.execute("""
+            self.cursor.execute("""
                 INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (
-                work_id,
+                self.work_id,
                 work_name_english,
                 work_name_tamil,
                 'One of the Five Great Epics of Tamil Literature',
                 '5th-6th century CE',
                 'Ilango Adigal'
             ))
-            conn.commit()
+            self.conn.commit()
+            print(f"Work ID: {self.work_id}")
 
-        print(f"Work ID: {work_id}")
+        # Get starting IDs for batch processing
+        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
+        self.section_id = self.cursor.fetchone()[0] + 1
 
-        # Get next available section_id
-        cur.execute("SELECT COALESCE(MAX(section_id), 0) + 1 FROM sections")
-        next_section_id = cur.fetchone()[0]
+        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
+        self.verse_id = self.cursor.fetchone()[0] + 1
 
-        # 2. Process each Kandam file
+        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
+        self.line_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
+        self.word_id = self.cursor.fetchone()[0] + 1
+
+    def parse_all_files(self):
+        """Phase 1: Parse all Kandam files into memory"""
+        print("\nPhase 1: Parsing all files...")
+
         for filename, kandam_tamil, kandam_english, kandam_num in KANDAM_FILES:
-            file_path = source_dir / filename
+            file_path = self.source_dir / filename
 
             if not os.path.exists(file_path):
                 print(f"Warning: File not found: {file_path}")
                 continue
 
-            print(f"\n{'='*60}")
-            print(f"Processing Kandam {kandam_num}: {kandam_tamil}")
-            print(f"{'='*60}")
+            print(f"\nProcessing Kandam {kandam_num}: {kandam_tamil}")
 
             # Parse the file
             kandam_data = parse_kandam_file(file_path)
 
-            # Insert Kandam section
-            cur.execute("""
-                INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
-                                     section_number, section_name, section_name_tamil, sort_order)
-                VALUES (%s, %s, NULL, %s, %s, %s, %s, %s, %s)
-            """, (next_section_id, work_id, 'kandam', 'காண்டம்', kandam_num,
-                  kandam_english, kandam_tamil, kandam_num))
-            kandam_section_id = next_section_id
-            next_section_id += 1
-            print(f"Kandam Section ID: {kandam_section_id}")
+            # Create Kandam section
+            kandam_section_id = self.section_id
+            self.section_id += 1
 
-            # 3. Process each Kaathai (subsection)
+            self.sections.append({
+                'section_id': kandam_section_id,
+                'work_id': self.work_id,
+                'parent_section_id': None,
+                'level_type': 'kandam',
+                'level_type_tamil': 'காண்டம்',
+                'section_number': kandam_num,
+                'section_name': kandam_english,
+                'section_name_tamil': kandam_tamil,
+                'sort_order': kandam_num
+            })
+
+            # Process each Kaathai (subsection)
             for section_data in kandam_data['sections']:
                 section_name = section_data['name']
                 section_number = section_data['number']
 
-                # Insert Kaathai section
-                cur.execute("""
-                    INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
-                                         section_number, section_name, section_name_tamil, sort_order)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (next_section_id, work_id, kandam_section_id, 'kaathai', 'காதை',
-                      section_number, section_name, section_name, section_number))
-                kaathai_section_id = next_section_id
-                next_section_id += 1
+                # Create Kaathai section
+                kaathai_section_id = self.section_id
+                self.section_id += 1
+
+                self.sections.append({
+                    'section_id': kaathai_section_id,
+                    'work_id': self.work_id,
+                    'parent_section_id': kandam_section_id,
+                    'level_type': 'kaathai',
+                    'level_type_tamil': 'காதை',
+                    'section_number': section_number,
+                    'section_name': section_name,
+                    'section_name_tamil': section_name,
+                    'sort_order': section_number
+                })
 
                 verse_count = len(section_data['verses'])
                 print(f"  Kaathai #{section_number}: {section_name} ({verse_count} verses)")
 
-                # 4. Process verses
+                # Process verses
                 for verse_idx, verse_data in enumerate(section_data['verses'], 1):
                     verse_lines = verse_data['lines']
 
                     if not verse_lines:
                         continue
 
-                    # Insert verse
-                    cur.execute("""
-                        INSERT INTO verses (section_id, verse_number, verse_text, sort_order)
-                        VALUES (%s, %s, %s, %s)
-                        RETURNING verse_id
-                    """, (kaathai_section_id, verse_idx, '\n'.join(verse_lines), verse_idx))
-                    verse_id = cur.fetchone()[0]
+                    # Add verse
+                    verse_id = self.verse_id
+                    self.verse_id += 1
 
-                    # 5. Process lines
+                    self.verses.append({
+                        'verse_id': verse_id,
+                        'work_id': self.work_id,
+                        'section_id': kaathai_section_id,
+                        'verse_number': verse_idx,
+                        'verse_type': None,
+                        'verse_type_tamil': None,
+                        'total_lines': len(verse_lines),
+                        'sort_order': verse_idx
+                    })
+
+                    # Process lines
                     for line_num, line_text in enumerate(verse_lines, 1):
-                        # Insert line
-                        cur.execute("""
-                            INSERT INTO lines (verse_id, line_number, line_text, sort_order)
-                            VALUES (%s, %s, %s, %s)
-                            RETURNING line_id
-                        """, (verse_id, line_num, line_text, line_num))
-                        line_id = cur.fetchone()[0]
+                        line_id = self.line_id
+                        self.line_id += 1
 
-                        # 6. Process words
+                        self.lines.append({
+                            'line_id': line_id,
+                            'verse_id': verse_id,
+                            'line_number': line_num,
+                            'line_text': line_text
+                        })
+
+                        # Process words
                         words = simple_word_split(line_text)
                         for word_pos, word_text in enumerate(words, 1):
                             if word_text:
-                                cur.execute("""
-                                    INSERT INTO words (line_id, word_number, word_text, sort_order)
-                                    VALUES (%s, %s, %s, %s)
-                                """, (line_id, word_pos, word_text, word_pos))
+                                word_id = self.word_id
+                                self.word_id += 1
 
-                # Commit after each Kaathai
-                conn.commit()
-                print(f"    ✓ Committed {verse_count} verses")
+                                self.words.append({
+                                    'word_id': word_id,
+                                    'line_id': line_id,
+                                    'word_position': word_pos,
+                                    'word_text': word_text,
+                                    'sandhi_split': None
+                                })
 
-        print(f"\n{'='*60}")
-        print("Silapathikaram import completed successfully!")
-        print(f"{'='*60}")
+        print(f"\n✓ Phase 1 complete: Parsed all files")
+        print(f"  - Sections: {len(self.sections)}")
+        print(f"  - Verses: {len(self.verses)}")
+        print(f"  - Lines: {len(self.lines)}")
+        print(f"  - Words: {len(self.words)}")
 
-    except Exception as e:
-        conn.rollback()
-        print(f"Error during import: {e}")
-        raise
-    finally:
-        cur.close()
+    def bulk_insert(self):
+        """Phase 2: Bulk insert using PostgreSQL COPY"""
+        print("\nPhase 2: Bulk inserting into database...")
+
+        # Insert sections
+        print(f"  Inserting {len(self.sections)} sections...")
+        self._bulk_copy('sections', self.sections,
+                       ['section_id', 'work_id', 'parent_section_id', 'level_type', 'level_type_tamil',
+                        'section_number', 'section_name', 'section_name_tamil', 'sort_order'])
+
+        # Insert verses
+        print(f"  Inserting {len(self.verses)} verses...")
+        self._bulk_copy('verses', self.verses,
+                       ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
+                        'verse_type_tamil', 'total_lines', 'sort_order'])
+
+        # Insert lines
+        print(f"  Inserting {len(self.lines)} lines...")
+        self._bulk_copy('lines', self.lines,
+                       ['line_id', 'verse_id', 'line_number', 'line_text'])
+
+        # Insert words
+        print(f"  Inserting {len(self.words)} words...")
+        self._bulk_copy('words', self.words,
+                       ['word_id', 'line_id', 'word_position', 'word_text', 'sandhi_split'])
+
+        self.conn.commit()
+        print("✓ Phase 2 complete: All data inserted")
+
+    def _bulk_copy(self, table_name, data, columns):
+        """Use PostgreSQL COPY for bulk insert"""
+        if not data:
+            return
+
+        # Create StringIO buffer
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, delimiter='\t')
+
+        for row in data:
+            writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+
+        buffer.seek(0)
+
+        # Use COPY command
+        self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
+
+    def close(self):
+        """Close database connection"""
+        self.cursor.close()
+        self.conn.close()
 
 
 def main():
@@ -312,21 +406,25 @@ def main():
     if len(sys.argv) > 1:
         db_connection = sys.argv[1]
 
-    print("=" * 60)
-    print("Silapathikaram Parser")
-    print("=" * 60)
+    print("=" * 70)
+    print("Silapathikaram Parser - Bulk COPY Import")
+    print("=" * 70)
     print(f"Database: {db_connection.split('@')[-1] if '@' in db_connection else db_connection}")
     print(f"Source: {source_dir}")
-    print("=" * 60)
+    print("=" * 70)
 
-    # Connect to database
-    print(f"Connecting to database...")
-    conn = psycopg2.connect(db_connection)
+    # Create importer
+    importer = SilapathikaramBulkImporter(db_connection, source_dir)
 
     try:
-        insert_silapathikaram(conn, source_dir)
+        importer._ensure_work_exists()
+        importer.parse_all_files()
+        importer.bulk_insert()
+        print("\n" + "=" * 70)
+        print("✓ Silapathikaram import completed successfully!")
+        print("=" * 70)
     finally:
-        conn.close()
+        importer.close()
         print("\n✓ Database connection closed")
 
 

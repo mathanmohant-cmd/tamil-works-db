@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Kambaramayanam Parser for Tamil Literature Database
+Kambaramayanam Parser for Tamil Literature Database - Bulk COPY Import
 
 This script parses Kambaramayanam text files and imports them into the database.
+Uses 2-phase bulk import for high performance.
 
 Structure:
 - Work: Kambaramayanam (கம்பராமாயணம்)
-- Level 1 (Kandam): 6 chapters marked with &
-  - &1 பாலகாண்டம் (Bala Kandam)
-  - &2 அயோத்தியா காண்டம் (Ayodhya Kandam)
-  - &3 ஆரணிய காண்டம் (Aranya Kandam)
-  - &4 கிட்கிந்தா காண்டம் (Kishkindha Kandam)
-  - &5 சுந்தர காண்டம் (Sundara Kandam)
-  - &61, &62, &63, &64 யுத்த காண்டம் (Yuddha Kandam - 4 parts)
-- Level 2 (Padalam): Subsections marked with @
-- Verses: Numbered with # (each verse is typically a 4-line stanza)
-- Lines: Individual lines within verses
-- Notes: Lines starting with ** or *** are ignored
+- Level 1 (Kandam): 6 chapters (Yuddha Kandam split into 4 parts)
+  - & marks Kandam
+  - @ marks Padalam (subsection)
+  - # marks verse number
+- Verses: Individual verses numbered with #
+- Lines: Lines within verses
+- Clean: Remove ** and *** markers
 """
 
 import os
 import re
 import sys
 import psycopg2
+import csv
+import io
 from pathlib import Path
 
-# Kandam files (ordered)
+# Kandam files (ordered) - Yuddha Kandam (6) split into parts 61-64
 KANDAM_FILES = [
     ('1-கம்பராமாயணம்-பாலகாண்டம்.txt', 'பாலகாண்டம்', 'Bala Kandam', 1),
     ('2-கம்பராமாயணம்-அயோத்தியா காண்டம்.txt', 'அயோத்தியா காண்டம்', 'Ayodhya Kandam', 2),
@@ -43,17 +42,11 @@ KANDAM_FILES = [
 def clean_line(line):
     """
     Clean a line by:
-    - Removing line numbers (multiples of 5) at the end
-    - Removing anything after **
+    - Removing ** and *** markers
     - Stripping whitespace
     """
-    # Remove anything after ** (including **)
-    if '**' in line:
-        return ''  # Ignore entire line with **
-
-    # Remove trailing numbers (multiples of 5)
-    line = re.sub(r'\s+\d+$', '', line)
-
+    # Remove ** and *** markers
+    line = re.sub(r'\*\*\*?', '', line)
     return line.strip()
 
 
@@ -64,15 +57,13 @@ def parse_kandam_file(file_path):
     Returns:
     {
         'kandam_name_tamil': str,
-        'kandam_name_english': str,
-        'kandam_number': int,
         'padalams': [
             {
                 'number': int,
                 'name': str,
                 'verses': [
                     {
-                        'verse_number': int,
+                        'number': int,
                         'lines': [str, str, ...]
                     },
                     ...
@@ -82,7 +73,7 @@ def parse_kandam_file(file_path):
         ]
     }
     """
-    print(f"Parsing file: {file_path}")
+    print(f"  Parsing file: {file_path.name}")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -92,51 +83,27 @@ def parse_kandam_file(file_path):
     }
 
     current_padalam = None
-    current_verse_number = None
-    current_verse_lines = []
+    current_verse = None
 
     for line in lines:
         line = line.rstrip('\n')
 
-        # Skip lines starting with ** or ***
-        if line.strip().startswith('**'):
-            continue
-
-        # Skip empty lines
-        if not line.strip():
-            # Save current verse if we have lines
-            if current_verse_lines and current_padalam is not None and current_verse_number is not None:
-                current_padalam['verses'].append({
-                    'verse_number': current_verse_number,
-                    'lines': current_verse_lines.copy()
-                })
-                current_verse_lines = []
-                current_verse_number = None
-            continue
-
         # Check for Kandam marker (&)
         if line.startswith('&'):
-            # Extract kandam info (format: &1 பாலகாண்டம் or &61 யுத்த காண்டம்-1)
-            match = re.match(r'^&(\d+)\s+(.+)$', line)
-            if match:
-                kandam_num = int(match.group(1))
-                kandam_text = match.group(2).strip()
-                kandam_info['kandam_name_tamil'] = kandam_text
-                kandam_info['kandam_number'] = kandam_num
+            kandam_text = line[1:].strip()
+            # Remove leading number if present
+            kandam_text = re.sub(r'^\d+\s+', '', kandam_text)
+            kandam_info['kandam_name_tamil'] = kandam_text
             continue
 
         # Check for Padalam marker (@)
         if line.startswith('@'):
-            # Save previous padalam's last verse
-            if current_verse_lines and current_padalam is not None and current_verse_number is not None:
-                current_padalam['verses'].append({
-                    'verse_number': current_verse_number,
-                    'lines': current_verse_lines.copy()
-                })
-                current_verse_lines = []
-                current_verse_number = None
+            # Save previous verse if exists
+            if current_verse and current_padalam:
+                current_padalam['verses'].append(current_verse)
+                current_verse = None
 
-            # Parse padalam header (format: @0 கடவுள் வாழ்த்து or @1 ஆற்றுப்படலம்)
+            # Parse padalam header (format: @1 மங்கல வாழ்த்துப் படலம்)
             match = re.match(r'^@(\d+)\s+(.+)$', line)
             if match:
                 padalam_number = int(match.group(1))
@@ -150,33 +117,30 @@ def parse_kandam_file(file_path):
                 kandam_info['padalams'].append(current_padalam)
             continue
 
-        # Check for verse number marker (#)
+        # Check for verse marker (#)
         if line.startswith('#'):
-            # Save previous verse if exists
-            if current_verse_lines and current_padalam is not None and current_verse_number is not None:
-                current_padalam['verses'].append({
-                    'verse_number': current_verse_number,
-                    'lines': current_verse_lines.copy()
-                })
-                current_verse_lines = []
+            # Save previous verse
+            if current_verse and current_padalam:
+                current_padalam['verses'].append(current_verse)
 
-            # Parse verse number (format: #1, #2, etc.)
+            # Parse verse number (format: #1)
             match = re.match(r'^#(\d+)$', line)
             if match:
-                current_verse_number = int(match.group(1))
+                verse_number = int(match.group(1))
+                current_verse = {
+                    'number': verse_number,
+                    'lines': []
+                }
             continue
 
         # Regular content line
         cleaned = clean_line(line)
-        if cleaned and current_padalam is not None and current_verse_number is not None:
-            current_verse_lines.append(cleaned)
+        if cleaned and current_verse is not None:
+            current_verse['lines'].append(cleaned)
 
     # Save last verse
-    if current_verse_lines and current_padalam is not None and current_verse_number is not None:
-        current_padalam['verses'].append({
-            'verse_number': current_verse_number,
-            'lines': current_verse_lines.copy()
-        })
+    if current_verse and current_padalam:
+        current_padalam['verses'].append(current_verse)
 
     return kandam_info
 
@@ -195,168 +159,296 @@ def simple_word_split(line):
     return words
 
 
-def insert_kambaramayanam(conn, source_dir):
-    """Insert Kambaramayanam into the database."""
-    cur = conn.cursor()
+class KambaramayanamBulkImporter:
+    def __init__(self, db_connection_string: str, source_dir: Path):
+        """Initialize bulk importer"""
+        self.conn = psycopg2.connect(db_connection_string)
+        self.cursor = self.conn.cursor()
+        self.source_dir = source_dir
 
-    try:
-        # 1. Insert or get work
+        # Data containers for bulk insert
+        self.sections = []
+        self.verses = []
+        self.lines = []
+        self.words = []
+
+        # ID counters
+        self.section_id = 1
+        self.verse_id = 1
+        self.line_id = 1
+        self.word_id = 1
+        self.work_id = None
+
+        # Track Yuddha Kandam parent section
+        self.yuddha_kandam_parent_id = None
+
+    def _ensure_work_exists(self):
+        """Ensure Kambaramayanam work exists"""
         work_name_tamil = 'கம்பராமாயணம்'
         work_name_english = 'Kambaramayanam'
 
-        # Get next available work_id
-        cur.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
-        work_id = cur.fetchone()[0]
-
         # Check if work already exists by name
-        cur.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
-        existing = cur.fetchone()
+        self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
+        existing = self.cursor.fetchone()
 
         if existing:
-            work_id = existing[0]
-            print(f"Work {work_name_tamil} already exists (ID: {work_id})")
+            self.work_id = existing[0]
+            print(f"Work {work_name_tamil} already exists (ID: {self.work_id})")
         else:
+            # Get next available work_id
+            self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
+            self.work_id = self.cursor.fetchone()[0]
+
             print(f"Creating work entry for {work_name_tamil}...")
-            cur.execute("""
+            self.cursor.execute("""
                 INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (
-                work_id,
+                self.work_id,
                 work_name_english,
                 work_name_tamil,
-                'Tamil version of the Ramayana epic',
+                'Tamil retelling of the Ramayana epic',
                 '12th century CE',
                 'Kambar'
             ))
-            conn.commit()
+            self.conn.commit()
+            print(f"Work ID: {self.work_id}")
 
-        print(f"Work ID: {work_id}")
+        # Get starting IDs for batch processing
+        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
+        self.section_id = self.cursor.fetchone()[0] + 1
 
-        # Get next available section_id
-        cur.execute("SELECT COALESCE(MAX(section_id), 0) + 1 FROM sections")
-        next_section_id = cur.fetchone()[0]
+        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
+        self.verse_id = self.cursor.fetchone()[0] + 1
 
-        # Track Yuddha Kandam parent section (for parts 61-64)
-        yuddha_kandam_parent_id = None
+        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
+        self.line_id = self.cursor.fetchone()[0] + 1
 
-        # 2. Process each Kandam file
+        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
+        self.word_id = self.cursor.fetchone()[0] + 1
+
+    def parse_all_files(self):
+        """Phase 1: Parse all Kandam files into memory"""
+        print("\nPhase 1: Parsing all files...")
+
         for filename, kandam_tamil, kandam_english, kandam_num in KANDAM_FILES:
-            file_path = source_dir / filename
+            file_path = self.source_dir / filename
 
             if not os.path.exists(file_path):
                 print(f"Warning: File not found: {file_path}")
                 continue
 
-            print(f"\n{'='*60}")
-            print(f"Processing Kandam {kandam_num}: {kandam_tamil}")
-            print(f"{'='*60}")
+            print(f"\nProcessing Kandam {kandam_num}: {kandam_tamil}")
 
             # Parse the file
             kandam_data = parse_kandam_file(file_path)
 
-            # Handle Yuddha Kandam parts (61-64)
+            # Handle Yuddha Kandam special case (parts 61-64)
             if kandam_num in [61, 62, 63, 64]:
-                # For first Yuddha Kandam file, create parent section
                 if kandam_num == 61:
-                    cur.execute("""
-                        INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
-                                             section_number, section_name, section_name_tamil, sort_order)
-                        VALUES (%s, %s, NULL, %s, %s, %s, %s, %s, %s)
-                    """, (next_section_id, work_id, 'kandam', 'காண்டம்', 6,
-                          'Yuddha Kandam', 'யுத்த காண்டம்', 6))
-                    yuddha_kandam_parent_id = next_section_id
-                    next_section_id += 1
-                    print(f"Yuddha Kandam Parent Section ID: {yuddha_kandam_parent_id}")
+                    # Create parent Yuddha Kandam section (6)
+                    self.yuddha_kandam_parent_id = self.section_id
+                    self.section_id += 1
 
-                # Insert as sub-section under Yuddha Kandam
-                cur.execute("""
-                    INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
-                                         section_number, section_name, section_name_tamil, sort_order)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (next_section_id, work_id, yuddha_kandam_parent_id, 'kandam_part', 'காண்டம் பகுதி',
-                      kandam_num, kandam_english, kandam_tamil, kandam_num))
-                kandam_section_id = next_section_id
-                next_section_id += 1
+                    self.sections.append({
+                        'section_id': self.yuddha_kandam_parent_id,
+                        'work_id': self.work_id,
+                        'parent_section_id': None,
+                        'level_type': 'kandam',
+                        'level_type_tamil': 'காண்டம்',
+                        'section_number': 6,
+                        'section_name': 'Yuddha Kandam',
+                        'section_name_tamil': 'யுத்த காண்டம்',
+                        'sort_order': 6
+                    })
+
+                # Create sub-section for this part
+                kandam_section_id = self.section_id
+                self.section_id += 1
+
+                self.sections.append({
+                    'section_id': kandam_section_id,
+                    'work_id': self.work_id,
+                    'parent_section_id': self.yuddha_kandam_parent_id,
+                    'level_type': 'kandam_part',
+                    'level_type_tamil': 'காண்டம் பகுதி',
+                    'section_number': kandam_num,
+                    'section_name': kandam_english,
+                    'section_name_tamil': kandam_tamil,
+                    'sort_order': kandam_num
+                })
             else:
-                # Regular Kandam (1-5)
-                cur.execute("""
-                    INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
-                                         section_number, section_name, section_name_tamil, sort_order)
-                    VALUES (%s, %s, NULL, %s, %s, %s, %s, %s, %s)
-                """, (next_section_id, work_id, 'kandam', 'காண்டம்', kandam_num,
-                      kandam_english, kandam_tamil, kandam_num))
-                kandam_section_id = next_section_id
-                next_section_id += 1
+                # Regular Kandam
+                kandam_section_id = self.section_id
+                self.section_id += 1
 
-            print(f"Kandam Section ID: {kandam_section_id}")
+                self.sections.append({
+                    'section_id': kandam_section_id,
+                    'work_id': self.work_id,
+                    'parent_section_id': None,
+                    'level_type': 'kandam',
+                    'level_type_tamil': 'காண்டம்',
+                    'section_number': kandam_num,
+                    'section_name': kandam_english,
+                    'section_name_tamil': kandam_tamil,
+                    'sort_order': kandam_num
+                })
 
-            # 3. Process each Padalam (subsection)
-            for padalam_data in kandam_data['padalams']:
+            # Track Padalam sections by (kandam_section_id, padalam_number) to handle duplicates
+            padalam_sections = {}  # key: (kandam_section_id, padalam_number), value: section_id
+
+            # Process each Padalam (subsection)
+            # Note: Padalam numbers restart for each Kandam part, so use padalam_idx for unique ordering
+            for padalam_idx, padalam_data in enumerate(kandam_data['padalams'], 1):
                 padalam_name = padalam_data['name']
                 padalam_number = padalam_data['number']
 
-                # Insert Padalam section
-                cur.execute("""
-                    INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
-                                         section_number, section_name, section_name_tamil, sort_order)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (next_section_id, work_id, kandam_section_id, 'padalam', 'படலம்',
-                      padalam_number, padalam_name, padalam_name, padalam_number))
-                padalam_section_id = next_section_id
-                next_section_id += 1
+                # Check if this Padalam number already exists (e.g., மிகைப் பாடல்கள்)
+                padalam_key = (kandam_section_id, padalam_number)
+                is_duplicate = padalam_key in padalam_sections
+
+                if is_duplicate:
+                    # Reuse existing Padalam section for duplicates (additional verses)
+                    padalam_section_id = padalam_sections[padalam_key]
+                    print(f"  Padalam #{padalam_number}: {padalam_name} (appending to existing - {len(padalam_data['verses'])} verses)")
+                else:
+                    # Create new Padalam section
+                    padalam_section_id = self.section_id
+                    self.section_id += 1
+
+                    # Use padalam_idx for sort_order since padalam_number repeats across Kandam parts
+                    self.sections.append({
+                        'section_id': padalam_section_id,
+                        'work_id': self.work_id,
+                        'parent_section_id': kandam_section_id,
+                        'level_type': 'padalam',
+                        'level_type_tamil': 'படலம்',
+                        'section_number': padalam_number,
+                        'section_name': padalam_name,
+                        'section_name_tamil': padalam_name,
+                        'sort_order': padalam_idx  # Use sequential index instead of padalam_number
+                    })
+
+                    padalam_sections[padalam_key] = padalam_section_id
+                    print(f"  Padalam #{padalam_number}: {padalam_name} ({len(padalam_data['verses'])} verses)")
 
                 verse_count = len(padalam_data['verses'])
-                print(f"  Padalam #{padalam_number}: {padalam_name} ({verse_count} verses)")
 
-                # 4. Process verses
-                for verse_data in padalam_data['verses']:
-                    verse_num = verse_data['verse_number']
+                # For duplicate Padalams (மிகைப் பாடல்கள்), find the next available verse number
+                if is_duplicate and len(self.verses) > 0:
+                    # Find max verse_number for this section
+                    existing_verses = [v for v in self.verses if v['section_id'] == padalam_section_id]
+                    next_verse_num = len(existing_verses) + 1  # Start from count + 1
+                    print(f"    Starting verse numbers at: {next_verse_num} (after {len(existing_verses)} existing verses)")
+                else:
+                    next_verse_num = 1
+
+                # Process verses - use sequential numbering within Padalam
+                for verse_idx, verse_data in enumerate(padalam_data['verses'], start=next_verse_num):
+                    verse_number = verse_idx
                     verse_lines = verse_data['lines']
 
                     if not verse_lines:
                         continue
 
-                    # Insert verse
-                    cur.execute("""
-                        INSERT INTO verses (section_id, verse_number, verse_text, sort_order)
-                        VALUES (%s, %s, %s, %s)
-                        RETURNING verse_id
-                    """, (padalam_section_id, verse_num, '\n'.join(verse_lines), verse_num))
-                    verse_id = cur.fetchone()[0]
+                    # Add verse
+                    verse_id = self.verse_id
+                    self.verse_id += 1
 
-                    # 5. Process lines
+                    self.verses.append({
+                        'verse_id': verse_id,
+                        'work_id': self.work_id,
+                        'section_id': padalam_section_id,
+                        'verse_number': verse_number,
+                        'verse_type': None,
+                        'verse_type_tamil': None,
+                        'total_lines': len(verse_lines),
+                        'sort_order': verse_number
+                    })
+
+                    # Process lines
                     for line_num, line_text in enumerate(verse_lines, 1):
-                        # Insert line
-                        cur.execute("""
-                            INSERT INTO lines (verse_id, line_number, line_text, sort_order)
-                            VALUES (%s, %s, %s, %s)
-                            RETURNING line_id
-                        """, (verse_id, line_num, line_text, line_num))
-                        line_id = cur.fetchone()[0]
+                        line_id = self.line_id
+                        self.line_id += 1
 
-                        # 6. Process words
+                        self.lines.append({
+                            'line_id': line_id,
+                            'verse_id': verse_id,
+                            'line_number': line_num,
+                            'line_text': line_text
+                        })
+
+                        # Process words
                         words = simple_word_split(line_text)
                         for word_pos, word_text in enumerate(words, 1):
                             if word_text:
-                                cur.execute("""
-                                    INSERT INTO words (line_id, word_number, word_text, sort_order)
-                                    VALUES (%s, %s, %s, %s)
-                                """, (line_id, word_pos, word_text, word_pos))
+                                word_id = self.word_id
+                                self.word_id += 1
 
-                # Commit after each Padalam
-                conn.commit()
-                print(f"    ✓ Committed {verse_count} verses")
+                                self.words.append({
+                                    'word_id': word_id,
+                                    'line_id': line_id,
+                                    'word_position': word_pos,
+                                    'word_text': word_text,
+                                    'sandhi_split': None
+                                })
 
-        print(f"\n{'='*60}")
-        print("Kambaramayanam import completed successfully!")
-        print(f"{'='*60}")
+        print(f"\n✓ Phase 1 complete: Parsed all files")
+        print(f"  - Sections: {len(self.sections)}")
+        print(f"  - Verses: {len(self.verses)}")
+        print(f"  - Lines: {len(self.lines)}")
+        print(f"  - Words: {len(self.words)}")
 
-    except Exception as e:
-        conn.rollback()
-        print(f"Error during import: {e}")
-        raise
-    finally:
-        cur.close()
+    def bulk_insert(self):
+        """Phase 2: Bulk insert using PostgreSQL COPY"""
+        print("\nPhase 2: Bulk inserting into database...")
+
+        # Insert sections
+        print(f"  Inserting {len(self.sections)} sections...")
+        self._bulk_copy('sections', self.sections,
+                       ['section_id', 'work_id', 'parent_section_id', 'level_type', 'level_type_tamil',
+                        'section_number', 'section_name', 'section_name_tamil', 'sort_order'])
+
+        # Insert verses
+        print(f"  Inserting {len(self.verses)} verses...")
+        self._bulk_copy('verses', self.verses,
+                       ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
+                        'verse_type_tamil', 'total_lines', 'sort_order'])
+
+        # Insert lines
+        print(f"  Inserting {len(self.lines)} lines...")
+        self._bulk_copy('lines', self.lines,
+                       ['line_id', 'verse_id', 'line_number', 'line_text'])
+
+        # Insert words
+        print(f"  Inserting {len(self.words)} words...")
+        self._bulk_copy('words', self.words,
+                       ['word_id', 'line_id', 'word_position', 'word_text', 'sandhi_split'])
+
+        self.conn.commit()
+        print("✓ Phase 2 complete: All data inserted")
+
+    def _bulk_copy(self, table_name, data, columns):
+        """Use PostgreSQL COPY for bulk insert"""
+        if not data:
+            return
+
+        # Create StringIO buffer
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, delimiter='\t')
+
+        for row in data:
+            writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+
+        buffer.seek(0)
+
+        # Use COPY command
+        self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
+
+    def close(self):
+        """Close database connection"""
+        self.cursor.close()
+        self.conn.close()
 
 
 def main():
@@ -380,21 +472,25 @@ def main():
     if len(sys.argv) > 1:
         db_connection = sys.argv[1]
 
-    print("=" * 60)
-    print("Kambaramayanam Parser")
-    print("=" * 60)
+    print("=" * 70)
+    print("Kambaramayanam Parser - Bulk COPY Import")
+    print("=" * 70)
     print(f"Database: {db_connection.split('@')[-1] if '@' in db_connection else db_connection}")
     print(f"Source: {source_dir}")
-    print("=" * 60)
+    print("=" * 70)
 
-    # Connect to database
-    print(f"Connecting to database...")
-    conn = psycopg2.connect(db_connection)
+    # Create importer
+    importer = KambaramayanamBulkImporter(db_connection, source_dir)
 
     try:
-        insert_kambaramayanam(conn, source_dir)
+        importer._ensure_work_exists()
+        importer.parse_all_files()
+        importer.bulk_insert()
+        print("\n" + "=" * 70)
+        print("✓ Kambaramayanam import completed successfully!")
+        print("=" * 70)
     finally:
-        conn.close()
+        importer.close()
         print("\n✓ Database connection closed")
 
 

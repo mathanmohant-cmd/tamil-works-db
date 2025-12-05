@@ -185,30 +185,49 @@ Located in `webapp/frontend/`:
 
 ### Data Import Architecture
 
+**IMPORTANT: All parsers MUST use the 2-phase bulk COPY import pattern for optimal performance (1000x faster than individual INSERTs).**
+
 Parser scripts in `scripts/` directory follow this pattern:
 
+**Phase 1: Parse into memory**
 1. **Load structural metadata** from JSON files (e.g., `thirukkural_structure.json`)
-2. **Parse concordance files** (e.g., `kuralconc_full.txt`)
+2. **Parse concordance files** into memory as lists of dictionaries
 3. **Apply word segmentation** following Professor P. Pandiaraja's principles
-4. **Insert hierarchically** - works → sections → verses → lines → words
-5. **Maintain sort_order** for proper reading sequence
+4. **Build complete hierarchy** in memory - works → sections → verses → lines → words
+5. **Pre-allocate all IDs** using `SELECT COALESCE(MAX(id), 0) + 1` pattern
+
+**Phase 2: Bulk insert using PostgreSQL COPY**
+1. Use `psycopg2.cursor.copy_from()` with StringIO buffers
+2. Insert in order: sections → verses → lines → words
+3. Single commit after all data inserted
 
 **Key Parser Features:**
-- Automatic section creation and ID management
+- 2-phase bulk COPY pattern (NOT row-by-row INSERTs)
+- Pre-allocated ID ranges for all tables
+- In-memory data structures (lists of dicts)
+- PostgreSQL COPY command for bulk insert
 - Word root extraction and part-of-speech tagging
 - Sandhi split analysis for compound words
-- Transaction-based insertion for data integrity
+- Single transaction for data integrity
 
 **Available Parsers:**
-- `thirukkural_parser.py` - 3 Paals → 10 Iyals → 133 Adhikarams → 1,330 Kurals
+- `thirukkural_bulk_import.py` - 3 Paals → 10 Iyals → 133 Adhikarams → 1,330 Kurals
+  - Reference implementation for bulk COPY pattern
+- `thirukkural_parser.py` - Alternative row-by-row version (slower, avoid for new parsers)
 - `sangam_parser.py` - 18 works with different formats (Thogai/Padal)
-- `silapathikaram_parser.py` - 3 Kandams → Kaathais/Padalams → Verses
+- `silapathikaram_parser.py` - 3 Kandams → Kaathais → Verses (uses bulk COPY)
   - Structure: $ marks Kandam, # marks Kaathai
   - Cleans ** markers and line numbers
-- `kambaramayanam_parser.py` - 6 Kandams → Padalams → Verses
+- `kambaramayanam_parser.py` - 6 Kandams → Padalams → Verses (uses bulk COPY)
   - Structure: & marks Kandam, @ marks Padalam, # marks verse
   - Yuddha Kandam split into 4 parts (61-64) under parent section
   - Cleans ** and *** markers
+
+**Schema Fields Reference (from sql/schema.sql):**
+- **sections**: section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order
+- **verses**: verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order
+- **lines**: line_id, verse_id, line_number, line_text (NO sort_order column)
+- **words**: word_id, line_id, word_position, word_text, sandhi_split (NO sort_order column, use word_position not word_number)
 
 ## Key Patterns and Conventions
 
