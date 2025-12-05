@@ -162,26 +162,26 @@ class Database:
                 # Add the same filters as the main query
                 words_params = []
                 if match_type == "exact":
-                    words_query += " AND wd.word_text = %s"
+                    words_query += " AND word_text = %s"
                     words_params.append(search_term)
                 else:  # partial - apply word_position
                     if word_position == "beginning":
-                        words_query += " AND wd.word_text LIKE %s"
+                        words_query += " AND word_text LIKE %s"
                         words_params.append(f"{search_term}%")
                     elif word_position == "end":
-                        words_query += " AND wd.word_text LIKE %s"
+                        words_query += " AND word_text LIKE %s"
                         words_params.append(f"%{search_term}")
                     else:  # anywhere
-                        words_query += " AND wd.word_text LIKE %s"
+                        words_query += " AND word_text LIKE %s"
                         words_params.append(f"%{search_term}%")
 
                 if work_ids:
                     placeholders = ','.join(['%s'] * len(work_ids))
-                    words_query += f" AND wd.work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
+                    words_query += f" AND work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
                     words_params.extend(work_ids)
 
                 if word_root:
-                    words_query += " AND wd.word_root = %s"
+                    words_query += " AND word_root = %s"
                     words_params.append(word_root)
 
                 words_query += """
