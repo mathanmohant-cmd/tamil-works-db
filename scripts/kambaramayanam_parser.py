@@ -26,9 +26,6 @@ import sys
 import psycopg2
 from pathlib import Path
 
-# Source directory
-SOURCE_DIR = r'Tamil-Source-TamilConcordence\5 _கம்பராமாயணம்'
-
 # Kandam files (ordered)
 KANDAM_FILES = [
     ('1-கம்பராமாயணம்-பாலகாண்டம்.txt', 'பாலகாண்டம்', 'Bala Kandam', 1),
@@ -198,7 +195,7 @@ def simple_word_split(line):
     return words
 
 
-def insert_kambaramayanam(conn):
+def insert_kambaramayanam(conn, source_dir):
     """Insert Kambaramayanam into the database."""
     cur = conn.cursor()
 
@@ -206,13 +203,19 @@ def insert_kambaramayanam(conn):
         # 1. Insert or get work
         work_name_tamil = 'கம்பராமாயணம்'
         work_name_english = 'Kambaramayanam'
-        work_id = 21  # Assign work_id for Kambaramayanam
 
-        # Check if work already exists
-        cur.execute("SELECT work_id FROM works WHERE work_id = %s", (work_id,))
+        # Get next available work_id
+        cur.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
+        work_id = cur.fetchone()[0]
+
+        # Check if work already exists by name
+        cur.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
         existing = cur.fetchone()
 
-        if not existing:
+        if existing:
+            work_id = existing[0]
+            print(f"Work {work_name_tamil} already exists (ID: {work_id})")
+        else:
             print(f"Creating work entry for {work_name_tamil}...")
             cur.execute("""
                 INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
@@ -226,8 +229,6 @@ def insert_kambaramayanam(conn):
                 'Kambar'
             ))
             conn.commit()
-        else:
-            print(f"Work {work_name_tamil} already exists (ID: {work_id})")
 
         print(f"Work ID: {work_id}")
 
@@ -236,7 +237,7 @@ def insert_kambaramayanam(conn):
 
         # 2. Process each Kandam file
         for filename, kandam_tamil, kandam_english, kandam_num in KANDAM_FILES:
-            file_path = os.path.join(SOURCE_DIR, filename)
+            file_path = source_dir / filename
 
             if not os.path.exists(file_path):
                 print(f"Warning: File not found: {file_path}")
@@ -364,6 +365,11 @@ def main():
     db_connection = os.getenv('DATABASE_URL',
                              "postgresql://postgres:postgres@localhost/tamil_literature")
 
+    # Source directory path
+    script_dir = Path(__file__).parent
+    project_dir = script_dir.parent
+    source_dir = project_dir / "Tamil-Source-TamilConcordence" / "5 _கம்பராமாயணம்"
+
     # Allow database URL as command line argument
     if len(sys.argv) > 1:
         db_connection = sys.argv[1]
@@ -372,6 +378,7 @@ def main():
     print("Kambaramayanam Parser")
     print("=" * 60)
     print(f"Database: {db_connection.split('@')[-1] if '@' in db_connection else db_connection}")
+    print(f"Source: {source_dir}")
     print("=" * 60)
 
     # Connect to database
@@ -379,7 +386,7 @@ def main():
     conn = psycopg2.connect(db_connection)
 
     try:
-        insert_kambaramayanam(conn)
+        insert_kambaramayanam(conn, source_dir)
     finally:
         conn.close()
         print("\n✓ Database connection closed")
