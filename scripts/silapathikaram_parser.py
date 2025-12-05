@@ -193,6 +193,10 @@ def insert_silapathikaram(conn, source_dir):
 
         print(f"Work ID: {work_id}")
 
+        # Get next available section_id
+        cur.execute("SELECT COALESCE(MAX(section_id), 0) + 1 FROM sections")
+        next_section_id = cur.fetchone()[0]
+
         # 2. Process each Kandam file
         for filename, kandam_tamil, kandam_english, kandam_num in KANDAM_FILES:
             file_path = source_dir / filename
@@ -210,12 +214,13 @@ def insert_silapathikaram(conn, source_dir):
 
             # Insert Kandam section
             cur.execute("""
-                INSERT INTO sections (work_id, section_name, section_name_tamil,
-                                     section_number, parent_section_id, sort_order)
-                VALUES (%s, %s, %s, %s, NULL, %s)
-                RETURNING section_id
-            """, (work_id, kandam_english, kandam_tamil, kandam_num, kandam_num))
-            kandam_section_id = cur.fetchone()[0]
+                INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
+                                     section_number, section_name, section_name_tamil, sort_order)
+                VALUES (%s, %s, NULL, %s, %s, %s, %s, %s, %s)
+            """, (next_section_id, work_id, 'kandam', 'காண்டம்', kandam_num,
+                  kandam_english, kandam_tamil, kandam_num))
+            kandam_section_id = next_section_id
+            next_section_id += 1
             print(f"Kandam Section ID: {kandam_section_id}")
 
             # 3. Process each Kaathai (subsection)
@@ -225,13 +230,13 @@ def insert_silapathikaram(conn, source_dir):
 
                 # Insert Kaathai section
                 cur.execute("""
-                    INSERT INTO sections (work_id, section_name, section_name_tamil,
-                                         section_number, parent_section_id, sort_order)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING section_id
-                """, (work_id, section_name, section_name, section_number,
-                      kandam_section_id, section_number))
-                kaathai_section_id = cur.fetchone()[0]
+                    INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_type_tamil,
+                                         section_number, section_name, section_name_tamil, sort_order)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (next_section_id, work_id, kandam_section_id, 'kaathai', 'காதை',
+                      section_number, section_name, section_name, section_number))
+                kaathai_section_id = next_section_id
+                next_section_id += 1
 
                 verse_count = len(section_data['verses'])
                 print(f"  Kaathai #{section_number}: {section_name} ({verse_count} verses)")

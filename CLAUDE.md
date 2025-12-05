@@ -83,10 +83,21 @@ npm run preview
 cd scripts
 
 # Import Thirukkural (all 1,330 kurals)
-python thirukkural_parser.py
+python thirukkural_parser.py [database_url]
 
-# Import Sangam literature
-python sangam_parser.py
+# Import Sangam literature (18 works)
+python sangam_parser.py [database_url]
+
+# Import Silapathikaram (epic in 3 Kandams)
+python silapathikaram_parser.py [database_url]
+
+# Import Kambaramayanam (epic in 6 Kandams)
+python kambaramayanam_parser.py [database_url]
+
+# All parsers support:
+# - DATABASE_URL environment variable
+# - Command line argument for database URL
+# - Default: postgresql://postgres:postgres@localhost/tamil_literature
 
 # Generate ER diagram
 python generate_er_diagram.py
@@ -187,6 +198,17 @@ Parser scripts in `scripts/` directory follow this pattern:
 - Word root extraction and part-of-speech tagging
 - Sandhi split analysis for compound words
 - Transaction-based insertion for data integrity
+
+**Available Parsers:**
+- `thirukkural_parser.py` - 3 Paals → 10 Iyals → 133 Adhikarams → 1,330 Kurals
+- `sangam_parser.py` - 18 works with different formats (Thogai/Padal)
+- `silapathikaram_parser.py` - 3 Kandams → Kaathais/Padalams → Verses
+  - Structure: $ marks Kandam, # marks Kaathai
+  - Cleans ** markers and line numbers
+- `kambaramayanam_parser.py` - 6 Kandams → Padalams → Verses
+  - Structure: & marks Kandam, @ marks Padalam, # marks verse
+  - Yuddha Kandam split into 4 parts (61-64) under parent section
+  - Cleans ** and *** markers
 
 ## Key Patterns and Conventions
 
