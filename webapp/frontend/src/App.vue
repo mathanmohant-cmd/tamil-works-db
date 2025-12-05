@@ -170,6 +170,7 @@
               v-for="(word, index) in uniqueWords"
               :key="word.text"
               class="word-item-expandable"
+              :class="{ expanded: expandedWords.has(word.text) }"
             >
               <!-- Word Header Row -->
               <div class="word-header-row">
@@ -192,9 +193,9 @@
                     @click="toggleWordExpansion(word.text)"
                     class="expand-collapse-button"
                     :class="{ expanded: expandedWords.has(word.text) }"
+                    :title="expandedWords.has(word.text) ? 'Collapse' : 'Expand'"
                   >
                     <span class="expand-icon">{{ expandedWords.has(word.text) ? '▼' : '▶' }}</span>
-                    <span class="expand-text">{{ expandedWords.has(word.text) ? 'Collapse' : 'Expand' }}</span>
                   </button>
                 </div>
               </div>
@@ -234,7 +235,11 @@
                     <div class="occurrence-number">{{ occIndex + 1 }}</div>
                     <div class="occurrence-content">
                       <div class="occurrence-metadata">
-                        {{ result.work_name_tamil }}: {{ result.hierarchy_path_tamil || result.hierarchy_path }} | Verse {{ result.verse_number }}, Line {{ result.line_number }}
+                        <span class="work-name">{{ result.work_name_tamil }}</span>
+                        <span class="separator">•</span>
+                        <span>{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
+                        <span class="separator">•</span>
+                        <span>Verse {{ result.verse_number }}, Line {{ result.line_number }}</span>
                       </div>
                       <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>
                     </div>
@@ -950,6 +955,33 @@ export default {
       )
     }
 
+    // Method: Clean hierarchy path to remove duplicates (e.g., "காண்டம்:ஆரணிய காண்டம்" → "ஆரணிய காண்டம்")
+    const cleanHierarchyPath = (path) => {
+      if (!path) return ''
+
+      // Split by ' > ' to get each level
+      const levels = path.split(' > ')
+
+      // Clean each level
+      const cleanedLevels = levels.map(level => {
+        // Split by ':' to separate level_type and section_name
+        const parts = level.split(':')
+        if (parts.length === 2) {
+          const levelType = parts[0].trim()
+          const sectionName = parts[1].trim()
+
+          // If section name already starts with the level type, just return section name
+          if (sectionName.startsWith(levelType)) {
+            return sectionName
+          }
+        }
+        // Otherwise return the full level as-is
+        return level
+      })
+
+      return cleanedLevels.join(' > ')
+    }
+
     // Method: Export lines for a specific word to CSV
     const exportWordLinesToCSV = (wordText) => {
       const occurrences = getWordOccurrences(wordText)
@@ -958,7 +990,7 @@ export default {
       // Create CSV content
       const headers = ['Work & Location', 'Line']
       const rows = occurrences.map(result => {
-        const location = `${result.work_name_tamil}: ${result.hierarchy_path_tamil || result.hierarchy_path} | Verse ${result.verse_number}, Line ${result.line_number}`
+        const location = `${result.work_name_tamil}: ${cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)} | Verse ${result.verse_number}, Line ${result.line_number}`
         return [location, result.line_text]
       })
 
@@ -1026,7 +1058,8 @@ export default {
       hasMoreOccurrences,
       loadMoreOccurrences,
       getWorkCounts,
-      exportWordLinesToCSV
+      exportWordLinesToCSV,
+      cleanHierarchyPath
     }
   }
 }
