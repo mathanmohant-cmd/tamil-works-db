@@ -36,14 +36,14 @@
         <div class="mentor-text">
           <h3>Ms. Vaidehi Herbert</h3>
           <p>
-            Her <em>Introduction to Sangam Literature</em> course and the community of learners she nurtures
-            opened the door for our deeper engagement with classical Tamil literature. Her clarity
-            and commitment have made Sangam texts accessible to modern readers.
+            Her *Introduction to Sangam Literature* courses and the community of learners she nurtures
+            opened my door for our deeper engagement with classical Tamil literature. Her enthusiasm
+            and unwavering commitment have made Sangam texts accessible to younger readers and non Tamil speakers too.
           </p>
         </div>
       </div>
 
-      <!-- Prof. Ku. Ve. Balakrishnan -->
+      <!-- Prof. Dr. Ku. Ve. Balasubramanian -->
       <div class="mentor-block">
         <div class="placeholder-image">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
@@ -53,11 +53,11 @@
           </svg>
         </div>
         <div class="mentor-text">
-          <h3>Prof. Ku. Ve. Balakrishnan</h3>
+          <h3>Prof. Dr. Ku. Ve. Balasubramanian</h3>
           <p>
             Even at the age of 80, he continues to share his vast knowledge through detailed
-            teachings on <em>Silapadhikaram</em> and <em>Tholkappiyam</em>. His 75+ episode Silapadhikaram series
-            and 80+ episode Tholkappiyam series are treasures that inspire anyone who loves Tamil.
+            teachings on *Silapadhikaram* and *Tholkappiyam*. His 75+ episode Silapadhikaram series
+            and 80+ episode Tholkappiyam series in YouTube are treasures that inspire anyone who loves Tamil.
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@
           <h3>R. Balakrishnan, IAS</h3>
           <p>
             His work in connecting Sangam literature with modern understanding has made classical Tamil
-            accessible to today's readers. His ability to distill profound insights from ancient texts
+            closer to today's generation. His ability to distill profound insights from ancient texts
             reflects deep passion, rigor, and scholarship.
           </p>
         </div>
