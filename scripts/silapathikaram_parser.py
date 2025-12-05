@@ -18,14 +18,9 @@ Structure:
 
 import os
 import re
+import sys
 import psycopg2
-from psycopg2.extras import execute_batch
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://localhost/tamil_literature')
+from pathlib import Path
 
 # File paths
 SOURCE_DIR = r'Tamil-Source-TamilConcordence\4_ஐம்பெருங்காப்பியங்கள்\சிலப்பதிகாரம்'
@@ -283,18 +278,35 @@ def insert_silapathikaram(conn):
 
 def main():
     """Main execution function."""
+    # Fix Windows console encoding for Tamil characters
+    if sys.platform == 'win32':
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+    # Database connection - check for environment variable or use default
+    db_connection = os.getenv('DATABASE_URL',
+                             "postgresql://postgres:postgres@localhost/tamil_literature")
+
+    # Allow database URL as command line argument
+    if len(sys.argv) > 1:
+        db_connection = sys.argv[1]
+
+    print("=" * 60)
     print("Silapathikaram Parser")
-    print("="*60)
+    print("=" * 60)
+    print(f"Database: {db_connection.split('@')[-1] if '@' in db_connection else db_connection}")
+    print("=" * 60)
 
     # Connect to database
     print(f"Connecting to database...")
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(db_connection)
 
     try:
         insert_silapathikaram(conn)
     finally:
         conn.close()
-        print("Database connection closed.")
+        print("\n✓ Database connection closed")
 
 
 if __name__ == '__main__':
