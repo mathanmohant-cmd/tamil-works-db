@@ -167,20 +167,29 @@ def insert_silapathikaram(conn):
         # 1. Insert or get work
         work_name_tamil = 'சிலப்பதிகாரம்'
         work_name_english = 'Silapathikaram'
+        work_id = 20  # Assign work_id for Silapathikaram
 
-        cur.execute("""
-            INSERT INTO works (work_name, work_name_tamil, description, period, author)
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (work_name) DO UPDATE SET work_name = EXCLUDED.work_name
-            RETURNING work_id
-        """, (
-            work_name_english,
-            work_name_tamil,
-            'One of the Five Great Epics of Tamil Literature',
-            '5th-6th century CE',
-            'Ilango Adigal'
-        ))
-        work_id = cur.fetchone()[0]
+        # Check if work already exists
+        cur.execute("SELECT work_id FROM works WHERE work_id = %s", (work_id,))
+        existing = cur.fetchone()
+
+        if not existing:
+            print(f"Creating work entry for {work_name_tamil}...")
+            cur.execute("""
+                INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                work_id,
+                work_name_english,
+                work_name_tamil,
+                'One of the Five Great Epics of Tamil Literature',
+                '5th-6th century CE',
+                'Ilango Adigal'
+            ))
+            conn.commit()
+        else:
+            print(f"Work {work_name_tamil} already exists (ID: {work_id})")
+
         print(f"Work ID: {work_id}")
 
         # 2. Process each Kandam file

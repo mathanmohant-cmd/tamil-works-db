@@ -206,20 +206,29 @@ def insert_kambaramayanam(conn):
         # 1. Insert or get work
         work_name_tamil = 'கம்பராமாயணம்'
         work_name_english = 'Kambaramayanam'
+        work_id = 21  # Assign work_id for Kambaramayanam
 
-        cur.execute("""
-            INSERT INTO works (work_name, work_name_tamil, description, period, author)
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (work_name) DO UPDATE SET work_name = EXCLUDED.work_name
-            RETURNING work_id
-        """, (
-            work_name_english,
-            work_name_tamil,
-            'Tamil version of the Ramayana epic',
-            '12th century CE',
-            'Kambar'
-        ))
-        work_id = cur.fetchone()[0]
+        # Check if work already exists
+        cur.execute("SELECT work_id FROM works WHERE work_id = %s", (work_id,))
+        existing = cur.fetchone()
+
+        if not existing:
+            print(f"Creating work entry for {work_name_tamil}...")
+            cur.execute("""
+                INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                work_id,
+                work_name_english,
+                work_name_tamil,
+                'Tamil version of the Ramayana epic',
+                '12th century CE',
+                'Kambar'
+            ))
+            conn.commit()
+        else:
+            print(f"Work {work_name_tamil} already exists (ID: {work_id})")
+
         print(f"Work ID: {work_id}")
 
         # Track Yuddha Kandam parent section (for parts 61-64)
