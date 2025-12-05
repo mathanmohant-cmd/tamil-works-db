@@ -1,46 +1,31 @@
 <template>
   <div class="home-page">
-    <section class="credit-section">
-      <div class="credit-container">
-        <h2>Tamil Concordance: A Treasure by Prof. P. Pandiaraja</h2>
+    <article class="tribute-content">
+      <header class="tribute-header">
+        <h1>Tamil Concordance: A Treasure by Prof. P. Pandiaraja</h1>
+        <p class="lead">An acknowledgement honoring the scholar whose concordance has shaped this project.</p>
+      </header>
 
-        <p>
-          This project is deeply indebted to <strong>Professor P. Pandiaraja</strong>, whose creation of the
-          <a href="http://tamilconcordance.in/" target="_blank">Tamil Concordance</a> stands as a monumental resource.
-          Over more than two decades, he has built a searchable treasure of Tamil words across Sangam and later literature,
-          blending his expertise in mathematics with his passion for Tamil.
-        </p>
+      <section class="content">
+        <h2 class="section-title">Acknowledgement</h2>
 
-        <h3>His Contribution</h3>
-        <ul>
-          <li><strong>Two decades of dedication:</strong> Meticulous study of Tamil words across Sangam and later literature.</li>
-          <li><strong>Books of precision:</strong> His works reflect an insatiable appetite for exactness and nuanced understanding.</li>
-          <li><strong>Mathematics meets language:</strong> Introduced statistical and quantitative methods into Tamil word studies.</li>
-          <li><strong>Interdisciplinary bridge:</strong> Blended academic expertise in mathematics with passion for Tamil culture.</li>
-        </ul>
+        <p>This project owes its deepest gratitude to Professor <strong>P. Pandiaraja</strong>, whose creation of the
+          <a class="concordance" href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer">Tamil Concordance</a>
+          stands as a monumental contribution to Tamil scholarship. Over more than five decades, he has built a priceless repository of Tamil words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamil.</p>
 
-        <h3>Why It Matters</h3>
-        <p>
-          His work provides researchers with structured concordance, scholars with a foundation for comparative studies, and Tamil speakers everywhere with deeper insights into their language.
-        </p>
+        <p>His work offers researchers a robust and structured concordance, opening up immense opportunities for etymological analysis of Tamil words, their usage, and the development of their meanings. For Tamil aficionados, this is a gift of easy access to classical Tamil, furthering a deeper appreciation of the language's richness and depth.</p>
 
-        <h3>Featured Works</h3>
-        <ul>
-          <li><em>[Insert Book Title 1]</em> – A landmark in Tamil word studies.</li>
-          <li><em>[Insert Book Title 2]</em> – Applying statistical rigor to Tamil lexicon.</li>
-          <li><em>[Insert Book Title 3]</em> – Bridging mathematics and literature.</li>
-        </ul>
+        <blockquote class="tribute-quote">
+          "This search tool is merely an extension of his lifelong labour. When we reached out to him, he warmly shared his wishes to see such a tool built. It is our immense pleasure and honour to help fulfil that vision."
+        </blockquote>
 
-        <p class="gratitude">
-          We extend heartfelt thanks to Prof. P. Pandiaraja for granting permission to use his work. His scholarship is not only a resource but an inspiration, reminding us that Tamil's timeless beauty can be studied with both passion and precision.
-        </p>
+        <p>We extend our heartfelt thanks to Prof. P. Pandiaraja for granting us permission to build upon his work. <strong>His scholarship is not only a resource but an enduring inspiration.</strong></p>
 
-        <p class="bio-link">
-          📖 Read more about his journey in his
-          <a href="http://tamilconcordance.in/ennaippaRRi.html" target="_blank">self‑biography</a>.
-        </p>
-      </div>
-    </section>
+        <footer class="tribute-footer">
+          <p>Created with respect and gratitude.</p>
+        </footer>
+      </section>
+    </article>
   </div>
 </template>
 
@@ -53,79 +38,91 @@ export default {
 <style scoped>
 .home-page {
   padding: 2rem 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.credit-section {
-  background: #fdfaf6;
-  padding: 2rem;
-  border-radius: 8px;
-  margin: 0 auto;
   max-width: 900px;
-  line-height: 1.6;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: 0 auto;
 }
 
-.credit-container h2 {
-  color: #6b2c91;
-  margin-top: 0;
-  text-align: center;
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+.tribute-content {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(11, 33, 65, 0.08);
+  padding: 32px;
+  line-height: 1.7;
+  color: #122233;
 }
 
-.credit-container h3 {
-  color: #444;
-  margin-top: 1.5rem;
+.tribute-header {
+  margin-bottom: 18px;
+}
+
+.tribute-header h1 {
+  margin: 0;
+  font-size: 22px;
+  color: #07203a;
+  font-weight: 700;
+}
+
+.lead {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.content {
+  margin-top: 12px;
+}
+
+.section-title {
+  font-weight: 700;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  color: #0b3b5c;
   font-size: 1.3rem;
 }
 
-.credit-container p {
+.content p {
   margin: 1rem 0;
-  color: #333;
+  color: #122233;
 }
 
-.credit-container ul {
-  margin: 0.5rem 0 1rem 1.5rem;
-}
-
-.credit-container li {
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.credit-container .gratitude {
-  font-style: italic;
-  margin-top: 1.5rem;
-  background: #f0e6f6;
-  padding: 1rem;
-  border-left: 4px solid #6b2c91;
-  border-radius: 4px;
-}
-
-.credit-container .bio-link {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 1.1rem;
-}
-
-.credit-container .bio-link a {
-  color: #6b2c91;
+.concordance {
+  color: #0f4c81;
   text-decoration: none;
-  font-weight: bold;
-}
-
-.credit-container .bio-link a:hover {
-  text-decoration: underline;
-}
-
-.credit-container a {
-  color: #6b2c91;
+  border-bottom: 1px dotted rgba(11, 76, 129, 0.25);
   font-weight: 600;
 }
 
-.credit-container a:hover {
-  text-decoration: underline;
+.concordance:hover {
+  border-bottom: 1px solid #0f4c81;
+}
+
+.tribute-quote {
+  margin: 18px 0;
+  padding: 14px 18px;
+  border-left: 4px solid #0f4c81;
+  background: #fbfdff;
+  border-radius: 8px;
+  color: #0b3b5c;
+  font-style: italic;
+}
+
+.tribute-footer {
+  margin-top: 22px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.tribute-footer p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .tribute-content {
+    padding: 20px;
+  }
+
+  .tribute-header h1 {
+    font-size: 20px;
+  }
 }
 </style>
