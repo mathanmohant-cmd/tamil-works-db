@@ -633,7 +633,8 @@ export default {
         selectedWorks.value = works.value.map(w => w.work_id)
         selectAllWorks.value = true
       } else {
-        // Open filters panel for selection
+        // Switch to search page and open filters panel for selection
+        currentPage.value = 'search'
         filtersExpanded.value = true
       }
     }
