@@ -4,18 +4,11 @@
     <header class="app-header">
       <h1>தமிழ் இலக்கிய சொல் தேடல் | Tamil Literary Words Search</h1>
 
-      <!-- Navigation -->
-      <nav class="main-nav">
-        <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Home</button>
-        <button @click="currentPage = 'search'" :class="{active: currentPage === 'search'}">Search</button>
-        <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About Us</button>
-      </nav>
-
       <!-- Database Summary -->
-      <div class="database-summary" v-if="stats && currentPage === 'search'">
-        <span>{{ stats.total_works }} Works | {{ stats.total_verses }} Verses | {{ stats.total_words.toLocaleString() }} Words | {{ stats.distinct_words.toLocaleString() }} Distinct Words</span>
+      <div class="database-summary" v-if="stats">
+        <span>{{ stats.total_works }} Works | {{ stats.total_verses.toLocaleString() }} Verses | {{ stats.distinct_words.toLocaleString() }} Distinct Words | {{ stats.total_words.toLocaleString() }} Usage</span>
       </div>
-      <div class="header-bottom" v-if="currentPage === 'search'">
+      <div class="header-bottom">
         <div class="search-section">
           <div class="search-row">
             <div class="search-box">
@@ -93,12 +86,22 @@
               </label>
             </div>
           </div>
+          <!-- Navigation -->
+          <nav class="main-nav">
+            <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Home</button>
+            <button @click="currentPage = 'search'" :class="{active: currentPage === 'search'}">Search</button>
+            <button @click="currentPage = 'inspiration'" :class="{active: currentPage === 'inspiration'}">Our Inspiration</button>
+            <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About Us</button>
+          </nav>
         </div>
       </div>
     </header>
 
     <!-- Home Page -->
     <Home v-if="currentPage === 'home'" />
+
+    <!-- Our Inspiration Page -->
+    <OurInspiration v-if="currentPage === 'inspiration'" />
 
     <!-- About Page -->
     <About v-if="currentPage === 'about'" />
@@ -280,12 +283,14 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import api from './api.js'
 import Home from './Home.vue'
+import OurInspiration from './OurInspiration.vue'
 import About from './About.vue'
 
 export default {
   name: 'App',
   components: {
     Home,
+    OurInspiration,
     About
   },
   setup() {
