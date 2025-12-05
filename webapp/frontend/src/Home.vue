@@ -2,14 +2,14 @@
   <div class="home-page">
     <article class="tribute-content">
       <header class="tribute-header">
-        <h1>Tamil Concordance: A Treasure by Prof. P. Pandiaraja</h1>
+        <h1>Tamil Concordance: A Treasure by Prof. Dr. P. Pandiyaraja</h1>
         <p class="lead">An acknowledgement honoring the scholar whose concordance has shaped this project.</p>
       </header>
 
       <section class="content">
         <h2 class="section-title">Acknowledgement</h2>
 
-        <p>This project owes its deepest gratitude to Professor <strong>P. Pandiaraja</strong>, whose creation of the
+        <p>This project owes its deepest gratitude to Professor <strong>Dr. P. Pandiyaraja</strong>, whose creation of the
           <a class="concordance" href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer">Tamil Concordance</a>
           stands as a monumental contribution to Tamil scholarship. Over more than five decades, he has built a priceless repository of Tamil words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamil.</p>
 
@@ -19,7 +19,7 @@
           "This search tool is merely an extension of his lifelong labour. When we reached out to him, he warmly shared his wishes to see such a tool built. It is our immense pleasure and honour to help fulfil that vision."
         </blockquote>
 
-        <p>We extend our heartfelt thanks to Prof. P. Pandiaraja for granting us permission to build upon his work. <strong>His scholarship is not only a resource but an enduring inspiration.</strong></p>
+        <p>We extend our heartfelt thanks to Prof. Dr. P. Pandiyaraja for granting us permission to build upon his work. <strong>His scholarship is not only a resource but an enduring inspiration.</strong></p>
       </section>
     </article>
   </div>

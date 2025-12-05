@@ -10,11 +10,11 @@
         of this Tamil Word Search initiative.
       </p>
 
-      <!-- Prof. P. Pandiaraja -->
+      <!-- Prof. Dr. P. Pandiaraja -->
       <div class="mentor-block">
-        <img src="/prof-pandiaraja.jpg" alt="Prof. P. Pandiaraja">
+        <img src="/prof-pandiaraja.jpg" alt="Prof. Dr. P. Pandiaraja">
         <div class="mentor-text">
-          <h3>Prof. P. Pandiaraja</h3>
+          <h3>Prof. Dr. P. Pandiaraja</h3>
           <p>
             His lifelong work in Tamil scholarship, especially the creation of the
             <strong>Tamil Concordance</strong>, shaped much of this project. His meticulous
@@ -100,28 +100,35 @@ export default {
 .container {
   max-width: 900px;
   margin: auto;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
 h1 {
   text-align: left;
   margin-bottom: 20px;
   color: #222;
-  font-size: 2rem;
+  font-size: 28px;
+}
+
+h2 {
+  text-align: left;
+  margin-bottom: 20px;
+  color: #222;
+  font-size: 24px;
 }
 
 .intro {
-  font-size: 1.1rem;
+  font-size: 16px;
   margin-bottom: 40px;
   line-height: 1.8;
-  color: #555;
+  color: #333;
 }
 
 .mentor-block {
   display: flex;
   align-items: flex-start;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
   background: #fff;
   padding: 20px;
   border-radius: 12px;
@@ -152,14 +159,14 @@ h1 {
 
 .mentor-text h3 {
   margin: 0 0 10px 0;
-  font-size: 1.3rem;
-  color: #6b2c91;
+  font-size: 1.4rem;
+  color: #222;
 }
 
 .mentor-text p {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.8;
   color: #333;
 }
 
