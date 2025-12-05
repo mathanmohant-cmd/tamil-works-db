@@ -10,11 +10,11 @@
         of this Tamil Word Search initiative.
       </p>
 
-      <!-- Prof. Dr. P. Pandiaraja -->
+      <!-- Prof. Dr. P. Pandiyaraja -->
       <div class="mentor-block">
-        <img src="/prof-pandiaraja.jpg" alt="Prof. Dr. P. Pandiaraja">
+        <img src="/prof-pandiaraja.jpg" alt="Prof. Dr. P. Pandiyaraja">
         <div class="mentor-text">
-          <h3>Prof. Dr. P. Pandiaraja</h3>
+          <h3>Prof. Dr. P. Pandiyaraja</h3>
           <p>
             His lifelong work in Tamil scholarship, especially the creation of the
             <strong>Tamil Concordance</strong>, shaped much of this project. His meticulous
