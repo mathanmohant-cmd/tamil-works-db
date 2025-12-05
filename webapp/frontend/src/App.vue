@@ -153,116 +153,115 @@
         <button @click="error = null">Dismiss</button>
       </div>
 
-      <!-- Two-Panel Results Layout -->
+      <!-- Single-Panel Collapsible Results Layout -->
       <div v-if="searchResults && !loading" class="results-layout">
-        <!-- Left Panel: Word List -->
-        <aside class="word-list-panel">
-          <div class="word-table-container">
-            <div class="table-toolbar">
-              <span class="search-summary-panel">{{ searchSummary }}</span>
-              <button @click="exportWordsToCSV" class="export-button-icon" title="Export list of found words to CSV">
-                📥
-              </button>
-            </div>
-            <table class="word-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Word</th>
-                  <th>Dict</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(word, index) in uniqueWords"
-                  :key="word.text"
-                  class="word-row"
-                  :class="{ active: selectedWordText === word.text }"
-                  @click="selectWordFromList(word.text)"
-                >
-                  <td class="word-number">{{ index + 1 }}</td>
-                  <td class="word-text">
-                    {{ word.text }} <span class="word-count-bracket">({{ word.count }})</span>
-                  </td>
-                  <td class="dictionary-cell">
-                    <a
-                      :href="`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(word.text)}&searchhws=yes&matchtype=default`"
-                      target="_blank"
-                      class="dictionary-link"
-                      @click.stop
-                      title="Look up in Tamil Lexicon"
+        <div class="single-panel">
+          <!-- Search Summary -->
+          <div class="results-header">
+            <span class="search-summary-panel">{{ searchSummary }}</span>
+            <button @click="exportWordsToCSV" class="export-button-small" title="Export list of found words to CSV">
+              📥 Export Words
+            </button>
+          </div>
+
+          <!-- Word List with Expandable Details -->
+          <div class="word-list-container">
+            <div
+              v-for="(word, index) in uniqueWords"
+              :key="word.text"
+              class="word-item-expandable"
+            >
+              <!-- Word Header Row -->
+              <div class="word-header-row">
+                <div class="word-info">
+                  <span class="word-number">{{ index + 1 }}.</span>
+                  <span class="word-text">{{ word.text }}</span>
+                  <span class="word-count-badge">{{ word.count }}</span>
+                </div>
+                <div class="word-actions">
+                  <a
+                    :href="`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(word.text)}&searchhws=yes&matchtype=default`"
+                    target="_blank"
+                    class="action-icon dictionary-icon"
+                    @click.stop
+                    title="Look up in Tamil Lexicon"
+                  >
+                    📖
+                  </a>
+                  <button
+                    @click="toggleWordExpansion(word.text)"
+                    class="expand-collapse-button"
+                    :class="{ expanded: expandedWords.has(word.text) }"
+                  >
+                    <span class="expand-icon">{{ expandedWords.has(word.text) ? '▼' : '▶' }}</span>
+                    <span class="expand-text">{{ expandedWords.has(word.text) ? 'Collapse' : 'Expand' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Expandable Occurrences Section -->
+              <div v-if="expandedWords.has(word.text)" class="word-expanded-content">
+                <!-- Selected Word Summary: Works, Verses, Usage -->
+                <div class="expanded-summary">
+                  <div class="summary-counts">
+                    <span class="summary-item">{{ getWorkCounts(word.text).length }} Work{{ getWorkCounts(word.text).length !== 1 ? 's' : '' }}</span>
+                    <span class="summary-divider">|</span>
+                    <span class="summary-item">{{ word.verse_count }} Verse{{ word.verse_count !== 1 ? 's' : '' }}</span>
+                    <span class="summary-divider">|</span>
+                    <span class="summary-item">{{ word.count }} Usage</span>
+                  </div>
+                  <button
+                    @click="exportWordLinesToCSV(word.text)"
+                    class="export-button-small"
+                    title="Export all lines for this word to CSV"
+                  >
+                    📥 Export Lines
+                  </button>
+                </div>
+
+                <!-- Loading State -->
+                <div v-if="loadingWord === word.text" class="loading-occurrences">
+                  Loading occurrences...
+                </div>
+
+                <!-- Occurrences List -->
+                <div v-else class="occurrences-list">
+                  <div
+                    v-for="(result, occIndex) in getSortedWordOccurrences(word.text)"
+                    :key="result.word_id"
+                    class="occurrence-item"
+                  >
+                    <div class="occurrence-number">{{ occIndex + 1 }}</div>
+                    <div class="occurrence-content">
+                      <div class="occurrence-metadata">
+                        {{ result.work_name_tamil }}: {{ result.hierarchy_path_tamil || result.hierarchy_path }} | Verse {{ result.verse_number }}, Line {{ result.line_number }}
+                      </div>
+                      <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>
+                    </div>
+                  </div>
+
+                  <!-- Load More Button if needed -->
+                  <div v-if="hasMoreOccurrences(word.text)" class="load-more-container">
+                    <button
+                      @click="loadMoreOccurrences(word.text)"
+                      class="load-more-button"
+                      :disabled="loadingWord === word.text"
                     >
-                      📖
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </aside>
+                      {{ loadingWord === word.text ? 'Loading...' : 'Load More' }}
+                    </button>
+                  </div>
+                </div>
 
-        <!-- Right Panel: Occurrences -->
-        <main class="occurrences-panel">
-          <div class="occurrences-table-container">
-            <table class="occurrences-table">
-              <thead>
-                <tr>
-                  <th colspan="2">
-                    <div class="table-header-content">
-                      <div class="header-left">
-                        <span class="selected-word-title">{{ selectedWordText || 'Occurrences' }}</span>
-                        <span class="occurrence-count">
-                          {{ filteredResults.length }} / {{ selectedWordText ? uniqueWords.find(w => w.text === selectedWordText)?.count || filteredResults.length : searchResults.total_count }} results
-                        </span>
-                      </div>
-                      <div class="header-right" v-if="selectedWordText">
-                        <button @click="exportLinesToCSV" class="export-button-icon" title="Export occurrences of selected word to CSV">
-                          📥
-                        </button>
-                      </div>
-                    </div>
-                  </th>
-                </tr>
-                <tr>
-                  <th class="line-num-header">#</th>
-                  <th>Location & Line</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="filteredResults.length === 0">
-                  <td colspan="2" class="no-results">No occurrences found</td>
-                </tr>
-                <tr
-                  v-for="(result, index) in filteredResults"
-                  :key="result.word_id"
-                  class="result-row"
-                  :class="{ selected: selectedWord?.word_id === result.word_id }"
-                  @click="selectWord(result)"
-                >
-                  <td class="line-number-cell">{{ index + 1 }}</td>
-                  <td class="result-content">
-                    <!-- Consolidated metadata: Work, Sections, Verse #, Line # -->
-                    <div class="result-metadata">
-                      {{ result.work_name_tamil }}: {{ result.hierarchy_path_tamil || result.hierarchy_path }} | Verse {{ result.verse_number }}, Line {{ result.line_number }}
-                    </div>
-                    <!-- Line Text with Highlighted Word -->
-                    <div class="line-text" v-html="highlightWord(result.line_text, selectedWordText || result.word_text)"></div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- Pagination -->
-            <div v-if="searchResults.total_count > searchResults.limit" class="pagination">
-              <button
-                @click="loadMore"
-                :disabled="loading || searchResults.results.length >= searchResults.total_count"
-              >
-                Load More
-              </button>
+                <!-- Collapse Button at Bottom -->
+                <div class="collapse-footer">
+                  <button @click="toggleWordExpansion(word.text)" class="collapse-button">
+                    ▲ Collapse
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
     </div>
@@ -309,6 +308,10 @@ export default {
     const autocompleteResults = ref([])
     const showAutocomplete = ref(false)
     let autocompleteTimeout = null
+    const expandedWords = ref(new Set())
+    const loadingWord = ref(null)
+    const loadedOccurrences = ref({}) // Track loaded occurrences per word with offset
+    const initialSearchSummary = ref(null) // Store initial search summary
 
     // Load initial data
     onMounted(async () => {
@@ -374,12 +377,15 @@ export default {
       loading.value = true
       error.value = null
       offset.value = 0
+      expandedWords.value = new Set() // Reset expanded words on new search
+      loadedOccurrences.value = {} // Reset loaded occurrences
 
       try {
         // If no works are selected, show empty results
         if (selectedWorks.value.length === 0) {
           searchResults.value = {
             results: [],
+            unique_words: [],
             total_count: 0,
             limit: 100,
             offset: 0,
@@ -387,6 +393,7 @@ export default {
             match_type: matchType.value,
             word_position: wordPosition.value
           }
+          initialSearchSummary.value = null
           loading.value = false
           return
         }
@@ -395,7 +402,7 @@ export default {
           q: trimmedQuery,
           match_type: matchType.value,
           word_position: wordPosition.value,
-          limit: 100,
+          limit: 0, // Don't load any results initially, just get unique_words
           offset: 0
         }
 
@@ -404,12 +411,20 @@ export default {
         }
 
         const response = await api.searchWords(params)
-        searchResults.value = response.data
+        searchResults.value = {
+          ...response.data,
+          results: [] // Start with empty results
+        }
+
+        // Don't store summary - let it update on each search
+        initialSearchSummary.value = null
+
         selectedWord.value = null
         selectedWordText.value = null
       } catch (err) {
         error.value = 'Search failed: ' + err.message
         searchResults.value = null
+        initialSearchSummary.value = null
       } finally {
         loading.value = false
       }
@@ -523,12 +538,14 @@ export default {
     const uniqueWords = computed(() => {
       if (!searchResults.value) return []
 
-      // ALWAYS use backend's unique_words if available (includes complete counts)
+      // ALWAYS use backend's unique_words if available (includes complete counts and work breakdown)
       if (searchResults.value.unique_words && Array.isArray(searchResults.value.unique_words) && searchResults.value.unique_words.length > 0) {
         console.log('Using backend unique_words:', searchResults.value.unique_words.length, 'words')
         return searchResults.value.unique_words.map(word => ({
           text: word.word_text,
-          count: word.count
+          count: word.count, // Usage count (total occurrences)
+          verse_count: word.verse_count || 0, // Verse count
+          work_breakdown: word.work_breakdown || [] // Include work breakdown from backend
         }))
       }
 
@@ -542,7 +559,7 @@ export default {
         if (wordMap[text]) {
           wordMap[text].count++
         } else {
-          wordMap[text] = { text, count: 1 }
+          wordMap[text] = { text, count: 1, verse_count: 0, work_breakdown: [] }
         }
       })
 
@@ -583,27 +600,32 @@ export default {
       return '▶ Show filters'
     })
 
-    // Computed: Search summary statistics
+    // Computed: Found Words Summary (format: X Works | Y Verses | Z Distinct Words | W Usage)
     const searchSummary = computed(() => {
-      if (!searchResults.value || !searchResults.value.results) return ''
+      if (!searchResults.value || !searchResults.value.unique_words) return ''
 
-      const results = searchResults.value.results
+      const distinctWords = searchResults.value.unique_words.length
+      const totalUsage = searchResults.value.total_count || 0
 
-      // Count unique works
-      const uniqueWorkNames = new Set(results.map(r => r.work_name))
-      const worksCount = uniqueWorkNames.size
+      // Count works and verses from unique_words
+      const worksSet = new Set()
+      let totalVerses = 0
 
-      // Count unique verses
-      const uniqueVerses = new Set(results.map(r => r.verse_id))
-      const versesCount = uniqueVerses.size
+      searchResults.value.unique_words.forEach(word => {
+        // Add verse count
+        totalVerses += word.verse_count || 0
 
-      // Total word occurrences
-      const wordOccurrences = searchResults.value.total_count
+        // Count works from work_breakdown
+        if (word.work_breakdown) {
+          word.work_breakdown.forEach(wb => {
+            worksSet.add(wb.work_name)
+          })
+        }
+      })
 
-      // Distinct words
-      const distinctWords = uniqueWords.value.length
+      const worksCount = worksSet.size
 
-      return `${worksCount} work${worksCount !== 1 ? 's' : ''}, ${versesCount} verse${versesCount !== 1 ? 's' : ''}, ${wordOccurrences.toLocaleString()} word occurrence${wordOccurrences !== 1 ? 's' : ''}, ${distinctWords} distinct word${distinctWords !== 1 ? 's' : ''}`
+      return `${worksCount} Work${worksCount !== 1 ? 's' : ''} | ${totalVerses.toLocaleString()} Verse${totalVerses !== 1 ? 's' : ''} | ${distinctWords} Distinct Word${distinctWords !== 1 ? 's' : ''} | ${totalUsage.toLocaleString()} Usage`
     })
 
     // Method: Toggle filters
@@ -763,6 +785,200 @@ export default {
       }, 200)
     }
 
+    // Method: Toggle word expansion
+    const toggleWordExpansion = async (wordText) => {
+      if (expandedWords.value.has(wordText)) {
+        // Collapse
+        const newSet = new Set(expandedWords.value)
+        newSet.delete(wordText)
+        expandedWords.value = newSet
+      } else {
+        // Expand - load first batch if not already loaded
+        const newSet = new Set(expandedWords.value)
+        newSet.add(wordText)
+        expandedWords.value = newSet
+
+        // Initialize tracking for this word if not exists
+        if (!loadedOccurrences.value[wordText]) {
+          loadedOccurrences.value[wordText] = {
+            offset: 0,
+            hasMore: true
+          }
+        }
+
+        // Check if we have any occurrences loaded for this word
+        const currentWordResults = searchResults.value.results.filter(
+          result => result.word_text === wordText
+        )
+
+        if (currentWordResults.length === 0) {
+          // Load first batch (100 occurrences)
+          await loadMoreOccurrences(wordText)
+        }
+      }
+    }
+
+    // Method: Load more occurrences for a specific word
+    const loadMoreOccurrences = async (wordText) => {
+      if (loadingWord.value === wordText) return
+
+      loadingWord.value = wordText
+      try {
+        const tracking = loadedOccurrences.value[wordText] || { offset: 0, hasMore: true }
+
+        const params = {
+          q: wordText,
+          match_type: 'exact',
+          limit: 100,
+          offset: tracking.offset
+        }
+
+        if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
+          params.work_ids = selectedWorks.value.join(',')
+        }
+
+        const response = await api.searchWords(params)
+
+        // Append new results to existing results (don't remove existing ones for this word)
+        const newResults = response.data.results || []
+
+        searchResults.value = {
+          ...searchResults.value,
+          results: [...searchResults.value.results, ...newResults]
+        }
+
+        // Update tracking
+        loadedOccurrences.value[wordText] = {
+          offset: tracking.offset + newResults.length,
+          hasMore: newResults.length === 100 // If we got 100, there might be more
+        }
+      } catch (err) {
+        error.value = 'Failed to load word occurrences: ' + err.message
+      } finally {
+        loadingWord.value = null
+      }
+    }
+
+    // Method: Get occurrences for a specific word (sorted by work name)
+    const getWordOccurrences = (wordText) => {
+      if (!searchResults.value || !searchResults.value.results) return []
+      return searchResults.value.results.filter(result => result.word_text === wordText)
+    }
+
+    // Method: Get sorted occurrences for a specific word
+    const getSortedWordOccurrences = (wordText) => {
+      const occurrences = getWordOccurrences(wordText)
+      return occurrences.sort((a, b) => {
+        // Sort by work name (Tamil), then by verse number, then by line number
+        const workCompare = (a.work_name_tamil || a.work_name).localeCompare(
+          b.work_name_tamil || b.work_name,
+          'ta'
+        )
+        if (workCompare !== 0) return workCompare
+
+        const verseCompare = a.verse_number - b.verse_number
+        if (verseCompare !== 0) return verseCompare
+
+        return a.line_number - b.line_number
+      })
+    }
+
+    // Method: Check if there are more occurrences to load
+    const hasMoreOccurrences = (wordText) => {
+      const tracking = loadedOccurrences.value[wordText]
+      if (!tracking) return false
+
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+      const totalCount = wordInfo?.count || 0
+      const loadedCount = getWordOccurrences(wordText).length
+
+      return loadedCount < totalCount && tracking.hasMore
+    }
+
+    // Method: Get work counts for a specific word (from backend data, not loaded results)
+    const getWorkCounts = (wordText) => {
+      // Get work breakdown from unique_words (which has complete counts from backend)
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+
+      if (wordInfo && wordInfo.work_breakdown) {
+        // Aggregate work_breakdown to get unique works with summed counts
+        const workCounts = {}
+        wordInfo.work_breakdown.forEach(item => {
+          const workName = item.work_name
+          if (!workCounts[workName]) {
+            workCounts[workName] = {
+              work_name: item.work_name,
+              work_name_tamil: item.work_name_tamil,
+              count: 0
+            }
+          }
+          workCounts[workName].count += item.count
+        })
+
+        // Return unique works sorted alphabetically by Tamil name
+        return Object.values(workCounts).sort((a, b) =>
+          (a.work_name_tamil || a.work_name).localeCompare(
+            b.work_name_tamil || b.work_name,
+            'ta'
+          )
+        )
+      }
+
+      // Fallback: calculate from loaded occurrences (not recommended)
+      const occurrences = getWordOccurrences(wordText)
+      const workCounts = {}
+
+      occurrences.forEach(result => {
+        const workName = result.work_name
+        const workNameTamil = result.work_name_tamil
+        if (!workCounts[workName]) {
+          workCounts[workName] = {
+            work_name: workName,
+            work_name_tamil: workNameTamil,
+            count: 0
+          }
+        }
+        workCounts[workName].count++
+      })
+
+      // Convert to array and sort alphabetically by Tamil name
+      return Object.values(workCounts).sort((a, b) =>
+        (a.work_name_tamil || a.work_name).localeCompare(
+          b.work_name_tamil || b.work_name,
+          'ta'
+        )
+      )
+    }
+
+    // Method: Export lines for a specific word to CSV
+    const exportWordLinesToCSV = (wordText) => {
+      const occurrences = getWordOccurrences(wordText)
+      if (occurrences.length === 0) return
+
+      // Create CSV content
+      const headers = ['Work & Location', 'Line']
+      const rows = occurrences.map(result => {
+        const location = `${result.work_name_tamil}: ${result.hierarchy_path_tamil || result.hierarchy_path} | Verse ${result.verse_number}, Line ${result.line_number}`
+        return [location, result.line_text]
+      })
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamil_lines_${wordText}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
     return {
       currentPage,
       searchQuery,
@@ -801,7 +1017,16 @@ export default {
       showAutocomplete,
       handleAutocompleteInput,
       selectAutocomplete,
-      hideAutocomplete
+      hideAutocomplete,
+      expandedWords,
+      loadingWord,
+      toggleWordExpansion,
+      getWordOccurrences,
+      getSortedWordOccurrences,
+      hasMoreOccurrences,
+      loadMoreOccurrences,
+      getWorkCounts,
+      exportWordLinesToCSV
     }
   }
 }

@@ -371,3 +371,88 @@ Follow the principles documented in `scripts/WORD_SEGMENTATION_PRINCIPLES.md`:
 - Use Tamil input methods for entering search terms
 - Transliteration fields available but optional
 - Respect traditional orthography in data entry
+
+## Frontend UI/UX Terminology and Design Patterns
+
+**IMPORTANT: Use this established vocabulary when discussing the search interface.**
+
+### Search Results Interface Terminology
+
+- **Found Words Summary** = The overall search statistics displayed at the top showing the format: "X Works | Y Verses | Z Distinct Words | W Usage"
+  - **Works** = Number of unique literary works containing the search results
+  - **Verses** = Total number of verses containing the search results
+  - **Distinct Words** = Number of unique word forms found
+  - **Usage** = Total number of word occurrences across all works
+
+- **Found Words Summary Header** = The top bar area containing:
+  - Found Words Summary (statistics text)
+  - "Export Words" button (exports the list of unique words with counts)
+
+- **Found Words Rows** = The numbered list of found words displayed below the header, where each row shows:
+  - Sequential number (1., 2., 3., ...)
+  - Word text in Tamil
+  - Usage count badge
+  - Dictionary lookup icon (📖)
+  - Expand/Collapse button
+
+- **Selected Word Summary Area** = The expanded section that appears when a user clicks "Expand" on a word, containing:
+  - Word-specific statistics: "X Works | Y Verses | Z Usage"
+  - "Export Lines" button (exports all line occurrences for that word)
+  - List of line occurrences with full context
+
+### Search Interface Design Pattern
+
+**Layout:** Single-panel collapsible design (NOT two-panel)
+- Do not use side-by-side panels for words and occurrences
+- Use expandable/collapsible rows for each word
+
+**Data Loading Strategy:**
+1. Initial search uses `limit=0` to fetch only word counts and metadata (no line occurrences)
+2. Backend returns `unique_words` array with `verse_count` and `work_breakdown` for each word
+3. When user expands a word, batch load 100 occurrences at a time
+4. "Load More" button appears if more than 100 occurrences exist
+5. Each "Load More" click fetches the next 100 occurrences and appends to the list
+
+**Mobile Responsiveness:**
+- Match Type and Word Position filter groups stack vertically on mobile (max-width: 968px)
+- Found Words Rows adapt to smaller screens
+- Selected Word Summary Area uses vertical layout on mobile
+
+**Export Functionality:**
+- **"Export Words"** button (in Found Words Summary Header): Exports CSV of all unique words with their usage counts
+- **"Export Lines"** button (in Selected Word Summary Area): Exports CSV of all line occurrences for the specific expanded word
+
+### Frontend Implementation Details
+
+- **Framework:** Vue.js 3 with Composition API
+- **Build Tool:** Vite (includes Hot Module Replacement for instant updates during development)
+- **HTTP Client:** Axios for API calls
+- **State Management:**
+  - `expandedWords` = Set of currently expanded word texts
+  - `loadedOccurrences` = Object tracking offset and hasMore status for each word
+  - `searchResults.unique_words` = Array of word metadata from backend (includes verse_count, work_breakdown)
+
+### Backend API Response Structure
+
+When searching with `limit=0`:
+```json
+{
+  "results": [],  // Empty initially
+  "unique_words": [
+    {
+      "word_text": "அறம்",
+      "count": 213,  // Total usage count
+      "verse_count": 213,  // Number of verses containing this word
+      "work_breakdown": [  // Array of works (may have duplicates, aggregate on frontend)
+        {"work_name": "Thirukkural", "work_name_tamil": "திருக்குறள்", "count": 1},
+        // ... more entries
+      ]
+    }
+  ],
+  "total_count": 213,
+  "limit": 0,
+  "offset": 0
+}
+```
+
+**Note:** The `work_breakdown` array contains one entry per verse (not per work), so the frontend must aggregate by `work_name` to get unique work counts and total usage per work.

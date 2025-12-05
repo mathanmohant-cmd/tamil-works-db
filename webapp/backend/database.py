@@ -148,13 +148,15 @@ class Database:
                 cur.execute(count_query, params[:-2])  # Exclude limit and offset
                 total_count = cur.fetchone()['count']
 
-                # Get unique words with counts for the complete list (no pagination)
+                # Get unique words with counts, work breakdown, and verse count for the complete list (no pagination)
                 words_query = """
-                    SELECT
-                        wd.word_text,
-                        COUNT(*) as count
-                    FROM word_details wd
-                    WHERE 1=1
+                    WITH word_stats AS (
+                        SELECT
+                            word_text,
+                            COUNT(*) as count,
+                            COUNT(DISTINCT verse_id) as verse_count
+                        FROM word_details
+                        WHERE 1=1
                 """
 
                 # Add the same filters as the main query
@@ -182,7 +184,60 @@ class Database:
                     words_query += " AND wd.word_root = %s"
                     words_params.append(word_root)
 
-                words_query += " GROUP BY wd.word_text ORDER BY wd.word_text"
+                words_query += """
+                        GROUP BY word_text
+                    ),
+                    work_breakdown_stats AS (
+                        SELECT
+                            word_text,
+                            work_name,
+                            work_name_tamil,
+                            COUNT(*) as work_count
+                        FROM word_details
+                        WHERE 1=1
+                """
+
+                # Add the same filters for the work breakdown subquery
+                if match_type == "exact":
+                    words_query += " AND word_text = %s"
+                    words_params.append(search_term)
+                else:
+                    if word_position == "beginning":
+                        words_query += " AND word_text LIKE %s"
+                        words_params.append(f"{search_term}%")
+                    elif word_position == "end":
+                        words_query += " AND word_text LIKE %s"
+                        words_params.append(f"%{search_term}")
+                    else:
+                        words_query += " AND word_text LIKE %s"
+                        words_params.append(f"%{search_term}%")
+
+                if work_ids:
+                    placeholders = ','.join(['%s'] * len(work_ids))
+                    words_query += f" AND work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
+                    words_params.extend(work_ids)
+
+                if word_root:
+                    words_query += " AND word_root = %s"
+                    words_params.append(word_root)
+
+                words_query += """
+                        GROUP BY word_text, work_name, work_name_tamil
+                    )
+                    SELECT
+                        ws.word_text,
+                        ws.count,
+                        ws.verse_count,
+                        json_agg(json_build_object(
+                            'work_name', wbs.work_name,
+                            'work_name_tamil', wbs.work_name_tamil,
+                            'count', wbs.work_count
+                        )) as work_breakdown
+                    FROM word_stats ws
+                    JOIN work_breakdown_stats wbs ON ws.word_text = wbs.word_text
+                    GROUP BY ws.word_text, ws.count, ws.verse_count
+                    ORDER BY ws.word_text
+                """
 
                 cur.execute(words_query, words_params)
                 unique_words = [dict(row) for row in cur.fetchall()]

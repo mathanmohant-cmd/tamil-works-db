@@ -88,7 +88,7 @@ def search_words(
     word_position: str = Query("beginning", pattern="^(beginning|end|anywhere)$", description="Word position: beginning, end, or anywhere"),
     work_ids: Optional[str] = Query(None, description="Comma-separated work IDs to filter"),
     word_root: Optional[str] = Query(None, description="Filter by word root"),
-    limit: int = Query(100, ge=1, le=500, description="Maximum results per page"),
+    limit: int = Query(100, ge=0, le=500, description="Maximum results per page"),
     offset: int = Query(0, ge=0, description="Pagination offset")
 ):
     """
