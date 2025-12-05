@@ -35,9 +35,6 @@
                   </li>
                 </ul>
               </div>
-              <button @click="performSearch" class="search-button" :disabled="loading">
-                {{ loading ? 'Searching...' : 'Search' }}
-              </button>
             </div>
           </div>
           <!-- Work Filter Radio Buttons -->
