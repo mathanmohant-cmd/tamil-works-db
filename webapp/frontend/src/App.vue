@@ -453,39 +453,70 @@ export default {
 
     const selectWordFromList = async (wordText) => {
       selectedWordText.value = wordText
+      selectedWord.value = null  // Clear individual line selection
 
-      // Reload all occurrences of this specific word from backend
+      // Check if we need to load more results for this word
+      if (!searchResults.value || !searchResults.value.results) return
+
+      const currentWordResults = searchResults.value.results.filter(
+        result => result.word_text === wordText
+      )
+
+      // Get the count from unique_words
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+      const totalCount = wordInfo?.count || currentWordResults.length
+
+      // If we already have all occurrences loaded, just scroll to top
+      if (currentWordResults.length >= totalCount) {
+        scrollToLinesPanel()
+        return
+      }
+
+      // Load all occurrences of this specific word from backend
       loading.value = true
-      error.value = null  // Clear any previous errors
+      error.value = null
       try {
         const params = {
           q: wordText,
-          match_type: 'exact',  // Exact match for selected word
-          limit: 500,  // Maximum allowed by backend
+          match_type: 'exact',
+          limit: 500,
           offset: 0
         }
 
-        // Apply same work filters as current search
         if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
           params.work_ids = selectedWorks.value.join(',')
         }
 
         const response = await api.searchWords(params)
 
-        // Replace search results with exact matches for this word
+        // Merge new results with existing results, preserving unique_words
+        const existingResults = searchResults.value.results.filter(
+          r => r.word_text !== wordText
+        )
+
         searchResults.value = {
-          ...response.data,
-          search_term: wordText,
-          match_type: 'exact'
+          ...searchResults.value,
+          results: [...existingResults, ...response.data.results],
+          total_count: searchResults.value.total_count
+          // Keep original unique_words and search_term
         }
 
-        // Clear selected word so all results show
-        selectedWord.value = null
+        scrollToLinesPanel()
       } catch (err) {
         error.value = 'Failed to load word occurrences: ' + err.message
       } finally {
         loading.value = false
       }
+    }
+
+    const scrollToLinesPanel = () => {
+      // Scroll to top of lines panel
+      setTimeout(() => {
+        const linesPanel = document.querySelector('.results-section')
+        if (linesPanel) {
+          linesPanel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
     }
 
     // Computed: Get unique words with counts from backend (already sorted)
