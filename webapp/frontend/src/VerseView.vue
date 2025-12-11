@@ -419,7 +419,7 @@ export default {
   border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
-  line-height: 1;
+  line-height: 1.15;
 }
 
 .line-row {
@@ -429,7 +429,7 @@ export default {
   margin: 0;
   padding: 0;
   align-items: baseline;
-  line-height: 1;
+  line-height: 1.15;
 }
 
 .line-number {
@@ -443,7 +443,7 @@ export default {
   -ms-user-select: none;
   padding-right: 0.5rem;
   border-right: 2px solid var(--border-color);
-  line-height: 1;
+  line-height: 1.15;
   margin: 0;
 }
 
@@ -451,7 +451,7 @@ export default {
   font-size: 1.3rem;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
-  line-height: 1;
+  line-height: 1.15;
   margin: 0;
   padding: 0;
 }
