@@ -12,18 +12,19 @@
     </div>
 
     <div v-else-if="verse" class="verse-content">
-      <!-- Work and Hierarchy -->
-      <div class="verse-breadcrumb">
-        <span class="work-title">{{ verse.work_name_tamil }}</span>
-        <template v-if="cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path)">
-          <span class="separator"> • </span>
-          <span class="hierarchy">{{ cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path) }}</span>
-        </template>
-      </div>
-
-      <!-- Verse Header with Export Button -->
+      <!-- Verse Header with Full Hierarchy and Export Button -->
       <div class="verse-header">
-        <h2>{{ verse.verse_type_tamil || verse.verse_type || 'பாடல்' }} {{ verse.verse_number }}</h2>
+        <div class="verse-title-line">
+          <h2>
+            <span class="work-title">{{ verse.work_name_tamil }}</span>
+            <template v-if="cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path)">
+              <span class="separator"> • </span>
+              <span class="hierarchy">{{ cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path) }}</span>
+            </template>
+            <span class="separator"> • </span>
+            <span class="verse-info">{{ verse.verse_type_tamil || verse.verse_type || 'பாடல்' }} {{ verse.verse_number }}</span>
+          </h2>
+        </div>
         <button @click="toggleExportMenu" class="export-verse-button">
           📥 Export
         </button>
@@ -35,6 +36,9 @@
           <h3>Export Verse</h3>
           <button @click="exportVerse('csv')" class="export-option">
             📊 Export as CSV
+          </button>
+          <button @click="exportVerse('txt')" class="export-option">
+            📄 Export as TXT
           </button>
           <button @click="showExportMenu = false" class="export-modal-cancel">
             Cancel
@@ -156,6 +160,8 @@ export default {
       showExportMenu.value = false
       if (format === 'csv') {
         exportVerseToCSV()
+      } else if (format === 'txt') {
+        exportVerseToTXT()
       }
     }
 
@@ -185,6 +191,39 @@ export default {
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
       link.setAttribute('download', `verse_${verse.value.verse_id}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    const exportVerseToTXT = () => {
+      if (!verse.value) return
+
+      let content = 'Data Source: tamilconcordence.in\n'
+      content += 'Compiled by: Prof. Dr. P. Pandiyaraja\n\n'
+
+      content += `Work: ${verse.value.work_name_tamil}\n`
+      if (cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)) {
+        content += `Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}\n`
+      }
+      content += `${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}\n\n`
+      content += '---\n\n'
+
+      verse.value.lines.forEach((line, index) => {
+        const lineNum = index + 1
+        if (lineNum % 5 === 0) {
+          content += `${lineNum}. ${line.line_text}\n`
+        } else {
+          content += `    ${line.line_text}\n`
+        }
+      })
+
+      const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `verse_${verse.value.verse_id}_${new Date().toISOString().split('T')[0]}.txt`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -231,49 +270,30 @@ export default {
 }
 
 .back-button {
-  padding: 1rem 2.5rem;
-  background: var(--primary-color);
+  padding: 0.75rem 1.5rem;
+  background: var(--secondary-color);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 1.2rem;
-  font-weight: 700;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--english-font);
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+  gap: 0.5rem;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
 }
 
 .back-button:hover {
-  background: var(--primary-dark);
-  transform: translateX(-6px) scale(1.05);
-  box-shadow: 0 6px 16px rgba(211, 47, 47, 0.4);
+  background: #1565c0;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
 }
 
 .back-button:active {
-  transform: translateX(-4px) scale(1.02);
-}
-
-.verse-breadcrumb {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-  font-family: var(--tamil-font), var(--english-font);
-}
-
-.work-title {
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.separator {
-  margin: 0 0.5rem;
-}
-
-.hierarchy {
-  font-style: italic;
+  transform: translateX(-2px);
 }
 
 .verse-header {
@@ -288,11 +308,41 @@ export default {
   flex-wrap: wrap;
 }
 
+.verse-title-line {
+  flex: 1;
+  min-width: 0;
+}
+
 .verse-header h2 {
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
   margin: 0;
+  line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.work-title {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.separator {
+  color: var(--text-secondary);
+  font-weight: normal;
+}
+
+.hierarchy {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.verse-info {
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .export-verse-button {
@@ -375,7 +425,7 @@ export default {
   display: grid;
   grid-template-columns: 60px 1fr;
   gap: 1.5rem;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0;
   align-items: baseline;
 }
 
@@ -396,7 +446,7 @@ export default {
   font-size: 1.3rem;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.2;
 }
 
 .verse-metadata {

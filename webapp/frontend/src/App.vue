@@ -308,6 +308,9 @@
         <button @click="exportWords('csv')" class="export-modal-option">
           📊 Export as CSV
         </button>
+        <button @click="exportWords('txt')" class="export-modal-option">
+          📄 Export as TXT
+        </button>
         <button @click="showWordsExportMenu = false" class="export-modal-cancel">
           Cancel
         </button>
@@ -320,6 +323,9 @@
         <h3>Export Lines for "{{ currentExportWordText }}"</h3>
         <button @click="exportWordLines('csv', currentExportWordText)" class="export-modal-option">
           📊 Export as CSV
+        </button>
+        <button @click="exportWordLines('txt', currentExportWordText)" class="export-modal-option">
+          📄 Export as TXT
         </button>
         <button @click="currentExportWordText = null" class="export-modal-cancel">
           Cancel
@@ -777,13 +783,15 @@ export default {
       return escapedLineText.replace(regex, '<span class="word-highlight">$1</span>')
     }
 
-    // Method: Export words to CSV
+    // Method: Export words to CSV or TXT
     const exportWords = (format) => {
       showWordsExportMenu.value = false
       if (!uniqueWords.value || uniqueWords.value.length === 0) return
 
       if (format === 'csv') {
         exportWordsToCSV()
+      } else if (format === 'txt') {
+        exportWordsToTXT()
       }
     }
 
@@ -843,6 +851,52 @@ export default {
       document.body.removeChild(link)
     }
 
+    // Method: Export words to TXT
+    const exportWordsToTXT = () => {
+      if (!uniqueWords.value || uniqueWords.value.length === 0) return
+
+      // Get search details
+      const searchTerm = searchResults.value.search_term || searchQuery.value.trim()
+      const totalWords = uniqueWords.value.length
+      const totalUsage = searchResults.value.total_count || 0
+
+      // Count works and verses
+      const worksSet = new Set()
+      let totalVerses = 0
+      searchResults.value.unique_words.forEach(word => {
+        totalVerses += word.verse_count || 0
+        if (word.work_breakdown) {
+          word.work_breakdown.forEach(wb => worksSet.add(wb.work_name))
+        }
+      })
+
+      // Create TXT content
+      let content = 'Data Source: tamilconcordence.in\n'
+      content += 'Compiled by: Prof. Dr. P. Pandiyaraja\n\n'
+      content += `Search Term: ${searchTerm}\n`
+      content += `Match Type: ${matchType.value}\n`
+      content += `Word Position: ${wordPosition.value}\n`
+      content += `Total Works Found: ${worksSet.size}\n`
+      content += `Total Verses Found: ${totalVerses}\n`
+      content += `Distinct Words Found: ${totalWords}\n`
+      content += `Total Usage Count: ${totalUsage}\n\n`
+      content += '---\n\n'
+
+      uniqueWords.value.forEach((word, index) => {
+        content += `${index + 1}. ${word.text} - ${word.count} usage\n`
+      })
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamil_words_${searchTerm}_${new Date().toISOString().split('T')[0]}.txt`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
 
     // Method: Export lines to CSV
     const exportLinesToCSV = () => {
@@ -1148,11 +1202,13 @@ export default {
       verseViewSearchWord.value = ''
     }
 
-    // Method: Export lines for a specific word (CSV)
+    // Method: Export lines for a specific word (CSV or TXT)
     const exportWordLines = (format, wordText) => {
       currentExportWordText.value = null
       if (format === 'csv') {
         exportWordLinesToCSV(wordText)
+      } else if (format === 'txt') {
+        exportWordLinesToTXT(wordText)
       }
     }
 
@@ -1207,6 +1263,52 @@ export default {
       document.body.removeChild(link)
     }
 
+    // Method: Export lines for a specific word to TXT
+    const exportWordLinesToTXT = (wordText) => {
+      const occurrences = getWordOccurrences(wordText)
+      if (occurrences.length === 0) return
+
+      // Get word details
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+      const usageCount = wordInfo?.count || occurrences.length
+      const verseCount = wordInfo?.verse_count || 0
+
+      // Get work breakdown
+      const workCounts = getWorkCounts(wordText)
+      const worksList = workCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+
+      // Create TXT content
+      let content = 'Data Source: tamilconcordence.in\n'
+      content += 'Compiled by: Prof. Dr. P. Pandiyaraja\n\n'
+      content += `Search Term: ${searchResults.value.search_term || searchQuery.value.trim()}\n`
+      content += `Found Word: ${wordText}\n`
+      content += `Total Works: ${workCounts.length}\n`
+      content += `Total Verses: ${verseCount}\n`
+      content += `Total Usage: ${usageCount}\n`
+      content += `Works: ${worksList}\n\n`
+      content += '---\n\n'
+
+      occurrences.forEach((result, index) => {
+        const hierarchyPath = cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)
+        const location = hierarchyPath
+          ? `${result.work_name_tamil} • ${hierarchyPath} • ${formatVerseAndLine(result, false)}`
+          : `${result.work_name_tamil} • ${formatVerseAndLine(result, false)}`
+
+        content += `${index + 1}. ${location}\n`
+        content += `   ${result.line_text}\n\n`
+      })
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamil_lines_${wordText}_${new Date().toISOString().split('T')[0]}.txt`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
 
     return {
       currentPage,
@@ -1244,9 +1346,11 @@ export default {
       highlightWord,
       exportWords,
       exportWordsToCSV,
+      exportWordsToTXT,
       exportLinesToCSV,
       exportWordLines,
       exportWordLinesToCSV,
+      exportWordLinesToTXT,
       autocompleteResults,
       showAutocomplete,
       handleAutocompleteInput,
