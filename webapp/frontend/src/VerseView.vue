@@ -419,14 +419,17 @@ export default {
   border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
+  line-height: 1;
 }
 
 .line-row {
   display: grid;
   grid-template-columns: 60px 1fr;
   gap: 1.5rem;
-  margin-bottom: 0;
+  margin: 0;
+  padding: 0;
   align-items: baseline;
+  line-height: 1;
 }
 
 .line-number {
@@ -440,13 +443,17 @@ export default {
   -ms-user-select: none;
   padding-right: 0.5rem;
   border-right: 2px solid var(--border-color);
+  line-height: 1;
+  margin: 0;
 }
 
 .line-text {
   font-size: 1.3rem;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
-  line-height: 1.2;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .verse-metadata {
