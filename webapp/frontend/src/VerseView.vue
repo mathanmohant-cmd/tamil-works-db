@@ -32,11 +32,12 @@
       <!-- Export Menu -->
       <div v-if="showExportMenu" class="export-menu" @click.stop>
         <div class="export-menu-content">
+          <h3>Export Verse</h3>
           <button @click="exportVerse('csv')" class="export-option">
             📊 Export as CSV
           </button>
-          <button @click="exportVerse('pdf')" class="export-option">
-            📄 Export as PDF
+          <button @click="showExportMenu = false" class="export-modal-cancel">
+            Cancel
           </button>
         </div>
       </div>
@@ -155,8 +156,6 @@ export default {
       showExportMenu.value = false
       if (format === 'csv') {
         exportVerseToCSV()
-      } else if (format === 'pdf') {
-        exportVerseToPDF()
       }
     }
 
@@ -170,11 +169,16 @@ export default {
       ])
 
       const csvContent = [
-        `"${verse.value.work_name_tamil} - ${verse.value.verse_type_tamil || 'பாடல்'} ${verse.value.verse_number}"`,
+        '"Data Source: tamilconcordence.in"',
+        '"Compiled by: Prof. Dr. P. Pandiyaraja"',
+        '',
+        `"Work: ${verse.value.work_name_tamil}"`,
+        cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path) ? `"Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}"` : '',
+        `"${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}"`,
         '',
         headers.join(','),
         ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-      ].join('\n')
+      ].filter(line => line !== '').join('\n')
 
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
@@ -185,41 +189,6 @@ export default {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-    }
-
-    const exportVerseToPDF = async () => {
-      if (!verse.value) return
-
-      // Create a proper text content that can be converted to PDF
-      let content = `${verse.value.work_name_tamil}\n`
-      if (cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)) {
-        content += `${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}\n`
-      }
-      content += `${verse.value.verse_type_tamil || 'பாடல்'} ${verse.value.verse_number}\n\n`
-
-      verse.value.lines.forEach((line, index) => {
-        const lineNum = index + 1
-        if (lineNum % 5 === 0) {
-          content += `${lineNum}. ${line.line_text}\n`
-        } else {
-          content += `    ${line.line_text}\n`
-        }
-      })
-
-      // For now, create a text file with UTF-8 BOM that most PDF converters can handle
-      // A proper PDF library would be needed for true PDF generation
-      const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', `verse_${verse.value.verse_id}_${new Date().toISOString().split('T')[0]}.txt`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      // Show message to user about PDF generation
-      alert('Note: For proper PDF export, please use a PDF converter or print to PDF from your browser (Ctrl+P or Cmd+P). The file has been saved as a text file that can be converted to PDF.')
     }
 
     // Close export menu when clicking outside
@@ -406,7 +375,7 @@ export default {
   display: grid;
   grid-template-columns: 60px 1fr;
   gap: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
   align-items: baseline;
 }
 
@@ -427,7 +396,7 @@ export default {
   font-size: 1.3rem;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
-  line-height: 1.8;
+  line-height: 1.5;
 }
 
 .verse-metadata {

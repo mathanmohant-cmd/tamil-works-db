@@ -308,9 +308,6 @@
         <button @click="exportWords('csv')" class="export-modal-option">
           📊 Export as CSV
         </button>
-        <button @click="exportWords('pdf')" class="export-modal-option">
-          📄 Export as PDF
-        </button>
         <button @click="showWordsExportMenu = false" class="export-modal-cancel">
           Cancel
         </button>
@@ -323,9 +320,6 @@
         <h3>Export Lines for "{{ currentExportWordText }}"</h3>
         <button @click="exportWordLines('csv', currentExportWordText)" class="export-modal-option">
           📊 Export as CSV
-        </button>
-        <button @click="exportWordLines('pdf', currentExportWordText)" class="export-modal-option">
-          📄 Export as PDF
         </button>
         <button @click="currentExportWordText = null" class="export-modal-cancel">
           Cancel
@@ -783,15 +777,13 @@ export default {
       return escapedLineText.replace(regex, '<span class="word-highlight">$1</span>')
     }
 
-    // Method: Export words to CSV or PDF
+    // Method: Export words to CSV
     const exportWords = (format) => {
       showWordsExportMenu.value = false
       if (!uniqueWords.value || uniqueWords.value.length === 0) return
 
       if (format === 'csv') {
         exportWordsToCSV()
-      } else if (format === 'pdf') {
-        exportWordsToPDF()
       }
     }
 
@@ -804,11 +796,37 @@ export default {
     const exportWordsToCSV = () => {
       if (!uniqueWords.value || uniqueWords.value.length === 0) return
 
+      // Get search details
+      const searchTerm = searchResults.value.search_term || searchQuery.value.trim()
+      const totalWords = uniqueWords.value.length
+      const totalUsage = searchResults.value.total_count || 0
+
+      // Count works and verses
+      const worksSet = new Set()
+      let totalVerses = 0
+      searchResults.value.unique_words.forEach(word => {
+        totalVerses += word.verse_count || 0
+        if (word.work_breakdown) {
+          word.work_breakdown.forEach(wb => worksSet.add(wb.work_name))
+        }
+      })
+
       // Create CSV content
-      const headers = ['Word', 'Count']
+      const headers = ['Word', 'Usage Count']
       const rows = uniqueWords.value.map(word => [word.text, word.count])
 
       const csvContent = [
+        '"Data Source: tamilconcordence.in"',
+        '"Compiled by: Prof. Dr. P. Pandiyaraja"',
+        '',
+        `"Search Term: ${searchTerm}"`,
+        `"Match Type: ${matchType.value}"`,
+        `"Word Position: ${wordPosition.value}"`,
+        `"Total Works Found: ${worksSet.size}"`,
+        `"Total Verses Found: ${totalVerses}"`,
+        `"Distinct Words Found: ${totalWords}"`,
+        `"Total Usage Count: ${totalUsage}"`,
+        '',
         headers.join(','),
         ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
       ].join('\n')
@@ -818,37 +836,13 @@ export default {
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_words_${searchQuery.value.trim()}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `tamil_words_${searchTerm}_${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
     }
 
-    // Method: Export words to PDF
-    const exportWordsToPDF = () => {
-      if (!uniqueWords.value || uniqueWords.value.length === 0) return
-
-      // Create PDF content with table format
-      const headers = ['Word', 'Count']
-      const rows = uniqueWords.value.map(word => [word.text, word.count.toString()])
-
-      // Generate simple text-based PDF content
-      let pdfContent = `Searched word: ${searchResults.value.search_term}\n\n`
-      pdfContent += `${headers.join('\t')}\n`
-      pdfContent += rows.map(row => row.join('\t')).join('\n')
-
-      // Create and download file
-      const blob = new Blob(['\ufeff' + pdfContent], { type: 'application/pdf;charset=utf-8;' })
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_words_${searchQuery.value.trim()}_${new Date().toISOString().split('T')[0]}.pdf`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    }
 
     // Method: Export lines to CSV
     const exportLinesToCSV = () => {
@@ -1154,13 +1148,11 @@ export default {
       verseViewSearchWord.value = ''
     }
 
-    // Method: Export lines for a specific word (CSV or PDF)
+    // Method: Export lines for a specific word (CSV)
     const exportWordLines = (format, wordText) => {
       currentExportWordText.value = null
       if (format === 'csv') {
         exportWordLinesToCSV(wordText)
-      } else if (format === 'pdf') {
-        exportWordLinesToPDF(wordText)
       }
     }
 
@@ -1169,14 +1161,36 @@ export default {
       const occurrences = getWordOccurrences(wordText)
       if (occurrences.length === 0) return
 
+      // Get word details
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+      const usageCount = wordInfo?.count || occurrences.length
+      const verseCount = wordInfo?.verse_count || 0
+
+      // Get work breakdown
+      const workCounts = getWorkCounts(wordText)
+      const worksList = workCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+
       // Create CSV content
       const headers = ['Work & Location', 'Line']
       const rows = occurrences.map(result => {
-        const location = `${result.work_name_tamil}: ${cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)} | Verse ${result.verse_number}, Line ${result.line_number}`
+        const hierarchyPath = cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)
+        const location = hierarchyPath
+          ? `${result.work_name_tamil} • ${hierarchyPath} • ${formatVerseAndLine(result, false)}`
+          : `${result.work_name_tamil} • ${formatVerseAndLine(result, false)}`
         return [location, result.line_text]
       })
 
       const csvContent = [
+        '"Data Source: tamilconcordence.in"',
+        '"Compiled by: Prof. Dr. P. Pandiyaraja"',
+        '',
+        `"Search Term: ${searchResults.value.search_term || searchQuery.value.trim()}"`,
+        `"Found Word: ${wordText}"`,
+        `"Total Works: ${workCounts.length}"`,
+        `"Total Verses: ${verseCount}"`,
+        `"Total Usage: ${usageCount}"`,
+        `"Works: ${worksList}"`,
+        '',
         headers.join(','),
         ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
       ].join('\n')
@@ -1193,33 +1207,6 @@ export default {
       document.body.removeChild(link)
     }
 
-    // Method: Export lines for a specific word to PDF
-    const exportWordLinesToPDF = (wordText) => {
-      const occurrences = getWordOccurrences(wordText)
-      if (occurrences.length === 0) return
-
-      // Create PDF content with table format (tab-separated for copy-paste)
-      const headers = ['Work & Location', 'Line']
-      const rows = occurrences.map(result => {
-        const location = `${result.work_name_tamil}: ${cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)} | Verse ${result.verse_number}, Line ${result.line_number}`
-        return [location, result.line_text]
-      })
-
-      let pdfContent = `Word: ${wordText}\n\n`
-      pdfContent += `${headers.join('\t')}\n`
-      pdfContent += rows.map(row => row.join('\t')).join('\n')
-
-      // Create and download file
-      const blob = new Blob(['\ufeff' + pdfContent], { type: 'application/pdf;charset=utf-8;' })
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_lines_${wordText}_${new Date().toISOString().split('T')[0]}.pdf`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    }
 
     return {
       currentPage,
@@ -1257,10 +1244,9 @@ export default {
       highlightWord,
       exportWords,
       exportWordsToCSV,
-      exportWordsToPDF,
       exportLinesToCSV,
       exportWordLines,
-      exportWordLinesToPDF,
+      exportWordLinesToCSV,
       autocompleteResults,
       showAutocomplete,
       handleAutocompleteInput,
@@ -1274,7 +1260,6 @@ export default {
       hasMoreOccurrences,
       loadMoreOccurrences,
       getWorkCounts,
-      exportWordLinesToCSV,
       cleanHierarchyPath,
       formatVerseAndLine,
       showVerseView,
