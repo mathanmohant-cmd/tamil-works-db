@@ -182,11 +182,8 @@
               <div>{{ searchSummary }}</div>
             </div>
             <div class="export-buttons-group">
-              <button @click="exportWords('csv')" class="export-button-small" title="Export list of found words to CSV">
-                📥 Export Words (CSV)
-              </button>
-              <button @click="exportWords('pdf')" class="export-button-small export-button-pdf" title="Export list of found words to PDF">
-                📄 Export Words (PDF)
+              <button @click="showWordsExportMenu = true" class="export-button-combined" title="Export list of found words">
+                📥 Export Words
               </button>
             </div>
           </div>
@@ -240,18 +237,11 @@
                   </div>
                   <div class="export-buttons-group">
                     <button
-                      @click="exportWordLines('csv', word.text)"
-                      class="export-button-small"
-                      title="Export all lines for this word to CSV"
+                      @click="showLinesExportMenu(word.text)"
+                      class="export-button-combined"
+                      title="Export all lines for this word"
                     >
-                      📥 Export Lines (CSV)
-                    </button>
-                    <button
-                      @click="exportWordLines('pdf', word.text)"
-                      class="export-button-small export-button-pdf"
-                      title="Export all lines for this word to PDF"
-                    >
-                      📄 Export Lines (PDF)
+                      📥 Export Lines
                     </button>
                   </div>
                 </div>
@@ -272,9 +262,11 @@
                     <div class="occurrence-content">
                       <div class="occurrence-metadata">
                         <span class="work-name">{{ result.work_name_tamil }}</span>
-                        <span v-if="result.hierarchy_path_tamil || result.hierarchy_path" class="separator"> > </span>
-                        <span v-if="result.hierarchy_path_tamil || result.hierarchy_path">{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
-                        <span class="separator"> > </span>
+                        <template v-if="cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)">
+                          <span class="separator"> • </span>
+                          <span>{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
+                        </template>
+                        <span class="separator"> • </span>
                         <span>{{ formatVerseAndLine(result, false) }}</span>
                         <a href="#" @click.prevent="openVerseView(result.verse_id, word.text)" class="verse-link" title="View full verse">🔗</a>
                       </div>
@@ -308,6 +300,38 @@
     </div>
     </div>
     <!-- End Search Page -->
+
+    <!-- Export Words Menu -->
+    <div v-if="showWordsExportMenu" class="export-modal" @click="showWordsExportMenu = false">
+      <div class="export-modal-content" @click.stop>
+        <h3>Export Found Words</h3>
+        <button @click="exportWords('csv')" class="export-modal-option">
+          📊 Export as CSV
+        </button>
+        <button @click="exportWords('pdf')" class="export-modal-option">
+          📄 Export as PDF
+        </button>
+        <button @click="showWordsExportMenu = false" class="export-modal-cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Export Lines Menu -->
+    <div v-if="currentExportWordText" class="export-modal" @click="currentExportWordText = null">
+      <div class="export-modal-content" @click.stop>
+        <h3>Export Lines for "{{ currentExportWordText }}"</h3>
+        <button @click="exportWordLines('csv', currentExportWordText)" class="export-modal-option">
+          📊 Export as CSV
+        </button>
+        <button @click="exportWordLines('pdf', currentExportWordText)" class="export-modal-option">
+          📄 Export as PDF
+        </button>
+        <button @click="currentExportWordText = null" class="export-modal-cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -361,6 +385,10 @@ export default {
     const showVerseView = ref(false)
     const selectedVerseId = ref(null)
     const verseViewSearchWord = ref('')
+
+    // Export menu state
+    const showWordsExportMenu = ref(false)
+    const currentExportWordText = ref(null)
 
     // Load initial data
     onMounted(async () => {
@@ -757,6 +785,7 @@ export default {
 
     // Method: Export words to CSV or PDF
     const exportWords = (format) => {
+      showWordsExportMenu.value = false
       if (!uniqueWords.value || uniqueWords.value.length === 0) return
 
       if (format === 'csv') {
@@ -764,6 +793,11 @@ export default {
       } else if (format === 'pdf') {
         exportWordsToPDF()
       }
+    }
+
+    // Method: Show lines export menu
+    const showLinesExportMenu = (wordText) => {
+      currentExportWordText.value = wordText
     }
 
     // Method: Export words to CSV
@@ -1122,6 +1156,7 @@ export default {
 
     // Method: Export lines for a specific word (CSV or PDF)
     const exportWordLines = (format, wordText) => {
+      currentExportWordText.value = null
       if (format === 'csv') {
         exportWordLinesToCSV(wordText)
       } else if (format === 'pdf') {
@@ -1246,7 +1281,10 @@ export default {
       selectedVerseId,
       verseViewSearchWord,
       openVerseView,
-      closeVerseView
+      closeVerseView,
+      showWordsExportMenu,
+      currentExportWordText,
+      showLinesExportMenu
     }
   }
 }
