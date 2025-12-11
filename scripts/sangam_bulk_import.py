@@ -4,6 +4,12 @@
 Sangam Literature Bulk Import - Fast 2-phase import using PostgreSQL COPY
 Phase 1: Parse all text files → Build data structures in memory
 Phase 2: Bulk COPY into database (1000x faster than INSERT)
+
+IMPROVEMENTS (2025-12-05):
+- Ignore dots/periods used for text alignment (……………………….. or .)
+- Ignore line count numbers (multiples of 5: 5, 10, 15, etc.)
+- Keep only Tamil characters, hyphens (-), and underscores (_) in words
+- Prof. P. Pandiyaraja uses - and _ for specific linguistic segmentation purposes
 """
 
 import re
@@ -15,78 +21,78 @@ import io
 import os
 
 class SangamBulkImporter:
-    # Map filenames to work information
+    # Map filenames to work information (work_id assigned dynamically)
     SANGAM_WORKS = {
         'குறுந்தொகை.txt': {
-            'work_id': 4, 'work_name': 'Kuruntokai', 'work_name_tamil': 'குறுந்தொகை',
+            'work_name': 'Kuruntokai', 'work_name_tamil': 'குறுந்தொகை',
             'type': 'thogai', 'description': 'Short poems on love and war'
         },
         'நற்றிணை.txt': {
-            'work_id': 5, 'work_name': 'Natrinai', 'work_name_tamil': 'நற்றிணை',
+            'work_name': 'Natrinai', 'work_name_tamil': 'நற்றிணை',
             'type': 'thogai', 'description': 'Collection of 400 poems'
         },
         'ஐங்குறுநூறு.txt': {
-            'work_id': 6, 'work_name': 'Ainkurunuru', 'work_name_tamil': 'ஐங்குறுநூறு',
+            'work_name': 'Ainkurunuru', 'work_name_tamil': 'ஐங்குறுநூறு',
             'type': 'thogai', 'description': 'Five hundred short poems'
         },
         'அகநானூறு.txt': {
-            'work_id': 7, 'work_name': 'Akananuru', 'work_name_tamil': 'அகநானூறு',
+            'work_name': 'Akananuru', 'work_name_tamil': 'அகநானூறு',
             'type': 'thogai', 'description': 'Four hundred poems on love'
         },
         'புறநானூறு.txt': {
-            'work_id': 8, 'work_name': 'Purananuru', 'work_name_tamil': 'புறநானூறு',
+            'work_name': 'Purananuru', 'work_name_tamil': 'புறநானூறு',
             'type': 'thogai', 'description': 'Four hundred poems on war and ethics'
         },
         'கலித்தொகை.txt': {
-            'work_id': 9, 'work_name': 'Kalittokai', 'work_name_tamil': 'கலித்தொகை',
+            'work_name': 'Kalittokai', 'work_name_tamil': 'கலித்தொகை',
             'type': 'thogai', 'description': 'Collection of Kali meter poems'
         },
         'பதிற்றுப்பத்து.txt': {
-            'work_id': 10, 'work_name': 'Patirruppattu', 'work_name_tamil': 'பதிற்றுப்பத்து',
+            'work_name': 'Patirruppattu', 'work_name_tamil': 'பதிற்றுப்பத்து',
             'type': 'thogai', 'description': 'Ten tens of poems'
         },
         'பரிபாடல்.txt': {
-            'work_id': 11, 'work_name': 'Paripadal', 'work_name_tamil': 'பரிபாடல்',
+            'work_name': 'Paripadal', 'work_name_tamil': 'பரிபாடல்',
             'type': 'thogai', 'description': 'Songs in Paripadal meter'
         },
         'திருமுருகாற்றுப்படை.txt': {
-            'work_id': 12, 'work_name': 'Tirumurukāṟṟuppaṭai', 'work_name_tamil': 'திருமுருகாற்றுப்படை',
+            'work_name': 'Tirumurukāṟṟuppaṭai', 'work_name_tamil': 'திருமுருகாற்றுப்படை',
             'type': 'padal', 'description': 'Guide to Lord Murugan'
         },
         'பொருநராற்றுப்படை.txt': {
-            'work_id': 13, 'work_name': 'Porunarāṟṟuppaṭai', 'work_name_tamil': 'பொருநராற்றுப்படை',
+            'work_name': 'Porunarāṟṟuppaṭai', 'work_name_tamil': 'பொருநராற்றுப்படை',
             'type': 'padal', 'description': 'Guide to patron'
         },
         'சிறுபாணாற்றுப்படை.txt': {
-            'work_id': 14, 'work_name': 'Sirupāṇāṟṟuppaṭai', 'work_name_tamil': 'சிறுபாணாற்றுப்படை',
+            'work_name': 'Sirupāṇāṟṟuppaṭai', 'work_name_tamil': 'சிறுபாணாற்றுப்படை',
             'type': 'padal', 'description': 'Guide to small drum player'
         },
         'பெரும்பாணாற்றுப்படை.txt': {
-            'work_id': 15, 'work_name': 'Perumpāṇāṟṟuppaṭai', 'work_name_tamil': 'பெரும்பாணாற்றுப்படை',
+            'work_name': 'Perumpāṇāṟṟuppaṭai', 'work_name_tamil': 'பெரும்பாணாற்றுப்படை',
             'type': 'padal', 'description': 'Guide to great drum player'
         },
         'முல்லைப்பாட்டு.txt': {
-            'work_id': 16, 'work_name': 'Mullaippāṭṭu', 'work_name_tamil': 'முல்லைப்பாட்டு',
+            'work_name': 'Mullaippāṭṭu', 'work_name_tamil': 'முல்லைப்பாட்டு',
             'type': 'padal', 'description': 'Song of Mullai landscape'
         },
         'மதுரைக்காஞ்சி.txt': {
-            'work_id': 17, 'work_name': 'Maturaikkāñci', 'work_name_tamil': 'மதுரைக்காஞ்சி',
+            'work_name': 'Maturaikkāñci', 'work_name_tamil': 'மதுரைக்காஞ்சி',
             'type': 'padal', 'description': 'Description of Madurai city'
         },
         'நெடுநல்வாடை.txt': {
-            'work_id': 18, 'work_name': 'Neṭunalvāṭai', 'work_name_tamil': 'நெடுநல்வாடை',
+            'work_name': 'Neṭunalvāṭai', 'work_name_tamil': 'நெடுநல்வாடை',
             'type': 'padal', 'description': 'The long north wind'
         },
         'பட்டினப்பாலை.txt': {
-            'work_id': 19, 'work_name': 'Paṭṭiṉappālai', 'work_name_tamil': 'பட்டினப்பாலை',
+            'work_name': 'Paṭṭiṉappālai', 'work_name_tamil': 'பட்டினப்பாலை',
             'type': 'padal', 'description': 'Description of seaport'
         },
         'மலைபடுகடாம்.txt': {
-            'work_id': 20, 'work_name': 'Malaippaṭukaṭām', 'work_name_tamil': 'மலைபடுகடாம்',
+            'work_name': 'Malaippaṭukaṭām', 'work_name_tamil': 'மலைபடுகடாம்',
             'type': 'padal', 'description': 'Mountain-traversing journey'
         },
         'குறிஞ்சிப்பாட்டு.txt': {
-            'work_id': 21, 'work_name': 'Kuṟiñcippāṭṭu', 'work_name_tamil': 'குறிஞ்சிப்பாட்டு',
+            'work_name': 'Kuṟiñcippāṭṭu', 'work_name_tamil': 'குறிஞ்சிப்பாட்டு',
             'type': 'padal', 'description': 'Song of Kurinji landscape'
         }
     }
@@ -122,14 +128,30 @@ class SangamBulkImporter:
         self.section_cache = {}
 
     def _ensure_works_exist(self):
-        """Create all Sangam work entries"""
-        print("  Creating Sangam work entries...")
+        """Create all Sangam work entries with dynamic work_id assignment"""
+        print("  Checking/creating Sangam work entries...")
+
+        # Get next available work_id ONCE before the loop
+        self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) FROM works")
+        next_work_id = self.cursor.fetchone()[0] + 1
 
         for filename, work_info in self.SANGAM_WORKS.items():
-            self.cursor.execute("SELECT work_id FROM works WHERE work_id = %s", (work_info['work_id'],))
-            if not self.cursor.fetchone():
+            work_name = work_info['work_name']
+
+            # Check if work already exists by name
+            self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name,))
+            existing = self.cursor.fetchone()
+
+            if existing:
+                # Store the work_id for this work
+                work_info['work_id'] = existing[0]
+                print(f"    {work_info['work_name_tamil']} already exists (ID: {existing[0]})")
+            else:
+                # Assign next available work_id and increment
+                work_info['work_id'] = next_work_id
+
                 self.works.append({
-                    'work_id': work_info['work_id'],
+                    'work_id': next_work_id,
                     'work_name': work_info['work_name'],
                     'work_name_tamil': work_info['work_name_tamil'],
                     'period': '300 BCE - 300 CE',
@@ -138,12 +160,14 @@ class SangamBulkImporter:
                     'description': work_info['description']
                 })
 
+                next_work_id += 1  # Increment for next work
+
         if self.works:
             self._bulk_copy('works', self.works,
                            ['work_id', 'work_name', 'work_name_tamil', 'period',
                             'author', 'author_tamil', 'description'])
             self.conn.commit()
-            print(f"  Created {len(self.works)} work entries")
+            print(f"  Created {len(self.works)} new work entries")
 
     def _reset_data_containers(self):
         """Clear data containers for next work"""
@@ -243,6 +267,32 @@ class SangamBulkImporter:
             self._add_poem(work_id, section_id, 1, poem_lines)
             print(f"    Parsed 1 continuous poem ({len(poem_lines)} lines)")
 
+    def _clean_word_text(self, word: str) -> str:
+        """
+        Clean word text according to Prof. P. Pandiyaraja's principles:
+        - Keep only Tamil characters, hyphens (-), and underscores (_)
+        - Remove dots, punctuation, and line count numbers
+        """
+        # First, strip trailing numbers (line counts like 5, 10, 15 attached to words)
+        word = re.sub(r'\d+$', '', word)
+
+        # Remove all non-Tamil characters except - and _
+        # Tamil Unicode range: \u0B80-\u0BFF
+        cleaned = re.sub(r'[^\u0B80-\u0BFF\-_]', '', word)
+        return cleaned.strip()
+
+    def _is_line_count(self, token: str) -> bool:
+        """
+        Check if token is a line count number (multiples of 5 or 10)
+        Returns True for: 5, 10, 15, 20, 25, etc.
+        """
+        try:
+            num = int(token)
+            # Common line counts: multiples of 5
+            return num % 5 == 0
+        except ValueError:
+            return False
+
     def _add_poem(self, work_id, section_id, poem_num, poem_lines):
         """Add poem to memory"""
         verse_id = self.verse_id
@@ -260,6 +310,9 @@ class SangamBulkImporter:
         })
 
         for line_num, line_text in enumerate(poem_lines, start=1):
+            # Clean line: remove dots/periods (used for spacing/alignment)
+            cleaned_line = line_text.replace('.', '').replace('…', '')
+
             line_id = self.line_id
             self.line_id += 1
 
@@ -267,12 +320,25 @@ class SangamBulkImporter:
                 'line_id': line_id,
                 'verse_id': verse_id,
                 'line_number': line_num,
-                'line_text': line_text
+                'line_text': cleaned_line.strip()
             })
 
             # Parse words
-            words = line_text.strip().split()
-            for word_position, word_text in enumerate(words, start=1):
+            tokens = cleaned_line.strip().split()
+            word_position = 1
+
+            for token in tokens:
+                # Skip line count numbers (multiples of 5)
+                if self._is_line_count(token):
+                    continue
+
+                # Clean word (keep only Tamil, -, and _)
+                word_text = self._clean_word_text(token)
+
+                # Skip empty words after cleaning
+                if not word_text:
+                    continue
+
                 word_id = self.word_id
                 self.word_id += 1
 
@@ -280,9 +346,11 @@ class SangamBulkImporter:
                     'word_id': word_id,
                     'line_id': line_id,
                     'word_position': word_position,
-                    'word_text': word_text.strip('.,;!?'),
+                    'word_text': word_text,
                     'sandhi_split': None
                 })
+
+                word_position += 1
 
     def parse_directory(self, directory_path: Path):
         """Parse and import works one at a time with per-work rollback"""

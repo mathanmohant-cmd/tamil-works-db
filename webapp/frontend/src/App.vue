@@ -35,8 +35,16 @@
                   </li>
                 </ul>
               </div>
-              <button @click="performSearch" class="search-button" :disabled="loading">
+              <button @click="performSearch" class="search-button" :disabled="loading || !searchQuery.trim()">
                 {{ loading ? 'Searching...' : 'Search' }}
+              </button>
+              <button
+                v-if="searchResults || searchQuery"
+                @click="clearSearch"
+                class="clear-button"
+                title="Clear search"
+              >
+                Clear
               </button>
             </div>
           </div>
@@ -106,14 +114,25 @@
     <!-- About Page -->
     <About v-if="currentPage === 'about'" />
 
+    <!-- Verse View (shown on search page) -->
+    <VerseView
+      v-if="currentPage === 'search' && showVerseView"
+      :verseId="selectedVerseId"
+      :searchWord="verseViewSearchWord"
+      @close="closeVerseView"
+    />
+
     <!-- Search Page -->
-    <div v-if="currentPage === 'search'" class="search-page">
+    <div v-if="currentPage === 'search' && !showVerseView" class="search-page">
     <!-- Collapsible Filters -->
     <div class="filters-panel" v-show="filtersExpanded">
       <div class="filter-group" v-if="works.length">
         <div class="filter-header">
           <label><strong>Filter by Work:</strong></label>
           <div class="filter-header-actions">
+            <button @click="clearFilters" class="clear-filter-button" title="Uncheck all works">
+              Clear Filter
+            </button>
             <label class="remember-checkbox">
               <input type="checkbox" v-model="rememberSelection" />
               Remember for session
@@ -158,10 +177,18 @@
         <div class="single-panel">
           <!-- Search Summary -->
           <div class="results-header">
-            <span class="search-summary-panel">{{ searchSummary }}</span>
-            <button @click="exportWordsToCSV" class="export-button-small" title="Export list of found words to CSV">
-              📥 Export Words
-            </button>
+            <div class="search-summary-panel">
+              <div class="searched-word-display">Searched word: <strong>{{ searchResults.search_term }}</strong></div>
+              <div>{{ searchSummary }}</div>
+            </div>
+            <div class="export-buttons-group">
+              <button @click="exportWords('csv')" class="export-button-small" title="Export list of found words to CSV">
+                📥 Export Words (CSV)
+              </button>
+              <button @click="exportWords('pdf')" class="export-button-small export-button-pdf" title="Export list of found words to PDF">
+                📄 Export Words (PDF)
+              </button>
+            </div>
           </div>
 
           <!-- Word List with Expandable Details -->
@@ -211,13 +238,22 @@
                     <span class="summary-divider">|</span>
                     <span class="summary-item">{{ word.count }} Usage</span>
                   </div>
-                  <button
-                    @click="exportWordLinesToCSV(word.text)"
-                    class="export-button-small"
-                    title="Export all lines for this word to CSV"
-                  >
-                    📥 Export Lines
-                  </button>
+                  <div class="export-buttons-group">
+                    <button
+                      @click="exportWordLines('csv', word.text)"
+                      class="export-button-small"
+                      title="Export all lines for this word to CSV"
+                    >
+                      📥 Export Lines (CSV)
+                    </button>
+                    <button
+                      @click="exportWordLines('pdf', word.text)"
+                      class="export-button-small export-button-pdf"
+                      title="Export all lines for this word to PDF"
+                    >
+                      📄 Export Lines (PDF)
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Loading State -->
@@ -236,10 +272,11 @@
                     <div class="occurrence-content">
                       <div class="occurrence-metadata">
                         <span class="work-name">{{ result.work_name_tamil }}</span>
-                        <span class="separator">•</span>
-                        <span>{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
-                        <span class="separator">•</span>
-                        <span>Verse {{ result.verse_number }}, Line {{ result.line_number }}</span>
+                        <span v-if="result.hierarchy_path_tamil || result.hierarchy_path" class="separator"> > </span>
+                        <span v-if="result.hierarchy_path_tamil || result.hierarchy_path">{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
+                        <span class="separator"> > </span>
+                        <span>{{ formatVerseAndLine(result, false) }}</span>
+                        <a href="#" @click.prevent="openVerseView(result.verse_id, word.text)" class="verse-link" title="View full verse">🔗</a>
                       </div>
                       <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>
                     </div>
@@ -281,13 +318,15 @@ import api from './api.js'
 import Home from './Home.vue'
 import OurInspiration from './OurInspiration.vue'
 import About from './About.vue'
+import VerseView from './VerseView.vue'
 
 export default {
   name: 'App',
   components: {
     Home,
     OurInspiration,
-    About
+    About,
+    VerseView
   },
   setup() {
     // Page navigation
@@ -317,6 +356,11 @@ export default {
     const loadingWord = ref(null)
     const loadedOccurrences = ref({}) // Track loaded occurrences per word with offset
     const initialSearchSummary = ref(null) // Store initial search summary
+
+    // Verse view state
+    const showVerseView = ref(false)
+    const selectedVerseId = ref(null)
+    const verseViewSearchWord = ref('')
 
     // Load initial data
     onMounted(async () => {
@@ -356,7 +400,14 @@ export default {
 
     watch(selectedWorks, (newVal) => {
       selectAllWorks.value = newVal.length === works.value.length
+      // Clear search results when filter changes if we have active search
+      if (searchResults.value && searchQuery.value) {
+        // Auto-search with new filter selection
+        performSearch()
+      }
     })
+
+    // Note: We no longer auto-clear on empty searchQuery since we have a dedicated Clear button
 
     // Methods
     const toggleAllWorks = () => {
@@ -365,6 +416,18 @@ export default {
       } else {
         selectedWorks.value = []
       }
+    }
+
+    const clearSearch = () => {
+      // Clear all search state
+      searchResults.value = null
+      searchQuery.value = ''
+      error.value = null
+      expandedWords.value = new Set()
+      loadedOccurrences.value = {}
+      selectedWord.value = null
+      selectedWordText.value = null
+      initialSearchSummary.value = null
     }
 
     const performSearch = async () => {
@@ -654,12 +717,20 @@ export default {
       }
     }
 
+    const clearFilters = () => {
+      selectedWorks.value = []
+      selectAllWorks.value = false
+    }
+
     // Method: Handle filter mode change
     const handleFilterModeChange = () => {
       if (filterMode.value === 'all') {
         selectedWorks.value = works.value.map(w => w.work_id)
         selectAllWorks.value = true
       } else {
+        // Switch to select mode - uncheck all by default
+        selectedWorks.value = []
+        selectAllWorks.value = false
         // Switch to search page and open filters panel for selection
         currentPage.value = 'search'
         filtersExpanded.value = true
@@ -684,6 +755,17 @@ export default {
       return escapedLineText.replace(regex, '<span class="word-highlight">$1</span>')
     }
 
+    // Method: Export words to CSV or PDF
+    const exportWords = (format) => {
+      if (!uniqueWords.value || uniqueWords.value.length === 0) return
+
+      if (format === 'csv') {
+        exportWordsToCSV()
+      } else if (format === 'pdf') {
+        exportWordsToPDF()
+      }
+    }
+
     // Method: Export words to CSV
     const exportWordsToCSV = () => {
       if (!uniqueWords.value || uniqueWords.value.length === 0) return
@@ -703,6 +785,31 @@ export default {
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
       link.setAttribute('download', `tamil_words_${searchQuery.value.trim()}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    // Method: Export words to PDF
+    const exportWordsToPDF = () => {
+      if (!uniqueWords.value || uniqueWords.value.length === 0) return
+
+      // Create PDF content with table format
+      const headers = ['Word', 'Count']
+      const rows = uniqueWords.value.map(word => [word.text, word.count.toString()])
+
+      // Generate simple text-based PDF content
+      let pdfContent = `Searched word: ${searchResults.value.search_term}\n\n`
+      pdfContent += `${headers.join('\t')}\n`
+      pdfContent += rows.map(row => row.join('\t')).join('\n')
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + pdfContent], { type: 'application/pdf;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamil_words_${searchQuery.value.trim()}_${new Date().toISOString().split('T')[0]}.pdf`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -955,31 +1062,71 @@ export default {
       )
     }
 
-    // Method: Clean hierarchy path to remove duplicates (e.g., "காண்டம்:ஆரணிய காண்டம்" → "ஆரணிய காண்டம்")
+    // Method: Clean hierarchy path - remove section type labels, keep only section names
+    // If there's only one section, hide it from display
     const cleanHierarchyPath = (path) => {
       if (!path) return ''
 
       // Split by ' > ' to get each level
       const levels = path.split(' > ')
 
-      // Clean each level
+      // If there's only one section level, return empty (hide it)
+      if (levels.length === 1) {
+        return ''
+      }
+
+      // Clean each level - remove the "type:" prefix and keep only the name
       const cleanedLevels = levels.map(level => {
         // Split by ':' to separate level_type and section_name
         const parts = level.split(':')
         if (parts.length === 2) {
-          const levelType = parts[0].trim()
-          const sectionName = parts[1].trim()
-
-          // If section name already starts with the level type, just return section name
-          if (sectionName.startsWith(levelType)) {
-            return sectionName
-          }
+          // Return only the section name (part after the colon)
+          return parts[1].trim()
         }
-        // Otherwise return the full level as-is
-        return level
+        // If no colon, return as-is
+        return level.trim()
       })
 
       return cleanedLevels.join(' > ')
+    }
+
+    // Method: Format verse and line display with Tamil terminology
+    // Order: Verse first, then Line (to follow hierarchy: sections > verse > line)
+    const formatVerseAndLine = (result, includeLink = false) => {
+      const hasHierarchy = result.hierarchy_path_tamil || result.hierarchy_path
+      // Use verse_type_tamil first, fall back to verse_type, then default to 'பாடல்'
+      const verseTypeTamil = result.verse_type_tamil || result.verse_type || 'பாடல்'
+
+      // If there's no hierarchy (no sections), just show line number with அடி
+      if (!hasHierarchy) {
+        return `அடி ${result.line_number}`
+      }
+
+      // Show: verse_type_tamil verse_number > அடி line_number
+      return `${verseTypeTamil} ${result.verse_number} > அடி ${result.line_number}`
+    }
+
+    // Method: Open verse view
+    const openVerseView = (verseId, searchWord = '') => {
+      selectedVerseId.value = verseId
+      verseViewSearchWord.value = searchWord
+      showVerseView.value = true
+    }
+
+    // Method: Close verse view
+    const closeVerseView = () => {
+      showVerseView.value = false
+      selectedVerseId.value = null
+      verseViewSearchWord.value = ''
+    }
+
+    // Method: Export lines for a specific word (CSV or PDF)
+    const exportWordLines = (format, wordText) => {
+      if (format === 'csv') {
+        exportWordLinesToCSV(wordText)
+      } else if (format === 'pdf') {
+        exportWordLinesToPDF(wordText)
+      }
     }
 
     // Method: Export lines for a specific word to CSV
@@ -1011,6 +1158,34 @@ export default {
       document.body.removeChild(link)
     }
 
+    // Method: Export lines for a specific word to PDF
+    const exportWordLinesToPDF = (wordText) => {
+      const occurrences = getWordOccurrences(wordText)
+      if (occurrences.length === 0) return
+
+      // Create PDF content with table format (tab-separated for copy-paste)
+      const headers = ['Work & Location', 'Line']
+      const rows = occurrences.map(result => {
+        const location = `${result.work_name_tamil}: ${cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)} | Verse ${result.verse_number}, Line ${result.line_number}`
+        return [location, result.line_text]
+      })
+
+      let pdfContent = `Word: ${wordText}\n\n`
+      pdfContent += `${headers.join('\t')}\n`
+      pdfContent += rows.map(row => row.join('\t')).join('\n')
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + pdfContent], { type: 'application/pdf;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamil_lines_${wordText}_${new Date().toISOString().split('T')[0]}.pdf`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
     return {
       currentPage,
       searchQuery,
@@ -1035,16 +1210,22 @@ export default {
       getFilterButtonText,
       searchSummary,
       toggleAllWorks,
+      clearSearch,
       performSearch,
       loadMore,
       selectWord,
       selectWordFromList,
       toggleFilters,
       closeFilters,
+      clearFilters,
       handleFilterModeChange,
       highlightWord,
+      exportWords,
       exportWordsToCSV,
+      exportWordsToPDF,
       exportLinesToCSV,
+      exportWordLines,
+      exportWordLinesToPDF,
       autocompleteResults,
       showAutocomplete,
       handleAutocompleteInput,
@@ -1059,7 +1240,13 @@ export default {
       loadMoreOccurrences,
       getWorkCounts,
       exportWordLinesToCSV,
-      cleanHierarchyPath
+      cleanHierarchyPath,
+      formatVerseAndLine,
+      showVerseView,
+      selectedVerseId,
+      verseViewSearchWord,
+      openVerseView,
+      closeVerseView
     }
   }
 }

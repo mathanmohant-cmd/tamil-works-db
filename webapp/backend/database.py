@@ -29,6 +29,13 @@ class Database:
         finally:
             conn.close()
 
+    def _escape_like_pattern(self, pattern: str) -> str:
+        """
+        Escape special SQL LIKE characters (%, _) in search pattern
+        """
+        # Escape backslash first, then % and _
+        return pattern.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+
     def search_words(
         self,
         search_term: str,
@@ -73,6 +80,7 @@ class Database:
                         wd.verse_id,
                         wd.verse_number,
                         wd.verse_type,
+                        wd.verse_type_tamil,
                         wd.work_name,
                         wd.work_name_tamil,
                         wd.hierarchy_path,
@@ -87,16 +95,17 @@ class Database:
                 if match_type == "exact":
                     query += " AND wd.word_text = %s"
                     params.append(search_term)
-                else:  # partial - apply word_position
+                else:  # partial - apply word_position with escaped pattern
+                    escaped_term = self._escape_like_pattern(search_term)
                     if word_position == "beginning":
-                        query += " AND wd.word_text LIKE %s"
-                        params.append(f"{search_term}%")
+                        query += " AND wd.word_text LIKE %s ESCAPE '\\'"
+                        params.append(f"{escaped_term}%")
                     elif word_position == "end":
-                        query += " AND wd.word_text LIKE %s"
-                        params.append(f"%{search_term}")
+                        query += " AND wd.word_text LIKE %s ESCAPE '\\'"
+                        params.append(f"%{escaped_term}")
                     else:  # anywhere
-                        query += " AND wd.word_text LIKE %s"
-                        params.append(f"%{search_term}%")
+                        query += " AND wd.word_text LIKE %s ESCAPE '\\'"
+                        params.append(f"%{escaped_term}%")
 
                 # Add work filter
                 if work_ids:
@@ -118,7 +127,16 @@ class Database:
 
                 # Execute search query
                 cur.execute(query, params)
-                results = cur.fetchall()
+                raw_results = cur.fetchall()
+
+                # Convert to regular dicts to ensure all fields are included
+                results = [dict(row) for row in raw_results]
+
+                # Debug
+                if results:
+                    import sys
+                    sys.stderr.write(f"\nDEBUG Keys: {list(results[0].keys())}\n")
+                    sys.stderr.flush()
 
                 # Get total count for pagination
                 count_query = """
@@ -130,13 +148,13 @@ class Database:
                 # Add the same filters as the main query
                 if match_type == "exact":
                     count_query += " AND wd.word_text = %s"
-                else:  # partial - apply word_position
+                else:  # partial - apply word_position with escaped pattern
                     if word_position == "beginning":
-                        count_query += " AND wd.word_text LIKE %s"
+                        count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
                     elif word_position == "end":
-                        count_query += " AND wd.word_text LIKE %s"
+                        count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
                     else:  # anywhere
-                        count_query += " AND wd.word_text LIKE %s"
+                        count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
 
                 if work_ids:
                     placeholders = ','.join(['%s'] * len(work_ids))
@@ -164,16 +182,17 @@ class Database:
                 if match_type == "exact":
                     words_query += " AND word_text = %s"
                     words_params.append(search_term)
-                else:  # partial - apply word_position
+                else:  # partial - apply word_position with escaped pattern
+                    escaped_term = self._escape_like_pattern(search_term)
                     if word_position == "beginning":
-                        words_query += " AND word_text LIKE %s"
-                        words_params.append(f"{search_term}%")
+                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
+                        words_params.append(f"{escaped_term}%")
                     elif word_position == "end":
-                        words_query += " AND word_text LIKE %s"
-                        words_params.append(f"%{search_term}")
+                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
+                        words_params.append(f"%{escaped_term}")
                     else:  # anywhere
-                        words_query += " AND word_text LIKE %s"
-                        words_params.append(f"%{search_term}%")
+                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
+                        words_params.append(f"%{escaped_term}%")
 
                 if work_ids:
                     placeholders = ','.join(['%s'] * len(work_ids))
@@ -202,15 +221,16 @@ class Database:
                     words_query += " AND word_text = %s"
                     words_params.append(search_term)
                 else:
+                    escaped_term = self._escape_like_pattern(search_term)
                     if word_position == "beginning":
-                        words_query += " AND word_text LIKE %s"
-                        words_params.append(f"{search_term}%")
+                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
+                        words_params.append(f"{escaped_term}%")
                     elif word_position == "end":
-                        words_query += " AND word_text LIKE %s"
-                        words_params.append(f"%{search_term}")
+                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
+                        words_params.append(f"%{escaped_term}")
                     else:
-                        words_query += " AND word_text LIKE %s"
-                        words_params.append(f"%{search_term}%")
+                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
+                        words_params.append(f"%{escaped_term}%")
 
                 if work_ids:
                     placeholders = ','.join(['%s'] * len(work_ids))
@@ -306,6 +326,7 @@ class Database:
                         v.verse_id,
                         v.verse_number,
                         v.verse_type,
+                        vh.verse_type_tamil,
                         vh.work_name,
                         vh.work_name_tamil,
                         vh.hierarchy_path,

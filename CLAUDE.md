@@ -17,6 +17,8 @@ This is a Tamil literature database and search application that stores and analy
 4. Silapathikaram (சிலப்பதிகாரம்) - Epic narrative
 5. Kambaramayanam (கம்பராமாயணம்) - Tamil Ramayana
 
+**Note:** Experimental grammar analysis tools (morphology analyzer, pronunciation evaluator) are located in `tamil-grammar-tools/` directory. These are separate side projects for future exploration and not part of the main search application.
+
 ## Common Commands
 
 ### Database Setup
@@ -79,20 +81,22 @@ npm run preview
 
 ### Data Import Scripts
 
+**IMPORTANT: All parsers use the 2-phase bulk COPY pattern for optimal performance (1000x faster than row-by-row INSERT).**
+
 ```bash
 cd scripts
 
 # Import Thirukkural (all 1,330 kurals)
-python thirukkural_parser.py [database_url]
+python thirukkural_bulk_import.py [database_url]
 
 # Import Sangam literature (18 works)
-python sangam_parser.py [database_url]
+python sangam_bulk_import.py [database_url]
 
 # Import Silapathikaram (epic in 3 Kandams)
-python silapathikaram_parser.py [database_url]
+python silapathikaram_bulk_import.py [database_url]
 
 # Import Kambaramayanam (epic in 6 Kandams)
-python kambaramayanam_parser.py [database_url]
+python kambaramayanam_bulk_import.py [database_url]
 
 # All parsers support:
 # - DATABASE_URL environment variable
@@ -210,15 +214,25 @@ Parser scripts in `scripts/` directory follow this pattern:
 - Sandhi split analysis for compound words
 - Single transaction for data integrity
 
-**Available Parsers:**
+**CRITICAL ID Allocation Patterns (lessons from 2025-12-05):**
+1. **Query MAX IDs at initialization**: ALWAYS query `SELECT COALESCE(MAX(id), 0) + 1` for ALL tables (sections, verses, lines, words) at the start of `__init__()` or before parsing
+2. **NEVER hardcode IDs to 1**: Parsers must work when run in any order after other works have been imported
+3. **For multiple works in one script** (like Sangam with 18 works):
+   - Query MAX(work_id) ONCE before the loop
+   - Increment manually: `next_work_id += 1` after each new work
+   - DO NOT query MAX inside the loop (causes duplicate work_ids)
+4. **Schema has no auto-sequences**: The schema uses `INTEGER PRIMARY KEY` (not SERIAL), so parsers must manually manage IDs
+5. **Drop sequences when resetting**: The `setup_railway_db.py` script drops sequences when dropping tables to ensure clean state
+
+**Available Parsers (all use bulk COPY pattern):**
 - `thirukkural_bulk_import.py` - 3 Paals → 10 Iyals → 133 Adhikarams → 1,330 Kurals
   - Reference implementation for bulk COPY pattern
-- `thirukkural_parser.py` - Alternative row-by-row version (slower, avoid for new parsers)
-- `sangam_parser.py` - 18 works with different formats (Thogai/Padal)
-- `silapathikaram_parser.py` - 3 Kandams → Kaathais → Verses (uses bulk COPY)
+- `sangam_bulk_import.py` - 18 works with different formats (Thogai/Padal)
+  - Improved: Ignores dots, line count numbers, keeps only Tamil + - and _
+- `silapathikaram_bulk_import.py` - 3 Kandams → Kaathais → Verses
   - Structure: $ marks Kandam, # marks Kaathai
   - Cleans ** markers and line numbers
-- `kambaramayanam_parser.py` - 6 Kandams → Padalams → Verses (uses bulk COPY)
+- `kambaramayanam_bulk_import.py` - 6 Kandams → Padalams → Verses
   - Structure: & marks Kandam, @ marks Padalam, # marks verse
   - Yuddha Kandam split into 4 parts (61-64) under parent section
   - Cleans ** and *** markers

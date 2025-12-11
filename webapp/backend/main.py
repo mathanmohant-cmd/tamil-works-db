@@ -171,6 +171,20 @@ def get_verse(verse_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/test_verse_type")
+def test_verse_type():
+    """Test endpoint to check verse_type_tamil"""
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    conn = psycopg2.connect(db.connection_string)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT verse_type, verse_type_tamil FROM word_details WHERE work_name = 'Thirukkural' LIMIT 1")
+    result = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return {"keys": list(result.keys()), "has_verse_type_tamil": "verse_type_tamil" in result, "data": result}
+
+
 @app.get("/stats", response_model=Statistics)
 def get_statistics():
     """
@@ -243,4 +257,4 @@ def debug_sample_words():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

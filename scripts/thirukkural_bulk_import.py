@@ -26,7 +26,7 @@ class ThirukkuralBulkImporter:
             self.structure = json.load(f)
 
         self.kural_to_hierarchy = self._build_kural_mapping()
-        self.work_id = 3
+        self.work_id = None  # Will be assigned dynamically
 
         # Data containers
         self.sections = []
@@ -34,11 +34,20 @@ class ThirukkuralBulkImporter:
         self.lines = []
         self.words = []
 
-        # ID counters
-        self.section_id = 1
-        self.verse_id = 1
-        self.line_id = 1
-        self.word_id = 1
+        # Get existing max IDs from database
+        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
+        self.section_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
+        self.verse_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
+        self.line_id = self.cursor.fetchone()[0] + 1
+
+        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
+        self.word_id = self.cursor.fetchone()[0] + 1
+
+        print(f"  Starting IDs: section={self.section_id}, verse={self.verse_id}, line={self.line_id}, word={self.word_id}")
 
         # Section cache to avoid duplicates
         self.section_cache = {}
@@ -60,14 +69,27 @@ class ThirukkuralBulkImporter:
 
     def _ensure_work_exists(self):
         """Ensure work entry exists"""
-        self.cursor.execute("SELECT work_id FROM works WHERE work_id = %s", (self.work_id,))
-        if not self.cursor.fetchone():
-            print("  Creating Thirukkural work entry...")
+        work_name_english = 'Thirukkural'
+        work_name_tamil = 'திருக்குறள்'
+
+        # Check if work already exists by name
+        self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
+        existing = self.cursor.fetchone()
+
+        if existing:
+            self.work_id = existing[0]
+            print(f"  Work {work_name_tamil} already exists (ID: {self.work_id})")
+        else:
+            # Get next available work_id
+            self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
+            self.work_id = self.cursor.fetchone()[0]
+
+            print(f"  Creating Thirukkural work entry (ID: {self.work_id})...")
             self.cursor.execute("""
                 INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
-                self.work_id, 'Thirukkural', 'திருக்குறள்',
+                self.work_id, work_name_english, work_name_tamil,
                 '4th - 5th century CE', 'Thiruvalluvar', 'திருவள்ளுவர்',
                 'Classic Tamil text on ethics, politics, and love - 1,330 couplets'
             ))

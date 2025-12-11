@@ -161,10 +161,25 @@ def drop_tables(connection_string):
             DROP TABLE IF EXISTS works CASCADE;
         """)
 
+        # Reset sequences - CRITICAL for avoiding duplicate key errors
+        # The sequences are auto-created when tables are recreated,
+        # but we need to ensure they start from 1
+        print("  Resetting ID sequences...")
+        cursor.execute("""
+            -- Reset sequences if they exist (will be recreated with tables)
+            DROP SEQUENCE IF EXISTS works_work_id_seq CASCADE;
+            DROP SEQUENCE IF EXISTS sections_section_id_seq CASCADE;
+            DROP SEQUENCE IF EXISTS verses_verse_id_seq CASCADE;
+            DROP SEQUENCE IF EXISTS lines_line_id_seq CASCADE;
+            DROP SEQUENCE IF EXISTS words_word_id_seq CASCADE;
+            DROP SEQUENCE IF EXISTS commentaries_commentary_id_seq CASCADE;
+            DROP SEQUENCE IF EXISTS cross_references_reference_id_seq CASCADE;
+        """)
+
         conn.commit()
         cursor.close()
         conn.close()
-        print("✓ Tables and views dropped successfully")
+        print("✓ Tables, views, and sequences dropped successfully")
         return True
     except Exception as e:
         print(f"✗ Error dropping tables: {e}")

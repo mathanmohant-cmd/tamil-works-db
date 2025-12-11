@@ -170,11 +170,11 @@ class SilapathikaramBulkImporter:
         self.lines = []
         self.words = []
 
-        # ID counters
-        self.section_id = 1
-        self.verse_id = 1
-        self.line_id = 1
-        self.word_id = 1
+        # ID counters - will be set properly in _ensure_work_exists()
+        self.section_id = None
+        self.verse_id = None
+        self.line_id = None
+        self.word_id = None
         self.work_id = None
 
     def _ensure_work_exists(self):
