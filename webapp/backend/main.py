@@ -122,6 +122,21 @@ def search_words(
         return results
 
     except Exception as e:
+        import traceback
+        import sys
+        # Log the full error to stderr for Railway logs
+        sys.stderr.write(f"\n{'='*70}\n")
+        sys.stderr.write(f"ERROR in /search endpoint:\n")
+        sys.stderr.write(f"Search term: {q}\n")
+        sys.stderr.write(f"Match type: {match_type}\n")
+        sys.stderr.write(f"Word position: {word_position}\n")
+        sys.stderr.write(f"Work IDs: {work_ids}\n")
+        sys.stderr.write(f"Limit: {limit}, Offset: {offset}\n")
+        sys.stderr.write(f"Error: {str(e)}\n")
+        sys.stderr.write(f"Traceback:\n")
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.write(f"{'='*70}\n")
+        sys.stderr.flush()
         raise HTTPException(status_code=500, detail=str(e))
 
 

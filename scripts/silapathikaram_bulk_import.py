@@ -294,8 +294,8 @@ class SilapathikaramBulkImporter:
                         'work_id': self.work_id,
                         'section_id': kaathai_section_id,
                         'verse_number': verse_idx,
-                        'verse_type': None,
-                        'verse_type_tamil': None,
+                        'verse_type': 'poem',
+                        'verse_type_tamil': 'பாடல்',
                         'total_lines': len(verse_lines),
                         'sort_order': verse_idx
                     })
