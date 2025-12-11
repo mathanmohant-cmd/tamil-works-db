@@ -336,7 +336,7 @@ INSERT INTO words (word_id, line_id, word_position, word_text, word_text_transli
 
 -- Kambaramayanam sample verse
 INSERT INTO verses (verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order) VALUES
-(5, 5, 102, 1, 'venba', 'வெண்பா', 4, 1);
+(5, 5, 102, 1, 'poem', 'பாடல்', 4, 1);
 
 -- Lines for Kambaramayanam verse
 INSERT INTO lines (line_id, verse_id, line_number, line_text, line_text_transliteration) VALUES
@@ -377,7 +377,7 @@ INSERT INTO sections (section_id, work_id, parent_section_id, level_type, level_
 
 -- Silapathikaram sample verse
 INSERT INTO verses (verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order) VALUES
-(6, 4, 201, 1, 'aasiriyappa', 'ஆசிரியப்பா', 3, 1);
+(6, 4, 201, 1, 'poem', 'பாடல்', 3, 1);
 
 INSERT INTO lines (line_id, verse_id, line_number, line_text) VALUES
 (13, 6, 1, 'உலகம் உவப்ப வாழ்வோம் அறத்தொடு'),
