@@ -4,20 +4,26 @@
       <section aria-labelledby="journey">
         <h2 id="journey">Our journey</h2>
         <p>
-          A 12‑week introduction to Sangam literature by Mrs. Veidhei Herbert opened our eyes to the richness of Tamizh poetry — its words, rhythms, and echoes across centuries. That experience sparked a desire to explore the words, themes, and ideas across this immense collection of work.
+          For many readers with only basic proficiency in Tamizh, the classical format of Sangam texts — and even later commentaries — can feel daunting. Thankfully, a 12‑week introduction to Sangam literature by Mrs. Veidhei Herbert not only provided an excellent entry point into Sangam works, it also opened our eyes to the richness of Tamizh poetry — its words, rhythms, and echoes across centuries.
         </p>
         <p>
-          For many readers with only basic proficiency in Tamizh, the classical format of Sangam texts — and even later commentaries — can feel daunting. We longed for a normalized rendering of classical texts that would not demand advanced linguistic expertise, but instead invite wider participation and appreciation.
+          That experience sparked a desire to explore the words, themes, and ideas across this immense collection of work. Mrs. Veidhei Herbert has also made these resources available in both Tamizh and English, helping more readers engage with the texts: <a href="https://sangambyphone.com/" target="_blank" rel="noopener noreferrer" class="inline-link">Sangam by Phone</a>.
         </p>
         <p>
-          That search led us to the pioneering work of Prof. Dr. P. Pandiaraja, whose Tamizh Concordance has made the Sangam corpus accessible. His mathematical precision and systematic exploration to unearth words and information from Sangam literature was deeply inspiring. Sample the fruits of his labour from his Sangacholai:
+          As we waded deeper, we discovered the work of Prof. Dr. P. Pandiaraja, whose Tamizh Concordance presented the Sangam corpus — and much of Tamizh literature — from a fresh perspective. His mathematical precision and systematic exploration to unearth words and information from Sangam texts was deeply inspiring.
+        </p>
+        <p>
+          Sample the fruits of his labour from his Sangacholai:
         </p>
         <ul class="list resource-links">
           <li><a href="http://www.tamilconcordance.in/sangacholvalam/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a></li>
           <li><a href="http://www.tamilconcordance.in/pattupattu/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கடம்</a></li>
         </ul>
         <p>
-          Building on that inspiration, we created a tool to make Tamizh literature searchable, discoverable, and alive for today's readers — a bridge between tradition and technology, designed to help anyone engage with the voices of our literary heritage.
+          Building on these inspirations, we created a tool to make Tamizh literature searchable, discoverable, and alive for today's readers — a bridge between tradition and technology, designed to help anyone engage with the voices of our literary heritage.
+        </p>
+        <p>
+          We also have a few more plans to make exploring Sangam and Tamizh literature easier, and we hope to make those tools available in the coming days.
         </p>
         <p>
           We hope you will bring your unique perspective from your experience and add more to the body of work that will take Sangam literature and the vast Tamizh literary tradition to a larger audience.
@@ -139,6 +145,19 @@ p {
 }
 
 .resource-links a:hover {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.inline-link {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.inline-link:hover {
   color: var(--primary-color);
   border-bottom: 2px solid var(--primary-color);
 }
