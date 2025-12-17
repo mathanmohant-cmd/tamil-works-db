@@ -10,7 +10,7 @@
           That experience sparked our desire to explore the words, themes, and ideas woven through this immense body of work. Mrs. Herbert’s bilingual resources, <a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer" class="inline-link">Sangam by Phone</a>, further opened doors for readers across languages.
         </p>
         <p>
-          As we delved deeper, we discovered Prof. Dr. P. Pandiaraja's Tamizh Concordance, which presented the Sangam corpus with unprecedented mathematical precision. His Sangacholai resources became invaluable references in our journey.
+          As we delved deeper, we discovered Prof. Dr. P. Pandiaraja's Tamizh Concordance, which presented the Sangam corpus with mathematical clarity. His Sangacholai resources became invaluable references in our journey.
         </p>
         <p>
           Through these efforts, we realised that Tamizh literature is not merely a treasure of the past — it is a living voice that continues to shape identity, culture, and imagination.
