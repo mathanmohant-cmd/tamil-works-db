@@ -456,6 +456,27 @@ export default {
   padding: 0;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .line-row {
+    grid-template-columns: 35px 1fr;
+    gap: 0.75rem;
+  }
+
+  .line-number {
+    font-size: 0.75rem;
+    padding-right: 0.25rem;
+  }
+
+  .line-text {
+    font-size: 1.1rem;
+  }
+
+  .verse-lines-table {
+    padding: 1rem;
+  }
+}
+
 .verse-metadata {
   background: #f9f9f9;
   padding: 1.5rem;
