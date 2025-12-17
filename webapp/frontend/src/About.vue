@@ -37,17 +37,12 @@
         <p>
           Every Tamizh work is part of a dialogue across time. We hope this platform becomes part of that dialogue, helping the voices of Tamizh literature reach new ears, new hearts, and new minds.
         </p>
-        <p class="closing">Join the Sangam of Tamizh literature admirers. Together, we can carry these voices into the future.</p>
 
         <div class="cta" aria-label="Call to action">
           <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas" class="cta-button secondary">Share your ideas</a>
         </div>
       </section>
     </article>
-
-    <footer aria-label="Footer">
-      Made with care for readers, learners, and technologists — honoring scholarship and inviting community.
-    </footer>
   </div>
 </template>
 
@@ -65,92 +60,102 @@ export default {
 }
 
 .about-content {
-  background: #ffffff;
-  border: 1px solid #e6dccf;
+  background: var(--surface);
+  border: 2px solid var(--border-color);
   border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   line-height: 1.7;
 }
 
 section {
-  margin: 18px 0 8px;
-  padding: 8px 0;
+  margin: 2rem 0 1rem;
+  padding: 0;
+}
+
+section:first-child {
+  margin-top: 0;
 }
 
 h2 {
-  font-family: "Noto Serif Tamil", serif;
-  font-size: 1.35rem;
-  margin: 0 0 8px;
-  color: #7a3e2f;
-  font-weight: 600;
+  font-family: var(--english-font);
+  font-size: 1.5rem;
+  margin: 0 0 1rem;
+  color: var(--primary-color);
+  font-weight: 700;
 }
 
 p {
-  margin: 0 0 12px;
-  color: #1a1a1a;
-  font-size: 1rem;
+  margin: 0 0 1rem;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .list {
-  margin: 10px 0 8px;
-  padding-left: 18px;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  list-style: none;
 }
 
 .list li {
-  margin: 6px 0;
+  margin: 0.75rem 0;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  line-height: 1.7;
 }
 
 .invite {
-  background: #f3e5dc;
-  border: 1px solid #e6dccf;
-  border-radius: 10px;
-  padding: 16px;
-  margin-top: 10px;
-}
-
-.closing {
-  margin-top: 14px;
-  font-weight: 600;
-  color: #7a3e2f;
-  text-align: center;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 2rem;
 }
 
 .cta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 1rem;
+  margin-top: 1.5rem;
   justify-content: center;
 }
 
 .cta-button {
   text-decoration: none;
-  color: #7a3e2f;
-  background: transparent;
-  padding: 10px 14px;
+  color: white;
+  background: var(--primary-color);
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
-  border: 1px solid #7a3e2f;
+  border: none;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(211, 47, 47, 0.3);
+  font-size: 1rem;
 }
 
 .cta-button:hover {
-  background: #7a3e2f;
-  color: white;
-  box-shadow: 0 2px 10px rgba(122, 62, 47, 0.25);
+  background: var(--primary-dark);
+  box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4);
+  transform: translateY(-2px);
 }
 
-footer {
-  margin-top: 24px;
-  color: #4c4c4c;
-  font-size: 0.9rem;
-  text-align: center;
+.cta-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(211, 47, 47, 0.3);
 }
 
 @media (max-width: 768px) {
   .about-content {
-    padding: 18px;
+    padding: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  p, .list li {
+    font-size: 1rem;
   }
 }
 </style>
