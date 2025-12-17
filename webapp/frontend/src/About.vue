@@ -10,15 +10,8 @@
           That experience sparked our desire to explore the words, themes, and ideas woven through this immense body of work. Mrs. Herbert’s bilingual resources, <a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer" class="inline-link">Sangam by Phone</a>, further opened doors for readers across languages.
         </p>
         <p>
-          As we delved deeper, we encountered the monumental work of Prof. Dr. P. Pandiaraja, whose Tamizh Concordance resorted the Sangam corpus — and much of Tamizh literature — with mathematical precision and systematic clarity.
+          As we delved deeper, we discovered Prof. Dr. P. Pandiaraja's Tamizh Concordance, which presented the Sangam corpus with unprecedented mathematical precision. His Sangacholai resources became invaluable references in our journey.
         </p>
-        <p>
-          His Sangacholai stands as a testament to the power of scholarship:
-        </p>
-        <ul class="list resource-links">
-          <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a></li>
-          <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a></li>
-        </ul>
         <p>
           Through these efforts, we realised that Tamizh literature is not merely a treasure of the past — it is a living voice that continues to shape identity, culture, and imagination.
         </p>
@@ -39,6 +32,22 @@
         <p>
           We are also working on new tools to make exploring Sangam and Tamizh literature even easier, and look forward to sharing them soon.
         </p>
+      </section>
+
+      <section aria-labelledby="resources">
+        <h2 id="resources">Resources</h2>
+        <p>
+          Explore these valuable resources from our inspirations:
+        </p>
+        <h3 class="resource-heading">Prof. Dr. P. Pandiaraja's Sangacholai</h3>
+        <ul class="list resource-links">
+          <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
+          <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
+        </ul>
+        <h3 class="resource-heading">Mrs. Veidhei Herbert's Resources</h3>
+        <ul class="list resource-links">
+          <li><a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer">Sangam by Phone</a> — Bilingual Sangam literature resources</li>
+        </ul>
       </section>
 
       <section class="invite" aria-labelledby="invitation">
@@ -100,6 +109,14 @@ h2 {
   margin: 0 0 1rem;
   color: var(--primary-color);
   font-weight: 700;
+}
+
+h3.resource-heading {
+  font-family: var(--english-font);
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 p {

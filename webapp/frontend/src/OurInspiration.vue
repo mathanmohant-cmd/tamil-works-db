@@ -16,10 +16,7 @@
         <div class="mentor-text">
           <h3>Prof. Dr. P. Pandiyaraja</h3>
           <p>
-            His lifelong work in Tamizh scholarship, especially the creation of the
-            <strong>Tamizh Concordance</strong>, shaped much of this project. His meticulous
-            research, deep knowledge, and generosity in sharing it have been guiding lights
-            for learners everywhere.
+            Creator of the <strong>Tamizh Concordance</strong>, whose mathematical precision and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on Home page)
           </p>
         </div>
       </div>
@@ -37,7 +34,7 @@
           <h3>Ms. Vaidehi Herbert</h3>
           <p>
             Her *Introduction to Sangam Literature* courses and the community of learners she nurtures
-            opened my door for our deeper engagement with classical Tamizh literature. Her enthusiasm
+            opened the door for our deeper engagement with classical Tamizh literature. Her enthusiasm
             and unwavering commitment have made Sangam texts accessible to younger readers and non Tamizh speakers too.
           </p>
         </div>
