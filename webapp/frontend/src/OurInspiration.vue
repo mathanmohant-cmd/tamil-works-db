@@ -7,7 +7,7 @@
         This project is inspired by the dedication of Tamizh scholars, teachers, and enthusiasts
         who have made Tamizh literature accessible to learners across the world.
         Their work sparked our curiosity to explore further, eventually leading to the creation
-        of this Tamizh Word Search initiative.
+        of this Tamizh Word Search initiative. Read more about <router-link to="/about" class="inline-link">our journey</router-link>.
       </p>
 
       <!-- Prof. Dr. P. Pandiyaraja -->
@@ -16,8 +16,15 @@
         <div class="mentor-text">
           <h3>Prof. Dr. P. Pandiyaraja</h3>
           <p>
-            Creator of the <strong>Tamizh Concordance</strong>, whose mathematical precision and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on Home page)
+            Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on Home page)
           </p>
+          <div class="resources">
+            <h4>A glimpse of their work</h4>
+            <ul>
+              <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
+              <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -33,10 +40,17 @@
         <div class="mentor-text">
           <h3>Ms. Vaidehi Herbert</h3>
           <p>
-            Her *Introduction to Sangam Literature* courses and the community of learners she nurtures
+            Her <em>Introduction to Sangam Literature</em> courses and the community of learners she nurtures
             opened the door for our deeper engagement with classical Tamizh literature. Her enthusiasm
             and unwavering commitment have made Sangam texts accessible to younger readers and non Tamizh speakers too.
           </p>
+          <div class="resources">
+            <h4>A glimpse of their work</h4>
+            <ul>
+              <li><a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer">Sangam by Phone</a> — Sangam literature online</li>
+              <li><a href="https://sangamtranslationsbyvaidehi.com/" target="_blank" rel="noopener noreferrer">Sangam Translations</a> — Bilingual Sangam literature resources</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -53,9 +67,16 @@
           <h3>Prof. Dr. Ku. Ve. Balasubramanian</h3>
           <p>
             Even at the age of 80, he continues to share his vast knowledge through detailed
-            teachings on *Silapadhikaram* and *Tholkappiyam*. His 75+ episode Silapadhikaram series
+            teachings on <em>Silapadhikaram</em> and <em>Tholkappiyam</em>. His 75+ episode Silapadhikaram series
             and 80+ episode Tholkappiyam series in YouTube are treasures that inspire anyone who loves Tamizh.
           </p>
+          <div class="resources">
+            <h4>A glimpse of their work</h4>
+            <ul>
+              <li><a href="https://www.youtube.com/@%E0%AE%B4%E0%AE%95%E0%AE%B0%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%82%E0%AE%9F%E0%AE%AE%E0%AF%8D" target="_blank" rel="noopener noreferrer">Silapathikaram Series</a> — thorough immersion into the epic of Silapathikaram</li>
+              <li><a href="https://www.youtube.com/@karthikkaveriselvan1716/" target="_blank" rel="noopener noreferrer">Tholkappiyam Series</a> — comprehensive exploration and review of Tholkappiyar's foundational work</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -175,6 +196,58 @@ h2 {
 .mentor-text strong {
   font-weight: 600;
   color: #6b2c91;
+}
+
+.inline-link {
+  color: #6b2c91;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.inline-link:hover {
+  color: #d32f2f;
+  border-bottom: 2px solid #d32f2f;
+}
+
+.resources {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.resources h4 {
+  font-size: 1.1rem;
+  margin: 0 0 10px 0;
+  color: #6b2c91;
+  font-weight: 600;
+}
+
+.resources ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.resources li {
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.resources a {
+  color: #6b2c91;
+  text-decoration: none;
+  font-weight: 600;
+  font-family: var(--tamil-font), var(--english-font);
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.resources a:hover {
+  color: #d32f2f;
+  border-bottom: 2px solid #d32f2f;
 }
 
 @media (max-width: 700px) {

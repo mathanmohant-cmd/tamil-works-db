@@ -2,58 +2,50 @@
   <div class="about-page">
     <article class="about-content">
       <section aria-labelledby="journey">
-        <h2 id="journey">Our journey</h2>
+        <h2 id="journey">My journey</h2>
         <p>
-          For many readers with only a basic grasp of Tamizh, the classical style of Sangam texts — and even their later commentaries — can feel daunting. A 12‑week introduction to Sangam literature by Mrs. Veidhei Herbert offered not only an accessible entry point but also revealed the richness of Tamizh poetry: its words, rhythms, and echoes across centuries.
+          My journey into Tamil literature began through the Chicago Tamil Sangam community. A paper presented in the 5th International Conference on Thirukkural gave me a glimpse of how the seeds sown by Thirukkural continue to shape our thoughts even today. I wished I had known Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram, and Kambaramayanam earlier, for these works constitute the very core of Tamil literature.
         </p>
         <p>
-          That experience sparked our desire to explore the words, themes, and ideas woven through this immense body of work. Mrs. Herbert’s bilingual resources, <a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer" class="inline-link">Sangam by Phone</a>, further opened doors for readers across languages.
+          It might have remained just a wish, but the network of people I met through CTS led me to the Introduction to Sangam Literature course conducted by Mrs. Vaidehi Herbert. For many Tamils like me, who attended schools in English medium with only a basic grasp of Tamizh, the classical style of Sangam texts — and even their later commentaries — can feel daunting. Her 12‑week course offered not only an accessible entry point but also revealed the richness of Tamizh poetry: its words, rhythms, and echoes across centuries. Her students — many of them experts themselves — joined weekly learning sessions, guiding other hand‑in‑hand into the fascinating world of the Sangam era.
         </p>
         <p>
-          As we delved deeper, we discovered Prof. Dr. P. Pandiaraja's Tamizh Concordance, which presented the Sangam corpus with mathematical clarity. His Sangacholai resources became invaluable references in our journey.
+          As I delved deeper, I discovered Prof. Dr. P. Pandiaraja's Tamizh Concordance, which presented the Sangam corpus with mathematical clarity. His Sangacholai resources opened perspectives that extended beyond literary beauty, revealing new dimensions of structure and meaning.
         </p>
         <p>
-          Through these efforts, we realised that Tamizh literature is not merely a treasure of the past — it is a living voice that continues to shape identity, culture, and imagination.
+          The erudite exposition of Tholkappiyam and Silapathikaram by Prof. Dr. Ku. Ve. Balasubramanian expanded my horizons and strengthened my confidence to explore the words, themes, and ideas woven through these invaluable collections of work.
         </p>
-
+        <p>
+          These exemplars — தமிழ்ச் சான்றோர், as Thiruvalluvar would call them — had shown Sangam literature is not merely a treasure of the past; it is a living voice that continues to shape identity, culture, and imagination.
+        </p>
       </section>
 
       <section aria-labelledby="why">
-        <h2 id="why">Why we built this</h2>
+        <h2 id="why">Why I built this</h2>
         <p>
-        By making it searchable, we hope to:
+          When reading through these works, I noticed links between words, for example
+        </p>
+        <ul class="list">
+          <li>பா, பாய், பாட்டு, பாம்பு - Extend, spread</li>
+          <li>கல், கல்வி, கற்பு - Complete, Steadfast</li>
+          <li>யா, யாமம், யானை, யாணர் - Dark, Unknown, New</li>
+          <li>எல், எல்லை, எல்லன் - Visible, illuminated</li>
+        </ul>
+        <p>
+          To indulge in exploring these connections further, I wanted a search tool that can find the usage of words across many works. By making Sangam and other Tamizh literature searchable, I also hope to:
         </p>
         <ul class="list">
           <li>🔎 Help readers explore words and meanings across classical and modern texts.</li>
           <li>🌱 Spark new connections between roots, poems, and ideas.</li>
           <li>📚 Support learners, researchers, and enthusiasts in their journey.</li>
-          <li>🌍 Invite a community to grow around Tamizh literature, keeping it alive for generations to come.</li>
-        </ul>
-        <p>
-          We are also working on new tools to make exploring Sangam and Tamizh literature even easier, and look forward to sharing them soon.
-        </p>
-      </section>
-
-      <section aria-labelledby="resources">
-        <h2 id="resources">Resources</h2>
-        <p>
-          Explore these valuable resources from our inspirations:
-        </p>
-        <h3 class="resource-heading">Prof. Dr. P. Pandiaraja's Sangacholai</h3>
-        <ul class="list resource-links">
-          <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
-          <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
-        </ul>
-        <h3 class="resource-heading">Mrs. Veidhei Herbert's Resources</h3>
-        <ul class="list resource-links">
-          <li><a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer">Sangam by Phone</a> — Bilingual Sangam literature resources</li>
+          <li>🌍 Invite a community to grow around Tamizh literature.</li>
         </ul>
       </section>
 
       <section class="invite" aria-labelledby="invitation">
         <h2 id="invitation">An invitation</h2>
         <p>
-          This is not just our project — it can be yours too. We invite you to:
+          Even though I use "My Journey", "Why I built", this is a collective effort. Without the work of others, I wouldn't even dare to start something like this. In a way this is not just my project — it can be yours too. I invite you to:
         </p>
         <ul class="list">
           <li>Use the tool to explore and learn.</li>
@@ -61,9 +53,9 @@
           <li>Build more tools that bring Tamizh literature closer to today's readers.</li>
         </ul>
         <p>
-          Every Tamizh work is part of a dialogue across time. We hope this platform becomes part of that dialogue, helping the voices of Tamizh literature reach new ears, new hearts, and new minds.
+          Every Tamizh work is part of a dialogue across time. I hope this platform becomes part of that dialogue, helping the voices of Tamizh literature reach new ears, new hearts, and new minds.
         </p>
-        <h2 id="share">Share your ideas. Join the journey. Keep Tamizh literature alive</h2>
+        <h2 id="share">Share your ideas. Join the journey.</h2>
         <div class="cta" aria-label="Call to action">
           <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas" class="cta-button secondary">Contact Us</a>
         </div>
@@ -111,14 +103,6 @@ h2 {
   font-weight: 700;
 }
 
-h3.resource-heading {
-  font-family: var(--english-font);
-  font-size: 1.1rem;
-  margin: 1.5rem 0 0.5rem;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
 p {
   margin: 0 0 1rem;
   color: var(--text-primary);
@@ -137,31 +121,6 @@ p {
   font-size: 1.05rem;
   color: var(--text-primary);
   line-height: 1.7;
-}
-
-.resource-links {
-  margin: 0.5rem 0 1rem;
-  padding-left: 2rem;
-  list-style: disc;
-}
-
-.resource-links li {
-  margin: 0.5rem 0;
-}
-
-.resource-links a {
-  color: var(--secondary-color);
-  text-decoration: none;
-  font-weight: 600;
-  font-family: var(--tamil-font), var(--english-font);
-  font-size: 1.1rem;
-  border-bottom: 2px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.resource-links a:hover {
-  color: var(--primary-color);
-  border-bottom: 2px solid var(--primary-color);
 }
 
 .inline-link {
