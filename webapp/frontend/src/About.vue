@@ -7,7 +7,7 @@
           For many readers with only a basic grasp of Tamizh, the classical style of Sangam texts — and even their later commentaries — can feel daunting. A 12‑week introduction to Sangam literature by Mrs. Veidhei Herbert offered not only an accessible entry point but also revealed the richness of Tamizh poetry: its words, rhythms, and echoes across centuries.
         </p>
         <p>
-          That experience sparked our desire to explore the words, themes, and ideas woven through this immense body of work. Mrs. Herbert’s bilingual resources, <a href="https://sangambyphone.com/" target="_blank" rel="noopener noreferrer" class="inline-link">Sangam by Phone</a>, further opened doors for readers across languages.
+          That experience sparked our desire to explore the words, themes, and ideas woven through this immense body of work. Mrs. Herbert’s bilingual resources, <a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer" class="inline-link">Sangam by Phone</a>, further opened doors for readers across languages.
         </p>
         <p>
           As we delved deeper, we encountered the monumental work of Prof. Dr. P. Pandiaraja, whose Tamizh Concordance resorted the Sangam corpus — and much of Tamizh literature — with mathematical precision and systematic clarity.
