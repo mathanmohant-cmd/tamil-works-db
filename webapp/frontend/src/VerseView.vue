@@ -459,21 +459,28 @@ export default {
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .line-row {
-    grid-template-columns: 35px 1fr;
+    grid-template-columns: 1fr 35px;
     gap: 0.75rem;
   }
 
   .line-number {
     font-size: 0.75rem;
-    padding-right: 0.25rem;
+    padding-right: 0;
+    padding-left: 0.25rem;
+    border-right: none;
+    border-left: 2px solid var(--border-color);
+    text-align: left;
+    order: 2;
   }
 
   .line-text {
     font-size: 1.1rem;
+    order: 1;
   }
 
   .verse-lines-table {
     padding: 1rem;
+    padding-left: 0.5rem;
   }
 }
 
