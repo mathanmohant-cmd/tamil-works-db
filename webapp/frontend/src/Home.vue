@@ -2,7 +2,7 @@
   <div class="home-page">
     <article class="tribute-content">
       <header class="tribute-header">
-        <h1>Tamil Concordance: A Treasure by Prof. Dr. P. Pandiyaraja</h1>
+        <h1>Tamizh Concordance: A Treasure by Prof. Dr. P. Pandiyaraja</h1>
         <p class="lead">An acknowledgement honoring the scholar whose concordance has shaped this project.</p>
       </header>
 
@@ -10,10 +10,10 @@
         <h2 class="section-title">Acknowledgement</h2>
 
         <p>This project owes its deepest gratitude to Professor <strong>Dr. P. Pandiyaraja</strong>, whose creation of the
-          <a class="concordance" href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer">Tamil Concordance</a>
-          stands as a monumental contribution to Tamil scholarship. Over more than five decades, he has built a priceless repository of Tamil words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamil.</p>
+          <a class="concordance" href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer">Tamizh Concordance</a>
+          stands as a monumental contribution to Tamizh scholarship. Over more than five decades, he has built a priceless repository of Tamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamizh.</p>
 
-        <p>His work offers researchers a robust and structured concordance, opening up immense opportunities for etymological analysis of Tamil words, their usage, and the development of their meanings. For Tamil aficionados, this is a gift of easy access to classical Tamil, furthering a deeper appreciation of the language's richness and depth.</p>
+        <p>His work offers researchers a robust and structured concordance, opening up immense opportunities for etymological analysis of Tamizh words, their usage, and the development of their meanings. For Tamizh aficionados, this is a gift of easy access to classical Tamizh, furthering a deeper appreciation of the language's richness and depth.</p>
 
         <blockquote class="tribute-quote">
           "This search tool is merely an extension of his lifelong labour. When we reached out to him, he warmly shared his wishes to see such a tool built. It is our immense pleasure and honour to help fulfil that vision."

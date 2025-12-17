@@ -4,10 +4,10 @@
       <h1>Our Inspiration</h1>
 
       <p class="intro">
-        This project is inspired by the dedication of Tamil scholars, teachers, and enthusiasts
-        who have made Tamil literature accessible to learners across the world.
+        This project is inspired by the dedication of Tamizh scholars, teachers, and enthusiasts
+        who have made Tamizh literature accessible to learners across the world.
         Their work sparked our curiosity to explore further, eventually leading to the creation
-        of this Tamil Word Search initiative.
+        of this Tamizh Word Search initiative.
       </p>
 
       <!-- Prof. Dr. P. Pandiyaraja -->
@@ -16,8 +16,8 @@
         <div class="mentor-text">
           <h3>Prof. Dr. P. Pandiyaraja</h3>
           <p>
-            His lifelong work in Tamil scholarship, especially the creation of the
-            <strong>Tamil Concordance</strong>, shaped much of this project. His meticulous
+            His lifelong work in Tamizh scholarship, especially the creation of the
+            <strong>Tamizh Concordance</strong>, shaped much of this project. His meticulous
             research, deep knowledge, and generosity in sharing it have been guiding lights
             for learners everywhere.
           </p>
@@ -37,8 +37,8 @@
           <h3>Ms. Vaidehi Herbert</h3>
           <p>
             Her *Introduction to Sangam Literature* courses and the community of learners she nurtures
-            opened my door for our deeper engagement with classical Tamil literature. Her enthusiasm
-            and unwavering commitment have made Sangam texts accessible to younger readers and non Tamil speakers too.
+            opened my door for our deeper engagement with classical Tamizh literature. Her enthusiasm
+            and unwavering commitment have made Sangam texts accessible to younger readers and non Tamizh speakers too.
           </p>
         </div>
       </div>
@@ -57,7 +57,7 @@
           <p>
             Even at the age of 80, he continues to share his vast knowledge through detailed
             teachings on *Silapadhikaram* and *Tholkappiyam*. His 75+ episode Silapadhikaram series
-            and 80+ episode Tholkappiyam series in YouTube are treasures that inspire anyone who loves Tamil.
+            and 80+ episode Tholkappiyam series in YouTube are treasures that inspire anyone who loves Tamizh.
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@
         <div class="mentor-text">
           <h3>R. Balakrishnan, IAS</h3>
           <p>
-            His work in connecting Sangam literature with modern understanding has made classical Tamil
+            His work in connecting Sangam literature with modern understanding has made classical Tamizh
             closer to today's generation. His ability to distill profound insights from ancient texts
             reflects deep passion, rigor, and scholarship.
           </p>

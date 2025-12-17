@@ -2,7 +2,7 @@
   <div id="app">
     <!-- Header -->
     <header class="app-header">
-      <h1>தமிழ் இலக்கிய சொல் தேடல் | Tamil Literary Words Search</h1>
+      <h1>தமிழ் இலக்கிய சொல் தேடல் | Tamizh Literary Words Search</h1>
 
       <!-- Database Summary -->
       <div class="database-summary" v-if="stats">
@@ -16,7 +16,7 @@
                 <input
                   v-model="searchQuery"
                   type="text"
-                  placeholder="Enter Tamil word... (e.g., அறம்)"
+                  placeholder="Enter Tamizh word... (e.g., அறம்)"
                   @keyup.enter="performSearch"
                   @input="handleAutocompleteInput"
                   @focus="showAutocomplete = true"
@@ -157,8 +157,8 @@
     <div class="main-container">
       <!-- Welcome Message -->
       <div v-if="!searchResults && !loading && currentPage === 'search'" class="welcome">
-        <h2>Welcome to Tamil Literary Words Search</h2>
-        <p>Enter a Tamil word in the search box to begin.</p>
+        <h2>Welcome to Tamizh Literary Words Search</h2>
+        <p>Enter a Tamizh word in the search box to begin.</p>
       </div>
 
       <!-- Loading State -->
@@ -209,7 +209,7 @@
                     target="_blank"
                     class="action-icon dictionary-icon"
                     @click.stop
-                    title="Look up in Tamil Lexicon"
+                    title="Look up in Tamizh Lexicon"
                   >
                     📖
                   </a>
@@ -844,7 +844,7 @@ export default {
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_words_${searchTerm}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `tamizh_words_${searchTerm}_${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -891,7 +891,7 @@ export default {
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_words_${searchTerm}_${new Date().toISOString().split('T')[0]}.txt`)
+      link.setAttribute('download', `tamizh_words_${searchTerm}_${new Date().toISOString().split('T')[0]}.txt`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -1256,7 +1256,7 @@ export default {
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_lines_${wordText}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `tamizh_lines_${wordText}_${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -1303,7 +1303,7 @@ export default {
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
-      link.setAttribute('download', `tamil_lines_${wordText}_${new Date().toISOString().split('T')[0]}.txt`)
+      link.setAttribute('download', `tamizh_lines_${wordText}_${new Date().toISOString().split('T')[0]}.txt`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
