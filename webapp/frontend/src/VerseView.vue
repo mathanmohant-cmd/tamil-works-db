@@ -474,7 +474,7 @@ export default {
 
   .verse-lines-table {
     padding: 0.75rem;
-    padding-left: 0.5rem;
+    padding-left: 0.25rem;
   }
 }
 
