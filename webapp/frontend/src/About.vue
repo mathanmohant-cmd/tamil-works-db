@@ -4,10 +4,23 @@
       <section aria-labelledby="journey">
         <h2 id="journey">Our journey</h2>
         <p>
-          This project began with curiosity. A 12‑week introduction to Sangam literature by Mrs. Veidhei Herbert opened our eyes to the richness of Tamizh poetry — its words, rhythms, and echoes across centuries. That experience led us to explore not just Sangam texts, but the vast and diverse world of Tamizh literature: from classical works to modern voices, from poetry to prose, from epics to everyday expressions.
+          A 12‑week introduction to Sangam literature by Mrs. Veidhei Herbert opened our eyes to the richness of Tamizh poetry — its words, rhythms, and echoes across centuries. That experience sparked a desire to explore the words, themes, and ideas across this immense collection of work.
         </p>
         <p>
-          We wanted a way to trace words, themes, and ideas across this immense tradition. That search led us to the pioneering work of scholars like Dr. P. Pandiaraja, whose dedication made the Sangam corpus accessible. Building on that inspiration, we created a tool to make Tamizh literature searchable, discoverable, and alive for today's readers.
+          For many readers with only basic proficiency in Tamizh, the classical format of Sangam texts — and even later commentaries — can feel daunting. We longed for a normalized rendering of classical texts that would not demand advanced linguistic expertise, but instead invite wider participation and appreciation.
+        </p>
+        <p>
+          That search led us to the pioneering work of Prof. Dr. P. Pandiaraja, whose Tamizh Concordance has made the Sangam corpus accessible. His mathematical precision and systematic exploration to unearth words and information from Sangam literature was deeply inspiring. Sample the fruits of his labour from his Sangacholai:
+        </p>
+        <ul class="list resource-links">
+          <li><a href="http://www.tamilconcordance.in/sangacholvalam/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a></li>
+          <li><a href="http://www.tamilconcordance.in/pattupattu/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கடம்</a></li>
+        </ul>
+        <p>
+          Building on that inspiration, we created a tool to make Tamizh literature searchable, discoverable, and alive for today's readers — a bridge between tradition and technology, designed to help anyone engage with the voices of our literary heritage.
+        </p>
+        <p>
+          We hope you will bring your unique perspective from your experience and add more to the body of work that will take Sangam literature and the vast Tamizh literary tradition to a larger audience.
         </p>
       </section>
 
@@ -103,6 +116,31 @@ p {
   font-size: 1.05rem;
   color: var(--text-primary);
   line-height: 1.7;
+}
+
+.resource-links {
+  margin: 0.5rem 0 1rem;
+  padding-left: 2rem;
+  list-style: disc;
+}
+
+.resource-links li {
+  margin: 0.5rem 0;
+}
+
+.resource-links a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-family: var(--tamil-font), var(--english-font);
+  font-size: 1.1rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.resource-links a:hover {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
 }
 
 .invite {
