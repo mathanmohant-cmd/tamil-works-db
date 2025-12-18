@@ -27,7 +27,7 @@
         </p>
         <ul class="list">
           <li>பா, பாய், பாட்டு, பாம்பு - That spreads, expands</li>
-          <li>கல், கல்வி, கற்பு - String, Robust, Steadfast</li>
+          <li>கல், கல்வி, கற்பு - Strong, Complete Knowledge, Steadfast</li>
           <li>யா, யாமம், யானை, யாணர் - Black, Dark, Unknown, Noval</li>
           <li>எல், எல்லை, எல்லன் - Visible, illuminated</li>
         </ul>
