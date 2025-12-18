@@ -20,6 +20,7 @@ CREATE TABLE works (
     author VARCHAR(200),
     author_tamil VARCHAR(200),
     description TEXT,
+    traditional_sort_order INTEGER,  -- Traditional chronological ordering of Tamil literature
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -203,12 +204,12 @@ INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id;
 -- This MUST come before any other data inserts due to foreign key constraints
 -- ============================================================================
 
-INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description) VALUES
-(1, 'Tolkappiyam', 'தொல்காப்பியம்', '3rd century BCE - 5th century CE', 'Tolkappiyar', 'தொல்காப்பியர்', 'Ancient Tamil grammar and poetics text'),
-(2, 'Sangam Literature', 'சங்க இலக்கியம்', '300 BCE - 300 CE', 'Various', 'பல்வேறு புலவர்கள்', 'Collection of classical Tamil poetry'),
-(3, 'Thirukkural', 'திருக்குறள்', '4th - 5th century CE', 'Thiruvalluvar', 'திருவள்ளுவர்', 'Classic Tamil text on ethics, politics, and love'),
-(4, 'Silapathikaram', 'சிலப்பதிகாரம்', '5th - 6th century CE', 'Ilango Adigal', 'இளங்கோ அடிகள்', 'Epic tale of Kannagi and Kovalan'),
-(5, 'Kambaramayanam', 'கம்பராமாயணம்', '12th century CE', 'Kambar', 'கம்பர்', 'Tamil version of the Ramayana');
+INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description, traditional_sort_order) VALUES
+(1, 'Tolkappiyam', 'தொல்காப்பியம்', '3rd century BCE - 5th century CE', 'Tolkappiyar', 'தொல்காப்பியர்', 'Ancient Tamil grammar and poetics text', 1),
+(2, 'Sangam Literature', 'சங்க இலக்கியம்', '300 BCE - 300 CE', 'Various', 'பல்வேறு புலவர்கள்', 'Collection of classical Tamil poetry', 2),
+(3, 'Thirukkural', 'திருக்குறள்', '4th - 5th century CE', 'Thiruvalluvar', 'திருவள்ளுவர்', 'Classic Tamil text on ethics, politics, and love', 3),
+(4, 'Silapathikaram', 'சிலப்பதிகாரம்', '5th - 6th century CE', 'Ilango Adigal', 'இளங்கோ அடிகள்', 'Epic tale of Kannagi and Kovalan', 4),
+(5, 'Kambaramayanam', 'கம்பராமாயணம்', '12th century CE', 'Kambar', 'கம்பர்', 'Tamil version of the Ramayana', 5);
 
 -- ============================================================================
 -- STEP 4: INSERT BASIC SAMPLE DATA (from schema.sql)

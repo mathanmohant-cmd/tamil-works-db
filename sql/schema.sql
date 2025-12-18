@@ -14,6 +14,7 @@ CREATE TABLE works (
     author VARCHAR(200),
     author_tamil VARCHAR(200),
     description TEXT,
+    traditional_sort_order INTEGER,  -- Traditional chronological ordering of Tamil literature
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
