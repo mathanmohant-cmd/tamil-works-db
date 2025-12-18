@@ -16,7 +16,7 @@ A comprehensive PostgreSQL database schema for storing and analyzing five major 
 tamil-works-db/
 ├── README.md                  # This file
 ├── sql/
-│   ├── schema.sql            # Complete database schema with sample data
+│   ├── complete_setup.sql   # Complete database schema (canonical)
 │   └── queries.sql           # 100+ saved queries organized by category
 ├── docs/
 │   ├── database_guide.md     # Comprehensive database documentation
@@ -68,7 +68,7 @@ export NEON_DB_URL="postgresql://user:pass@host/db?sslmode=require"
 
 ```bash
 # Install the schema
-psql $NEON_DB_URL -f sql/schema.sql
+psql $NEON_DB_URL -f sql/complete_setup.sql
 
 # Verify installation
 psql $NEON_DB_URL -c "\dt"

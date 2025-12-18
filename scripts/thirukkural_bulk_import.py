@@ -21,7 +21,7 @@ class ThirukkuralBulkImporter:
         self.cursor = self.conn.cursor()
 
         # Load structure
-        structure_file = Path(__file__).parent / "thirukkural_structure.json"
+        structure_file = Path(__file__).parent.parent / "data" / "thirukkural_structure.json"
         with open(structure_file, 'r', encoding='utf-8') as f:
             self.structure = json.load(f)
 

@@ -187,6 +187,7 @@ SELECT
     v.verse_type_tamil,
     w.work_name,
     w.work_name_tamil,
+    w.traditional_sort_order,
     sp.path_names as hierarchy_path,
     sp.path_names_tamil as hierarchy_path_tamil,
     sp.depth as hierarchy_depth
@@ -214,6 +215,7 @@ SELECT
     vh.verse_type_tamil,
     vh.work_name,
     vh.work_name_tamil,
+    vh.traditional_sort_order,
     vh.hierarchy_path,
     vh.hierarchy_path_tamil
 FROM words w

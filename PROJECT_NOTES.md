@@ -40,7 +40,7 @@
 
 2. **Install schema**:
    ```bash
-   psql $NEON_DB_URL -f sql/schema.sql
+   psql $NEON_DB_URL -f sql/complete_setup.sql
    ```
 
 3. **Verify installation**:
@@ -67,7 +67,7 @@ tamil-works-db/
 ├── README.md                 # Project overview and quick start
 ├── PROJECT_NOTES.md          # This file - project status and notes
 ├── sql/
-│   ├── schema.sql           # Database schema with sample data
+│   ├── complete_setup.sql   # Database schema (canonical)
 │   └── queries.sql          # 100+ saved queries
 └── docs/
     ├── database_guide.md    # Complete documentation

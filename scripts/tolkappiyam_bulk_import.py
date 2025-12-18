@@ -477,7 +477,7 @@ def main():
     script_dir = Path(__file__).parent
     project_dir = script_dir.parent
     tolkappiyam_dir = project_dir / "Tamil-Source-TamilConcordence" / "1_இலக்கண_நூல்கள்" / "தொல்காப்பியம்"
-    single_char_output = script_dir / "tolkappiyam_single_char_words.json"
+    single_char_output = project_dir / "data" / "tolkappiyam_single_char_words.json"
 
     print("="*70)
     print("Tolkappiyam Bulk Import - Fast 2-Phase Import")

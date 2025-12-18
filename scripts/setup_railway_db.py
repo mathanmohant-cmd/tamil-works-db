@@ -302,7 +302,7 @@ def main():
     # Get SQL file path
     script_dir = Path(__file__).parent
     project_dir = script_dir.parent
-    schema_file = project_dir / "sql" / "schema.sql"
+    schema_file = project_dir / "sql" / "complete_setup.sql"
 
     if not schema_file.exists():
         print(f"\n✗ Schema file not found: {schema_file}")

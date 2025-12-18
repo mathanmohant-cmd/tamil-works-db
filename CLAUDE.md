@@ -34,9 +34,8 @@ psql tamil_literature -f verify_setup.sql
 # Connect to database
 psql tamil_literature
 
-# For Windows (using setup scripts)
-setup_database.bat        # Batch script
-setup_database.ps1        # PowerShell script
+# For Windows (using Python setup script)
+python scripts/setup_database.py
 ```
 
 ### Backend (FastAPI)
@@ -237,7 +236,7 @@ Parser scripts in `scripts/` directory follow this pattern:
   - Yuddha Kandam split into 4 parts (61-64) under parent section
   - Cleans ** and *** markers
 
-**Schema Fields Reference (from sql/schema.sql):**
+**Schema Fields Reference (from sql/complete_setup.sql):**
 - **sections**: section_id, work_id, parent_section_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil, sort_order
 - **verses**: verse_id, work_id, section_id, verse_number, verse_type, verse_type_tamil, total_lines, sort_order
 - **lines**: line_id, verse_id, line_number, line_text (NO sort_order column)
@@ -301,8 +300,7 @@ Follow the principles documented in `scripts/WORD_SEGMENTATION_PRINCIPLES.md`:
 - `scripts/WORD_SEGMENTATION_PRINCIPLES.md` - Word parsing guidelines
 
 ### Database
-- `sql/schema.sql` - Core database schema
-- `sql/complete_setup.sql` - Schema + sample data
+- `sql/complete_setup.sql` - Core database schema (canonical)
 - `sql/queries.sql` - 100+ example queries
 - `sql/sample_word_data.sql` - Sample word-level data
 - `verify_setup.sql` - Database verification queries
@@ -343,7 +341,7 @@ Follow the principles documented in `scripts/WORD_SEGMENTATION_PRINCIPLES.md`:
 
 ### Making Database Schema Changes
 
-1. Update `sql/schema.sql` with changes
+1. Update `sql/complete_setup.sql` with changes
 2. Update views if affected (`verse_hierarchy`, `word_details`)
 3. Update `database.py` queries if table structure changed
 4. Test with `verify_setup.sql`
