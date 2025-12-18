@@ -97,7 +97,8 @@
           <!-- Navigation -->
           <nav class="main-nav">
             <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Home</button>
-            <button @click="currentPage = 'search'" :class="{active: currentPage === 'search'}">Search</button>
+            <button @click="currentPage = 'search'; showWelcome = true" :class="{active: currentPage === 'search'}">Search</button>
+            <button @click="currentPage = 'principles'" :class="{active: currentPage === 'principles'}">Word Segmentation Principles</button>
             <button @click="currentPage = 'inspiration'" :class="{active: currentPage === 'inspiration'}">Our Inspiration</button>
             <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About Us</button>
           </nav>
@@ -107,6 +108,9 @@
 
     <!-- Home Page -->
     <Home v-if="currentPage === 'home'" />
+
+    <!-- Principles Page -->
+    <Principles v-if="currentPage === 'principles'" />
 
     <!-- Our Inspiration Page -->
     <OurInspiration v-if="currentPage === 'inspiration'" />
@@ -155,10 +159,39 @@
 
     <!-- Main Content -->
     <div class="main-container">
-      <!-- Welcome Message -->
-      <div v-if="!searchResults && !loading && currentPage === 'search'" class="welcome">
+      <!-- Help/Welcome Message -->
+      <div v-if="currentPage === 'search' && !loading && showWelcome" class="welcome">
         <h2>Welcome to Tamizh Literary Words Search</h2>
-        <p>Enter a Tamizh word in the search box to begin.</p>
+        <p class="welcome-subtitle">Search for words across 5 major Tamil literary works</p>
+
+        <div class="welcome-highlight">
+          <h3>💡 About This Database</h3>
+          <p>This database uses <strong>word segmentation principles</strong> to extract words from literary works. For better use of this tool, please learn about word segmentation principles.</p>
+          <p class="learn-more">
+            <a href="#" @click.prevent="currentPage = 'principles'" class="principles-link">Learn about word segmentation principles →</a>
+          </p>
+        </div>
+
+        <div class="quick-start">
+          <h3>Quick Start</h3>
+          <ul class="tips-list">
+            <li><strong>Type a Tamil word</strong> in the search box above — it auto-completes as you type!</li>
+            <li><strong>Choose match type:</strong> Partial (finds similar words) or Exact (precise match)</li>
+            <li><strong>Set position:</strong> Beginning, End, or Anywhere in the word</li>
+            <li><strong>Filter by works</strong> (optional) to search specific texts</li>
+          </ul>
+        </div>
+
+        <div class="try-examples">
+          <h3>Try These Examples</h3>
+          <div class="example-buttons">
+            <button @click="tryExampleSearch('அறம்')" class="example-btn">அறம்</button>
+            <button @click="tryExampleSearch('தமிழ்நாடு')" class="example-btn">தமிழ்நாடு</button>
+            <button @click="tryExampleSearch('எஃகு')" class="example-btn">எஃகு</button>
+            <button @click="tryExampleSearch('அறிவுடையோன் ')" class="example-btn">அறிவுடையோன்</button>
+            <button @click="tryExampleSearch('ஈனில்')" class="example-btn">ஈனில்</button>
+          </div>
+        </div>
       </div>
 
       <!-- Loading State -->
@@ -342,6 +375,7 @@ import api from './api.js'
 import Home from './Home.vue'
 import OurInspiration from './OurInspiration.vue'
 import About from './About.vue'
+import Principles from './Principles.vue'
 import VerseView from './VerseView.vue'
 
 export default {
@@ -350,11 +384,13 @@ export default {
     Home,
     OurInspiration,
     About,
+    Principles,
     VerseView
   },
   setup() {
     // Page navigation
     const currentPage = ref('home')
+    const showWelcome = ref(true)
 
     // State
     const searchQuery = ref('')
@@ -456,6 +492,7 @@ export default {
       selectedWord.value = null
       selectedWordText.value = null
       initialSearchSummary.value = null
+      showWelcome.value = true // Show welcome/help content when clearing
     }
 
     const performSearch = async () => {
@@ -469,6 +506,7 @@ export default {
 
       // Switch to search page to show results
       currentPage.value = 'search'
+      showWelcome.value = false // Hide welcome/help content when searching
 
       loading.value = true
       error.value = null
@@ -979,6 +1017,12 @@ export default {
       }, 200)
     }
 
+    // Method: Try example search
+    const tryExampleSearch = (word) => {
+      searchQuery.value = word
+      performSearch()
+    }
+
     // Method: Toggle word expansion
     const toggleWordExpansion = async (wordText) => {
       if (expandedWords.value.has(wordText)) {
@@ -1312,6 +1356,7 @@ export default {
 
     return {
       currentPage,
+      showWelcome,
       searchQuery,
       matchType,
       wordPosition,
@@ -1373,7 +1418,8 @@ export default {
       closeVerseView,
       showWordsExportMenu,
       currentExportWordText,
-      showLinesExportMenu
+      showLinesExportMenu,
+      tryExampleSearch
     }
   }
 }
