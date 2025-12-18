@@ -63,6 +63,13 @@
           <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas" class="cta-button secondary">Join Us</a>
         </div>
       </section>
+
+      <footer class="gratitude-footer">
+        <p class="gratitude-text">
+          Written in gratitude to the தமிழ்ச் சான்றோர் who made this journey possible.
+        </p>
+        <p class="author-name">— T. Mathan Mohan</p>
+      </footer>
     </article>
   </div>
 </template>
@@ -179,6 +186,29 @@ p {
   box-shadow: 0 2px 4px rgba(211, 47, 47, 0.3);
 }
 
+.gratitude-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border-color);
+  text-align: center;
+}
+
+.gratitude-text {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-family: var(--tamil-font), var(--english-font);
+}
+
+.author-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
 @media (max-width: 768px) {
   .about-content {
     padding: 1.5rem;
@@ -190,6 +220,14 @@ p {
 
   p, .list li {
     font-size: 1rem;
+  }
+
+  .gratitude-text {
+    font-size: 1rem;
+  }
+
+  .author-name {
+    font-size: 0.95rem;
   }
 }
 </style>
