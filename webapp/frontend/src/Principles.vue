@@ -426,6 +426,8 @@ export default {
   padding: 2rem 1rem;
   max-width: 900px;
   margin: 0 auto;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .principles-content {
@@ -435,6 +437,10 @@ export default {
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   line-height: 1.7;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
 }
 
 .principles-header {
@@ -645,28 +651,88 @@ li {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+  .principles-page {
+    padding: 1rem 0.75rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
   .principles-content {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
+    width: 100%;
+    max-width: 100%;
   }
 
   .principles-header h1 {
     font-size: 1.5rem;
+    word-wrap: break-word;
   }
 
   h2 {
     font-size: 1.3rem;
+    word-wrap: break-word;
   }
 
   h3 {
     font-size: 1.1rem;
+    word-wrap: break-word;
   }
 
   p, li {
     font-size: 1rem;
+    text-align: left;
   }
 
   .word-list {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .example-block {
+    padding: 1rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .example-block code {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .transformation {
+    flex-wrap: wrap;
+  }
+
+  .verse {
+    padding: 1rem;
+    word-wrap: break-word;
+  }
+
+  .note {
+    padding: 1rem;
+    word-wrap: break-word;
+  }
+}
+
+@media (max-width: 640px) {
+  .principles-page {
+    padding: 0.5rem;
+  }
+
+  .principles-content {
+    padding: 1rem 0.75rem;
+    border-radius: 8px;
+  }
+
+  .word-list {
+    grid-template-columns: 1fr;
+  }
+
+  .word-item {
+    width: 100%;
+    max-width: 100%;
   }
 }
 </style>
