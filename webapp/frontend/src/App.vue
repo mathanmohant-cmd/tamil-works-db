@@ -189,7 +189,7 @@
             <button @click="tryExampleSearch('அறம்')" class="example-btn">அறம்</button>
             <button @click="tryExampleSearch('தமிழ்நாடு')" class="example-btn">தமிழ்நாடு</button>
             <button @click="tryExampleSearch('எஃகு')" class="example-btn">எஃகு</button>
-            <button @click="tryExampleSearch('அறிவுடையோன் ')" class="example-btn">அறிவுடையோன்</button>
+            <button @click="tryExampleSearch('இம்மென்')" class="example-btn">இம்மென்</button>
             <button @click="tryExampleSearch('ஈனில்')" class="example-btn">ஈனில்</button>
           </div>
         </div>
