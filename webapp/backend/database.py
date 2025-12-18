@@ -418,3 +418,265 @@ class Database:
                 """)
                 return dict(cur.fetchone())
 
+    # =========================================================================
+    # Collection Management Methods
+    # =========================================================================
+
+    def get_collections(self, include_works: bool = False) -> List[Dict]:
+        """
+        Get all collections with hierarchy information
+
+        Args:
+            include_works: If True, include works assigned to each collection
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        c.collection_id,
+                        c.collection_name,
+                        c.collection_name_tamil,
+                        c.collection_type,
+                        c.description,
+                        c.parent_collection_id,
+                        c.sort_order,
+                        pc.collection_name as parent_name,
+                        pc.collection_name_tamil as parent_name_tamil,
+                        (SELECT COUNT(*) FROM work_collections wc WHERE wc.collection_id = c.collection_id) as work_count
+                    FROM collections c
+                    LEFT JOIN collections pc ON c.parent_collection_id = pc.collection_id
+                    ORDER BY c.sort_order NULLS LAST, c.collection_name
+                """)
+                collections = [dict(row) for row in cur.fetchall()]
+
+                if include_works:
+                    for coll in collections:
+                        cur.execute("""
+                            SELECT
+                                w.work_id,
+                                w.work_name,
+                                w.work_name_tamil,
+                                wc.position_in_collection,
+                                wc.is_primary,
+                                wc.notes
+                            FROM work_collections wc
+                            JOIN works w ON wc.work_id = w.work_id
+                            WHERE wc.collection_id = %s
+                            ORDER BY wc.position_in_collection NULLS LAST, w.work_name
+                        """, [coll['collection_id']])
+                        coll['works'] = [dict(row) for row in cur.fetchall()]
+
+                return collections
+
+    def get_collection(self, collection_id: int) -> Optional[Dict]:
+        """Get a single collection by ID with its works"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        c.collection_id,
+                        c.collection_name,
+                        c.collection_name_tamil,
+                        c.collection_type,
+                        c.description,
+                        c.parent_collection_id,
+                        c.sort_order,
+                        pc.collection_name as parent_name,
+                        pc.collection_name_tamil as parent_name_tamil
+                    FROM collections c
+                    LEFT JOIN collections pc ON c.parent_collection_id = pc.collection_id
+                    WHERE c.collection_id = %s
+                """, [collection_id])
+                row = cur.fetchone()
+                if not row:
+                    return None
+
+                collection = dict(row)
+
+                # Get works in this collection
+                cur.execute("""
+                    SELECT
+                        w.work_id,
+                        w.work_name,
+                        w.work_name_tamil,
+                        wc.position_in_collection,
+                        wc.is_primary,
+                        wc.notes
+                    FROM work_collections wc
+                    JOIN works w ON wc.work_id = w.work_id
+                    WHERE wc.collection_id = %s
+                    ORDER BY wc.position_in_collection NULLS LAST, w.work_name
+                """, [collection_id])
+                collection['works'] = [dict(row) for row in cur.fetchall()]
+
+                # Get child collections
+                cur.execute("""
+                    SELECT collection_id, collection_name, collection_name_tamil
+                    FROM collections
+                    WHERE parent_collection_id = %s
+                    ORDER BY sort_order NULLS LAST, collection_name
+                """, [collection_id])
+                collection['children'] = [dict(row) for row in cur.fetchall()]
+
+                return collection
+
+    def create_collection(self, data: Dict) -> Dict:
+        """Create a new collection"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Get next collection_id
+                cur.execute("SELECT COALESCE(MAX(collection_id), 0) + 1 FROM collections")
+                next_id = cur.fetchone()['coalesce']
+
+                cur.execute("""
+                    INSERT INTO collections (
+                        collection_id, collection_name, collection_name_tamil,
+                        collection_type, description, parent_collection_id, sort_order
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    RETURNING *
+                """, [
+                    next_id,
+                    data['collection_name'],
+                    data.get('collection_name_tamil'),
+                    data.get('collection_type', 'custom'),
+                    data.get('description'),
+                    data.get('parent_collection_id'),
+                    data.get('sort_order')
+                ])
+                return dict(cur.fetchone())
+
+    def update_collection(self, collection_id: int, data: Dict) -> Optional[Dict]:
+        """Update an existing collection"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Check if collection exists
+                cur.execute("SELECT 1 FROM collections WHERE collection_id = %s", [collection_id])
+                if not cur.fetchone():
+                    return None
+
+                # Prevent circular parent reference
+                if data.get('parent_collection_id') == collection_id:
+                    raise ValueError("Collection cannot be its own parent")
+
+                cur.execute("""
+                    UPDATE collections SET
+                        collection_name = COALESCE(%s, collection_name),
+                        collection_name_tamil = %s,
+                        collection_type = COALESCE(%s, collection_type),
+                        description = %s,
+                        parent_collection_id = %s,
+                        sort_order = %s
+                    WHERE collection_id = %s
+                    RETURNING *
+                """, [
+                    data.get('collection_name'),
+                    data.get('collection_name_tamil'),
+                    data.get('collection_type'),
+                    data.get('description'),
+                    data.get('parent_collection_id'),
+                    data.get('sort_order'),
+                    collection_id
+                ])
+                return dict(cur.fetchone())
+
+    def delete_collection(self, collection_id: int) -> bool:
+        """Delete a collection (and unlink its works)"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                # Check if collection exists
+                cur.execute("SELECT 1 FROM collections WHERE collection_id = %s", [collection_id])
+                if not cur.fetchone():
+                    return False
+
+                # Update children to have no parent (orphan them)
+                cur.execute("""
+                    UPDATE collections SET parent_collection_id = NULL
+                    WHERE parent_collection_id = %s
+                """, [collection_id])
+
+                # Delete work associations (CASCADE should handle this, but be explicit)
+                cur.execute("DELETE FROM work_collections WHERE collection_id = %s", [collection_id])
+
+                # Delete the collection
+                cur.execute("DELETE FROM collections WHERE collection_id = %s", [collection_id])
+                return True
+
+    def add_work_to_collection(self, collection_id: int, work_id: int,
+                                position: Optional[int] = None,
+                                is_primary: bool = False,
+                                notes: Optional[str] = None) -> Dict:
+        """Add a work to a collection"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # If setting as primary, unset other primaries for this work
+                if is_primary:
+                    cur.execute("""
+                        UPDATE work_collections SET is_primary = FALSE
+                        WHERE work_id = %s
+                    """, [work_id])
+
+                cur.execute("""
+                    INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary, notes)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (work_id, collection_id) DO UPDATE SET
+                        position_in_collection = EXCLUDED.position_in_collection,
+                        is_primary = EXCLUDED.is_primary,
+                        notes = EXCLUDED.notes
+                    RETURNING *
+                """, [work_id, collection_id, position, is_primary, notes])
+                return dict(cur.fetchone())
+
+    def remove_work_from_collection(self, collection_id: int, work_id: int) -> bool:
+        """Remove a work from a collection"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    DELETE FROM work_collections
+                    WHERE collection_id = %s AND work_id = %s
+                """, [collection_id, work_id])
+                return cur.rowcount > 0
+
+    def update_work_position(self, collection_id: int, work_id: int, position: int) -> bool:
+        """Update a work's position within a collection"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE work_collections
+                    SET position_in_collection = %s
+                    WHERE collection_id = %s AND work_id = %s
+                """, [position, collection_id, work_id])
+                return cur.rowcount > 0
+
+    def get_collection_tree(self) -> List[Dict]:
+        """Get collections as a nested tree structure"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        c.collection_id,
+                        c.collection_name,
+                        c.collection_name_tamil,
+                        c.collection_type,
+                        c.description,
+                        c.parent_collection_id,
+                        c.sort_order,
+                        (SELECT COUNT(*) FROM work_collections wc WHERE wc.collection_id = c.collection_id) as work_count
+                    FROM collections c
+                    ORDER BY c.sort_order NULLS LAST, c.collection_name
+                """)
+                all_collections = [dict(row) for row in cur.fetchall()]
+
+        # Build tree structure
+        collection_map = {c['collection_id']: {**c, 'children': []} for c in all_collections}
+        root_collections = []
+
+        for coll in all_collections:
+            coll_with_children = collection_map[coll['collection_id']]
+            parent_id = coll['parent_collection_id']
+            if parent_id and parent_id in collection_map:
+                collection_map[parent_id]['children'].append(coll_with_children)
+            else:
+                root_collections.append(coll_with_children)
+
+        return root_collections
+

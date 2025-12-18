@@ -101,6 +101,7 @@
             <button @click="currentPage = 'principles'" :class="{active: currentPage === 'principles'}">Word Segmentation Principles</button>
             <button @click="currentPage = 'inspiration'" :class="{active: currentPage === 'inspiration'}">Our Inspiration</button>
             <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About Us</button>
+            <button @click="currentPage = 'admin'" :class="{active: currentPage === 'admin'}">Admin</button>
           </nav>
         </div>
       </div>
@@ -117,6 +118,9 @@
 
     <!-- About Page -->
     <About v-if="currentPage === 'about'" />
+
+    <!-- Admin Page -->
+    <Admin v-if="currentPage === 'admin'" />
 
     <!-- Verse View (shown on search page) -->
     <VerseView
@@ -378,6 +382,7 @@ import OurInspiration from './OurInspiration.vue'
 import About from './About.vue'
 import Principles from './Principles.vue'
 import VerseView from './VerseView.vue'
+import Admin from './Admin.vue'
 
 export default {
   name: 'App',
@@ -386,7 +391,8 @@ export default {
     OurInspiration,
     About,
     Principles,
-    VerseView
+    VerseView,
+    Admin
   },
   setup() {
     // Page navigation

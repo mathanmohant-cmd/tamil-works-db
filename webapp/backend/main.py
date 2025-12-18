@@ -69,6 +69,31 @@ class Statistics(BaseModel):
     unique_roots: int
 
 
+class CollectionCreate(BaseModel):
+    collection_name: str
+    collection_name_tamil: Optional[str] = None
+    collection_type: str = "custom"
+    description: Optional[str] = None
+    parent_collection_id: Optional[int] = None
+    sort_order: Optional[int] = None
+
+
+class CollectionUpdate(BaseModel):
+    collection_name: Optional[str] = None
+    collection_name_tamil: Optional[str] = None
+    collection_type: Optional[str] = None
+    description: Optional[str] = None
+    parent_collection_id: Optional[int] = None
+    sort_order: Optional[int] = None
+
+
+class WorkAssignment(BaseModel):
+    work_id: int
+    position: Optional[int] = None
+    is_primary: bool = False
+    notes: Optional[str] = None
+
+
 # API Endpoints
 
 @app.get("/")
@@ -280,6 +305,122 @@ def debug_sample_words():
                     "sample_words_from_table": sample_words,
                     "sample_from_word_details_view": word_details_sample
                 }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================================
+# Admin Collection Endpoints
+# =========================================================================
+
+@app.get("/admin/collections")
+def get_collections(
+    include_works: bool = Query(False, description="Include works in each collection"),
+    tree: bool = Query(False, description="Return as nested tree structure")
+):
+    """
+    Get all collections
+
+    - **include_works**: Include works assigned to each collection
+    - **tree**: Return as nested tree structure instead of flat list
+    """
+    try:
+        if tree:
+            return db.get_collection_tree()
+        return db.get_collections(include_works=include_works)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/admin/collections/{collection_id}")
+def get_collection(collection_id: int):
+    """Get a single collection with its works and children"""
+    try:
+        collection = db.get_collection(collection_id)
+        if not collection:
+            raise HTTPException(status_code=404, detail="Collection not found")
+        return collection
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/admin/collections", status_code=201)
+def create_collection(collection: CollectionCreate):
+    """Create a new collection"""
+    try:
+        return db.create_collection(collection.model_dump())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/admin/collections/{collection_id}")
+def update_collection(collection_id: int, collection: CollectionUpdate):
+    """Update an existing collection"""
+    try:
+        result = db.update_collection(collection_id, collection.model_dump(exclude_unset=True))
+        if not result:
+            raise HTTPException(status_code=404, detail="Collection not found")
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/admin/collections/{collection_id}")
+def delete_collection(collection_id: int):
+    """Delete a collection"""
+    try:
+        if not db.delete_collection(collection_id):
+            raise HTTPException(status_code=404, detail="Collection not found")
+        return {"message": "Collection deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/admin/collections/{collection_id}/works")
+def add_work_to_collection(collection_id: int, assignment: WorkAssignment):
+    """Add a work to a collection"""
+    try:
+        return db.add_work_to_collection(
+            collection_id=collection_id,
+            work_id=assignment.work_id,
+            position=assignment.position,
+            is_primary=assignment.is_primary,
+            notes=assignment.notes
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/admin/collections/{collection_id}/works/{work_id}")
+def remove_work_from_collection(collection_id: int, work_id: int):
+    """Remove a work from a collection"""
+    try:
+        if not db.remove_work_from_collection(collection_id, work_id):
+            raise HTTPException(status_code=404, detail="Work not found in collection")
+        return {"message": "Work removed from collection"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.patch("/admin/collections/{collection_id}/works/{work_id}/position")
+def update_work_position(collection_id: int, work_id: int, position: int = Query(...)):
+    """Update a work's position within a collection"""
+    try:
+        if not db.update_work_position(collection_id, work_id, position):
+            raise HTTPException(status_code=404, detail="Work not found in collection")
+        return {"message": "Position updated"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

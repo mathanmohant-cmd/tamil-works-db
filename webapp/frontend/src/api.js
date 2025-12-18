@@ -54,5 +54,74 @@ export default {
    */
   healthCheck() {
     return api.get('/health')
+  },
+
+  // =========================================================================
+  // Admin Collection APIs
+  // =========================================================================
+
+  /**
+   * Get all collections
+   */
+  getCollections(params = {}) {
+    return api.get('/admin/collections', { params })
+  },
+
+  /**
+   * Get collection tree (nested structure)
+   */
+  getCollectionTree() {
+    return api.get('/admin/collections', { params: { tree: true } })
+  },
+
+  /**
+   * Get single collection
+   */
+  getCollection(collectionId) {
+    return api.get(`/admin/collections/${collectionId}`)
+  },
+
+  /**
+   * Create collection
+   */
+  createCollection(data) {
+    return api.post('/admin/collections', data)
+  },
+
+  /**
+   * Update collection
+   */
+  updateCollection(collectionId, data) {
+    return api.put(`/admin/collections/${collectionId}`, data)
+  },
+
+  /**
+   * Delete collection
+   */
+  deleteCollection(collectionId) {
+    return api.delete(`/admin/collections/${collectionId}`)
+  },
+
+  /**
+   * Add work to collection
+   */
+  addWorkToCollection(collectionId, data) {
+    return api.post(`/admin/collections/${collectionId}/works`, data)
+  },
+
+  /**
+   * Remove work from collection
+   */
+  removeWorkFromCollection(collectionId, workId) {
+    return api.delete(`/admin/collections/${collectionId}/works/${workId}`)
+  },
+
+  /**
+   * Update work position in collection
+   */
+  updateWorkPosition(collectionId, workId, position) {
+    return api.patch(`/admin/collections/${collectionId}/works/${workId}/position`, null, {
+      params: { position }
+    })
   }
 }
