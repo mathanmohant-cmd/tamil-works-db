@@ -166,7 +166,7 @@
 
         <div class="welcome-highlight">
           <h3>💡 About This Database</h3>
-          <p>This database applies <strong>word segmentation principles</strong> developed by Prof. Dr. P. Pandiyaraja to create a comprehensive concordance of Tamizh literary works. Understanding these principles will help you search more effectively and discover meaningful patterns across texts.
+          <p>This database is built using the comprehensive concordance of Tamizh literary works developed by Prof. Dr. P. Pandiyaraja. Understanding the <strong>word segmentation principles</strong> he has adopted will help you use this tool more effectively.
           </p>
           <p class="learn-more">
             <a href="#" @click.prevent="currentPage = 'principles'" class="principles-link">Learn about word segmentation principles →</a>
