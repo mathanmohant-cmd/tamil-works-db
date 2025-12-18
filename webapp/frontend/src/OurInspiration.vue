@@ -96,6 +96,13 @@
             closer to today's generation. His ability to distill profound insights from ancient texts
             reflects deep passion, rigor, and scholarship.
           </p>
+          <div class="resources">
+            <h4>A glimpse of their work</h4>
+            <ul>
+              <li><a href="https://www.youtube.com/watch?v=CvKR-6GchLM&list=PL-2LGdu8vvFv98qoMA2TL_FRbJCqqmItI" target="_blank" rel="noopener noreferrer">பாலாவின் சங்கச்சுரங்கம்</a> — இணையப்பத்து - முதலாம் பத்து</li>
+              <li><a href="https://www.youtube.com/watch?v=uuFdIMTqVDc" target="_blank" rel="noopener noreferrer">பாலாவின் சங்கச்சுரங்கம்</a> — கரும்பு இவண் தந்தோன்</li>
+            </ul>
+          </div>
         </div>
       </div>
 
