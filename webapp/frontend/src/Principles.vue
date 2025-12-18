@@ -3,7 +3,7 @@
     <article class="principles-content">
       <header class="principles-header">
         <h1>சொற்பிரிப்பு - ஓர் ஆறிமுகம்</h1>
-        <p class="lead">The principles of word segmentation as described by Prof. P. Pandiyaraja</p>
+        <p class="lead">The principles of word segmentation based on Prof. Dr. P. Pandiyaraja</p>
         <p class="source-link">Source: <a href="http://tamilconcordance.in/Principles.html" target="_blank" rel="noopener noreferrer">tamilconcordance.in/Principles.html</a></p>
       </header>
 
@@ -409,7 +409,6 @@
     </main>
 
     <footer class="principles-footer">
-      <p><strong>Prof. P. Pandiyaraja</strong></p>
       <p class="footer-source">Source: <a href="http://tamilconcordance.in/Principles.html" target="_blank" rel="noopener noreferrer">tamilconcordance.in/Principles.html</a></p>
     </footer>
     </article>
