@@ -44,7 +44,8 @@ class Database:
         work_ids: Optional[List[int]] = None,
         word_root: Optional[str] = None,
         limit: int = 100,
-        offset: int = 0
+        offset: int = 0,
+        sort_by: str = "alphabetical"  # "alphabetical", "canonical", or "chronological"
     ) -> Dict:
         """
         Search for words in the database
@@ -118,11 +119,26 @@ class Database:
                     query += " AND wd.word_root = %s"
                     params.append(word_root)
 
+                # Determine ORDER BY clause based on sort_by parameter
+                if sort_by == "canonical":
+                    # Sort by canonical position (from Traditional Canon collection)
+                    order_clause = """
+                        ORDER BY wd.canonical_position ASC NULLS LAST,
+                                 wd.work_name, wd.verse_id, wd.line_number, wd.word_position
+                    """
+                elif sort_by == "chronological":
+                    # Sort by chronological order (would need chronology fields in word_details view)
+                    # For now, fall back to work_name as proxy
+                    order_clause = """
+                        ORDER BY wd.work_name, wd.verse_id, wd.line_number, wd.word_position
+                    """
+                else:  # alphabetical (default)
+                    order_clause = """
+                        ORDER BY wd.work_name, wd.verse_id, wd.line_number, wd.word_position
+                    """
+
                 # Add ordering and pagination
-                query += """
-                    ORDER BY wd.work_name, wd.verse_id, wd.line_number, wd.word_position
-                    LIMIT %s OFFSET %s
-                """
+                query += f"{order_clause} LIMIT %s OFFSET %s"
                 params.extend([limit, offset])
 
                 # Execute search query
@@ -272,21 +288,55 @@ class Database:
                     "match_type": match_type
                 }
 
-    def get_works(self) -> List[Dict]:
-        """Get all literary works"""
+    def get_works(self, sort_by: str = "alphabetical") -> List[Dict]:
+        """
+        Get all literary works with optional sorting
+
+        Args:
+            sort_by: Sort order - "alphabetical", "canonical", or "chronological"
+        """
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("""
+                # Determine ORDER BY clause
+                if sort_by == "canonical":
+                    # Sort by position in Traditional Canon collection (ID=100)
+                    order_clause = """
+                        ORDER BY wc_canon.position_in_collection ASC NULLS LAST, w.work_name
+                    """
+                    from_clause = """
+                        FROM works w
+                        LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id
+                            AND wc_canon.collection_id = 100
+                    """
+                elif sort_by == "chronological":
+                    # Sort by midpoint of date range (average of start and end year)
+                    order_clause = """
+                        ORDER BY (w.chronology_start_year + w.chronology_end_year) / 2 ASC NULLS LAST, w.work_id
+                    """
+                    from_clause = "FROM works w"
+                else:  # alphabetical (default)
+                    order_clause = "ORDER BY w.work_name ASC"
+                    from_clause = "FROM works w"
+
+                cur.execute(f"""
                     SELECT
-                        work_id,
-                        work_name,
-                        work_name_tamil,
-                        author,
-                        author_tamil,
-                        period,
-                        description
-                    FROM works
-                    ORDER BY work_id
+                        w.work_id,
+                        w.work_name,
+                        w.work_name_tamil,
+                        w.author,
+                        w.author_tamil,
+                        w.period,
+                        w.description,
+                        w.chronology_start_year,
+                        w.chronology_end_year,
+                        w.chronology_confidence,
+                        w.chronology_notes,
+                        w.primary_collection_id,
+                        wc_canon.position_in_collection as canonical_position
+                    {from_clause}
+                    LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id
+                        AND wc_canon.collection_id = 100
+                    {order_clause}
                 """)
                 return [dict(row) for row in cur.fetchall()]
 

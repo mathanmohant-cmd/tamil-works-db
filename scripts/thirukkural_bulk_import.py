@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List
 import csv
 import io
+from word_cleaning import split_and_clean_words
 
 class ThirukkuralBulkImporter:
     def __init__(self, db_connection_string: str):
@@ -86,14 +87,22 @@ class ThirukkuralBulkImporter:
 
             print(f"  Creating Thirukkural work entry (ID: {self.work_id})...")
             self.cursor.execute("""
-                INSERT INTO works (work_id, work_name, work_name_tamil, period, author, author_tamil, description)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO works (
+                    work_id, work_name, work_name_tamil, period, author, author_tamil, description,
+                    chronology_start_year, chronology_end_year,
+                    chronology_confidence, chronology_notes
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id, work_name_english, work_name_tamil,
                 '4th - 5th century CE', 'Thiruvalluvar', 'திருவள்ளுவர்',
-                'Classic Tamil text on ethics, politics, and love - 1,330 couplets'
+                'Classic Tamil text on ethics, politics, and love - 1,330 couplets',
+                300, 500, 'medium',
+                'Dating disputed: ranges from 200 BCE to 800 CE. Kamil Zvelebil: 450-500 CE. Database uses moderate consensus.'
             ))
+
             self.conn.commit()
+            print(f"  ✓ Work created. Use collection management utility to assign to collections.")
 
     def _get_or_create_section_id(self, parent_id, level_type, section_number, section_name, section_name_tamil):
         """Get or create section, return section_id"""
@@ -235,9 +244,9 @@ class ThirukkuralBulkImporter:
                 'line_text': line_text
             })
 
-            # Parse words
-            words = line_text.strip().split()
-            for word_position, word_text in enumerate(words, start=1):
+            # Parse and clean words using shared utility
+            cleaned_words = split_and_clean_words(line_text)
+            for word_position, word_text in enumerate(cleaned_words, start=1):
                 word_id = self.word_id
                 self.word_id += 1
 
@@ -245,7 +254,7 @@ class ThirukkuralBulkImporter:
                     'word_id': word_id,
                     'line_id': line_id,
                     'word_position': word_position,
-                    'word_text': word_text.strip('.,;!?'),
+                    'word_text': word_text,
                     'sandhi_split': None
                 })
 

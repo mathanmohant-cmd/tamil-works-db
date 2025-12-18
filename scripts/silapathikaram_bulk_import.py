@@ -12,9 +12,11 @@ Structure:
   - புகார்க் காண்டம் (Pukar Kandam)
   - மதுரைக் காண்டம் (Madurai Kandam)
   - வஞ்சிக் காண்டம் (Vanci Kandam)
-- Level 2 (Kaathai/Paayiram/Vazhuthu): Subsections marked with #
-- Verses: Groups of lines (until blank line or next section marker)
-- Lines: Individual lines with numbers (multiples of 5) removed
+- Level 2 (Kaathai): Subsections marked with # (e.g., #1 மங்கல வாழ்த்துப் பாடல்)
+- IMPORTANT: Each Kaathai is ONE complete verse (not multiple verses)
+- Lines: Individual lines within each Kaathai verse
+- Note: Blank lines in input files are just for readability, NOT verse boundaries
+- Line numbers (multiples of 5) are removed during cleaning
 """
 
 import os
@@ -24,6 +26,7 @@ import psycopg2
 import csv
 import io
 from pathlib import Path
+from word_cleaning import split_and_clean_words
 
 # Kandam files (ordered)
 KANDAM_FILES = [
@@ -54,6 +57,9 @@ def parse_kandam_file(file_path):
     """
     Parse a single Kandam file and extract structure.
 
+    IMPORTANT: Each Kaathai (section marked with #) is ONE complete verse.
+    Blank lines are just for readability, NOT verse boundaries.
+
     Returns:
     {
         'kandam_name_tamil': str,
@@ -61,12 +67,7 @@ def parse_kandam_file(file_path):
             {
                 'number': int,
                 'name': str,
-                'verses': [
-                    {
-                        'lines': [str, str, ...]
-                    },
-                    ...
-                ]
+                'lines': [str, str, ...]  # All lines in this Kaathai (ONE verse)
             },
             ...
         ]
@@ -82,19 +83,12 @@ def parse_kandam_file(file_path):
     }
 
     current_section = None
-    current_verse_lines = []
 
     for line in lines:
         line = line.rstrip('\n')
 
-        # Skip empty lines (they mark verse boundaries)
+        # Skip empty lines (they are just for readability)
         if not line.strip():
-            # Save current verse if we have lines
-            if current_verse_lines and current_section is not None:
-                current_section['verses'].append({
-                    'lines': current_verse_lines.copy()
-                })
-                current_verse_lines = []
             continue
 
         # Check for Kandam marker ($)
@@ -106,14 +100,11 @@ def parse_kandam_file(file_path):
             kandam_info['kandam_name_tamil'] = kandam_text
             continue
 
-        # Check for section marker (#)
+        # Check for section marker (#) - This starts a NEW Kaathai (ONE verse)
         if line.startswith('#'):
-            # Save previous section's last verse
-            if current_verse_lines and current_section is not None:
-                current_section['verses'].append({
-                    'lines': current_verse_lines.copy()
-                })
-                current_verse_lines = []
+            # Save previous section if exists
+            if current_section is not None:
+                kandam_info['sections'].append(current_section)
 
             # Parse section header (format: #0 பதிகம் or #11 காடுகாண் காதை)
             match = re.match(r'^#(\d+)\s+(.+)$', line)
@@ -124,37 +115,23 @@ def parse_kandam_file(file_path):
                 current_section = {
                     'number': section_number,
                     'name': section_name,
-                    'verses': []
+                    'lines': []  # All lines belong to ONE verse
                 }
-                kandam_info['sections'].append(current_section)
             continue
 
-        # Regular content line
+        # Regular content line - add to current section's lines
         cleaned = clean_line(line)
         if cleaned and current_section is not None:
-            current_verse_lines.append(cleaned)
+            current_section['lines'].append(cleaned)
 
-    # Save last verse
-    if current_verse_lines and current_section is not None:
-        current_section['verses'].append({
-            'lines': current_verse_lines.copy()
-        })
+    # Save last section
+    if current_section is not None:
+        kandam_info['sections'].append(current_section)
 
     return kandam_info
 
 
-def simple_word_split(line):
-    """
-    Simple word segmentation for Tamil text.
-    Splits on whitespace and basic punctuation.
-    """
-    # Replace common punctuation with spaces
-    line = re.sub(r'[,;!?()।]', ' ', line)
-
-    # Split on whitespace and filter empty strings
-    words = [w.strip() for w in line.split() if w.strip()]
-
-    return words
+# Note: Removed simple_word_split function - now using shared word_cleaning utility
 
 
 class SilapathikaramBulkImporter:
@@ -196,18 +173,25 @@ class SilapathikaramBulkImporter:
 
             print(f"Creating work entry for {work_name_tamil}...")
             self.cursor.execute("""
-                INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO works (
+                    work_id, work_name, work_name_tamil, description, period, author, author_tamil,
+                    chronology_start_year, chronology_end_year,
+                    chronology_confidence, chronology_notes
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id,
                 work_name_english,
                 work_name_tamil,
                 'One of the Five Great Epics of Tamil Literature',
                 '5th-6th century CE',
-                'Ilango Adigal'
+                'Ilango Adigal',
+                'இளங்கோ அடிகள்',
+                400, 600, 'high',
+                'Epic by Iḷaṅkō Aṭikaḷ. References to Gajabahu of Sri Lanka help dating.'
             ))
             self.conn.commit()
-            print(f"Work ID: {self.work_id}")
+            print(f"  ✓ Work created (ID: {self.work_id}). Use collection management utility to assign to collections.")
 
         # Get starting IDs for batch processing
         self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
@@ -254,10 +238,14 @@ class SilapathikaramBulkImporter:
                 'sort_order': kandam_num
             })
 
-            # Process each Kaathai (subsection)
+            # Process each Kaathai (subsection) - each Kaathai is ONE verse
             for section_data in kandam_data['sections']:
                 section_name = section_data['name']
                 section_number = section_data['number']
+                kaathai_lines = section_data['lines']
+
+                if not kaathai_lines:
+                    continue
 
                 # Create Kaathai section
                 kaathai_section_id = self.section_id
@@ -275,57 +263,50 @@ class SilapathikaramBulkImporter:
                     'sort_order': section_number
                 })
 
-                verse_count = len(section_data['verses'])
-                print(f"  Kaathai #{section_number}: {section_name} ({verse_count} verses)")
+                line_count = len(kaathai_lines)
+                print(f"  Kaathai #{section_number}: {section_name} ({line_count} lines in 1 verse)")
 
-                # Process verses
-                for verse_idx, verse_data in enumerate(section_data['verses'], 1):
-                    verse_lines = verse_data['lines']
+                # Create ONE verse for this entire Kaathai
+                # verse_type stores the specific name (e.g., 'மங்கல வாழ்த்துப் பாடல்', 'கானல் வரி')
+                verse_id = self.verse_id
+                self.verse_id += 1
 
-                    if not verse_lines:
-                        continue
+                self.verses.append({
+                    'verse_id': verse_id,
+                    'work_id': self.work_id,
+                    'section_id': kaathai_section_id,
+                    'verse_number': 1,  # Always 1 - one verse per Kaathai
+                    'verse_type': section_name,  # Use the actual section name (includes காதை/வரி/பாடல்/etc.)
+                    'verse_type_tamil': section_name,  # Same as section_name since it's already in Tamil
+                    'total_lines': line_count,
+                    'sort_order': 1
+                })
 
-                    # Add verse
-                    verse_id = self.verse_id
-                    self.verse_id += 1
+                # Process all lines in this Kaathai (which is one verse)
+                for line_num, line_text in enumerate(kaathai_lines, 1):
+                    line_id = self.line_id
+                    self.line_id += 1
 
-                    self.verses.append({
+                    self.lines.append({
+                        'line_id': line_id,
                         'verse_id': verse_id,
-                        'work_id': self.work_id,
-                        'section_id': kaathai_section_id,
-                        'verse_number': verse_idx,
-                        'verse_type': 'poem',
-                        'verse_type_tamil': 'பாடல்',
-                        'total_lines': len(verse_lines),
-                        'sort_order': verse_idx
+                        'line_number': line_num,
+                        'line_text': line_text
                     })
 
-                    # Process lines
-                    for line_num, line_text in enumerate(verse_lines, 1):
-                        line_id = self.line_id
-                        self.line_id += 1
+                    # Process words using shared cleaning utility
+                    cleaned_words = split_and_clean_words(line_text)
+                    for word_pos, word_text in enumerate(cleaned_words, 1):
+                        word_id = self.word_id
+                        self.word_id += 1
 
-                        self.lines.append({
+                        self.words.append({
+                            'word_id': word_id,
                             'line_id': line_id,
-                            'verse_id': verse_id,
-                            'line_number': line_num,
-                            'line_text': line_text
+                            'word_position': word_pos,
+                            'word_text': word_text,
+                            'sandhi_split': None
                         })
-
-                        # Process words
-                        words = simple_word_split(line_text)
-                        for word_pos, word_text in enumerate(words, 1):
-                            if word_text:
-                                word_id = self.word_id
-                                self.word_id += 1
-
-                                self.words.append({
-                                    'word_id': word_id,
-                                    'line_id': line_id,
-                                    'word_position': word_pos,
-                                    'word_text': word_text,
-                                    'sandhi_split': None
-                                })
 
         print(f"\n✓ Phase 1 complete: Parsed all files")
         print(f"  - Sections: {len(self.sections)}")

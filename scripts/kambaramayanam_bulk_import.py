@@ -24,6 +24,7 @@ import psycopg2
 import csv
 import io
 from pathlib import Path
+from word_cleaning import split_and_clean_words
 
 # Kandam files (ordered) - Yuddha Kandam (6) split into parts 61-64
 # Note: Section names should NOT include the level type word (காண்டம்) to avoid duplication in hierarchy display
@@ -150,18 +151,7 @@ def parse_kandam_file(file_path):
     return kandam_info
 
 
-def simple_word_split(line):
-    """
-    Simple word segmentation for Tamil text.
-    Splits on whitespace and basic punctuation.
-    """
-    # Replace common punctuation with spaces
-    line = re.sub(r'[,;!?()।]', ' ', line)
-
-    # Split on whitespace and filter empty strings
-    words = [w.strip() for w in line.split() if w.strip()]
-
-    return words
+# Note: Removed simple_word_split function - now using shared word_cleaning utility
 
 
 class KambaramayanamBulkImporter:
@@ -206,18 +196,25 @@ class KambaramayanamBulkImporter:
 
             print(f"Creating work entry for {work_name_tamil}...")
             self.cursor.execute("""
-                INSERT INTO works (work_id, work_name, work_name_tamil, description, period, author)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO works (
+                    work_id, work_name, work_name_tamil, description, period, author, author_tamil,
+                    chronology_start_year, chronology_end_year,
+                    chronology_confidence, chronology_notes
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id,
                 work_name_english,
                 work_name_tamil,
                 'Tamil retelling of the Ramayana epic',
                 '12th century CE',
-                'Kambar'
+                'Kambar',
+                'கம்பர்',
+                1100, 1200, 'high',
+                'Medieval epic by Kambar during Chola period.'
             ))
             self.conn.commit()
-            print(f"Work ID: {self.work_id}")
+            print(f"  ✓ Work created (ID: {self.work_id}). Use collection management utility to assign to collections.")
 
         # Get starting IDs for batch processing
         self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
@@ -383,20 +380,19 @@ class KambaramayanamBulkImporter:
                             'line_text': line_text
                         })
 
-                        # Process words
-                        words = simple_word_split(line_text)
-                        for word_pos, word_text in enumerate(words, 1):
-                            if word_text:
-                                word_id = self.word_id
-                                self.word_id += 1
+                        # Process words using shared cleaning utility
+                        cleaned_words = split_and_clean_words(line_text)
+                        for word_pos, word_text in enumerate(cleaned_words, 1):
+                            word_id = self.word_id
+                            self.word_id += 1
 
-                                self.words.append({
-                                    'word_id': word_id,
-                                    'line_id': line_id,
-                                    'word_position': word_pos,
-                                    'word_text': word_text,
-                                    'sandhi_split': None
-                                })
+                            self.words.append({
+                                'word_id': word_id,
+                                'line_id': line_id,
+                                'word_position': word_pos,
+                                'word_text': word_text,
+                                'sandhi_split': None
+                            })
 
         print(f"\n✓ Phase 1 complete: Parsed all files")
         print(f"  - Sections: {len(self.sections)}")

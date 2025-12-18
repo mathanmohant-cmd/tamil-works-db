@@ -22,78 +22,115 @@ import os
 
 class SangamBulkImporter:
     # Map filenames to work information (work_id assigned dynamically)
+    # Ordered by standard Sangam literature sequence (1-18)
     SANGAM_WORKS = {
-        'குறுந்தொகை.txt': {
-            'work_name': 'Kuruntokai', 'work_name_tamil': 'குறுந்தொகை',
-            'type': 'thogai', 'description': 'Short poems on love and war'
-        },
         'நற்றிணை.txt': {
-            'work_name': 'Natrinai', 'work_name_tamil': 'நற்றிணை',
-            'type': 'thogai', 'description': 'Collection of 400 poems'
+            'work_name': 'Natrrinai', 'work_name_tamil': 'நற்றிணை',
+            'type': 'thogai', 'description': 'Collection of 400 poems',
+            'traditional_order': 2, 'start_year': -100, 'end_year': 100,
+            'confidence': 'high', 'notes': 'Considered among the earliest Sangam works'
+        },
+        'குறுந்தொகை.txt': {
+            'work_name': 'Kurunthokai', 'work_name_tamil': 'குறுந்தொகை',
+            'type': 'thogai', 'description': 'Short poems on love and war',
+            'traditional_order': 3, 'start_year': -100, 'end_year': 100,
+            'confidence': 'high', 'notes': 'Early Sangam anthology'
         },
         'ஐங்குறுநூறு.txt': {
             'work_name': 'Ainkurunuru', 'work_name_tamil': 'ஐங்குறுநூறு',
-            'type': 'thogai', 'description': 'Five hundred short poems'
-        },
-        'அகநானூறு.txt': {
-            'work_name': 'Akananuru', 'work_name_tamil': 'அகநானூறு',
-            'type': 'thogai', 'description': 'Four hundred poems on love'
-        },
-        'புறநானூறு.txt': {
-            'work_name': 'Purananuru', 'work_name_tamil': 'புறநானூறு',
-            'type': 'thogai', 'description': 'Four hundred poems on war and ethics'
-        },
-        'கலித்தொகை.txt': {
-            'work_name': 'Kalittokai', 'work_name_tamil': 'கலித்தொகை',
-            'type': 'thogai', 'description': 'Collection of Kali meter poems'
+            'type': 'thogai', 'description': 'Five hundred short poems',
+            'traditional_order': 4, 'start_year': -100, 'end_year': 200,
+            'confidence': 'high', 'notes': 'Sangam anthology of 500 short love poems'
         },
         'பதிற்றுப்பத்து.txt': {
-            'work_name': 'Patirruppattu', 'work_name_tamil': 'பதிற்றுப்பத்து',
-            'type': 'thogai', 'description': 'Ten tens of poems'
+            'work_name': 'Pathitrupathu', 'work_name_tamil': 'பதிற்றுப்பத்து',
+            'type': 'thogai', 'description': 'Ten tens of poems',
+            'traditional_order': 5, 'start_year': 100, 'end_year': 200,
+            'confidence': 'high', 'notes': 'Features Chera kings, slightly later than other anthologies'
         },
         'பரிபாடல்.txt': {
-            'work_name': 'Paripadal', 'work_name_tamil': 'பரிபாடல்',
-            'type': 'thogai', 'description': 'Songs in Paripadal meter'
+            'work_name': 'Paripaadal', 'work_name_tamil': 'பரிபாடல்',
+            'type': 'thogai', 'description': 'Songs in Paripadal meter',
+            'traditional_order': 6, 'start_year': 100, 'end_year': 200,
+            'confidence': 'high', 'notes': 'Religious hymns to Murugan and Thirumal'
+        },
+        'கலித்தொகை.txt': {
+            'work_name': 'Kalithokai', 'work_name_tamil': 'கலித்தொகை',
+            'type': 'thogai', 'description': 'Collection of Kali meter poems',
+            'traditional_order': 7, 'start_year': 100, 'end_year': 250,
+            'confidence': 'medium', 'notes': 'Some scholars date to later Sangam period'
+        },
+        'அகநானூறு.txt': {
+            'work_name': 'Aganaanuru', 'work_name_tamil': 'அகநானூறு',
+            'type': 'thogai', 'description': 'Four hundred poems on love',
+            'traditional_order': 8, 'start_year': -100, 'end_year': 200,
+            'confidence': 'high', 'notes': '400 love poems from Sangam period'
+        },
+        'புறநானூறு.txt': {
+            'work_name': 'Puranaanuru', 'work_name_tamil': 'புறநானூறு',
+            'type': 'thogai', 'description': 'Four hundred poems on war and ethics',
+            'traditional_order': 9, 'start_year': -100, 'end_year': 200,
+            'confidence': 'high', 'notes': 'Historical references help date some poems precisely'
         },
         'திருமுருகாற்றுப்படை.txt': {
-            'work_name': 'Tirumurukāṟṟuppaṭai', 'work_name_tamil': 'திருமுருகாற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to Lord Murugan'
+            'work_name': 'Thirumurugaatruppadai', 'work_name_tamil': 'திருமுருகாற்றுப்படை',
+            'type': 'padal', 'description': 'Guide to Lord Murugan',
+            'traditional_order': 10, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'பொருநராற்றுப்படை.txt': {
-            'work_name': 'Porunarāṟṟuppaṭai', 'work_name_tamil': 'பொருநராற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to patron'
+            'work_name': 'Porunaraatruppadai', 'work_name_tamil': 'பொருநராற்றுப்படை',
+            'type': 'padal', 'description': 'Guide to patron',
+            'traditional_order': 11, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'சிறுபாணாற்றுப்படை.txt': {
-            'work_name': 'Sirupāṇāṟṟuppaṭai', 'work_name_tamil': 'சிறுபாணாற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to small drum player'
+            'work_name': 'Sirupanaatruppadai', 'work_name_tamil': 'சிறுபாணாற்றுப்படை',
+            'type': 'padal', 'description': 'Guide to small drum player',
+            'traditional_order': 12, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'பெரும்பாணாற்றுப்படை.txt': {
-            'work_name': 'Perumpāṇāṟṟuppaṭai', 'work_name_tamil': 'பெரும்பாணாற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to great drum player'
+            'work_name': 'Perumpanaatruppadai', 'work_name_tamil': 'பெரும்பாணாற்றுப்படை',
+            'type': 'padal', 'description': 'Guide to great drum player',
+            'traditional_order': 13, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'முல்லைப்பாட்டு.txt': {
-            'work_name': 'Mullaippāṭṭu', 'work_name_tamil': 'முல்லைப்பாட்டு',
-            'type': 'padal', 'description': 'Song of Mullai landscape'
+            'work_name': 'Mullaippaattu', 'work_name_tamil': 'முல்லைப்பாட்டு',
+            'type': 'padal', 'description': 'Song of Mullai landscape',
+            'traditional_order': 14, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'மதுரைக்காஞ்சி.txt': {
-            'work_name': 'Maturaikkāñci', 'work_name_tamil': 'மதுரைக்காஞ்சி',
-            'type': 'padal', 'description': 'Description of Madurai city'
+            'work_name': 'Madurai kanchi', 'work_name_tamil': 'மதுரைக்காஞ்சி',
+            'type': 'padal', 'description': 'Description of Madurai city',
+            'traditional_order': 15, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'நெடுநல்வாடை.txt': {
-            'work_name': 'Neṭunalvāṭai', 'work_name_tamil': 'நெடுநல்வாடை',
-            'type': 'padal', 'description': 'The long north wind'
-        },
-        'பட்டினப்பாலை.txt': {
-            'work_name': 'Paṭṭiṉappālai', 'work_name_tamil': 'பட்டினப்பாலை',
-            'type': 'padal', 'description': 'Description of seaport'
-        },
-        'மலைபடுகடாம்.txt': {
-            'work_name': 'Malaippaṭukaṭām', 'work_name_tamil': 'மலைபடுகடாம்',
-            'type': 'padal', 'description': 'Mountain-traversing journey'
+            'work_name': 'Nedunalvaadai', 'work_name_tamil': 'நெடுநல்வாடை',
+            'type': 'padal', 'description': 'The long north wind',
+            'traditional_order': 16, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         },
         'குறிஞ்சிப்பாட்டு.txt': {
-            'work_name': 'Kuṟiñcippāṭṭu', 'work_name_tamil': 'குறிஞ்சிப்பாட்டு',
-            'type': 'padal', 'description': 'Song of Kurinji landscape'
+            'work_name': 'Kurinchippaattu', 'work_name_tamil': 'குறிஞ்சிப்பாட்டு',
+            'type': 'padal', 'description': 'Song of Kurinji landscape',
+            'traditional_order': 17, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
+        },
+        'பட்டினப்பாலை.txt': {
+            'work_name': 'Pattinappaalai', 'work_name_tamil': 'பட்டினப்பாலை',
+            'type': 'padal', 'description': 'Description of seaport',
+            'traditional_order': 18, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
+        },
+        'மலைபடுகடாம்.txt': {
+            'work_name': 'Malaipadukataam', 'work_name_tamil': 'மலைபடுகடாம்',
+            'type': 'padal', 'description': 'Mountain-traversing journey',
+            'traditional_order': 19, 'start_year': 150, 'end_year': 250,
+            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
         }
     }
 
@@ -157,7 +194,11 @@ class SangamBulkImporter:
                     'period': '300 BCE - 300 CE',
                     'author': 'Various',
                     'author_tamil': 'பல்வேறு புலவர்கள்',
-                    'description': work_info['description']
+                    'description': work_info['description'],
+                    'chronology_start_year': work_info['start_year'],
+                    'chronology_end_year': work_info['end_year'],
+                    'chronology_confidence': work_info['confidence'],
+                    'chronology_notes': work_info['notes']
                 })
 
                 next_work_id += 1  # Increment for next work
@@ -165,9 +206,11 @@ class SangamBulkImporter:
         if self.works:
             self._bulk_copy('works', self.works,
                            ['work_id', 'work_name', 'work_name_tamil', 'period',
-                            'author', 'author_tamil', 'description'])
+                            'author', 'author_tamil', 'description',
+                            'chronology_start_year', 'chronology_end_year',
+                            'chronology_confidence', 'chronology_notes'])
             self.conn.commit()
-            print(f"  Created {len(self.works)} new work entries")
+            print(f"  ✓ Created {len(self.works)} new work entries. Use collection management utility to assign to collections.")
 
     def _reset_data_containers(self):
         """Clear data containers for next work"""

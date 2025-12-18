@@ -52,6 +52,12 @@ class Work(BaseModel):
     author_tamil: Optional[str]
     period: Optional[str]
     description: Optional[str]
+    primary_collection_id: Optional[int]
+    canonical_position: Optional[int]  # Position in Traditional Canon collection (if applicable)
+    chronology_start_year: Optional[int]
+    chronology_end_year: Optional[int]
+    chronology_confidence: Optional[str]
+    chronology_notes: Optional[str]
 
 
 class Statistics(BaseModel):
@@ -89,7 +95,8 @@ def search_words(
     work_ids: Optional[str] = Query(None, description="Comma-separated work IDs to filter"),
     word_root: Optional[str] = Query(None, description="Filter by word root"),
     limit: int = Query(100, ge=0, le=500, description="Maximum results per page"),
-    offset: int = Query(0, ge=0, description="Pagination offset")
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    sort_by: str = Query("alphabetical", pattern="^(alphabetical|canonical|chronological)$", description="Sort order: alphabetical, canonical (traditional order 1-22), or chronological")
 ):
     """
     Search for Tamil words across all literary works
@@ -101,6 +108,7 @@ def search_words(
     - **word_root**: Filter by word root
     - **limit**: Maximum number of results (1-500)
     - **offset**: Pagination offset
+    - **sort_by**: Sort order - "alphabetical" (default), "canonical" (traditional 1-22 order), or "chronological"
     """
     try:
         # Parse work_ids if provided
@@ -116,7 +124,8 @@ def search_words(
             work_ids=work_id_list,
             word_root=word_root,
             limit=limit,
-            offset=offset
+            offset=offset,
+            sort_by=sort_by
         )
 
         return results
@@ -141,14 +150,19 @@ def search_words(
 
 
 @app.get("/works", response_model=List[Work])
-def get_works():
+def get_works(
+    sort_by: str = Query("alphabetical", pattern="^(alphabetical|canonical|chronological)$",
+                        description="Sort order: alphabetical (by name), canonical (traditional 1-22 order), or chronological (by date)")
+):
     """
     Get all literary works in the database
 
     Returns list of works with metadata
+
+    - **sort_by**: Sort order - "alphabetical", "canonical" (traditional 1-22 order), or "chronological"
     """
     try:
-        return db.get_works()
+        return db.get_works(sort_by=sort_by)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

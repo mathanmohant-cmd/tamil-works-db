@@ -32,9 +32,55 @@ CREATE TABLE works (
     author VARCHAR(200),
     author_tamil VARCHAR(200),
     description TEXT,
-    traditional_sort_order INTEGER,  -- Traditional chronological ordering of Tamil literature
+    chronology_start_year INTEGER,  -- Approximate start year (negative = BCE)
+    chronology_end_year INTEGER,  -- Approximate end year (negative = BCE)
+    chronology_confidence VARCHAR(20),  -- 'high', 'medium', 'low', 'disputed'
+    chronology_notes TEXT,  -- Scholarly variations and dating debates
+    primary_collection_id INTEGER,  -- Primary collection this work belongs to (FK added after collections table)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Collections table (literary periods, traditions, genres, canons)
+CREATE TABLE collections (
+    collection_id INTEGER PRIMARY KEY,
+    collection_name VARCHAR(100) NOT NULL UNIQUE,
+    collection_name_tamil VARCHAR(100),
+    collection_type VARCHAR(50) NOT NULL,  -- 'period', 'tradition', 'genre', 'canon', 'custom'
+    description TEXT,
+    parent_collection_id INTEGER,  -- For hierarchical collections (FK self-reference added below)
+    sort_order INTEGER,  -- For ordering collections themselves
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add foreign key constraints for collections
+ALTER TABLE collections
+    ADD CONSTRAINT fk_collections_parent
+    FOREIGN KEY (parent_collection_id) REFERENCES collections(collection_id);
+
+ALTER TABLE works
+    ADD CONSTRAINT fk_works_primary_collection
+    FOREIGN KEY (primary_collection_id) REFERENCES collections(collection_id);
+
+-- Junction table: Works can belong to multiple collections
+CREATE TABLE work_collections (
+    work_collection_id SERIAL PRIMARY KEY,
+    work_id INTEGER NOT NULL,
+    collection_id INTEGER NOT NULL,
+    position_in_collection INTEGER,  -- Order within this specific collection
+    is_primary BOOLEAN DEFAULT FALSE,  -- Mark primary collection for each work
+    notes TEXT,  -- Collection-specific notes about this work
+    FOREIGN KEY (work_id) REFERENCES works(work_id) ON DELETE CASCADE,
+    FOREIGN KEY (collection_id) REFERENCES collections(collection_id) ON DELETE CASCADE,
+    UNIQUE (work_id, collection_id),
+    UNIQUE (collection_id, position_in_collection)
+);
+
+-- Indexes for collections
+CREATE INDEX idx_collections_type ON collections(collection_type);
+CREATE INDEX idx_collections_parent ON collections(parent_collection_id);
+CREATE INDEX idx_works_primary_collection ON works(primary_collection_id);
+CREATE INDEX idx_work_collections_work ON work_collections(work_id);
+CREATE INDEX idx_work_collections_collection ON work_collections(collection_id);
 
 -- Hierarchical sections table (flexible structure for all levels)
 CREATE TABLE sections (
@@ -63,8 +109,8 @@ CREATE TABLE verses (
     work_id INTEGER NOT NULL,
     section_id INTEGER NOT NULL,  -- Links to the most specific section (e.g., adhikaram)
     verse_number INTEGER NOT NULL,
-    verse_type VARCHAR(50),  -- e.g., 'kural', 'venba', 'kalippa', 'noorpa', 'poem'
-    verse_type_tamil VARCHAR(50),
+    verse_type VARCHAR(200),  -- Type/name of verse: 'kural', 'Mangala Vaazhththu Paadal', 'Kaanal Vari', etc.
+    verse_type_tamil VARCHAR(200),  -- Tamil type/name: 'குறள்', 'மங்கல வாழ்த்துப் பாடல்', 'கானல் வரி', etc.
     meter VARCHAR(100),  -- Poetic meter if applicable
     total_lines INTEGER NOT NULL,
     sort_order INTEGER NOT NULL,
@@ -187,13 +233,14 @@ SELECT
     v.verse_type_tamil,
     w.work_name,
     w.work_name_tamil,
-    w.traditional_sort_order,
+    wc_canon.position_in_collection as canonical_position,  -- Position in Traditional Canon collection
     sp.path_names as hierarchy_path,
     sp.path_names_tamil as hierarchy_path_tamil,
     sp.depth as hierarchy_depth
 FROM verses v
 INNER JOIN works w ON v.work_id = w.work_id
-INNER JOIN section_path sp ON v.section_id = sp.section_id;
+INNER JOIN section_path sp ON v.section_id = sp.section_id
+LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id AND wc_canon.collection_id = 100;  -- 100 = Traditional Canon
 
 -- Complete word information with full context
 CREATE VIEW word_details AS
@@ -215,13 +262,89 @@ SELECT
     vh.verse_type_tamil,
     vh.work_name,
     vh.work_name_tamil,
-    vh.traditional_sort_order,
+    vh.canonical_position,  -- From Traditional Canon collection (collection_id = 100)
     vh.hierarchy_path,
     vh.hierarchy_path_tamil
 FROM words w
 INNER JOIN lines l ON w.line_id = l.line_id
 INNER JOIN verses v ON l.verse_id = v.verse_id
 INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id;
+
+-- View: Works with their primary collection
+CREATE VIEW works_with_primary_collection AS
+SELECT
+    w.*,
+    c.collection_name,
+    c.collection_name_tamil,
+    c.collection_type,
+    wc.position_in_collection,
+    wc.notes AS collection_notes
+FROM works w
+LEFT JOIN work_collections wc ON w.work_id = wc.work_id AND wc.is_primary = TRUE
+LEFT JOIN collections c ON wc.collection_id = c.collection_id;
+
+-- View: Collection hierarchy with work counts
+CREATE VIEW collection_hierarchy AS
+WITH RECURSIVE coll_tree AS (
+    -- Base case: top-level collections
+    SELECT
+        c.collection_id,
+        c.collection_name,
+        c.collection_name_tamil,
+        c.collection_type,
+        c.parent_collection_id,
+        c.sort_order,
+        0 AS depth,
+        ARRAY[c.collection_id] AS path,
+        c.collection_name::TEXT AS full_path
+    FROM collections c
+    WHERE c.parent_collection_id IS NULL
+
+    UNION ALL
+
+    -- Recursive case: child collections
+    SELECT
+        c.collection_id,
+        c.collection_name,
+        c.collection_name_tamil,
+        c.collection_type,
+        c.parent_collection_id,
+        c.sort_order,
+        ct.depth + 1,
+        ct.path || c.collection_id,
+        ct.full_path || ' > ' || c.collection_name
+    FROM collections c
+    JOIN coll_tree ct ON c.parent_collection_id = ct.collection_id
+)
+SELECT
+    ct.*,
+    COUNT(DISTINCT wc.work_id) AS work_count
+FROM coll_tree ct
+LEFT JOIN work_collections wc ON ct.collection_id = wc.collection_id
+GROUP BY ct.collection_id, ct.collection_name, ct.collection_name_tamil,
+         ct.collection_type, ct.parent_collection_id, ct.sort_order,
+         ct.depth, ct.path, ct.full_path
+ORDER BY ct.path;
+
+-- View: Works in collections with hierarchy
+CREATE VIEW works_in_collections AS
+SELECT
+    w.work_id,
+    w.work_name,
+    w.work_name_tamil,
+    c.collection_id,
+    c.collection_name,
+    c.collection_name_tamil,
+    c.collection_type,
+    wc.position_in_collection,
+    wc.is_primary,
+    pc.collection_name AS parent_collection_name,
+    pc.collection_name_tamil AS parent_collection_name_tamil
+FROM works w
+JOIN work_collections wc ON w.work_id = wc.work_id
+JOIN collections c ON wc.collection_id = c.collection_id
+LEFT JOIN collections pc ON c.parent_collection_id = pc.collection_id
+ORDER BY c.collection_id, wc.position_in_collection;
 
 -- ============================================================================
 -- COMMON QUERY EXAMPLES
