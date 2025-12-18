@@ -166,7 +166,7 @@
 
         <div class="welcome-highlight">
           <h3>💡 About This Database</h3>
-          <p>This database uses <strong>word segmentation principles</strong> to extract words from literary works for creating concordance of Tamizh words for Tamizh literary works. For better use of this tool, please learn word segmentation principles.
+          <p>This database applies <strong>word segmentation principles</strong> developed by Prof. Dr. P. Pandiyaraja to create a comprehensive concordance of Tamizh literary works. Understanding these principles will help you search more effectively and discover meaningful patterns across texts.
           </p>
           <p class="learn-more">
             <a href="#" @click.prevent="currentPage = 'principles'" class="principles-link">Learn about word segmentation principles →</a>
