@@ -166,7 +166,7 @@
 
         <div class="welcome-highlight">
           <h3>💡 About This Database</h3>
-          <p>This database uses <strong>word segmentation principles</strong> to extract words from literary works. For better use of this tool, please learn about word segmentation principles.</p>
+          <p>This database uses <strong>word segmentation principles</strong> to extract words from literary works for creating concordance of Tamil words for Tamil Literary works. For better use of this tool, please learn about word segmentation principles.</p>
           <p class="learn-more">
             <a href="#" @click.prevent="currentPage = 'principles'" class="principles-link">Learn about word segmentation principles →</a>
           </p>
