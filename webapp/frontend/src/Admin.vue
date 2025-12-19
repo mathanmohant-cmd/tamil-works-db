@@ -178,15 +178,22 @@
           <div class="works-section">
             <div class="section-header">
               <h4>Works in this Collection ({{ selectedCollection.works?.length || 0 }})</h4>
-              <button @click="showAddWork = true" class="btn-small">+ Add Work</button>
+              <button @click="openAddWorkModal" class="btn-small">+ Add Work</button>
             </div>
 
             <div v-if="selectedCollection.works?.length > 0" class="works-list">
               <div
-                v-for="work in selectedCollection.works"
+                v-for="(work, index) in sortedWorks"
                 :key="work.work_id"
                 class="work-item"
+                draggable="true"
+                @dragstart="handleDragStart(index, $event)"
+                @dragover="handleDragOver(index, $event)"
+                @drop="handleDrop(index, $event)"
+                @dragend="handleDragEnd"
+                :class="{ 'dragging': draggedIndex === index, 'drag-over': dragOverIndex === index }"
               >
+                <span class="drag-handle" title="Drag to reorder">☰</span>
                 <div class="work-info">
                   <span class="work-position" v-if="work.position_in_collection">
                     #{{ work.position_in_collection }}
@@ -243,7 +250,15 @@
 
         <div class="form-group">
           <label>Position in Collection</label>
-          <input v-model.number="addWorkData.position" type="number" min="1" />
+          <input
+            v-model.number="addWorkData.position"
+            type="number"
+            min="1"
+            placeholder="Auto-assigned"
+          />
+          <small style="display: block; margin-top: 4px; color: #666;">
+            Next available position auto-assigned. You can change it if needed.
+          </small>
         </div>
 
         <div class="form-group">
@@ -351,6 +366,25 @@ export default {
       is_primary: false
     })
 
+    // Watch for showAddWork to auto-assign next position
+    const openAddWorkModal = () => {
+      // Calculate next available position
+      const currentWorks = selectedCollection.value?.works || []
+      const maxPosition = currentWorks.length > 0
+        ? Math.max(...currentWorks.map(w => w.position_in_collection || 0))
+        : 0
+      const nextPosition = maxPosition + 1
+
+      // Reset form data with auto-assigned position
+      addWorkData.value = {
+        work_id: null,
+        position: nextPosition,
+        is_primary: false
+      }
+
+      showAddWork.value = true
+    }
+
     // Delete confirmation
     const showDeleteConfirm = ref(false)
 
@@ -400,6 +434,76 @@ export default {
       const existingIds = new Set(selectedCollection.value.works?.map(w => w.work_id) || [])
       return works.value.filter(w => !existingIds.has(w.work_id))
     })
+
+    // Sorted works for display (sorted by position_in_collection)
+    const sortedWorks = computed(() => {
+      if (!selectedCollection.value?.works) return []
+      return [...selectedCollection.value.works].sort((a, b) => {
+        const posA = a.position_in_collection || 999999
+        const posB = b.position_in_collection || 999999
+        return posA - posB
+      })
+    })
+
+    // Drag and drop state
+    const draggedIndex = ref(null)
+    const dragOverIndex = ref(null)
+
+    // Drag and drop handlers
+    const handleDragStart = (index, event) => {
+      draggedIndex.value = index
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/html', event.target.innerHTML)
+    }
+
+    const handleDragOver = (index, event) => {
+      event.preventDefault()
+      event.dataTransfer.dropEffect = 'move'
+      dragOverIndex.value = index
+    }
+
+    const handleDrop = async (dropIndex, event) => {
+      event.preventDefault()
+      const dragIndex = draggedIndex.value
+
+      if (dragIndex === null || dragIndex === dropIndex) {
+        draggedIndex.value = null
+        dragOverIndex.value = null
+        return
+      }
+
+      // Reorder the works array
+      const works = [...sortedWorks.value]
+      const [draggedItem] = works.splice(dragIndex, 1)
+      works.splice(dropIndex, 0, draggedItem)
+
+      // Update positions on backend
+      try {
+        for (let i = 0; i < works.length; i++) {
+          const newPosition = i + 1
+          if (works[i].position_in_collection !== newPosition) {
+            await api.updateWorkPosition(
+              selectedCollection.value.collection_id,
+              works[i].work_id,
+              newPosition
+            )
+          }
+        }
+
+        // Reload collection to get updated data
+        await selectCollection(selectedCollection.value)
+      } catch (err) {
+        error.value = 'Failed to reorder works: ' + (err.response?.data?.detail || err.message)
+      } finally {
+        draggedIndex.value = null
+        dragOverIndex.value = null
+      }
+    }
+
+    const handleDragEnd = () => {
+      draggedIndex.value = null
+      dragOverIndex.value = null
+    }
 
     // Form actions
     const showCreateForm = () => {
@@ -520,6 +624,9 @@ export default {
       addWorkData,
       showDeleteConfirm,
       availableWorks,
+      sortedWorks,
+      draggedIndex,
+      dragOverIndex,
       selectCollection,
       selectCollectionById,
       showCreateForm,
@@ -528,8 +635,13 @@ export default {
       saveCollection,
       confirmDelete,
       deleteCollection,
+      openAddWorkModal,
       addWork,
-      removeWork
+      removeWork,
+      handleDragStart,
+      handleDragOver,
+      handleDrop,
+      handleDragEnd
     }
   }
 }
@@ -668,6 +780,30 @@ export default {
   background: #f9f9f9;
   border-radius: 4px;
   margin-bottom: 4px;
+  cursor: move;
+  transition: all 0.2s ease;
+}
+
+.work-item.dragging {
+  opacity: 0.5;
+  background: #e3f2fd;
+}
+
+.work-item.drag-over {
+  border-top: 2px solid #2196f3;
+  margin-top: 4px;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #999;
+  margin-right: 8px;
+  font-size: 16px;
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .work-info {

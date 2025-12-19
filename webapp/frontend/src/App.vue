@@ -94,6 +94,20 @@
               </label>
             </div>
           </div>
+          <!-- Sort Order Options -->
+          <div class="sort-order-options">
+            <div class="filter-group-inline">
+              <span class="filter-label">Sort by:</span>
+              <label>
+                <input type="radio" v-model="sortBy" value="canonical" />
+                Traditional Canon
+              </label>
+              <label>
+                <input type="radio" v-model="sortBy" value="alphabetical" />
+                Alphabetical
+              </label>
+            </div>
+          </div>
           <!-- Navigation -->
           <nav class="main-nav">
             <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Home</button>
@@ -403,6 +417,9 @@ export default {
     const searchQuery = ref('')
     const matchType = ref('partial')
     const wordPosition = ref('beginning')  // beginning, end, anywhere
+    const sortBy = ref('canonical')  // canonical (default), alphabetical
+    const collections = ref([])
+    const selectedCollectionId = ref(null)
     const filterMode = ref('all')  // 'all' or 'select'
     const selectedWorks = ref([])
     const selectAllWorks = ref(true)
@@ -440,6 +457,10 @@ export default {
         const worksResponse = await api.getWorks()
         works.value = worksResponse.data
 
+        // Load collections for sort options
+        const collectionsResponse = await api.getPublicCollections()
+        collections.value = collectionsResponse.data
+
         // Check for saved selection in session storage
         const savedSelection = sessionStorage.getItem('selectedWorks')
         const savedMode = sessionStorage.getItem('filterMode')
@@ -474,6 +495,14 @@ export default {
       // Clear search results when filter changes if we have active search
       if (searchResults.value && searchQuery.value) {
         // Auto-search with new filter selection
+        performSearch()
+      }
+    })
+
+    // Watch sortBy changes to auto-reload results
+    watch(sortBy, () => {
+      // Auto-reload search results when sort order changes if we have active search
+      if (searchResults.value && searchQuery.value) {
         performSearch()
       }
     })
@@ -544,11 +573,16 @@ export default {
           match_type: matchType.value,
           word_position: wordPosition.value,
           limit: 0, // Don't load any results initially, just get unique_words
-          offset: 0
+          offset: 0,
+          sort_by: sortBy.value
         }
 
         if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
           params.work_ids = selectedWorks.value.join(',')
+        }
+
+        if (sortBy.value === 'collection' && selectedCollectionId.value) {
+          params.collection_id = selectedCollectionId.value
         }
 
         const response = await api.searchWords(params)
@@ -583,11 +617,16 @@ export default {
           match_type: matchType.value,
           word_position: wordPosition.value,
           limit: 100,
-          offset: offset.value
+          offset: offset.value,
+          sort_by: sortBy.value
         }
 
         if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
           params.work_ids = selectedWorks.value.join(',')
+        }
+
+        if (sortBy.value === 'collection' && selectedCollectionId.value) {
+          params.collection_id = selectedCollectionId.value
         }
 
         const response = await api.searchWords(params)
@@ -636,23 +675,27 @@ export default {
           q: wordText,
           match_type: 'exact',
           limit: 500,
-          offset: 0
+          offset: 0,
+          sort_by: sortBy.value
         }
 
         if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
           params.work_ids = selectedWorks.value.join(',')
         }
 
+        if (sortBy.value === 'collection' && selectedCollectionId.value) {
+          params.collection_id = selectedCollectionId.value
+        }
+
         const response = await api.searchWords(params)
 
-        // Merge new results with existing results, preserving unique_words
-        const existingResults = searchResults.value.results.filter(
-          r => r.word_text !== wordText
-        )
-
+        // CRITICAL: Replace all results with the newly fetched ones (already sorted by backend)
+        // DO NOT merge with existing results - merging would destroy the backend's sort order
+        // The backend returns results sorted according to sort_by parameter (alphabetical/canonical/chronological/collection)
+        // Any client-side merging or concatenation will break this ordering
         searchResults.value = {
           ...searchResults.value,
-          results: [...existingResults, ...response.data.results],
+          results: response.data.results,  // Use ONLY the new results, not [...existingResults, ...newResults]
           total_count: searchResults.value.total_count
           // Keep original unique_words and search_term
         }
@@ -1075,11 +1118,16 @@ export default {
           q: wordText,
           match_type: 'exact',
           limit: 100,
-          offset: tracking.offset
+          offset: tracking.offset,
+          sort_by: sortBy.value
         }
 
         if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
           params.work_ids = selectedWorks.value.join(',')
+        }
+
+        if (sortBy.value === 'collection' && selectedCollectionId.value) {
+          params.collection_id = selectedCollectionId.value
         }
 
         const response = await api.searchWords(params)
@@ -1111,21 +1159,12 @@ export default {
     }
 
     // Method: Get sorted occurrences for a specific word
+    // CRITICAL: DO NOT sort here - backend already sorted according to sort_by parameter
+    // The results are already in the correct order from the backend (alphabetical/canonical/chronological/collection)
+    // Any frontend sorting will destroy the backend's ordering
     const getSortedWordOccurrences = (wordText) => {
-      const occurrences = getWordOccurrences(wordText)
-      return occurrences.sort((a, b) => {
-        // Sort by work name (Tamil), then by verse number, then by line number
-        const workCompare = (a.work_name_tamil || a.work_name).localeCompare(
-          b.work_name_tamil || b.work_name,
-          'ta'
-        )
-        if (workCompare !== 0) return workCompare
-
-        const verseCompare = a.verse_number - b.verse_number
-        if (verseCompare !== 0) return verseCompare
-
-        return a.line_number - b.line_number
-      })
+      // Simply return filtered results WITHOUT sorting - they're already sorted by backend
+      return getWordOccurrences(wordText)
     }
 
     // Method: Check if there are more occurrences to load
@@ -1367,6 +1406,9 @@ export default {
       searchQuery,
       matchType,
       wordPosition,
+      sortBy,
+      collections,
+      selectedCollectionId,
       filterMode,
       selectedWorks,
       selectAllWorks,
