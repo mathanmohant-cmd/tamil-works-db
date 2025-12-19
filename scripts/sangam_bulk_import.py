@@ -370,13 +370,15 @@ class SangamBulkImporter:
 
         for line_num, line_text in enumerate(poem_lines, start=1):
             # Clean line: remove dots/periods, markers, and line numbers
+            # Remove alignment dots and ellipsis
             cleaned_line = line_text.replace('.', '').replace('…', '')
             # Remove structural markers
             cleaned_line = re.sub(r'^[#@$&*]+\s*', '', cleaned_line)
             # Remove ** and *** markers
             cleaned_line = re.sub(r'\*\*\*?', '', cleaned_line)
-            # Remove trailing line numbers
-            cleaned_line = re.sub(r'\s+\d+$', '', cleaned_line)
+            # Remove trailing line numbers (with or without preceding space)
+            # Matches: "text 5", "text5", "text  10", etc.
+            cleaned_line = re.sub(r'\s*\d+$', '', cleaned_line)
 
             line_id = self.line_id
             self.line_id += 1
