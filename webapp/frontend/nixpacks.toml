@@ -3,8 +3,10 @@ nixPkgs = ['nodejs_20']
 
 [phases.install]
 cmds = [
+  'echo "Build timestamp: 1734592800"',
   'rm -rf node_modules',
   'rm -rf dist',
+  'npm cache clean --force',
   'npm ci --legacy-peer-deps'
 ]
 
