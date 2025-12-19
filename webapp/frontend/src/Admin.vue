@@ -1,6 +1,42 @@
 <template>
   <div class="admin-page">
-    <h2>Collections Admin</h2>
+    <!-- Login Modal -->
+    <div v-if="!isAuthenticated" class="login-container">
+      <div class="login-box">
+        <h2>Admin Login</h2>
+        <form @submit.prevent="handleLogin">
+          <div class="form-group">
+            <label>Username</label>
+            <input
+              v-model="loginForm.username"
+              type="text"
+              required
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              v-model="loginForm.password"
+              type="password"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <div v-if="loginError" class="login-error">{{ loginError }}</div>
+          <button type="submit" class="btn-primary" :disabled="loginLoading">
+            {{ loginLoading ? 'Logging in...' : 'Login' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Content (only shown when authenticated) -->
+    <template v-else>
+    <div class="admin-header">
+      <h2>Collections Admin</h2>
+      <button @click="logout" class="btn-logout">Logout</button>
+    </div>
 
     <div class="admin-layout">
       <!-- Left Panel: Collection Tree -->
@@ -14,13 +50,41 @@
         <div v-else-if="error" class="error">{{ error }}</div>
 
         <div v-else class="collection-tree">
-          <CollectionNode
+          <div
             v-for="collection in collectionTree"
             :key="collection.collection_id"
-            :collection="collection"
-            :selectedId="selectedCollection?.collection_id"
-            @select="selectCollection"
-          />
+            class="tree-node"
+          >
+            <div
+              class="tree-item"
+              :class="{ selected: collection.collection_id === selectedCollection?.collection_id }"
+              @click="selectCollection(collection)"
+            >
+              <span class="tree-icon">{{ collection.children?.length ? '▶' : '•' }}</span>
+              <span class="tree-name">{{ collection.collection_name }}</span>
+              <span class="tree-count">({{ collection.work_count || 0 }})</span>
+            </div>
+            <!-- Nested children (one level deep for now) -->
+            <div v-if="collection.children?.length" class="tree-children">
+              <div
+                v-for="child in collection.children"
+                :key="child.collection_id"
+                class="tree-node"
+                style="padding-left: 16px;"
+              >
+                <div
+                  class="tree-item"
+                  :class="{ selected: child.collection_id === selectedCollection?.collection_id }"
+                  @click="selectCollection(child)"
+                >
+                  <span class="tree-icon">•</span>
+                  <span class="tree-name">{{ child.collection_name }}</span>
+                  <span class="tree-count">({{ child.work_count || 0 }})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div v-if="collectionTree.length === 0" class="empty-state">
             No collections yet. Create one to get started.
           </div>
@@ -210,6 +274,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -217,45 +282,48 @@
 import { ref, computed, onMounted } from 'vue'
 import api from './api.js'
 
-// Recursive CollectionNode component
-const CollectionNode = {
-  name: 'CollectionNode',
-  props: {
-    collection: Object,
-    selectedId: Number,
-    depth: { type: Number, default: 0 }
-  },
-  emits: ['select'],
-  template: `
-    <div class="tree-node" :style="{ paddingLeft: depth * 16 + 'px' }">
-      <div
-        class="tree-item"
-        :class="{ selected: collection.collection_id === selectedId }"
-        @click="$emit('select', collection)"
-      >
-        <span v-if="collection.children?.length" class="tree-icon">▶</span>
-        <span v-else class="tree-icon">•</span>
-        <span class="tree-name">{{ collection.collection_name }}</span>
-        <span class="tree-count">({{ collection.work_count }})</span>
-      </div>
-      <div v-if="collection.children?.length" class="tree-children">
-        <CollectionNode
-          v-for="child in collection.children"
-          :key="child.collection_id"
-          :collection="child"
-          :selectedId="selectedId"
-          :depth="depth + 1"
-          @select="$emit('select', $event)"
-        />
-      </div>
-    </div>
-  `
-}
-
 export default {
   name: 'Admin',
-  components: { CollectionNode },
   setup() {
+    // Authentication state
+    const isAuthenticated = ref(false)
+    const loginForm = ref({ username: '', password: '' })
+    const loginError = ref(null)
+    const loginLoading = ref(false)
+
+    // Check if already logged in (session storage)
+    const checkAuth = () => {
+      const auth = sessionStorage.getItem('adminAuth')
+      if (auth) {
+        isAuthenticated.value = true
+      }
+    }
+
+    // Handle login
+    const handleLogin = async () => {
+      loginError.value = null
+      loginLoading.value = true
+      try {
+        const response = await api.adminLogin(loginForm.value.username, loginForm.value.password)
+        if (response.data.success) {
+          isAuthenticated.value = true
+          sessionStorage.setItem('adminAuth', JSON.stringify(response.data.user))
+          loginForm.value = { username: '', password: '' }
+          loadCollections()
+        }
+      } catch (err) {
+        loginError.value = err.response?.data?.detail || 'Login failed'
+      } finally {
+        loginLoading.value = false
+      }
+    }
+
+    // Logout
+    const logout = () => {
+      isAuthenticated.value = false
+      sessionStorage.removeItem('adminAuth')
+    }
+
     const loading = ref(false)
     const error = ref(null)
     const collectionTree = ref([])
@@ -379,7 +447,7 @@ export default {
           await selectCollection(selectedCollection.value)
         }
       } catch (err) {
-        error.value = 'Failed to save collection: ' + err.message
+        error.value = 'Failed to save collection: ' + (err.response?.data?.detail || err.message)
       }
     }
 
@@ -423,9 +491,22 @@ export default {
       }
     }
 
-    onMounted(loadCollections)
+    onMounted(() => {
+      checkAuth()
+      if (isAuthenticated.value) {
+        loadCollections()
+      }
+    })
 
     return {
+      // Auth
+      isAuthenticated,
+      loginForm,
+      loginError,
+      loginLoading,
+      handleLogin,
+      logout,
+      // Collections
       loading,
       error,
       collectionTree,
@@ -807,5 +888,73 @@ export default {
   .collections-panel {
     min-height: auto;
   }
+}
+
+/* Login Styles */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.login-box {
+  background: white;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-box h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.login-box .form-group input {
+  width: 100%;
+  padding: 10px 12px;
+}
+
+.login-box .btn-primary {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.login-error {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Admin Header with Logout */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.admin-header h2 {
+  margin: 0;
+}
+
+.btn-logout {
+  background: #f5f5f5;
+  color: #666;
+  border: 1px solid #ddd;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-logout:hover {
+  background: #eee;
+  color: #333;
 }
 </style>

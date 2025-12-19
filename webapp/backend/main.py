@@ -32,6 +32,10 @@ app.add_middleware(
 # Initialize database
 db = Database()
 
+# Note: Admin user setup is handled lazily on first login attempt
+# The ensure_admin_user_exists() is called when verifying credentials
+# This prevents blocking startup if database is temporarily unavailable
+
 
 # Pydantic models for request/response
 class SearchResponse(BaseModel):
@@ -92,6 +96,11 @@ class WorkAssignment(BaseModel):
     position: Optional[int] = None
     is_primary: bool = False
     notes: Optional[str] = None
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
 # API Endpoints
@@ -305,6 +314,31 @@ def debug_sample_words():
                     "sample_words_from_table": sample_words,
                     "sample_from_word_details_view": word_details_sample
                 }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================================
+# Admin Authentication
+# =========================================================================
+
+@app.post("/admin/login")
+def admin_login(credentials: LoginRequest):
+    """
+    Authenticate admin user
+
+    Returns user info if credentials are valid
+    """
+    try:
+        # Ensure admin user exists (creates table and default user if needed)
+        db.ensure_admin_user_exists()
+
+        user = db.verify_admin_user(credentials.username, credentials.password)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        return {"success": True, "user": user}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

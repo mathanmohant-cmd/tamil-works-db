@@ -6,6 +6,7 @@ from typing import List, Dict, Optional
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
+import bcrypt
 
 
 class Database:
@@ -525,8 +526,8 @@ class Database:
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Get next collection_id
-                cur.execute("SELECT COALESCE(MAX(collection_id), 0) + 1 FROM collections")
-                next_id = cur.fetchone()['coalesce']
+                cur.execute("SELECT COALESCE(MAX(collection_id), 0) + 1 AS next_id FROM collections")
+                next_id = cur.fetchone()['next_id']
 
                 cur.execute("""
                     INSERT INTO collections (
@@ -679,4 +680,98 @@ class Database:
                 root_collections.append(coll_with_children)
 
         return root_collections
+
+    # =========================================================================
+    # Authentication Methods
+    # =========================================================================
+
+    def verify_admin_user(self, username: str, password: str) -> Optional[Dict]:
+        """
+        Verify admin user credentials
+
+        Args:
+            username: The username to verify
+            password: The plain text password to check
+
+        Returns:
+            User dict if valid, None if invalid
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT user_id, username, password_hash
+                    FROM admin_users
+                    WHERE username = %s
+                """, [username])
+                user = cur.fetchone()
+
+                if not user:
+                    return None
+
+                # Verify password using bcrypt
+                if bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+                    return {
+                        'user_id': user['user_id'],
+                        'username': user['username']
+                    }
+                return None
+
+    def create_admin_user(self, username: str, password: str) -> Dict:
+        """
+        Create a new admin user (for setup purposes)
+
+        Args:
+            username: The username
+            password: The plain text password (will be hashed)
+
+        Returns:
+            Created user dict
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Hash the password
+                password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+                cur.execute("""
+                    INSERT INTO admin_users (username, password_hash)
+                    VALUES (%s, %s)
+                    RETURNING user_id, username, created_at
+                """, [username, password_hash])
+                return dict(cur.fetchone())
+
+    def ensure_admin_user_exists(self):
+        """
+        Ensure the default admin user exists (for initial setup)
+        Creates admin user with default password if not exists
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Check if admin_users table exists
+                cur.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables
+                        WHERE table_name = 'admin_users'
+                    )
+                """)
+                if not cur.fetchone()['exists']:
+                    # Create the table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS admin_users (
+                            user_id SERIAL PRIMARY KEY,
+                            username VARCHAR(50) NOT NULL UNIQUE,
+                            password_hash VARCHAR(255) NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_admin_users_username ON admin_users(username)")
+
+                # Check if admin user exists
+                cur.execute("SELECT 1 FROM admin_users WHERE username = 'admin'")
+                if not cur.fetchone():
+                    # Create default admin user with password TKsltk#123
+                    password_hash = bcrypt.hashpw('TKsltk#123'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                    cur.execute("""
+                        INSERT INTO admin_users (username, password_hash)
+                        VALUES ('admin', %s)
+                    """, [password_hash])
 

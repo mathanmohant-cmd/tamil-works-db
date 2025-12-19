@@ -413,3 +413,17 @@ ORDER BY c.collection_id, wc.position_in_collection;
 -- INNER JOIN lines l ON v.verse_id = l.verse_id
 -- WHERE v.section_id = 6
 -- ORDER BY v.verse_number, l.line_number;
+
+-- ============================================================================
+-- ADMIN USERS TABLE
+-- ============================================================================
+
+CREATE TABLE admin_users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index for username lookup
+CREATE INDEX idx_admin_users_username ON admin_users(username);
