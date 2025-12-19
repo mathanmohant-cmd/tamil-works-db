@@ -453,13 +453,17 @@ export default {
     // Load initial data
     onMounted(async () => {
       try {
+        console.log('[DEBUG] onMounted: Loading initial data...')
+
         // Load works
         const worksResponse = await api.getWorks()
         works.value = worksResponse.data
+        console.log('[DEBUG] Loaded works:', works.value.length)
 
         // Load collections for sort options
         const collectionsResponse = await api.getPublicCollections()
         collections.value = collectionsResponse.data
+        console.log('[DEBUG] Loaded collections:', collections.value.length)
 
         // Check for saved selection in session storage
         const savedSelection = sessionStorage.getItem('selectedWorks')
@@ -470,15 +474,19 @@ export default {
           selectedWorks.value = JSON.parse(savedSelection)
           filterMode.value = savedMode || 'all'
           rememberSelection.value = true
+          console.log('[DEBUG] Restored saved selection:', selectedWorks.value.length, 'works')
         } else {
           selectedWorks.value = works.value.map(w => w.work_id)
           filterMode.value = 'all'
+          console.log('[DEBUG] Initialized all works:', selectedWorks.value.length, 'works')
         }
 
         // Load stats
         const statsResponse = await api.getStatistics()
         stats.value = statsResponse.data
+        console.log('[DEBUG] Loaded stats:', stats.value)
       } catch (err) {
+        console.error('[DEBUG] onMounted error:', err)
         error.value = 'Failed to load initial data: ' + err.message
       }
     })
