@@ -551,8 +551,16 @@ export default {
       loadedOccurrences.value = {} // Reset loaded occurrences
 
       try {
+        console.log('[DEBUG] performSearch called:', {
+          selectedWorksCount: selectedWorks.value.length,
+          totalWorksCount: works.value.length,
+          filterMode: filterMode.value,
+          searchQuery: trimmedQuery
+        })
+
         // If no works are selected, show empty results
         if (selectedWorks.value.length === 0) {
+          console.warn('[DEBUG] No works selected! Returning empty results')
           searchResults.value = {
             results: [],
             unique_words: [],
