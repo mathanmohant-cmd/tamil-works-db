@@ -46,7 +46,8 @@ class Database:
         word_root: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
-        sort_by: str = "alphabetical"  # "alphabetical", "canonical", or "chronological"
+        sort_by: str = "alphabetical",  # "alphabetical", "canonical", "chronological", or "collection"
+        collection_id: Optional[int] = None
     ) -> Dict:
         """
         Search for words in the database
@@ -66,32 +67,94 @@ class Database:
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Build the query dynamically based on filters
-                query = """
-                    SELECT
-                        wd.word_id,
-                        wd.word_text,
-                        wd.word_text_transliteration,
-                        wd.word_root,
-                        wd.word_type,
-                        wd.word_position,
-                        wd.sandhi_split,
-                        wd.meaning,
-                        wd.line_id,
-                        wd.line_number,
-                        wd.line_text,
-                        wd.verse_id,
-                        wd.verse_number,
-                        wd.verse_type,
-                        wd.verse_type_tamil,
-                        wd.work_name,
-                        wd.work_name_tamil,
-                        wd.hierarchy_path,
-                        wd.hierarchy_path_tamil
-                    FROM word_details wd
-                    WHERE 1=1
-                """
-
-                params = []
+                # Add JOIN for sorting methods that need works table data
+                if sort_by in ("canonical", "chronological"):
+                    # Need works table for canonical_order and chronology_start_year
+                    query = """
+                        SELECT
+                            wd.word_id,
+                            wd.word_text,
+                            wd.word_text_transliteration,
+                            wd.word_root,
+                            wd.word_type,
+                            wd.word_position,
+                            wd.sandhi_split,
+                            wd.meaning,
+                            wd.line_id,
+                            wd.line_number,
+                            wd.line_text,
+                            wd.verse_id,
+                            wd.verse_number,
+                            wd.verse_type,
+                            wd.verse_type_tamil,
+                            wd.work_name,
+                            wd.work_name_tamil,
+                            wd.hierarchy_path,
+                            wd.hierarchy_path_tamil,
+                            w.canonical_order,
+                            w.chronology_start_year
+                        FROM word_details wd
+                        LEFT JOIN works w ON wd.work_name = w.work_name
+                        WHERE 1=1
+                    """
+                    params = []
+                elif sort_by == "collection" and collection_id:
+                    # Need works and work_collections tables for collection sorting
+                    query = """
+                        SELECT
+                            wd.word_id,
+                            wd.word_text,
+                            wd.word_text_transliteration,
+                            wd.word_root,
+                            wd.word_type,
+                            wd.word_position,
+                            wd.sandhi_split,
+                            wd.meaning,
+                            wd.line_id,
+                            wd.line_number,
+                            wd.line_text,
+                            wd.verse_id,
+                            wd.verse_number,
+                            wd.verse_type,
+                            wd.verse_type_tamil,
+                            wd.work_name,
+                            wd.work_name_tamil,
+                            wd.hierarchy_path,
+                            wd.hierarchy_path_tamil,
+                            wc.position_in_collection
+                        FROM word_details wd
+                        LEFT JOIN works w ON wd.work_name = w.work_name
+                        LEFT JOIN work_collections wc ON w.work_id = wc.work_id AND wc.collection_id = %s
+                        WHERE 1=1
+                    """
+                    params = [collection_id]
+                else:
+                    # Alphabetical - no JOIN needed
+                    query = """
+                        SELECT
+                            wd.word_id,
+                            wd.word_text,
+                            wd.word_text_transliteration,
+                            wd.word_root,
+                            wd.word_type,
+                            wd.word_position,
+                            wd.sandhi_split,
+                            wd.meaning,
+                            wd.line_id,
+                            wd.line_number,
+                            wd.line_text,
+                            wd.verse_id,
+                            wd.verse_number,
+                            wd.verse_type,
+                            wd.verse_type_tamil,
+                            wd.work_name,
+                            wd.work_name_tamil,
+                            wd.hierarchy_path,
+                            wd.hierarchy_path_tamil
+                        FROM word_details wd
+                        WHERE 1=1
+                    """
+                    params = []
 
                 # Add search term condition based on match_type and word_position
                 if match_type == "exact":
@@ -122,16 +185,23 @@ class Database:
 
                 # Determine ORDER BY clause based on sort_by parameter
                 if sort_by == "canonical":
-                    # Sort by canonical position (from Traditional Canon collection)
+                    # Sort by traditional Tamil literary canon order
                     order_clause = """
-                        ORDER BY wd.canonical_position ASC NULLS LAST,
-                                 wd.work_name, wd.verse_id, wd.line_number, wd.word_position
+                        ORDER BY w.canonical_order ASC NULLS LAST,
+                                 wd.verse_id, wd.line_number, wd.word_position
                     """
                 elif sort_by == "chronological":
-                    # Sort by chronological order (would need chronology fields in word_details view)
-                    # For now, fall back to work_name as proxy
+                    # Sort by estimated chronological composition date
                     order_clause = """
-                        ORDER BY wd.work_name, wd.verse_id, wd.line_number, wd.word_position
+                        ORDER BY w.chronology_start_year ASC NULLS LAST,
+                                 wd.verse_id, wd.line_number, wd.word_position
+                    """
+                elif sort_by == "collection" and collection_id:
+                    # Sort by position in the specified collection
+                    # Fallback to Tamil work name for works with same position
+                    order_clause = """
+                        ORDER BY wc.position_in_collection ASC NULLS LAST,
+                        wd.work_name_tamil, wd.verse_id, wd.line_number, wd.word_position
                     """
                 else:  # alphabetical (default)
                     order_clause = """
@@ -162,25 +232,35 @@ class Database:
                     WHERE 1=1
                 """
 
+                # Build count_params separately (without collection_id at start)
+                count_params = []
+
                 # Add the same filters as the main query
                 if match_type == "exact":
                     count_query += " AND wd.word_text = %s"
+                    count_params.append(search_term)
                 else:  # partial - apply word_position with escaped pattern
+                    escaped_term = self._escape_like_pattern(search_term)
                     if word_position == "beginning":
                         count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
+                        count_params.append(f"{escaped_term}%")
                     elif word_position == "end":
                         count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
+                        count_params.append(f"%{escaped_term}")
                     else:  # anywhere
                         count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
+                        count_params.append(f"%{escaped_term}%")
 
                 if work_ids:
                     placeholders = ','.join(['%s'] * len(work_ids))
                     count_query += f" AND wd.work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
+                    count_params.extend(work_ids)
 
                 if word_root:
                     count_query += " AND wd.word_root = %s"
+                    count_params.append(word_root)
 
-                cur.execute(count_query, params[:-2])  # Exclude limit and offset
+                cur.execute(count_query, count_params)
                 total_count = cur.fetchone()['count']
 
                 # Get unique words with counts, work breakdown, and verse count for the complete list (no pagination)
@@ -300,15 +380,11 @@ class Database:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Determine ORDER BY clause
                 if sort_by == "canonical":
-                    # Sort by position in Traditional Canon collection (ID=100)
+                    # Sort by traditional Tamil canon using canonical_order field
                     order_clause = """
-                        ORDER BY wc_canon.position_in_collection ASC NULLS LAST, w.work_name
+                        ORDER BY w.canonical_order ASC NULLS LAST, w.work_name
                     """
-                    from_clause = """
-                        FROM works w
-                        LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id
-                            AND wc_canon.collection_id = 100
-                    """
+                    from_clause = "FROM works w"
                 elif sort_by == "chronological":
                     # Sort by midpoint of date range (average of start and end year)
                     order_clause = """
@@ -333,10 +409,8 @@ class Database:
                         w.chronology_confidence,
                         w.chronology_notes,
                         w.primary_collection_id,
-                        wc_canon.position_in_collection as canonical_position
+                        w.canonical_order as canonical_position
                     {from_clause}
-                    LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id
-                        AND wc_canon.collection_id = 100
                     {order_clause}
                 """)
                 return [dict(row) for row in cur.fetchall()]
@@ -609,6 +683,15 @@ class Database:
         """Add a work to a collection"""
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # If no position provided, auto-assign next available position
+                if position is None:
+                    cur.execute("""
+                        SELECT COALESCE(MAX(position_in_collection), 0) + 1
+                        FROM work_collections
+                        WHERE collection_id = %s
+                    """, [collection_id])
+                    position = cur.fetchone()[0]
+
                 # If setting as primary, unset other primaries for this work
                 if is_primary:
                     cur.execute("""
