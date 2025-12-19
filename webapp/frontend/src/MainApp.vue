@@ -163,7 +163,7 @@
             <input type="checkbox" v-model="selectAllWorks" @change="toggleAllWorks" />
             <strong>All Works</strong>
           </label>
-          <label v-for="work in works" :key="work.work_id">
+          <label v-for="work in sortedWorks" :key="work.work_id">
             <input type="checkbox" :value="work.work_id" v-model="selectedWorks" />
             {{ work.work_name_tamil }} ({{ work.work_name }})
           </label>
@@ -795,6 +795,18 @@ export default {
     // Computed: Check if custom filter is active
     const hasCustomFilter = computed(() => {
       return selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length
+    })
+
+    // Computed: Sort works by canonical order (canonical_position field)
+    const sortedWorks = computed(() => {
+      if (!works.value || works.value.length === 0) return []
+
+      // Sort by canonical_position field (ascending)
+      return [...works.value].sort((a, b) => {
+        const orderA = a.canonical_position || 999
+        const orderB = b.canonical_position || 999
+        return orderA - orderB
+      })
     })
 
     // Computed: Works indicator text for filter button
@@ -1453,6 +1465,7 @@ export default {
       uniqueWords,
       filteredResults,
       hasCustomFilter,
+      sortedWorks,
       worksFilterButtonText,
       getFilterButtonText,
       searchSummary,
