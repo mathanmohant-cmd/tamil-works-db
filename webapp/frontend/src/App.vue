@@ -586,10 +586,19 @@ export default {
         }
 
         const response = await api.searchWords(params)
+        console.log('[DEBUG] API response:', {
+          hasUniqueWords: !!response.data.unique_words,
+          uniqueWordsLength: response.data.unique_words?.length,
+          totalCount: response.data.total_count
+        })
         searchResults.value = {
           ...response.data,
           results: [] // Start with empty results
         }
+        console.log('[DEBUG] searchResults after assignment:', {
+          hasUniqueWords: !!searchResults.value.unique_words,
+          uniqueWordsLength: searchResults.value.unique_words?.length
+        })
 
         // Don't store summary - let it update on each search
         initialSearchSummary.value = null
