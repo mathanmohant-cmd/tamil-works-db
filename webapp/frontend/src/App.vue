@@ -460,10 +460,20 @@ export default {
         works.value = worksResponse.data
         console.log('[DEBUG] Loaded works:', works.value.length)
 
-        // Load collections for sort options
-        const collectionsResponse = await api.getPublicCollections()
-        collections.value = collectionsResponse.data
-        console.log('[DEBUG] Loaded collections:', collections.value.length)
+        // Load collections for sort options (optional - fallback to empty if not available)
+        try {
+          if (api.getPublicCollections) {
+            const collectionsResponse = await api.getPublicCollections()
+            collections.value = collectionsResponse.data
+            console.log('[DEBUG] Loaded collections:', collections.value.length)
+          } else {
+            console.warn('[DEBUG] getPublicCollections not available, skipping')
+            collections.value = []
+          }
+        } catch (collErr) {
+          console.warn('[DEBUG] Failed to load collections:', collErr.message)
+          collections.value = []
+        }
 
         // Check for saved selection in session storage
         const savedSelection = sessionStorage.getItem('selectedWorks')
