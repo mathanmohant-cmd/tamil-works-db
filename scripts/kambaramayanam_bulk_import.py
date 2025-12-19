@@ -26,29 +26,38 @@ import io
 from pathlib import Path
 from word_cleaning import split_and_clean_words
 
-# Kandam files (ordered) - Yuddha Kandam (6) split into parts 61-64
-# Note: Section names should NOT include the level type word (காண்டம்) to avoid duplication in hierarchy display
+# Kandam files (ordered) - Yuddha Kandam (6) is split across 4 files for convenience
+# Note: Section names include "Kandam"/"காண்டம்" and "Padalam"/"படலம்" for natural reading
 KANDAM_FILES = [
-    ('1-கம்பராமாயணம்-பாலகாண்டம்.txt', 'பால', 'Bala Kandam', 1),
-    ('2-கம்பராமாயணம்-அயோத்தியா காண்டம்.txt', 'அயோத்தியா', 'Ayodhya Kandam', 2),
-    ('3-கம்பராமாயணம்-ஆரணிய காண்டம்.txt', 'ஆரணிய', 'Aranya Kandam', 3),
-    ('4-கம்பராமாயணம்-கிட்கிந்தா காண்டம்.txt', 'கிட்கிந்தா', 'Kishkindha Kandam', 4),
-    ('5-கம்பராமாயணம்-சுந்தர காண்டம்.txt', 'சுந்தர', 'Sundara Kandam', 5),
-    ('6-கம்பராமாயணம்-யுத்த காண்டம்-1.txt', 'யுத்த-1', 'Yuddha Kandam-1', 61),
-    ('6-கம்பராமாயணம்-யுத்த காண்டம்-2.txt', 'யுத்த-2', 'Yuddha Kandam-2', 62),
-    ('6-கம்பராமாயணம்-யுத்த காண்டம்-3.txt', 'யுத்த-3', 'Yuddha Kandam-3', 63),
-    ('6-கம்பராமாயணம்-யுத்த காண்டம்-4.txt', 'யுத்த-4', 'Yuddha Kandam-4', 64),
+    ('1-கம்பராமாயணம்-பாலகாண்டம்.txt', 'பால காண்டம்', 'Bala Kandam', 1),
+    ('2-கம்பராமாயணம்-அயோத்தியா காண்டம்.txt', 'அயோத்தியா காண்டம்', 'Ayodhya Kandam', 2),
+    ('3-கம்பராமாயணம்-ஆரணிய காண்டம்.txt', 'ஆரணிய காண்டம்', 'Aranya Kandam', 3),
+    ('4-கம்பராமாயணம்-கிட்கிந்தா காண்டம்.txt', 'கிட்கிந்தா காண்டம்', 'Kishkindha Kandam', 4),
+    ('5-கம்பராமாயணம்-சுந்தர காண்டம்.txt', 'சுந்தர காண்டம்', 'Sundara Kandam', 5),
+    ('6-கம்பராமாயணம்-யுத்த காண்டம்-1.txt', 'யுத்த காண்டம்', 'Yuddha Kandam', 6),
+    ('6-கம்பராமாயணம்-யுத்த காண்டம்-2.txt', 'யுத்த காண்டம்', 'Yuddha Kandam', 6),
+    ('6-கம்பராமாயணம்-யுத்த காண்டம்-3.txt', 'யுத்த காண்டம்', 'Yuddha Kandam', 6),
+    ('6-கம்பராமாயணம்-யுத்த காண்டம்-4.txt', 'யுத்த காண்டம்', 'Yuddha Kandam', 6),
 ]
 
 
 def clean_line(line):
     """
     Clean a line by:
+    - Removing structural markers (#, &, @)
     - Removing ** and *** markers
+    - Removing line numbers (multiples of 5) at the end
     - Stripping whitespace
     """
+    # Remove structural markers that should not appear in line_text
+    line = re.sub(r'^[#&@]', '', line)
+
     # Remove ** and *** markers
     line = re.sub(r'\*\*\*?', '', line)
+
+    # Remove trailing line numbers (multiples of 5)
+    line = re.sub(r'\s+\d+$', '', line)
+
     return line.strip()
 
 
@@ -111,9 +120,10 @@ def parse_kandam_file(file_path):
                 padalam_number = int(match.group(1))
                 padalam_name = match.group(2).strip()
 
-                # Remove " படலம்" suffix to avoid duplication in hierarchy (e.g., "படலம்:விராதன் வதை படலம்")
-                if padalam_name.endswith(' படலம்'):
-                    padalam_name = padalam_name[:-len(' படலம்')].strip()
+                # Keep " படலம்" in the name for natural reading
+                # If missing, add it
+                if not padalam_name.endswith(' படலம்'):
+                    padalam_name = padalam_name + ' படலம்'
 
                 current_padalam = {
                     'number': padalam_number,
@@ -188,7 +198,12 @@ class KambaramayanamBulkImporter:
 
         if existing:
             self.work_id = existing[0]
-            print(f"Work {work_name_tamil} already exists (ID: {self.work_id})")
+            print(f"\n✗ Work {work_name_tamil} already exists (ID: {self.work_id})")
+            print(f"To re-import, first delete the existing work:")
+            print(f'  python scripts/delete_work.py "{work_name_english}"')
+            self.cursor.close()
+            self.conn.close()
+            sys.exit(1)
         else:
             # Get next available work_id
             self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
@@ -199,9 +214,9 @@ class KambaramayanamBulkImporter:
                 INSERT INTO works (
                     work_id, work_name, work_name_tamil, description, period, author, author_tamil,
                     chronology_start_year, chronology_end_year,
-                    chronology_confidence, chronology_notes
+                    chronology_confidence, chronology_notes, canonical_order
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id,
                 work_name_english,
@@ -211,7 +226,8 @@ class KambaramayanamBulkImporter:
                 'Kambar',
                 'கம்பர்',
                 1100, 1200, 'high',
-                'Medieval epic by Kambar during Chola period.'
+                'Medieval epic by Kambar during Chola period.',
+                400  # Medieval epic
             ))
             self.conn.commit()
             print(f"  ✓ Work created (ID: {self.work_id}). Use collection management utility to assign to collections.")
@@ -245,10 +261,10 @@ class KambaramayanamBulkImporter:
             # Parse the file
             kandam_data = parse_kandam_file(file_path)
 
-            # Handle Yuddha Kandam special case (parts 61-64)
-            if kandam_num in [61, 62, 63, 64]:
-                if kandam_num == 61:
-                    # Create parent Yuddha Kandam section (6)
+            # Handle Yuddha Kandam special case (6) - split across 4 files but ONE section
+            if kandam_num == 6:
+                if self.yuddha_kandam_parent_id is None:
+                    # Create Yuddha Kandam section only once (first time we see kandam_num=6)
                     self.yuddha_kandam_parent_id = self.section_id
                     self.section_id += 1
 
@@ -259,28 +275,16 @@ class KambaramayanamBulkImporter:
                         'level_type': 'kandam',
                         'level_type_tamil': 'காண்டம்',
                         'section_number': 6,
-                        'section_name': 'Yuddha Kandam',
-                        'section_name_tamil': 'யுத்த',
+                        'section_name': kandam_english,
+                        'section_name_tamil': kandam_tamil,
                         'sort_order': 6
                     })
+                    print(f"  Created Yuddha Kandam section (will span multiple files)")
 
-                # Create sub-section for this part
-                kandam_section_id = self.section_id
-                self.section_id += 1
-
-                self.sections.append({
-                    'section_id': kandam_section_id,
-                    'work_id': self.work_id,
-                    'parent_section_id': self.yuddha_kandam_parent_id,
-                    'level_type': 'part',
-                    'level_type_tamil': 'பகுதி',
-                    'section_number': kandam_num,
-                    'section_name': kandam_english,
-                    'section_name_tamil': kandam_tamil,
-                    'sort_order': kandam_num
-                })
+                # Reuse the same Yuddha Kandam section for all 4 files
+                kandam_section_id = self.yuddha_kandam_parent_id
             else:
-                # Regular Kandam
+                # Regular Kandam (1-5)
                 kandam_section_id = self.section_id
                 self.section_id += 1
 

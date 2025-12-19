@@ -79,7 +79,12 @@ class ThirukkuralBulkImporter:
 
         if existing:
             self.work_id = existing[0]
-            print(f"  Work {work_name_tamil} already exists (ID: {self.work_id})")
+            print(f"\n✗ Work {work_name_tamil} already exists (ID: {self.work_id})")
+            print(f"To re-import, first delete the existing work:")
+            print(f'  python scripts/delete_work.py "{work_name_english}"')
+            self.cursor.close()
+            self.conn.close()
+            sys.exit(1)
         else:
             # Get next available work_id
             self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
@@ -90,15 +95,16 @@ class ThirukkuralBulkImporter:
                 INSERT INTO works (
                     work_id, work_name, work_name_tamil, period, author, author_tamil, description,
                     chronology_start_year, chronology_end_year,
-                    chronology_confidence, chronology_notes
+                    chronology_confidence, chronology_notes, canonical_order
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id, work_name_english, work_name_tamil,
                 '4th - 5th century CE', 'Thiruvalluvar', 'திருவள்ளுவர்',
                 'Classic Tamil text on ethics, politics, and love - 1,330 couplets',
                 300, 500, 'medium',
-                'Dating disputed: ranges from 200 BCE to 800 CE. Kamil Zvelebil: 450-500 CE. Database uses moderate consensus.'
+                'Dating disputed: ranges from 200 BCE to 800 CE. Kamil Zvelebil: 450-500 CE. Database uses moderate consensus.',
+                260  # Post-Sangam transitional period
             ))
 
             self.conn.commit()
@@ -234,6 +240,15 @@ class ThirukkuralBulkImporter:
         })
 
         for line_num, line_text in enumerate(kural_lines, start=1):
+            # Clean line: remove dots/periods, markers, and line numbers
+            cleaned_line = line_text.replace('.', '').replace('…', '')
+            # Remove structural markers
+            cleaned_line = re.sub(r'^[#@$&*]+\s*', '', cleaned_line)
+            # Remove ** and *** markers
+            cleaned_line = re.sub(r'\*\*\*?', '', cleaned_line)
+            # Remove trailing line numbers
+            cleaned_line = re.sub(r'\s+\d+$', '', cleaned_line)
+
             line_id = self.line_id
             self.line_id += 1
 
@@ -241,11 +256,11 @@ class ThirukkuralBulkImporter:
                 'line_id': line_id,
                 'verse_id': verse_id,
                 'line_number': line_num,
-                'line_text': line_text
+                'line_text': cleaned_line.strip()
             })
 
             # Parse and clean words using shared utility
-            cleaned_words = split_and_clean_words(line_text)
+            cleaned_words = split_and_clean_words(cleaned_line)
             for word_position, word_text in enumerate(cleaned_words, start=1):
                 word_id = self.word_id
                 self.word_id += 1

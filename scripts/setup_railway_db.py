@@ -98,7 +98,26 @@ def check_existing_schema(connection_string):
         conn = psycopg2.connect(connection_string)
         cursor = conn.cursor()
 
-        # Check if works table exists
+        # Check if ANY of our core tables exist
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_name IN ('works', 'collections', 'sections', 'verses', 'words');
+        """)
+        existing_tables_count = cursor.fetchone()[0]
+
+        if existing_tables_count == 0:
+            cursor.close()
+            conn.close()
+            return None
+
+        # Get counts if tables exist
+        work_count = 0
+        verse_count = 0
+        word_count = 0
+
+        # Check if works table exists and get count
         cursor.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
@@ -106,22 +125,33 @@ def check_existing_schema(connection_string):
                 AND table_name = 'works'
             );
         """)
-        table_exists = cursor.fetchone()[0]
+        if cursor.fetchone()[0]:
+            cursor.execute("SELECT COUNT(*) FROM works;")
+            work_count = cursor.fetchone()[0]
 
-        if not table_exists:
-            cursor.close()
-            conn.close()
-            return None
+        # Check if verses table exists and get count
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = 'verses'
+            );
+        """)
+        if cursor.fetchone()[0]:
+            cursor.execute("SELECT COUNT(*) FROM verses;")
+            verse_count = cursor.fetchone()[0]
 
-        # Get counts
-        cursor.execute("SELECT COUNT(*) FROM works;")
-        work_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM verses;")
-        verse_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM words;")
-        word_count = cursor.fetchone()[0]
+        # Check if words table exists and get count
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = 'words'
+            );
+        """)
+        if cursor.fetchone()[0]:
+            cursor.execute("SELECT COUNT(*) FROM words;")
+            word_count = cursor.fetchone()[0]
 
         cursor.close()
         conn.close()
@@ -136,53 +166,33 @@ def check_existing_schema(connection_string):
         return None
 
 def drop_tables(connection_string):
-    """Drop our project tables and views"""
+    """Drop and recreate the public schema - cleanest way to reset database"""
     import psycopg2
 
-    print("\nDropping existing tables and views...")
+    print("\nDropping and recreating public schema...")
     try:
         conn = psycopg2.connect(connection_string)
+        conn.autocommit = True  # CRITICAL: Each statement commits immediately
         cursor = conn.cursor()
 
-        # Drop views first (they depend on tables)
-        cursor.execute("""
-            DROP VIEW IF EXISTS word_details CASCADE;
-            DROP VIEW IF EXISTS verse_hierarchy CASCADE;
-        """)
+        print("  Dropping public schema (CASCADE removes all objects)...")
+        cursor.execute("DROP SCHEMA IF EXISTS public CASCADE;")
 
-        # Drop tables in reverse order of dependencies
-        cursor.execute("""
-            DROP TABLE IF EXISTS cross_references CASCADE;
-            DROP TABLE IF EXISTS commentaries CASCADE;
-            DROP TABLE IF EXISTS words CASCADE;
-            DROP TABLE IF EXISTS lines CASCADE;
-            DROP TABLE IF EXISTS verses CASCADE;
-            DROP TABLE IF EXISTS sections CASCADE;
-            DROP TABLE IF EXISTS works CASCADE;
-        """)
+        print("  Recreating public schema...")
+        cursor.execute("CREATE SCHEMA public;")
 
-        # Reset sequences - CRITICAL for avoiding duplicate key errors
-        # The sequences are auto-created when tables are recreated,
-        # but we need to ensure they start from 1
-        print("  Resetting ID sequences...")
-        cursor.execute("""
-            -- Reset sequences if they exist (will be recreated with tables)
-            DROP SEQUENCE IF EXISTS works_work_id_seq CASCADE;
-            DROP SEQUENCE IF EXISTS sections_section_id_seq CASCADE;
-            DROP SEQUENCE IF EXISTS verses_verse_id_seq CASCADE;
-            DROP SEQUENCE IF EXISTS lines_line_id_seq CASCADE;
-            DROP SEQUENCE IF EXISTS words_word_id_seq CASCADE;
-            DROP SEQUENCE IF EXISTS commentaries_commentary_id_seq CASCADE;
-            DROP SEQUENCE IF EXISTS cross_references_reference_id_seq CASCADE;
-        """)
+        print("  Granting permissions...")
+        cursor.execute("GRANT ALL ON SCHEMA public TO postgres;")
+        cursor.execute("GRANT ALL ON SCHEMA public TO public;")
 
-        conn.commit()
         cursor.close()
         conn.close()
-        print("✓ Tables, views, and sequences dropped successfully")
+        print("✓ Schema reset successfully - all tables, views, and sequences removed")
         return True
     except Exception as e:
-        print(f"✗ Error dropping tables: {e}")
+        print(f"✗ Error resetting schema: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def verify_setup(connection_string):

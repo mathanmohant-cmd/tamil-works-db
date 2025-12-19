@@ -39,13 +39,24 @@ KANDAM_FILES = [
 def clean_line(line):
     """
     Clean a line by:
+    - Removing structural markers ($, #)
+    - Removing ** markers
     - Removing line numbers (multiples of 5) at the end
-    - Removing anything after **
+    - Removing dots used for alignment
     - Stripping whitespace
     """
+    # Remove structural markers at the beginning
+    line = re.sub(r'^[$#]+\s*', '', line)
+
     # Remove anything after ** (including **)
     if '**' in line:
         line = line.split('**')[0]
+
+    # Remove ** and *** markers anywhere
+    line = re.sub(r'\*\*\*?', '', line)
+
+    # Remove dots used for alignment
+    line = line.replace('.', '').replace('…', '')
 
     # Remove trailing numbers (multiples of 5)
     line = re.sub(r'\s+\d+$', '', line)
@@ -165,7 +176,12 @@ class SilapathikaramBulkImporter:
 
         if existing:
             self.work_id = existing[0]
-            print(f"Work {work_name_tamil} already exists (ID: {self.work_id})")
+            print(f"\n✗ Work {work_name_tamil} already exists (ID: {self.work_id})")
+            print(f"To re-import, first delete the existing work:")
+            print(f'  python scripts/delete_work.py "{work_name_english}"')
+            self.cursor.close()
+            self.conn.close()
+            sys.exit(1)
         else:
             # Get next available work_id
             self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
@@ -176,9 +192,9 @@ class SilapathikaramBulkImporter:
                 INSERT INTO works (
                     work_id, work_name, work_name_tamil, description, period, author, author_tamil,
                     chronology_start_year, chronology_end_year,
-                    chronology_confidence, chronology_notes
+                    chronology_confidence, chronology_notes, canonical_order
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id,
                 work_name_english,
@@ -188,7 +204,8 @@ class SilapathikaramBulkImporter:
                 'Ilango Adigal',
                 'இளங்கோ அடிகள்',
                 400, 600, 'high',
-                'Epic by Iḷaṅkō Aṭikaḷ. References to Gajabahu of Sri Lanka help dating.'
+                'Epic by Iḷaṅkō Aṭikaḷ. References to Gajabahu of Sri Lanka help dating.',
+                280  # Transitional period epic
             ))
             self.conn.commit()
             print(f"  ✓ Work created (ID: {self.work_id}). Use collection management utility to assign to collections.")

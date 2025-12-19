@@ -36,6 +36,7 @@ CREATE TABLE works (
     chronology_end_year INTEGER,  -- Approximate end year (negative = BCE)
     chronology_confidence VARCHAR(20),  -- 'high', 'medium', 'low', 'disputed'
     chronology_notes TEXT,  -- Scholarly variations and dating debates
+    canonical_order INTEGER,  -- Traditional Tamil literary canon ordering (100=Tolkappiyam, 200s=Sangam, 260=Thirukkural, 280=Silapathikaram, 400=Kambaramayanam)
     primary_collection_id INTEGER,  -- Primary collection this work belongs to (FK added after collections table)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

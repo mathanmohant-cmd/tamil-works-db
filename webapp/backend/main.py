@@ -130,7 +130,8 @@ def search_words(
     word_root: Optional[str] = Query(None, description="Filter by word root"),
     limit: int = Query(100, ge=0, le=500, description="Maximum results per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
-    sort_by: str = Query("alphabetical", pattern="^(alphabetical|canonical|chronological)$", description="Sort order: alphabetical, canonical (traditional order 1-22), or chronological")
+    sort_by: str = Query("alphabetical", pattern="^(alphabetical|canonical|chronological|collection)$", description="Sort order: alphabetical, canonical (traditional order 1-22), chronological, or collection"),
+    collection_id: Optional[int] = Query(None, description="Collection ID for collection-based sorting (required when sort_by=collection)")
 ):
     """
     Search for Tamil words across all literary works
@@ -142,13 +143,18 @@ def search_words(
     - **word_root**: Filter by word root
     - **limit**: Maximum number of results (1-500)
     - **offset**: Pagination offset
-    - **sort_by**: Sort order - "alphabetical" (default), "canonical" (traditional 1-22 order), or "chronological"
+    - **sort_by**: Sort order - "alphabetical" (default), "canonical" (traditional 1-22 order), "chronological", or "collection"
+    - **collection_id**: Collection ID for custom ordering (required when sort_by="collection")
     """
     try:
         # Parse work_ids if provided
         work_id_list = None
         if work_ids:
             work_id_list = [int(x.strip()) for x in work_ids.split(",")]
+
+        # Validate collection_id requirement
+        if sort_by == "collection" and collection_id is None:
+            raise HTTPException(status_code=400, detail="collection_id is required when sort_by=collection")
 
         # Search database
         results = db.search_words(
@@ -159,7 +165,8 @@ def search_words(
             word_root=word_root,
             limit=limit,
             offset=offset,
-            sort_by=sort_by
+            sort_by=sort_by,
+            collection_id=collection_id
         )
 
         return results
@@ -257,6 +264,19 @@ def get_statistics():
     """
     try:
         return db.get_statistics()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/collections")
+def get_public_collections():
+    """
+    Get all collections (public endpoint for sort options)
+
+    Returns list of collections for use in sorting options
+    """
+    try:
+        return db.get_collections(include_works=False)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

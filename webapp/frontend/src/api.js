@@ -56,6 +56,13 @@ export default {
     return api.get('/health')
   },
 
+  /**
+   * Get all collections (for sort options)
+   */
+  getPublicCollections() {
+    return api.get('/collections')
+  },
+
   // =========================================================================
   // Admin Authentication
   // =========================================================================

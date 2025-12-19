@@ -289,6 +289,41 @@ Follow the principles documented in `scripts/WORD_SEGMENTATION_PRINCIPLES.md`:
 - Tag word roots consistently
 - Document sandhi transformations
 
+### Frontend Sort Order Preservation (CRITICAL)
+
+**NEVER merge or concatenate search results on the frontend.** The backend returns results in the correct sort order based on the `sort_by` parameter (alphabetical/canonical/chronological/collection). Any client-side array operations will destroy this ordering.
+
+**Anti-pattern (WRONG):**
+```javascript
+// DON'T DO THIS - destroys backend sort order
+const existingResults = searchResults.value.results.filter(r => r.word_text !== wordText)
+searchResults.value.results = [...existingResults, ...response.data.results]
+```
+
+**Correct pattern:**
+```javascript
+// ALWAYS use ONLY the new results from backend
+searchResults.value = {
+  ...searchResults.value,
+  results: response.data.results  // Backend-sorted, do not merge
+}
+```
+
+**Why this matters:**
+- Collection order sorting requires JOINs with `work_collections` table to get `position_in_collection`
+- Backend performs complex SQL ORDER BY with multiple fallback levels
+- Frontend has no access to this ordering metadata
+- Merging arrays concatenates them sequentially, losing the intended order
+
+**Common bug locations:**
+1. **App.vue `selectWordFromList`** (lines ~700-709): Don't merge `[...existingResults, ...newResults]`
+2. **App.vue `getSortedWordOccurrences`** (lines ~1170-1176): Don't re-sort the results, backend already sorted them
+
+**Test to verify:**
+Search for "சொல்" with "Collection Order" (Sangam Literature), expand a word, verify தொல்காப்பியம் (position 1) appears first.
+
+See `TESTING_CHECKLIST.md` for complete test scenarios.
+
 ## Important File Locations
 
 ### Documentation

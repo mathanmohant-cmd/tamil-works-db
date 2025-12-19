@@ -168,47 +168,63 @@ class SangamBulkImporter:
         """Create all Sangam work entries with dynamic work_id assignment"""
         print("  Checking/creating Sangam work entries...")
 
+        # First, check if ANY works already exist
+        existing_works = []
+        for filename, work_info in self.SANGAM_WORKS.items():
+            work_name = work_info['work_name']
+            self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name,))
+            existing = self.cursor.fetchone()
+            if existing:
+                existing_works.append((work_info['work_name'], work_info['work_name_tamil'], existing[0]))
+
+        # If any works exist, exit with error
+        if existing_works:
+            print(f"\n✗ Found {len(existing_works)} existing Sangam works in database:")
+            for name_en, name_ta, work_id in existing_works:
+                print(f"  - {name_ta} ({name_en}) - ID: {work_id}")
+            print(f"\nTo re-import, first delete the existing work(s):")
+            for name_en, name_ta, work_id in existing_works:
+                print(f'  python scripts/delete_work.py "{name_en}"')
+            print(f"\nNote: You must delete ALL Sangam works before re-importing.")
+            self.cursor.close()
+            self.conn.close()
+            sys.exit(1)
+
         # Get next available work_id ONCE before the loop
         self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) FROM works")
         next_work_id = self.cursor.fetchone()[0] + 1
 
         for filename, work_info in self.SANGAM_WORKS.items():
-            work_name = work_info['work_name']
+            # Assign next available work_id and increment
+            work_info['work_id'] = next_work_id
 
-            # Check if work already exists by name
-            self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name,))
-            existing = self.cursor.fetchone()
+            # Calculate canonical order: Sangam works are 200-217
+            # Map traditional_order (2-19) to canonical_order (200-217)
+            canonical_order = 198 + work_info['traditional_order']  # 198 + 2 = 200, 198 + 19 = 217
 
-            if existing:
-                # Store the work_id for this work
-                work_info['work_id'] = existing[0]
-                print(f"    {work_info['work_name_tamil']} already exists (ID: {existing[0]})")
-            else:
-                # Assign next available work_id and increment
-                work_info['work_id'] = next_work_id
+            self.works.append({
+                'work_id': next_work_id,
+                'work_name': work_info['work_name'],
+                'work_name_tamil': work_info['work_name_tamil'],
+                'period': '300 BCE - 300 CE',
+                'author': 'Various',
+                'author_tamil': 'பல்வேறு புலவர்கள்',
+                'description': work_info['description'],
+                'chronology_start_year': work_info['start_year'],
+                'chronology_end_year': work_info['end_year'],
+                'chronology_confidence': work_info['confidence'],
+                'chronology_notes': work_info['notes'],
+                'canonical_order': canonical_order
+            })
 
-                self.works.append({
-                    'work_id': next_work_id,
-                    'work_name': work_info['work_name'],
-                    'work_name_tamil': work_info['work_name_tamil'],
-                    'period': '300 BCE - 300 CE',
-                    'author': 'Various',
-                    'author_tamil': 'பல்வேறு புலவர்கள்',
-                    'description': work_info['description'],
-                    'chronology_start_year': work_info['start_year'],
-                    'chronology_end_year': work_info['end_year'],
-                    'chronology_confidence': work_info['confidence'],
-                    'chronology_notes': work_info['notes']
-                })
-
-                next_work_id += 1  # Increment for next work
+            next_work_id += 1  # Increment for next work
 
         if self.works:
             self._bulk_copy('works', self.works,
                            ['work_id', 'work_name', 'work_name_tamil', 'period',
                             'author', 'author_tamil', 'description',
                             'chronology_start_year', 'chronology_end_year',
-                            'chronology_confidence', 'chronology_notes'])
+                            'chronology_confidence', 'chronology_notes', 'canonical_order'])
             self.conn.commit()
             print(f"  ✓ Created {len(self.works)} new work entries. Use collection management utility to assign to collections.")
 
@@ -353,8 +369,14 @@ class SangamBulkImporter:
         })
 
         for line_num, line_text in enumerate(poem_lines, start=1):
-            # Clean line: remove dots/periods (used for spacing/alignment)
+            # Clean line: remove dots/periods, markers, and line numbers
             cleaned_line = line_text.replace('.', '').replace('…', '')
+            # Remove structural markers
+            cleaned_line = re.sub(r'^[#@$&*]+\s*', '', cleaned_line)
+            # Remove ** and *** markers
+            cleaned_line = re.sub(r'\*\*\*?', '', cleaned_line)
+            # Remove trailing line numbers
+            cleaned_line = re.sub(r'\s+\d+$', '', cleaned_line)
 
             line_id = self.line_id
             self.line_id += 1

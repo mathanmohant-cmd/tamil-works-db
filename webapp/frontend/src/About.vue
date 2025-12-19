@@ -3,77 +3,60 @@
     <article class="about-content">
       <section aria-labelledby="journey">
         <h2 id="journey">My Journey</h2>
+        <p class="author-name">— T. Mathan Mohan</p>
         <p>
-          My journey into Tamizh literature began within the Chicago Tamil Sangam community. A paper presented at the 5th International Conference on Thirukkural offered a glimpse into how the ideas sown by Thirukkural continue to shape thought and values even today. It also awakened a desire to learn works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em> - the very foundation of Tamizh literary and cultural consciousness.
+          It started within the Chicago Tamil Sangam community. A paper presented at the 5th International Conference on Thirukkural offered an early glimpse into how the ideas sown by the Thirukkural continue to shape thought and values even today. It also awakened a desire to engage more deeply with works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em>—the foundational texts of Tamizh literary and cultural consciousness.
         </p>
         <p>
-          What might have remained a dormant wish became possible through the people and learning communities I encountered along the way. A defining moment was the <em>Introduction to Sangam Literature</em> course conducted by Mrs. Vaidehi Herbert. For many Tamils educated primarily in English, engaging with classical Tamizh texts—and even their traditional commentaries—can feel daunting. Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of Tamizh language, rhythm, imagery, and resonance across centuries. Weekly discussions—shaped by fellow learners and scholars—became a shared space of inquiry and discovery.
+          What might have remained a dormant wish became possible through the people and learning communities I encountered along the way. A defining moment was the <em>Introduction to Sangam Literature</em> course conducted by Mrs. Vaidehi Herbert.
         </p>
         <p>
-          As my exploration broadened, I encountered the Tamizh Concordance developed by Prof. Dr. P. Pandiaraja and the Sangacholai resources, which presented the Sangam corpus with remarkable structural and analytical clarity. These works showed that Tamizh literature is not only aesthetically powerful but also profoundly systematic, revealing patterns and relationships that span texts and time.
+          For many Tamils educated primarily in English, approaching classical Tamizh texts—and even their traditional commentaries—can feel daunting. Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Tamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery.
         </p>
         <p>
-          Further guidance came through the erudite expositions of Prof. Dr. Ku. Ve. Balasubramanian on <em>Tholkappiyam</em> and <em>Silapathikaram</em>. His teachings strengthened my confidence to engage deeply with Tamizh words, themes, and ideas—and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
+          As my exploration broadened, I encountered the Tamizh Concordance developed by Prof. Dr. P. Pandiaraja and the Sangacholai resources, which present the Sangam corpus with remarkable structural and analytical clarity. These works revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time.
+        </p>
+        <p>
+          Further guidance came through the erudite expositions of Prof. Dr. Ku. Ve. Balasubramanian on <em>Tholkappiyam</em> and <em>Silapathikaram</em>. His teachings strengthened my confidence to work closely with Tamizh words, themes, and ideas, and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
         </p>
         <p>
           These teachers and scholars—தமிழ்ச் சான்றோர், as Thiruvalluvar would call them—made one truth clear: Sangam literature is not a relic of the past. It is a living voice, sustained by communities of readers, learners, and interpreters across generations.
         </p>
-      </section>
-
-      <section aria-labelledby="wish">
-        <h2 id="wish">My Wish</h2>
         <p>
-          In spite of immense support, I feel my journey has just begun. When I read the texts, sometimes words and usages jump out and begin to tease—inviting me into a search for meaning and connection. For example:
+          Together, these experiences shaped a personal commitment to reading slowly, attentively, and with genuine curiosity.
+        </p>
+        <p>
+          When reading the texts, certain words and usages often stand out and spark curiosity—prompting a pause, comparison, and a return to the text with fresh questions.
+        </p>
+        <p>
+          For example:
         </p>
         <ul class="list">
-          <li><strong>பா, பாய், பாட்டு, பாம்பு</strong> – That spreads, expands</li>
-          <li><strong>கல், கல்வி, கற்பு</strong> – Strong, Complete Knowledge, Steadfast</li>
-          <li><strong>யா, யாமம், யானை, யாணர்</strong> – Black, Dark, Unknown, Novel</li>
-          <li><strong>எல், எல்லை, எல்லன்</strong> – Visible, illuminated</li>
+          <li><strong>பா, பாய், பாட்டு, பாம்பு</strong> – ideas of spreading and expansion</li>
+          <li><strong>கல், கல்வி, கற்பு</strong> – strength, learning, steadiness</li>
+          <li><strong>யா, யாமம், யானை, யாணர்</strong> – darkness, the unfamiliar, the new</li>
+          <li><strong>எல், எல்லை, எல்லன்</strong> – visibility and boundary</li>
         </ul>
         <p>
-          I am not an expert to make a definite call, but I wanted to indulge in this puzzle. That is why I began to envision a tool that could search across works, with quick access to etymological dictionaries and reference to expert commentaries. At the moment, I have only added a search facility. I hope the rest can be added too. With AI tools, the chance of building an integrated platform is high.
+          These are moments of discovery that many readers encounter while engaging with the texts. Yet following such threads across poems, genres, and commentaries can be difficult without simple ways to search and compare.
+        </p>
+        <p>
+          This platform grew out of that need. At present, it offers a basic search across selected works, helping readers locate words and usages more easily. Over time, additional references and tools may be added to support deeper exploration. The aim remains careful reading rather than quick conclusions.
+        </p>
+        <p>
+          The path through classical Tamizh literature is rarely linear. It unfolds through questions, comparisons, and the slow accumulation of understanding. This platform is an attempt to support that process—offering simple tools that make exploration a little easier, and perhaps a little more inviting.
+        </p>
+        <p>
+          I hope it serves as a bridge for readers who wish to enter these texts thoughtfully, one word and one insight at a time.
         </p>
       </section>
 
-      <section aria-labelledby="hope">
-        <h2 id="hope">My Hope</h2>
-        <p>
-          Together, we aim to:
-        </p>
-        <ul class="list">
-          <li>🔎 Enable exploration of words, roots, and meanings across classical and modern Tamizh texts.</li>
-          <li>🌱 Encourage new connections between language, poetry, and ideas.</li>
-          <li>📚 Support learners, researchers, and enthusiasts at every stage.</li>
-          <li>🌍 Nurture a community committed to keeping Tamizh literature alive and accessible.</li>
-        </ul>
+      <section class="invite" aria-labelledby="share">
+        <h2 id="share">
+          <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas" class="journey-link">Join the journey.</a>
+        </h2>
       </section>
 
-      <section class="invite" aria-labelledby="invitation">
-        <h2 id="invitation">An Invitation</h2>
-        <p>
-          While this platform began with my personal journey, it exists because of collective effort—built upon the scholarship, teaching, and generosity of many before us. This space grows through participation. I invite you to:
-        </p>
-        <ul class="list">
-          <li>Explore Tamizh literature using these tools.</li>
-          <li>Share insights, corrections, and ideas.</li>
-          <li>Contribute new approaches that bring classical texts closer to today's readers.</li>
-        </ul>
-        <p>
-          Every Tamizh work is part of a dialogue across time. I hope this platform becomes part of that dialogue—connecting past and present, individual curiosity and shared understanding.
-        </p>
-        <h2 id="share">Share your ideas. Join the journey.</h2>
-        <div class="cta" aria-label="Call to action">
-          <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas" class="cta-button secondary">Join Us</a>
-        </div>
-      </section>
-
-      <footer class="gratitude-footer">
-        <p class="gratitude-text">
-          Written in gratitude to the தமிழ்ச் சான்றோர் who made this journey possible.
-        </p>
-        <p class="author-name">— T. Mathan Mohan</p>
-      </footer>
     </article>
   </div>
 </template>
@@ -156,6 +139,18 @@ p {
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 2rem;
+  text-align: center;
+}
+
+.journey-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.journey-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 .cta {
