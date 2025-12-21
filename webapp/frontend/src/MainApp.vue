@@ -525,8 +525,33 @@ export default {
       }
     })
 
-    // Note: sortBy changes are handled reactively by getSortedWordOccurrences
-    // No need to trigger full search - just re-sort the already loaded lines
+    // Watch sortBy to reload occurrences for expanded words with new sort order
+    watch(sortBy, async (newSortBy, oldSortBy) => {
+      // Only reload if there are expanded words and sort actually changed
+      if (expandedWords.value.size === 0 || newSortBy === oldSortBy) return
+
+      const wordsToReload = Array.from(expandedWords.value)
+
+      for (const wordText of wordsToReload) {
+        // Remove all occurrences for this word
+        if (searchResults.value && searchResults.value.results) {
+          searchResults.value.results = searchResults.value.results.filter(
+            r => r.word_text !== wordText
+          )
+        }
+
+        // Reset tracking to reload from beginning
+        loadedOccurrences.value[wordText] = {
+          offset: 0,
+          hasMore: true
+        }
+      }
+
+      // Now reload each word's first batch sequentially
+      for (const wordText of wordsToReload) {
+        await loadMoreOccurrences(wordText)
+      }
+    })
 
     // Note: We no longer auto-clear on empty searchQuery since we have a dedicated Clear button
 
