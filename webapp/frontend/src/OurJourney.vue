@@ -39,7 +39,7 @@
               Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Tamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery. Her enthusiasm and unwavering commitment have made Sangam texts accessible to younger readers and non-Tamizh speakers as well.
             </p>
             <div class="resources">
-              <h4>Explore Their Work</h4>
+              <h4>Follow her work</h4>
               <ul>
                 <li><a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer">Sangam by Phone</a> — Sangam literature online</li>
                 <li><a href="https://sangamtranslationsbyvaidehi.com/" target="_blank" rel="noopener noreferrer">Sangam Translations</a> — Bilingual Sangam literature resources</li>
@@ -60,7 +60,7 @@
               His work revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time. (See full tribute on the Acknowledgment page)
             </p>
             <div class="resources">
-              <h4>Explore Their Work</h4>
+              <h4>Follow his work</h4>
               <ul>
                 <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
                 <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
@@ -87,7 +87,7 @@
               His teachings strengthened my confidence to work closely with Tamizh words, themes, and ideas, and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
             </p>
             <div class="resources">
-              <h4>Explore Their Work</h4>
+              <h4>Follow his work</h4>
               <ul>
                 <li><a href="https://www.youtube.com/@%E0%AE%B4%E0%AE%95%E0%AE%B0%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%82%E0%AE%9F%E0%AE%AE%E0%AF%8D" target="_blank" rel="noopener noreferrer">Silapathikaram Series</a> — thorough immersion into the epic of Silapathikaram</li>
                 <li><a href="https://www.youtube.com/@karthikkaveriselvan1716/" target="_blank" rel="noopener noreferrer">Tholkappiyam Series</a> — comprehensive exploration and review of Tholkappiyar's foundational work</li>
@@ -114,7 +114,7 @@
               He is a reminder that with passion, discipline, and honest and open enquiry, one can excel in many domains and make impactful contributions in all.
             </p>
             <div class="resources">
-              <h4>Explore Their Work</h4>
+              <h4>Follow his work</h4>
               <ul>
                 <li><a href="https://www.youtube.com/watch?v=CvKR-6GchLM&list=PL-2LGdu8vvFv98qoMA2TL_FRbJCqqmItI" target="_blank" rel="noopener noreferrer">பாலாவின் சங்கச்சுரங்கம்</a> — இணையப்பத்து - முதலாம் பத்து</li>
                 <li><a href="https://www.youtube.com/watch?v=uuFdIMTqVDc" target="_blank" rel="noopener noreferrer">பாலாவின் சங்கச்சுரங்கம்</a> — கரும்பு இவண் தந்தோன்</li>
@@ -286,11 +286,18 @@ h2 {
 }
 
 .closing-reflection {
-  margin: 1.5rem 0;
-  font-size: 16px;
-  line-height: 1.8;
-  color: #333;
+  margin: 2.5rem 0;
+  padding: 2rem 2.5rem;
+  font-size: 17px;
+  line-height: 1.9;
+  color: #2d2d2d;
   font-style: italic;
+  background: linear-gradient(135deg, #f5f0ff 0%, #fff5f5 100%);
+  border-left: 4px solid var(--primary-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(107, 44, 145, 0.1);
+  text-align: center;
+  font-weight: 500;
 }
 
 .tool-section {
