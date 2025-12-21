@@ -94,6 +94,18 @@ python sangam_bulk_import.py [database_url]
 # Import Silapathikaram (epic in 3 Kandams)
 python silapathikaram_bulk_import.py [database_url]
 
+# Import Manimegalai (epic with 1 Pathigam and 30 Kathais)
+python manimegalai_bulk_import.py [database_url]
+
+# Import Seevaka Sinthamani (epic in 14 Ilampagams)
+python seevaka_sinthamani_bulk_import.py [database_url]
+
+# Import Valayapathi (fragmentary epic - 72 verses)
+python valayapathi_bulk_import.py [database_url]
+
+# Import Kundalakesi (fragmentary epic - 19 verses)
+python kundalakesi_bulk_import.py [database_url]
+
 # Import Kambaramayanam (epic in 6 Kandams)
 python kambaramayanam_bulk_import.py [database_url]
 
@@ -231,6 +243,22 @@ Parser scripts in `scripts/` directory follow this pattern:
 - `silapathikaram_bulk_import.py` - 3 Kandams → Kaathais → Verses
   - Structure: $ marks Kandam, # marks Kaathai
   - Cleans ** markers and line numbers
+- `manimegalai_bulk_import.py` - 1 Pathigam + 30 Kathais (each Kathai = ONE verse)
+  - Structure: # marks sections (Pathigam #0, Kathais #1-#30)
+  - IMPORTANT: Each Kathai is ONE complete verse (blank lines are for readability)
+  - Cleans line numbers (multiples of 5)
+- `seevaka_sinthamani_bulk_import.py` - 14 Ilampagams → 3,146 verses
+  - Structure: @ marks Ilampagams, # marks verses
+  - Each # section is ONE complete verse (typically 4 lines)
+  - Cleans line numbers and alignment dots
+- `valayapathi_bulk_import.py` - 72 verses (fragmentary, no hierarchical structure)
+  - Structure: # marks verses (simple flat structure)
+  - Creates default section to hold all verses
+  - Lost epic, only fragments survive
+- `kundalakesi_bulk_import.py` - 19 verses (fragmentary, no hierarchical structure)
+  - Structure: # marks verses (simple flat structure)
+  - Creates default section to hold all verses
+  - Lost Buddhist epic, only fragments survive
 - `kambaramayanam_bulk_import.py` - 6 Kandams → Padalams → Verses
   - Structure: & marks Kandam, @ marks Padalam, # marks verse
   - Yuddha Kandam split into 4 parts (61-64) under parent section

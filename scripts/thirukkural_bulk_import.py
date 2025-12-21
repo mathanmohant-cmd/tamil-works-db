@@ -104,7 +104,7 @@ class ThirukkuralBulkImporter:
                 'Classic Tamil text on ethics, politics, and love - 1,330 couplets',
                 300, 500, 'medium',
                 'Dating disputed: ranges from 200 BCE to 800 CE. Kamil Zvelebil: 450-500 CE. Database uses moderate consensus.',
-                260  # Post-Sangam transitional period
+                261  # Post-Sangam transitional period
             ))
 
             self.conn.commit()
@@ -337,7 +337,7 @@ def main():
     # Text file path
     script_dir = Path(__file__).parent
     project_dir = script_dir.parent
-    text_file = project_dir / "Tamil-Source-TamilConcordence" / "3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு" / "திருக்குறள்.txt"
+    text_file = project_dir / "Tamil-Source-TamilConcordence" / "3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு" / "11-திருக்குறள்.txt"
 
     print("="*70)
     print("Thirukkural Bulk Import - Fast 2-Phase Import")
