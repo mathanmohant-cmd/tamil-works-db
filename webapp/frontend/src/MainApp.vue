@@ -7,6 +7,7 @@
       <!-- Database Summary -->
       <div class="database-summary" v-if="stats">
         <span>{{ stats.total_works }} Works | {{ stats.total_verses.toLocaleString() }} Verses | {{ stats.distinct_words.toLocaleString() }} Distinct Words | {{ stats.total_words.toLocaleString() }} Usage</span>
+        <span class="attribution-note">Built upon Prof. P. Pandiyaraja's <a href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer" class="concordance-link">Tamizh Concordance</a></span>
       </div>
       <div class="header-bottom">
         <div class="search-section">
@@ -110,27 +111,23 @@
           </div>
           <!-- Navigation -->
           <nav class="main-nav">
-            <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Home</button>
+            <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Acknowledgment</button>
             <button @click="currentPage = 'search'; showWelcome = true" :class="{active: currentPage === 'search'}">Search</button>
             <button @click="currentPage = 'principles'" :class="{active: currentPage === 'principles'}">Word Segmentation Principles</button>
-            <button @click="currentPage = 'inspiration'" :class="{active: currentPage === 'inspiration'}">Our Inspiration</button>
-            <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About Us</button>
+            <button @click="currentPage = 'journey'" :class="{active: currentPage === 'journey'}">Our Journey</button>
           </nav>
         </div>
       </div>
     </header>
 
-    <!-- Home Page -->
+    <!-- Home Page (Acknowledgment) -->
     <Home v-if="currentPage === 'home'" />
 
     <!-- Principles Page -->
     <Principles v-if="currentPage === 'principles'" />
 
-    <!-- Our Inspiration Page -->
-    <OurInspiration v-if="currentPage === 'inspiration'" />
-
-    <!-- About Page -->
-    <About v-if="currentPage === 'about'" />
+    <!-- Our Journey Page -->
+    <OurJourney v-if="currentPage === 'journey'" />
 
     <!-- Verse View (shown on search page) -->
     <VerseView
@@ -405,8 +402,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import api from './api.js'
 import Home from './Home.vue'
-import OurInspiration from './OurInspiration.vue'
-import About from './About.vue'
+import OurJourney from './OurJourney.vue'
 import Principles from './Principles.vue'
 import VerseView from './VerseView.vue'
 
@@ -414,14 +410,13 @@ export default {
   name: 'App',
   components: {
     Home,
-    OurInspiration,
-    About,
+    OurJourney,
     Principles,
     VerseView
   },
   setup() {
     // Page navigation
-    const currentPage = ref('home')
+    const currentPage = ref('search')  // Default to search page
     const showWelcome = ref(true)
 
     // State

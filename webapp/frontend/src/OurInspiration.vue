@@ -6,20 +6,20 @@
       <p class="intro">
         This project is inspired by the dedication of Tamizh scholars, teachers, and enthusiasts
         who have made Tamizh literature accessible to learners across the world.
-        Their work sparked our curiosity to explore further, eventually leading to the creation
-        of this Tamizh Word Search initiative. Read more about <router-link to="/about" class="inline-link">our journey</router-link>.
+        Their work sparked my curiosity to explore further, eventually leading to the creation
+        of this Tamizh Word Search initiative. Read more about <router-link to="/about" class="inline-link">my journey</router-link>.
       </p>
 
-      <!-- Prof. Dr. P. Pandiyaraja -->
+      <!-- Prof. P. Pandiyaraja -->
       <div class="mentor-block">
-        <img src="/prof-pandiaraja.jpg" alt="Prof. Dr. P. Pandiyaraja">
+        <img src="/prof-pandiaraja.jpg" alt="Prof. P. Pandiyaraja">
         <div class="mentor-text">
-          <h3>Prof. Dr. P. Pandiyaraja</h3>
+          <h3>Prof. P. Pandiyaraja</h3>
           <p>
-            Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on Home page)
+            Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on the Home page)
           </p>
           <div class="resources">
-            <h4>What inspired me</h4>
+            <h4>Resources that inspired me</h4>
             <ul>
               <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
               <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
@@ -41,11 +41,11 @@
           <h3>Ms. Vaidehi Herbert</h3>
           <p>
             Her <em>Introduction to Sangam Literature</em> courses and the community of learners she nurtures
-            opened the door for our deeper engagement with classical Tamizh literature. Her enthusiasm
-            and unwavering commitment have made Sangam texts accessible to younger readers and non Tamizh speakers too.
+            opened the door for my deeper engagement with classical Tamizh literature. Her enthusiasm
+            and unwavering commitment have made Sangam texts accessible to younger readers and non-Tamizh speakers as well.
           </p>
           <div class="resources">
-            <h4>What inspired me</h4>
+            <h4>Resources that inspired me</h4>
             <ul>
               <li><a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer">Sangam by Phone</a> — Sangam literature online</li>
               <li><a href="https://sangamtranslationsbyvaidehi.com/" target="_blank" rel="noopener noreferrer">Sangam Translations</a> — Bilingual Sangam literature resources</li>
@@ -54,7 +54,7 @@
         </div>
       </div>
 
-      <!-- Prof. Dr. Ku. Ve. Balasubramanian -->
+      <!-- Prof. Ku. Ve. Balasubramanian -->
       <div class="mentor-block">
         <div class="placeholder-image">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
@@ -64,14 +64,14 @@
           </svg>
         </div>
         <div class="mentor-text">
-          <h3>Prof. Dr. Ku. Ve. Balasubramanian</h3>
+          <h3>Prof. Ku. Ve. Balasubramanian</h3>
           <p>
             Even at the age of 80, he continues to share his vast knowledge through detailed
             teachings on <em>Silapadhikaram</em> and <em>Tholkappiyam</em>. His 75+ episode Silapadhikaram series
-            and 80+ episode Tholkappiyam series in YouTube are treasures that inspire anyone who loves Tamizh.
+            and 80+ episode Tholkappiyam series on YouTube are treasures that inspire anyone who loves Tamizh.
           </p>
           <div class="resources">
-            <h4>What inspired me</h4>
+            <h4>Resources that inspired me</h4>
             <ul>
               <li><a href="https://www.youtube.com/@%E0%AE%B4%E0%AE%95%E0%AE%B0%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%82%E0%AE%9F%E0%AE%AE%E0%AF%8D" target="_blank" rel="noopener noreferrer">Silapathikaram Series</a> — thorough immersion into the epic of Silapathikaram</li>
               <li><a href="https://www.youtube.com/@karthikkaveriselvan1716/" target="_blank" rel="noopener noreferrer">Tholkappiyam Series</a> — comprehensive exploration and review of Tholkappiyar's foundational work</li>
@@ -97,7 +97,7 @@
             reflects deep passion, rigor, and scholarship.
           </p>
           <div class="resources">
-            <h4>What inspired me</h4>
+            <h4>Resources that inspired me</h4>
             <ul>
               <li><a href="https://www.youtube.com/watch?v=CvKR-6GchLM&list=PL-2LGdu8vvFv98qoMA2TL_FRbJCqqmItI" target="_blank" rel="noopener noreferrer">பாலாவின் சங்கச்சுரங்கம்</a> — இணையப்பத்து - முதலாம் பத்து</li>
               <li><a href="https://www.youtube.com/watch?v=uuFdIMTqVDc" target="_blank" rel="noopener noreferrer">பாலாவின் சங்கச்சுரங்கம்</a> — கரும்பு இவண் தந்தோன்</li>

@@ -5,19 +5,22 @@
         <h2 id="journey">My Journey</h2>
         <p class="author-name">— T. Mathan Mohan</p>
         <p>
-          It started within the Chicago Tamil Sangam community. A paper presented at the 5th International Conference on Thirukkural offered an early glimpse into how the ideas sown by the Thirukkural continue to shape thought and values even today. It also awakened a desire to engage more deeply with works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em>—the foundational texts of Tamizh literary and cultural consciousness.
+          It started within the Chicago Tamizh Sangam community. A paper presented at the 5th International Conference on Thirukkural offered an early glimpse into how the ideas sown by the Thirukkural continue to shape thought and values even today.
         </p>
         <p>
-          What might have remained a dormant wish became possible through the people and learning communities I encountered along the way. A defining moment was the <em>Introduction to Sangam Literature</em> course conducted by Mrs. Vaidehi Herbert.
+          It also awakened a desire to engage more deeply with works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em>—the foundational texts of Tamizh literary and cultural consciousness.
         </p>
         <p>
-          For many Tamils educated primarily in English, approaching classical Tamizh texts—and even their traditional commentaries—can feel daunting. Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Tamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery.
+          What might have remained a dormant wish became possible through the people and learning communities I encountered along the way. A defining moment was the <em>Introduction to Sangam Literature</em> course conducted by Ms. Vaidehi Herbert.
         </p>
         <p>
-          As my exploration broadened, I encountered the Tamizh Concordance developed by Prof. Dr. P. Pandiaraja and the Sangacholai resources, which present the Sangam corpus with remarkable structural and analytical clarity. These works revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time.
+          For many Tamizhs educated primarily in English, approaching classical Tamizh texts—and even their traditional commentaries—can feel daunting. Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Tamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery.
         </p>
         <p>
-          Further guidance came through the erudite expositions of Prof. Dr. Ku. Ve. Balasubramanian on <em>Tholkappiyam</em> and <em>Silapathikaram</em>. His teachings strengthened my confidence to work closely with Tamizh words, themes, and ideas, and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
+          As my exploration broadened, I encountered the Tamizh Concordance developed by Prof. P. Pandiaraja and the Sangacholai resources, which present the Sangam corpus with remarkable structural and analytical clarity. These works revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time.
+        </p>
+        <p>
+          Further guidance came through the erudite expositions of Prof. Ku. Ve. Balasubramanian on <em>Tholkappiyam</em> and <em>Silapathikaram</em>. His teachings strengthened my confidence to work closely with Tamizh words, themes, and ideas, and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
         </p>
         <p>
           These teachers and scholars—தமிழ்ச் சான்றோர், as Thiruvalluvar would call them—made one truth clear: Sangam literature is not a relic of the past. It is a living voice, sustained by communities of readers, learners, and interpreters across generations.
@@ -53,7 +56,7 @@
 
       <section class="invite" aria-labelledby="share">
         <h2 id="share">
-          <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas" class="journey-link">Join the journey.</a>
+          <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Share your ideas and feedback</a>
         </h2>
       </section>
 
