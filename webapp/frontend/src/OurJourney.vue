@@ -21,27 +21,6 @@
       <section class="teachers-section">
         <h2>தமிழ்ச் சான்றோர்</h2>
 
-        <!-- Prof. P. Pandiyaraja -->
-        <div class="mentor-block">
-          <img src="/prof-pandiaraja.jpg" alt="Prof. P. Pandiyaraja">
-          <div class="mentor-text">
-            <h3>Prof. P. Pandiyaraja</h3>
-            <p>
-              Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. Over more than five decades, he has built a priceless repository of Tamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamizh.
-            </p>
-            <p>
-              His work revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time. (See full tribute on the Acknowledgment page)
-            </p>
-            <div class="resources">
-              <h4>Explore Their Work</h4>
-              <ul>
-                <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
-                <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
         <!-- Ms. Vaidehi Herbert -->
         <div class="mentor-block">
           <div class="placeholder-image">
@@ -64,6 +43,27 @@
               <ul>
                 <li><a href="https://sangambyphone.wordpress.com/" target="_blank" rel="noopener noreferrer">Sangam by Phone</a> — Sangam literature online</li>
                 <li><a href="https://sangamtranslationsbyvaidehi.com/" target="_blank" rel="noopener noreferrer">Sangam Translations</a> — Bilingual Sangam literature resources</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prof. P. Pandiyaraja -->
+        <div class="mentor-block">
+          <img src="/prof-pandiaraja.jpg" alt="Prof. P. Pandiyaraja">
+          <div class="mentor-text">
+            <h3>Prof. P. Pandiyaraja</h3>
+            <p>
+              Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. Over more than five decades, he has built a priceless repository of Tamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamizh.
+            </p>
+            <p>
+              His work revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time. (See full tribute on the Acknowledgment page)
+            </p>
+            <div class="resources">
+              <h4>Explore Their Work</h4>
+              <ul>
+                <li><a href="https://sangampedia.net/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d/%e0%ae%9a%e0%ae%99%e0%af%8d%e0%ae%95%e0%ae%9a%e0%af%8d-%e0%ae%9a%e0%af%8a%e0%ae%b2%e0%af%8d%e0%ae%b5%e0%ae%b3%e0%ae%ae%e0%af%8d-2/" target="_blank" rel="noopener noreferrer">சங்கச் சொல்வளம்</a> — Sangam word treasury</li>
+                <li><a href="https://sangampedia.net/%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%aa%e0%af%8d%e0%ae%aa%e0%ae%be%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81-%e0%ae%aa%e0%ae%a4%e0%af%8d%e0%ae%a4%e0%af%81%e0%ae%95%e0%af%8d%e0%ae%95%e0%ae%9f/" target="_blank" rel="noopener noreferrer">பத்துப்பாட்டு — பத்துக்கட்டுரைகள்</a> — Pattupattu articles</li>
               </ul>
             </div>
           </div>
@@ -106,7 +106,7 @@
             </svg>
           </div>
           <div class="mentor-text">
-            <h3>R. Balakrishnan, IAS</h3>
+            <h3>Mr. R. Balakrishnan, IAS</h3>
             <p>
               His work in connecting Sangam literature with modern understanding has made classical Tamizh closer to today's generation. His ability to distill profound insights from ancient texts reflects deep passion, rigor, and scholarship.
             </p>
