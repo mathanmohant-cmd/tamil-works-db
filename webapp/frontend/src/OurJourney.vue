@@ -108,7 +108,10 @@
           <div class="mentor-text">
             <h3>Mr. R. Balakrishnan, IAS</h3>
             <p>
-              His ability to distill profound insights from Sangam texts reflects unwavering discipline, deep scholarship, and intellectual rigor. He particularly excels in highlighting what is uniquely Tamizh, bridging past and present, and awakening Tamizh cultural consciousness. The profound phrases he unearths from Sangam Literature and makes accessible to ordinary Tamizh people can be compared to the Mahavakyas of the Vedic tradition.
+              His ability to unearth profound phrases from Sangam Literature—comparable to the Mahavakyas of Vedic tradition—and make them accessible to ordinary Tamizh people is unparalleled. This reflects unwavering discipline, deep scholarship, and intellectual rigor. Beyond his scholarly work, his vast administrative experience and keen social observation enable him to bring people together, opening new pathways to carry Sangam Literature forward beyond literary circles.
+            </p>
+            <p>
+              He is a reminder that with passion, discipline, and honest and open enquiry, one can excel in many domains and make impactful contributions in all.
             </p>
             <div class="resources">
               <h4>Explore Their Work</h4>
