@@ -250,11 +250,11 @@ class SangamBulkImporter:
             'section_id': section_id,
             'work_id': work_id,
             'parent_section_id': parent_id,
-            'level_type': 'Poems',
-            'level_type_tamil': 'பாடல்கள்',
+            'level_type': 'Collection',
+            'level_type_tamil': 'தொகுப்பு',
             'section_number': 1,
-            'section_name': 'Main Collection',
-            'section_name_tamil': 'முக்கிய தொகுப்பு',
+            'section_name': None,  # NULL for flat works to avoid redundant hierarchy
+            'section_name_tamil': None,
             'sort_order': 1
         })
 
