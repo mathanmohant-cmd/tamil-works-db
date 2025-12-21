@@ -100,7 +100,7 @@
             <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Acknowledgment</button>
             <button @click="currentPage = 'search'; showWelcome = true" :class="{active: currentPage === 'search'}">Search</button>
             <button @click="currentPage = 'principles'" :class="{active: currentPage === 'principles'}">Word Segmentation Principles</button>
-            <button @click="currentPage = 'journey'" :class="{active: currentPage === 'journey'}">Our Journey</button>
+            <button @click="currentPage = 'journey'" :class="{active: currentPage === 'journey'}">The Story Behind</button>
           </nav>
         </div>
       </div>
@@ -112,7 +112,7 @@
     <!-- Principles Page -->
     <Principles v-if="currentPage === 'principles'" />
 
-    <!-- Our Journey Page -->
+    <!-- The Story Behind Page -->
     <OurJourney v-if="currentPage === 'journey'" />
 
     <!-- Verse View (shown on search page) -->

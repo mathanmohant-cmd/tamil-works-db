@@ -7,8 +7,6 @@
       </header>
 
       <section class="content">
-        <h2 class="section-title">Acknowledgement</h2>
-
         <p>This project owes its deepest gratitude to <strong>Prof. P. Pandiyaraja</strong>, whose creation of the
           <a class="concordance" href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer">Tamizh Concordance</a>
           stands as a monumental contribution to Tamizh scholarship. Over more than five decades, he has built a priceless repository of Tamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamizh.</p>

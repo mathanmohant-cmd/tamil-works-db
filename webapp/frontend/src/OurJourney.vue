@@ -1,7 +1,7 @@
 <template>
   <div class="journey-page">
     <div class="container">
-      <h1>Our Journey</h1>
+      <h1>The Story Behind</h1>
       <p class="author-name">— T. Mathan Mohan</p>
 
       <!-- Introduction -->
