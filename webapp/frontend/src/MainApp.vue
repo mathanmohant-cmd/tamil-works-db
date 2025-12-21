@@ -236,6 +236,23 @@
             </div>
           </div>
 
+          <!-- Word List Sort Options -->
+          <div class="word-list-sort-options">
+            <span class="filter-label">Sort words by:</span>
+            <label>
+              <input type="radio" v-model="wordListSortBy" value="alphabetical" />
+              Alphabetical
+            </label>
+            <label>
+              <input type="radio" v-model="wordListSortBy" value="count_high_to_low" />
+              Count (High to Low)
+            </label>
+            <label>
+              <input type="radio" v-model="wordListSortBy" value="count_low_to_high" />
+              Count (Low to High)
+            </label>
+          </div>
+
           <!-- Word List with Expandable Details -->
           <div class="word-list-container">
             <div
@@ -443,6 +460,9 @@ export default {
     // Export menu state
     const showWordsExportMenu = ref(false)
     const currentExportWordText = ref(null)
+
+    // Word list sort state
+    const wordListSortBy = ref('alphabetical')
 
     // Load initial data
     onMounted(async () => {
@@ -747,36 +767,49 @@ export default {
       }, 100)
     }
 
-    // Computed: Get unique words with counts from backend (already sorted)
+    // Computed: Get unique words with counts from backend (sorted by user preference)
     const uniqueWords = computed(() => {
       if (!searchResults.value) return []
+
+      let words = []
 
       // ALWAYS use backend's unique_words if available (includes complete counts and work breakdown)
       if (searchResults.value.unique_words && Array.isArray(searchResults.value.unique_words) && searchResults.value.unique_words.length > 0) {
         console.log('Using backend unique_words:', searchResults.value.unique_words.length, 'words')
-        return searchResults.value.unique_words.map(word => ({
+        words = searchResults.value.unique_words.map(word => ({
           text: word.word_text,
           count: word.count, // Usage count (total occurrences)
           verse_count: word.verse_count || 0, // Verse count
           work_breakdown: word.work_breakdown || [] // Include work breakdown from backend
         }))
+      } else {
+        // Fallback: compute from results if unique_words not available (NOT RECOMMENDED - counts will be wrong!)
+        console.warn('Fallback: Computing word counts from paginated results - counts may be incomplete!')
+        if (!searchResults.value.results) return []
+
+        const wordMap = {}
+        searchResults.value.results.forEach(result => {
+          const text = result.word_text
+          if (wordMap[text]) {
+            wordMap[text].count++
+          } else {
+            wordMap[text] = { text, count: 1, verse_count: 0, work_breakdown: [] }
+          }
+        })
+
+        words = Object.values(wordMap)
       }
 
-      // Fallback: compute from results if unique_words not available (NOT RECOMMENDED - counts will be wrong!)
-      console.warn('Fallback: Computing word counts from paginated results - counts may be incomplete!')
-      if (!searchResults.value.results) return []
+      // Sort based on user preference
+      if (wordListSortBy.value === 'alphabetical') {
+        return words.sort((a, b) => a.text.localeCompare(b.text, 'ta'))
+      } else if (wordListSortBy.value === 'count_high_to_low') {
+        return words.sort((a, b) => b.count - a.count)
+      } else if (wordListSortBy.value === 'count_low_to_high') {
+        return words.sort((a, b) => a.count - b.count)
+      }
 
-      const wordMap = {}
-      searchResults.value.results.forEach(result => {
-        const text = result.word_text
-        if (wordMap[text]) {
-          wordMap[text].count++
-        } else {
-          wordMap[text] = { text, count: 1, verse_count: 0, work_breakdown: [] }
-        }
-      })
-
-      return Object.values(wordMap).sort((a, b) => a.text.localeCompare(b.text, 'ta'))
+      return words
     })
 
     // Computed: Filter results by selected word
@@ -1200,12 +1233,45 @@ export default {
     }
 
     // Method: Get sorted occurrences for a specific word
-    // CRITICAL: DO NOT sort here - backend already sorted according to sort_by parameter
-    // The results are already in the correct order from the backend (alphabetical/canonical/chronological/collection)
-    // Any frontend sorting will destroy the backend's ordering
+    // Sort by: user's sort order (canonical/alphabetical for works) → section hierarchy → verse → line
     const getSortedWordOccurrences = (wordText) => {
-      // Simply return filtered results WITHOUT sorting - they're already sorted by backend
-      return getWordOccurrences(wordText)
+      const occurrences = getWordOccurrences(wordText)
+
+      // Sort by user's preference, then by hierarchy
+      return occurrences.sort((a, b) => {
+        // First, sort by work according to user's selected sort order
+        if (a.work_id !== b.work_id) {
+          if (sortBy.value === 'alphabetical') {
+            // Alphabetical sort by work name (Tamil)
+            const aWorkName = a.work_name_tamil || a.work_name
+            const bWorkName = b.work_name_tamil || b.work_name
+            return aWorkName.localeCompare(bWorkName, 'ta')
+          } else {
+            // Canonical sort by canonical_position
+            const aCanonical = a.canonical_position !== undefined ? a.canonical_position : a.work_id
+            const bCanonical = b.canonical_position !== undefined ? b.canonical_position : b.work_id
+            return aCanonical - bCanonical
+          }
+        }
+
+        // Within same work, sort by section_id (sections are numbered sequentially in canonical order)
+        // The section_id represents the canonical order better than section_sort_order
+        // because it was assigned during import in the correct sequence
+        if (a.section_id !== b.section_id) {
+          return a.section_id - b.section_id
+        }
+
+        // Then sort by verse_sort_order (if available) or verse_number
+        const aVerseOrder = a.verse_sort_order !== undefined ? a.verse_sort_order : a.verse_number
+        const bVerseOrder = b.verse_sort_order !== undefined ? b.verse_sort_order : b.verse_number
+
+        if (aVerseOrder !== bVerseOrder) {
+          return aVerseOrder - bVerseOrder
+        }
+
+        // Finally, sort by line_number
+        return a.line_number - b.line_number
+      })
     }
 
     // Method: Check if there are more occurrences to load
@@ -1469,6 +1535,7 @@ export default {
       worksFilterButtonText,
       getFilterButtonText,
       searchSummary,
+      wordListSortBy,
       toggleAllWorks,
       clearSearch,
       performSearch,

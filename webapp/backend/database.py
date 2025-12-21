@@ -91,10 +91,17 @@ class Database:
                             wd.work_name_tamil,
                             wd.hierarchy_path,
                             wd.hierarchy_path_tamil,
+                            wd.canonical_position,
                             w.canonical_order,
-                            w.chronology_start_year
+                            w.chronology_start_year,
+                            w.work_id,
+                            v.section_id,
+                            s.sort_order as section_sort_order,
+                            v.sort_order as verse_sort_order
                         FROM word_details wd
                         LEFT JOIN works w ON wd.work_name = w.work_name
+                        LEFT JOIN verses v ON wd.verse_id = v.verse_id
+                        LEFT JOIN sections s ON v.section_id = s.section_id
                         WHERE 1=1
                     """
                     params = []
@@ -121,15 +128,22 @@ class Database:
                             wd.work_name_tamil,
                             wd.hierarchy_path,
                             wd.hierarchy_path_tamil,
-                            wc.position_in_collection
+                            wd.canonical_position,
+                            wc.position_in_collection,
+                            w.work_id,
+                            v.section_id,
+                            s.sort_order as section_sort_order,
+                            v.sort_order as verse_sort_order
                         FROM word_details wd
                         LEFT JOIN works w ON wd.work_name = w.work_name
+                        LEFT JOIN verses v ON wd.verse_id = v.verse_id
+                        LEFT JOIN sections s ON v.section_id = s.section_id
                         LEFT JOIN work_collections wc ON w.work_id = wc.work_id AND wc.collection_id = %s
                         WHERE 1=1
                     """
                     params = [collection_id]
                 else:
-                    # Alphabetical - no JOIN needed
+                    # Alphabetical - still need fields for frontend sorting
                     query = """
                         SELECT
                             wd.word_id,
@@ -150,8 +164,16 @@ class Database:
                             wd.work_name,
                             wd.work_name_tamil,
                             wd.hierarchy_path,
-                            wd.hierarchy_path_tamil
+                            wd.hierarchy_path_tamil,
+                            wd.canonical_position,
+                            w.work_id,
+                            v.section_id,
+                            s.sort_order as section_sort_order,
+                            v.sort_order as verse_sort_order
                         FROM word_details wd
+                        LEFT JOIN works w ON wd.work_name = w.work_name
+                        LEFT JOIN verses v ON wd.verse_id = v.verse_id
+                        LEFT JOIN sections s ON v.section_id = s.section_id
                         WHERE 1=1
                     """
                     params = []
