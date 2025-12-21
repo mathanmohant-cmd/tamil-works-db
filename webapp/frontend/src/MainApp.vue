@@ -159,7 +159,7 @@
       <!-- Help/Welcome Message -->
       <div v-if="currentPage === 'search' && !loading && showWelcome" class="welcome">
         <h2>Welcome to Tamizh Literary Words Search</h2>
-        <p class="welcome-subtitle">Search for words across 5 major Tamil literary works</p>
+        <p class="welcome-subtitle">Search for words across Tamizh literary works</p>
 
         <div class="welcome-highlight">
           <h3>💡 About This Database</h3>
@@ -1363,11 +1363,6 @@ export default {
       // Split by ' > ' to get each level
       const levels = path.split(' > ')
 
-      // If there's only one section level, return empty (hide it)
-      if (levels.length === 1) {
-        return ''
-      }
-
       // Clean each level - remove the "type:" prefix and keep only the name
       const cleanedLevels = levels.map(level => {
         // Split by ':' to separate level_type and section_name
@@ -1390,11 +1385,18 @@ export default {
       // Use verse_type_tamil first, fall back to verse_type, then default to 'பாடல்'
       const verseTypeTamil = result.verse_type_tamil || result.verse_type || 'பாடல்'
 
-      // If there's no hierarchy (no sections), just show line number with அடி
-      if (!hasHierarchy) {
+      // For single-poem works (work_verse_count = 1), only show line number
+      if (result.work_verse_count === 1) {
         return `அடி ${result.line_number}`
       }
 
+      // For Manimegalai and Silapathikaram, each section (Kathai/Kaathai) is one verse
+      // Hide redundant verse number (always 1 per section)
+      if (result.work_name === 'Manimegalai' || result.work_name === 'Silapathikaram') {
+        return `அடி ${result.line_number}`
+      }
+
+      // For collection works (work_verse_count > 1), show verse number
       // Show: verse_type_tamil verse_number > அடி line_number
       return `${verseTypeTamil} ${result.verse_number} > அடி ${result.line_number}`
     }

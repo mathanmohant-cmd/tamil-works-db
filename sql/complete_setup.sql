@@ -245,6 +245,13 @@ LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id AND wc_canon
 
 -- Complete word information with full context
 CREATE VIEW word_details AS
+WITH work_verse_counts AS (
+    SELECT
+        work_id,
+        COUNT(DISTINCT verse_id) as work_verse_count
+    FROM verses
+    GROUP BY work_id
+)
 SELECT
     w.word_id,
     w.word_text,
@@ -259,17 +266,20 @@ SELECT
     l.line_text,
     v.verse_id,
     v.verse_number,
+    v.total_lines,  -- Total lines in this verse
     vh.verse_type,
     vh.verse_type_tamil,
     vh.work_name,
     vh.work_name_tamil,
     vh.canonical_position,  -- From Traditional Canon collection (collection_id = 100)
     vh.hierarchy_path,
-    vh.hierarchy_path_tamil
+    vh.hierarchy_path_tamil,
+    wvc.work_verse_count  -- Total verses in the work
 FROM words w
 INNER JOIN lines l ON w.line_id = l.line_id
 INNER JOIN verses v ON l.verse_id = v.verse_id
-INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id;
+INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id
+INNER JOIN work_verse_counts wvc ON v.work_id = wvc.work_id;
 
 -- View: Works with their primary collection
 CREATE VIEW works_with_primary_collection AS

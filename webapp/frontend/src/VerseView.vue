@@ -21,8 +21,12 @@
               <span class="separator"> • </span>
               <span class="hierarchy">{{ cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path) }}</span>
             </template>
-            <span class="separator"> • </span>
-            <span class="verse-info">{{ verse.verse_type_tamil || verse.verse_type || 'பாடல்' }} {{ verse.verse_number }}</span>
+            <!-- Only show verse number for works with multiple verses (collections) -->
+            <!-- Hide for Manimegalai and Silapathikaram (1 verse per section) -->
+            <template v-if="verse.work_verse_count && verse.work_verse_count > 1 && verse.work_name !== 'Manimegalai' && verse.work_name !== 'Silapathikaram'">
+              <span class="separator"> • </span>
+              <span class="verse-info">{{ verse.verse_type_tamil || verse.verse_type || 'பாடல்' }} {{ verse.verse_number }}</span>
+            </template>
           </h2>
         </div>
         <button @click="toggleExportMenu" class="export-verse-button">
@@ -105,30 +109,22 @@ export default {
       // Split by ' > ' to get each level
       const levels = path.split(' > ')
 
-      // If there's only one section, check if it's a generic label and hide it
-      if (levels.length === 1) {
-        const parts = levels[0].split(':')
-        if (parts.length === 2) {
-          const sectionName = parts[1].trim()
-          // Hide generic section labels like "முக்கிய தொகுப்பு"
-          if (sectionName === 'முக்கிய தொகுப்பு' || sectionName === 'Main Collection') {
-            return ''
-          }
-        }
-        return ''
-      }
-
       // Clean each level - remove the "type:" prefix and keep only the name
       const cleanedLevels = levels.map(level => {
         // Split by ':' to separate level_type and section_name
         const parts = level.split(':')
         if (parts.length === 2) {
+          const sectionName = parts[1].trim()
+          // Hide generic section labels like "முக்கிய தொகுப்பு"
+          if (sectionName === 'முக்கிய தொகுப்பு' || sectionName === 'Main Collection') {
+            return null
+          }
           // Return only the section name (part after the colon)
-          return parts[1].trim()
+          return sectionName
         }
         // If no colon, return as-is
         return level.trim()
-      })
+      }).filter(level => level !== null)  // Remove nulls
 
       return cleanedLevels.join(' • ')
     }
@@ -174,17 +170,28 @@ export default {
         line.line_text
       ])
 
-      const csvContent = [
+      const csvLines = [
         '"Data Source: tamilconcordence.in"',
         '"Compiled by: Prof. Dr. P. Pandiyaraja"',
         '',
-        `"Work: ${verse.value.work_name_tamil}"`,
-        cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path) ? `"Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}"` : '',
-        `"${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}"`,
-        '',
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-      ].filter(line => line !== '').join('\n')
+        `"Work: ${verse.value.work_name_tamil}"`
+      ]
+
+      // Add section if present
+      if (cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)) {
+        csvLines.push(`"Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}"`)
+      }
+
+      // Add verse number only for multi-verse works (except Manimegalai and Silapathikaram)
+      if (verse.value.work_verse_count && verse.value.work_verse_count > 1 &&
+          verse.value.work_name !== 'Manimegalai' && verse.value.work_name !== 'Silapathikaram') {
+        csvLines.push(`"${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}"`)
+      }
+
+      csvLines.push('', headers.join(','))
+      rows.forEach(row => csvLines.push(row.map(cell => `"${cell}"`).join(',')))
+
+      const csvContent = csvLines.join('\n')
 
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
@@ -207,8 +214,12 @@ export default {
       if (cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)) {
         content += `Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}\n`
       }
-      content += `${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}\n\n`
-      content += '---\n\n'
+      // Add verse number only for multi-verse works (except Manimegalai and Silapathikaram)
+      if (verse.value.work_verse_count && verse.value.work_verse_count > 1 &&
+          verse.value.work_name !== 'Manimegalai' && verse.value.work_name !== 'Silapathikaram') {
+        content += `${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}\n`
+      }
+      content += '\n---\n\n'
 
       verse.value.lines.forEach((line, index) => {
         const lineNum = index + 1

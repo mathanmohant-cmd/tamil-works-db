@@ -92,6 +92,8 @@ class Database:
                             wd.hierarchy_path,
                             wd.hierarchy_path_tamil,
                             wd.canonical_position,
+                            wd.total_lines,
+                            wd.work_verse_count,
                             w.canonical_order,
                             w.chronology_start_year,
                             w.work_id,
@@ -129,6 +131,8 @@ class Database:
                             wd.hierarchy_path,
                             wd.hierarchy_path_tamil,
                             wd.canonical_position,
+                            wd.total_lines,
+                            wd.work_verse_count,
                             wc.position_in_collection,
                             w.work_id,
                             v.section_id,
@@ -166,6 +170,8 @@ class Database:
                             wd.hierarchy_path,
                             wd.hierarchy_path_tamil,
                             wd.canonical_position,
+                            wd.total_lines,
+                            wd.work_verse_count,
                             w.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
@@ -467,19 +473,29 @@ class Database:
         """Get complete verse with all lines"""
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                # Get verse info
+                # Get verse info with work_verse_count
                 cur.execute("""
+                    WITH work_verse_counts AS (
+                        SELECT
+                            work_id,
+                            COUNT(DISTINCT verse_id) as work_verse_count
+                        FROM verses
+                        GROUP BY work_id
+                    )
                     SELECT
                         v.verse_id,
                         v.verse_number,
                         v.verse_type,
+                        v.total_lines,
                         vh.verse_type_tamil,
                         vh.work_name,
                         vh.work_name_tamil,
                         vh.hierarchy_path,
-                        vh.hierarchy_path_tamil
+                        vh.hierarchy_path_tamil,
+                        wvc.work_verse_count
                     FROM verses v
                     JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id
+                    JOIN work_verse_counts wvc ON v.work_id = wvc.work_id
                     WHERE v.verse_id = %s
                 """, [verse_id])
                 verse = dict(cur.fetchone())
