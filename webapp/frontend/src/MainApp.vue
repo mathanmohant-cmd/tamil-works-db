@@ -525,13 +525,8 @@ export default {
       }
     })
 
-    // Watch sortBy changes to auto-reload results
-    watch(sortBy, () => {
-      // Auto-reload search results when sort order changes if we have active search
-      if (searchResults.value && searchQuery.value) {
-        performSearch()
-      }
-    })
+    // Note: sortBy changes are handled reactively by getSortedWordOccurrences
+    // No need to trigger full search - just re-sort the already loaded lines
 
     // Note: We no longer auto-clear on empty searchQuery since we have a dedicated Clear button
 
