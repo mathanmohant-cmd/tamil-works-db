@@ -109,6 +109,11 @@ python kundalakesi_bulk_import.py [database_url]
 # Import Kambaramayanam (epic in 6 Kandams)
 python kambaramayanam_bulk_import.py [database_url]
 
+# ===== MASTER IMPORT SCRIPTS =====
+# Import all Eighteen Lesser Texts at once (பதினெண்கீழ்க்கணக்கு)
+python import_eighteen_lesser_texts.py [database_url]
+# Includes: Thirukkural + 17 other works (2,161 total verses)
+
 # All parsers support:
 # - DATABASE_URL environment variable
 # - Command line argument for database URL
