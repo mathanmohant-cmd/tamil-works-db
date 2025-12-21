@@ -371,6 +371,44 @@ body {
   height: 16px;
 }
 
+/* Lines Sort Options (in expanded word section) */
+.lines-sort-options {
+  padding: 0.75rem 1.5rem;
+  background: #fff9f0;
+  border-bottom: 1px solid #e0d0c0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.lines-sort-options .filter-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.lines-sort-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.lines-sort-options label:hover {
+  color: var(--text-primary);
+}
+
+.lines-sort-options input[type="radio"] {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+}
+
 .word-list-container {
   /* No max-height or scroll - let the page expand */
 }

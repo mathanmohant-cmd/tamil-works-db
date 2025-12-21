@@ -95,20 +95,6 @@
               </label>
             </div>
           </div>
-          <!-- Sort Order Options -->
-          <div class="sort-order-options">
-            <div class="filter-group-inline">
-              <span class="filter-label">Sort by:</span>
-              <label>
-                <input type="radio" v-model="sortBy" value="canonical" />
-                Traditional Canon
-              </label>
-              <label>
-                <input type="radio" v-model="sortBy" value="alphabetical" />
-                Alphabetical
-              </label>
-            </div>
-          </div>
           <!-- Navigation -->
           <nav class="main-nav">
             <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Acknowledgment</button>
@@ -306,6 +292,19 @@
                       📥 Export Lines
                     </button>
                   </div>
+                </div>
+
+                <!-- Sort Lines Options -->
+                <div class="lines-sort-options">
+                  <span class="filter-label">Sort lines by work order:</span>
+                  <label>
+                    <input type="radio" v-model="sortBy" value="canonical" />
+                    Traditional Canon
+                  </label>
+                  <label>
+                    <input type="radio" v-model="sortBy" value="alphabetical" />
+                    Alphabetical
+                  </label>
                 </div>
 
                 <!-- Loading State -->
