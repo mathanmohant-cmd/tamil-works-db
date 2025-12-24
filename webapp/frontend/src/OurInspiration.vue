@@ -4,10 +4,10 @@
       <h1>Our Inspiration</h1>
 
       <p class="intro">
-        This project is inspired by the dedication of Tamizh scholars, teachers, and enthusiasts
-        who have made Tamizh literature accessible to learners across the world.
+        This project is inspired by the dedication of Thamizh scholars, teachers, and enthusiasts
+        who have made Thamizh literature accessible to learners across the world.
         Their work sparked my curiosity to explore further, eventually leading to the creation
-        of this Tamizh Word Search initiative. Read more about <router-link to="/about" class="inline-link">my journey</router-link>.
+        of this Thamizh Word Search initiative. Read more about <router-link to="/about" class="inline-link">my journey</router-link>.
       </p>
 
       <!-- Prof. P. Pandiyaraja -->
@@ -16,7 +16,7 @@
         <div class="mentor-text">
           <h3>Prof. P. Pandiyaraja</h3>
           <p>
-            Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on the Home page)
+            Creator of the <strong>Thamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. (See full tribute on the Home page)
           </p>
           <div class="resources">
             <h4>Explore Their Work</h4>
@@ -41,8 +41,8 @@
           <h3>Ms. Vaidehi Herbert</h3>
           <p>
             Her <em>Introduction to Sangam Literature</em> courses and the community of learners she nurtures
-            opened the door for my deeper engagement with classical Tamizh literature. Her enthusiasm
-            and unwavering commitment have made Sangam texts accessible to younger readers and non-Tamizh speakers as well.
+            opened the door for my deeper engagement with classical Thamizh literature. Her enthusiasm
+            and unwavering commitment have made Sangam texts accessible to younger readers and non-Thamizh speakers as well.
           </p>
           <div class="resources">
             <h4>Explore Their Work</h4>
@@ -68,7 +68,7 @@
           <p>
             Even at the age of 80, he continues to share his vast knowledge through detailed
             teachings on <em>Silapadhikaram</em> and <em>Tholkappiyam</em>. His 75+ episode Silapadhikaram series
-            and 80+ episode Tholkappiyam series on YouTube are treasures that inspire anyone who loves Tamizh.
+            and 80+ episode Tholkappiyam series on YouTube are treasures that inspire anyone who loves Thamizh.
           </p>
           <div class="resources">
             <h4>Explore Their Work</h4>
@@ -92,7 +92,7 @@
         <div class="mentor-text">
           <h3>R. Balakrishnan, IAS</h3>
           <p>
-            His work in connecting Sangam literature with modern understanding has made classical Tamizh
+            His work in connecting Sangam literature with modern understanding has made classical Thamizh
             closer to today's generation. His ability to distill profound insights from ancient texts
             reflects deep passion, rigor, and scholarship.
           </p>

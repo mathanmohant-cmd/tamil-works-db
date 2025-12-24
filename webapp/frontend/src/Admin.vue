@@ -103,7 +103,7 @@
           </div>
 
           <div class="form-group">
-            <label>Name (Tamil)</label>
+            <label>Name (Thamizh)</label>
             <input v-model="formData.collection_name_tamil" type="text" />
           </div>
 
@@ -163,7 +163,7 @@
 
           <div class="details-info">
             <p v-if="selectedCollection.collection_name_tamil">
-              <strong>Tamil:</strong> {{ selectedCollection.collection_name_tamil }}
+              <strong>Thamizh:</strong> {{ selectedCollection.collection_name_tamil }}
             </p>
             <p><strong>Type:</strong> {{ selectedCollection.collection_type }}</p>
             <p v-if="selectedCollection.parent_name">

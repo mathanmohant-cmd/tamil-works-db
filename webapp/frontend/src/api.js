@@ -1,5 +1,5 @@
 /**
- * API client for Tamil Words Search backend
+ * API client for Thamizh Words Search backend
  */
 import axios from 'axios'
 

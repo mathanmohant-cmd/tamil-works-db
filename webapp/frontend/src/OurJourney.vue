@@ -7,10 +7,10 @@
       <!-- Introduction -->
       <section class="intro-section">
         <p class="intro">
-          It started within the Chicago Tamizh Sangam community. A paper presented at the 5th International Conference on Thirukkural offered an early glimpse into how the ideas sown by the Thirukkural continue to shape thought and values even today.
+          It started within the Chicago Thamizh Sangam community. A paper presented at the 5th International Conference on Thirukkural offered an early glimpse into how the ideas sown by the Thirukkural continue to shape thought and values even today.
         </p>
         <p class="intro">
-          It also awakened a desire to engage more deeply with works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em>—the foundational texts of Tamizh literary and cultural consciousness.
+          It also awakened a desire to engage more deeply with works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em>—the foundational texts of Thamizh literary and cultural consciousness.
         </p>
         <p class="intro">
           What might have remained a dormant wish became possible through the தமிழ்ச் சான்றோர்—the scholars and teachers—whose work guided me along the way.
@@ -33,10 +33,10 @@
           <div class="mentor-text">
             <h3>Ms. Vaidehi Herbert</h3>
             <p>
-              A defining moment was the <em>Introduction to Sangam Literature</em> course she conducted. For many Tamizhs educated primarily in English, approaching classical Tamizh texts—and even their traditional commentaries—can feel daunting.
+              A defining moment was the <em>Introduction to Sangam Literature</em> course she conducted. For many Thamizhs educated primarily in English, approaching classical Thamizh texts—and even their traditional commentaries—can feel daunting.
             </p>
             <p>
-              Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Tamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery. Her enthusiasm and unwavering commitment have made Sangam texts accessible to younger readers and non-Tamizh speakers as well.
+              Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Thamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery. Her enthusiasm and unwavering commitment have made Sangam texts accessible to younger readers and non-Thamizh speakers as well.
             </p>
             <div class="resources">
               <h4>Follow her work</h4>
@@ -54,10 +54,10 @@
           <div class="mentor-text">
             <h3>Prof. P. Pandiyaraja</h3>
             <p>
-              Creator of the <strong>Tamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. Over more than five decades, he has built a priceless repository of Tamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Tamizh.
+              Creator of the <strong>Thamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. Over more than five decades, he has built a priceless repository of Thamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Thamizh.
             </p>
             <p>
-              His work revealed that Tamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time. (See full tribute on the Acknowledgment page)
+              His work revealed that Thamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time. (See full tribute on the Acknowledgment page)
             </p>
             <div class="resources">
               <h4>Follow his work</h4>
@@ -81,10 +81,10 @@
           <div class="mentor-text">
             <h3>Prof. Ku. Ve. Balasubramanian</h3>
             <p>
-              Even at the age of 80, he continues to share his vast knowledge through detailed teachings on <em>Silapathikaram</em> and <em>Tholkappiyam</em>. His 75+ episode Silapathikaram series and 80+ episode Tholkappiyam series on YouTube are treasures that inspire anyone who loves Tamizh.
+              Even at the age of 80, he continues to share his vast knowledge through detailed teachings on <em>Silapathikaram</em> and <em>Tholkappiyam</em>. His 75+ episode Silapathikaram series and 80+ episode Tholkappiyam series on YouTube are treasures that inspire anyone who loves Thamizh.
             </p>
             <p>
-              His teachings strengthened my confidence to work closely with Tamizh words, themes, and ideas, and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
+              His teachings strengthened my confidence to work closely with Thamizh words, themes, and ideas, and reinforced the understanding that this tradition thrives through careful study, dialogue, and transmission.
             </p>
             <div class="resources">
               <h4>Follow his work</h4>
@@ -108,7 +108,7 @@
           <div class="mentor-text">
             <h3>Mr. R. Balakrishnan, IAS</h3>
             <p>
-              His ability to unearth profound phrases from Sangam Literature—comparable to the Mahavakyas of Vedic tradition—and make them accessible to ordinary Tamizh people is unparalleled. This reflects unwavering discipline, deep scholarship, and intellectual rigor. Beyond his scholarly work, his vast administrative experience and keen social observation enable him to bring people together, opening new pathways to carry Sangam Literature forward beyond literary circles.
+              His ability to unearth profound phrases from Sangam Literature—comparable to the Mahavakyas of Vedic tradition—and make them accessible to ordinary Thamizh people is unparalleled. This reflects unwavering discipline, deep scholarship, and intellectual rigor. Beyond his scholarly work, his vast administrative experience and keen social observation enable him to bring people together, opening new pathways to carry Sangam Literature forward beyond literary circles.
             </p>
             <p>
               He is a reminder that with passion, discipline, and honest and open enquiry, one can excel in many domains and make impactful contributions in all.
@@ -150,7 +150,7 @@
           This platform grew out of that need. At present, it offers a basic search across selected works, helping readers locate words and usages more easily. Over time, additional references and tools may be added to support deeper exploration. The aim remains careful reading rather than quick conclusions.
         </p>
         <p>
-          The path through classical Tamizh literature is rarely linear. It unfolds through questions, comparisons, and the slow accumulation of understanding. This platform is an attempt to support that process—offering simple tools that make exploration a little easier, and perhaps a little more inviting.
+          The path through classical Thamizh literature is rarely linear. It unfolds through questions, comparisons, and the slow accumulation of understanding. This platform is an attempt to support that process—offering simple tools that make exploration a little easier, and perhaps a little more inviting.
         </p>
         <p>
           I hope it serves as a bridge for readers who wish to enter these texts thoughtfully, one word and one insight at a time.
@@ -160,7 +160,7 @@
       <!-- Call to Action -->
       <section class="invite" aria-labelledby="share">
         <h2 id="share">
-          <a href="mailto:thamizh.words@gmail.com?subject=Tamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Share your ideas and feedback</a>
+          <a href="mailto:thamizh.words@gmail.com?subject=Thamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Share your ideas and feedback</a>
         </h2>
       </section>
 

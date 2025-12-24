@@ -2,12 +2,12 @@
   <div id="app">
     <!-- Header -->
     <header class="app-header">
-      <h1>தமிழ் இலக்கிய சொல் தேடல் | Tamizh Literary Words Search</h1>
+      <h1>தமிழ் இலக்கிய சொல் தேடல் | Thamizh Literary Words Search</h1>
 
       <!-- Database Summary -->
       <div class="database-summary" v-if="stats">
         <span>{{ stats.total_works }} Works | {{ stats.total_verses.toLocaleString() }} Verses | {{ stats.distinct_words.toLocaleString() }} Distinct Words | {{ stats.total_words.toLocaleString() }} Usage</span>
-        <span class="attribution-note">Built upon Prof. P. Pandiyaraja's <a href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer" class="concordance-link">Tamizh Concordance</a></span>
+        <span class="attribution-note">Built upon Prof. P. Pandiyaraja's <a href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer" class="concordance-link">Thamizh Concordance</a></span>
       </div>
       <div class="header-bottom">
         <div class="search-section">
@@ -17,7 +17,7 @@
                 <input
                   v-model="searchQuery"
                   type="text"
-                  placeholder="Enter Tamizh word... (e.g., அறம்)"
+                  placeholder="Enter Thamizh word... (e.g., அறம்)"
                   @keyup.enter="performSearch"
                   @input="handleAutocompleteInput"
                   @focus="showAutocomplete = true"
@@ -172,12 +172,12 @@
     <div class="main-container">
       <!-- Help/Welcome Message -->
       <div v-if="currentPage === 'search' && !loading && showWelcome" class="welcome">
-        <h2>Welcome to Tamizh Literary Words Search</h2>
-        <p class="welcome-subtitle">Search for words across Tamizh literary works</p>
+        <h2>Welcome to Thamizh Literary Words Search</h2>
+        <p class="welcome-subtitle">Search for words across Thamizh literary works</p>
 
         <div class="welcome-highlight">
           <h3>💡 About This Database</h3>
-          <p>This database is built using the comprehensive concordance of Tamizh literary works developed by Prof. Dr. P. Pandiyaraja. Understanding the <strong>word segmentation principles</strong> he has adopted will help you use this tool more effectively.
+          <p>This database is built using the comprehensive concordance of Thamizh literary works developed by Prof. Dr. P. Pandiyaraja. Understanding the <strong>word segmentation principles</strong> he has adopted will help you use this tool more effectively.
           </p>
           <p class="learn-more">
             <a href="#" @click.prevent="currentPage = 'principles'" class="principles-link">Learn about word segmentation principles →</a>
@@ -187,7 +187,7 @@
         <div class="quick-start">
           <h3>Quick Start</h3>
           <ul class="tips-list">
-            <li><strong>Type a Tamil word</strong> in the search box above — it auto-completes as you type!</li>
+            <li><strong>Type a Thamizh word</strong> in the search box above — it auto-completes as you type!</li>
             <li><strong>Choose match type:</strong> Partial (finds similar words) or Exact (precise match)</li>
             <li><strong>Set position:</strong> Beginning, End, or Anywhere in the word</li>
             <li><strong>Filter by works</strong> (optional) to search specific texts</li>
@@ -271,7 +271,7 @@
                     target="_blank"
                     class="action-icon dictionary-icon"
                     @click.stop
-                    title="Look up in Tamizh Lexicon"
+                    title="Look up in Thamizh Lexicon"
                   >
                     📖
                   </a>
