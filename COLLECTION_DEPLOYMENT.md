@@ -74,7 +74,7 @@ ORDER BY sort_order;
 
 ```sql
 CREATE TABLE collections (
-    collection_id INTEGER PRIMARY KEY,
+    collection_id INTEGER PRIMARY KEY,  -- Note: INTEGER, not SERIAL (no auto-sequence)
     collection_name VARCHAR(100) NOT NULL UNIQUE,
     collection_name_tamil VARCHAR(100),
     collection_type VARCHAR(50) NOT NULL,  -- 'period', 'tradition', 'genre', 'canon', 'custom'
@@ -84,6 +84,8 @@ CREATE TABLE collections (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+**Important:** The `collection_id` uses `INTEGER` not `SERIAL`, so there's no auto-generated sequence. You must manually manage IDs when inserting collections.
 
 ### Work_Collections Table (Junction)
 

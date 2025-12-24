@@ -30,13 +30,31 @@ def export_collections(source_db_url=None, output_file='collections_export.sql')
         conn = psycopg2.connect(source_db_url)
         cur = conn.cursor()
 
-        # Read collections
+        # Read collections in hierarchical order (parents before children)
+        # Using recursive CTE to ensure proper insertion order
         cur.execute("""
+            WITH RECURSIVE collection_tree AS (
+                -- Root collections (no parent)
+                SELECT collection_id, collection_name, collection_name_tamil,
+                       collection_type, description, parent_collection_id,
+                       sort_order, created_at, 0 as level
+                FROM collections
+                WHERE parent_collection_id IS NULL
+
+                UNION ALL
+
+                -- Child collections
+                SELECT c.collection_id, c.collection_name, c.collection_name_tamil,
+                       c.collection_type, c.description, c.parent_collection_id,
+                       c.sort_order, c.created_at, ct.level + 1
+                FROM collections c
+                INNER JOIN collection_tree ct ON c.parent_collection_id = ct.collection_id
+            )
             SELECT collection_id, collection_name, collection_name_tamil,
                    collection_type, description, parent_collection_id,
                    sort_order, created_at
-            FROM collections
-            ORDER BY collection_id
+            FROM collection_tree
+            ORDER BY level, sort_order, collection_id
         """)
         collections = cur.fetchall()
 
@@ -69,10 +87,14 @@ def export_collections(source_db_url=None, output_file='collections_export.sql')
             f.write("DELETE FROM work_collections;\n")
             f.write("DELETE FROM collections;\n\n")
 
-            # Reset sequences (if they exist)
-            f.write("-- Reset sequences\n")
-            f.write("SELECT setval('collections_collection_id_seq', 1, false);\n")
-            f.write("SELECT setval('work_collections_work_collection_id_seq', 1, false);\n\n")
+            # Reset sequences (only if they exist)
+            f.write("-- Reset sequences (only work_collections has SERIAL, collections uses INTEGER)\n")
+            f.write("-- collections table uses INTEGER PRIMARY KEY, not SERIAL, so no sequence\n")
+            f.write("DO $$ BEGIN\n")
+            f.write("  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'work_collections_work_collection_id_seq') THEN\n")
+            f.write("    PERFORM setval('work_collections_work_collection_id_seq', 1, false);\n")
+            f.write("  END IF;\n")
+            f.write("END $$;\n\n")
 
             # Insert collections
             f.write("-- Insert collections\n")
@@ -107,10 +129,14 @@ VALUES ({wc_id}, {work_id}, {collection_id}, {position_str}, {is_primary_str}, {
 
             f.write("\n")
 
-            # Update sequences to max values
-            f.write("-- Update sequences to current max\n")
-            f.write("SELECT setval('collections_collection_id_seq', (SELECT MAX(collection_id) FROM collections));\n")
-            f.write("SELECT setval('work_collections_work_collection_id_seq', (SELECT MAX(work_collection_id) FROM work_collections));\n")
+            # Update sequences to max values (only work_collections has a sequence)
+            f.write("-- Update work_collections sequence to current max\n")
+            f.write("-- Note: collections table has no sequence (uses INTEGER PRIMARY KEY, not SERIAL)\n")
+            f.write("DO $$ BEGIN\n")
+            f.write("  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'work_collections_work_collection_id_seq') THEN\n")
+            f.write("    PERFORM setval('work_collections_work_collection_id_seq', (SELECT COALESCE(MAX(work_collection_id), 0) FROM work_collections));\n")
+            f.write("  END IF;\n")
+            f.write("END $$;\n")
 
             f.write("\n-- Export complete!\n")
 

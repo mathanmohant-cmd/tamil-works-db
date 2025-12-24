@@ -185,7 +185,7 @@ const loadWorks = async () => {
   // The parent will handle loading, but we need to get the works
   // We'll use a workaround by importing axios here
   const axios = (await import('axios')).default
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
   try {
     const response = await axios.get(`${API_BASE_URL}/collections/${props.collection.collection_id}/works`)
