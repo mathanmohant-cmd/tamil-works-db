@@ -83,18 +83,18 @@ export default {
 .concordance {
   color: #0f4c81;
   text-decoration: none;
-  border-bottom: 1px dotted rgba(11, 76, 129, 0.25);
+  border-bottom: 1px dotted var(--life-pulse);
   font-weight: 600;
 }
 
 .concordance:hover {
-  border-bottom: 1px solid #0f4c81;
+  border-bottom: 1px solid var(--life-pulse);
 }
 
 .tribute-quote {
   margin: 18px 0;
   padding: 14px 18px;
-  border-left: 4px solid #0f4c81;
+  border-left: 4px solid var(--life-pulse);
   background: #fbfdff;
   border-radius: 8px;
   color: #0b3b5c;

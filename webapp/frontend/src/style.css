@@ -857,7 +857,7 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   background: var(--marutham-gold);
-  border: 2px solid var(--marutham-primary);
+  border: 2px solid var(--life-pulse);
   border-left: 3px solid var(--life-pulse);
   font-size: 0.85rem;
   min-width: 36px;
@@ -910,7 +910,12 @@ body {
 
 .occurrence-metadata .separator {
   color: var(--text-secondary);
-  font-weight: normal;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.hierarchy-path {
+  font-size: 1.1rem;
 }
 
 

@@ -293,7 +293,7 @@ h2 {
   color: #2d2d2d;
   font-style: italic;
   background: linear-gradient(135deg, #f5f0ff 0%, #fff5f5 100%);
-  border-left: 4px solid var(--primary-color);
+  border-left: 4px solid var(--life-pulse);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(107, 44, 145, 0.1);
   text-align: center;
@@ -363,13 +363,13 @@ h2 {
 }
 
 .resources a:hover {
-  color: #d32f2f;
-  border-bottom: 2px solid #d32f2f;
+  color: var(--life-pulse);
+  border-bottom: 2px solid var(--life-pulse);
 }
 
 .invite {
   background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border: 2px solid var(--primary-color);
+  border: 2px solid var(--life-pulse);
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 3rem;

@@ -126,7 +126,7 @@ export default {
         return level.trim()
       }).filter(level => level !== null)  // Remove nulls
 
-      return cleanedLevels.join(' . ')
+      return cleanedLevels.join(' ● ')
     }
 
     const highlightSearchWord = (lineText) => {
