@@ -129,15 +129,11 @@
     <div class="filters-panel" v-show="filtersExpanded">
       <div class="filter-group" v-if="works.length">
         <div class="filter-header">
-          <label><strong>Filter by Work:</strong></label>
+          <div style="flex: 1;"></div>
           <div class="filter-header-actions">
             <button @click="clearFilters" class="clear-filter-button" title="Uncheck all works">
               Clear Filter
             </button>
-            <label class="remember-checkbox">
-              <input type="checkbox" v-model="rememberSelection" />
-              Remember for session
-            </label>
             <button @click="closeFilters" class="done-button">Done</button>
           </div>
         </div>
@@ -448,7 +444,6 @@ export default {
     const filterMode = ref('all')  // 'all' or 'select'
     const selectedWorks = ref([])
     const selectAllWorks = ref(true)
-    const rememberSelection = ref(false)
     const accordionFilterRef = ref(null)  // Ref to AccordionFilter component
     const works = ref([])
     const searchResults = ref(null)
@@ -504,15 +499,13 @@ export default {
           collections.value = []
         }
 
-        // Check for saved selection in session storage
+        // Check for saved selection in session storage (always restore if available)
         const savedSelection = sessionStorage.getItem('selectedWorks')
         const savedMode = sessionStorage.getItem('filterMode')
-        const savedRemember = sessionStorage.getItem('rememberSelection')
 
-        if (savedRemember === 'true' && savedSelection) {
+        if (savedSelection) {
           selectedWorks.value = JSON.parse(savedSelection)
           filterMode.value = savedMode || 'all'
-          rememberSelection.value = true
           console.log('[DEBUG] Restored saved selection:', selectedWorks.value.length, 'works')
         } else {
           selectedWorks.value = works.value.map(w => w.work_id)
@@ -949,16 +942,9 @@ export default {
     const closeFilters = () => {
       filtersExpanded.value = false
 
-      // Save to session storage if remember is checked
-      if (rememberSelection.value) {
-        sessionStorage.setItem('selectedWorks', JSON.stringify(selectedWorks.value))
-        sessionStorage.setItem('filterMode', filterMode.value)
-        sessionStorage.setItem('rememberSelection', 'true')
-      } else {
-        sessionStorage.removeItem('selectedWorks')
-        sessionStorage.removeItem('filterMode')
-        sessionStorage.removeItem('rememberSelection')
-      }
+      // Always save to session storage
+      sessionStorage.setItem('selectedWorks', JSON.stringify(selectedWorks.value))
+      sessionStorage.setItem('filterMode', filterMode.value)
     }
 
     // Method: Get work name by ID
@@ -1612,7 +1598,6 @@ export default {
       filterMode,
       selectedWorks,
       selectAllWorks,
-      rememberSelection,
       accordionFilterRef,
       works,
       searchResults,

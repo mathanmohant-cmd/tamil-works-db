@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinai Color Scheme Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Tinai-Inspired Color Palette */
+        :root {
+            /* Kurinji - Intellectual depth (mountain blue) */
+            --kurinji-primary: #2c5f8d;
+            --kurinji-light: #4a7ba7;
+            --kurinji-dark: #1a3a5a;
+
+            /* Neithal - Continuity (sea blue) */
+            --neithal-primary: #5b9bc4;
+            --neithal-light: #7db8d9;
+            --neithal-dark: #3d7a9f;
+
+            /* Mullai - Calm ethics (sage green/white) */
+            --mullai-primary: #5ca37f;
+            --mullai-light: #7ec99e;
+            --mullai-accent: #f5f9f7;
+
+            /* Marutham - Social life (olive/gold green) */
+            --marutham-primary: #6b9b3d;
+            --marutham-gold: #a8b854;
+            --marutham-light: #8fbb5f;
+
+            /* Paalai - Struggle (ochre/earth) */
+            --paalai-primary: #c17a3a;
+            --paalai-light: #d89a5f;
+            --paalai-dark: #9a5f2d;
+
+            /* Red - Life pulse (accent) */
+            --life-pulse: #c44545;
+            --life-pulse-bright: #e05555;
+            --life-pulse-dark: #a03535;
+
+            /* Neutrals */
+            --neutral-bg: #faf9f7;
+            --neutral-text: #2d2d2d;
+            --neutral-border: #e0ddd8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--neutral-bg);
+            color: var(--neutral-text);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--kurinji-dark);
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: var(--neithal-dark);
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--neutral-border);
+        }
+
+        h2 {
+            color: var(--kurinji-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--neutral-border);
+        }
+
+        /* Color Swatches */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .color-swatch {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--neutral-border);
+        }
+
+        .color-box {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .color-label {
+            padding: 12px;
+            background: white;
+            font-size: 0.9em;
+        }
+
+        .color-name {
+            font-weight: 600;
+            color: var(--neutral-text);
+        }
+
+        .color-value {
+            color: #666;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
+        /* Buttons */
+        .button-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-kurinji {
+            background: var(--kurinji-primary);
+            color: white;
+        }
+
+        .btn-kurinji:hover {
+            background: var(--kurinji-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-neithal {
+            background: var(--neithal-primary);
+            color: white;
+        }
+
+        .btn-neithal:hover {
+            background: var(--neithal-dark);
+        }
+
+        .btn-mullai {
+            background: var(--mullai-primary);
+            color: white;
+        }
+
+        .btn-mullai:hover {
+            background: var(--mullai-light);
+        }
+
+        .btn-marutham {
+            background: var(--marutham-gold);
+            color: var(--neutral-text);
+        }
+
+        .btn-marutham:hover {
+            background: var(--marutham-light);
+        }
+
+        .btn-paalai {
+            background: var(--paalai-primary);
+            color: white;
+        }
+
+        .btn-paalai:hover {
+            background: var(--paalai-dark);
+        }
+
+        .btn-life-pulse {
+            background: var(--life-pulse);
+            color: white;
+        }
+
+        .btn-life-pulse:hover {
+            background: var(--life-pulse-dark);
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .card p {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .card-kurinji { background: var(--kurinji-primary); }
+        .card-neithal { background: var(--neithal-primary); }
+        .card-mullai { background: var(--mullai-primary); }
+        .card-marutham { background: var(--marutham-primary); color: var(--neutral-bg); }
+        .card-paalai { background: var(--paalai-primary); }
+
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: var(--neithal-light);
+            border-color: var(--neithal-dark);
+            color: var(--neithal-dark);
+        }
+
+        .alert-success {
+            background: var(--mullai-accent);
+            border-color: var(--mullai-primary);
+            color: var(--mullai-primary);
+        }
+
+        .alert-warning {
+            background: var(--paalai-light);
+            border-color: var(--paalai-dark);
+            color: var(--paalai-dark);
+        }
+
+        .alert-error {
+            background: var(--life-pulse-bright);
+            border-color: var(--life-pulse-dark);
+            color: white;
+        }
+
+        /* Search Bar Example */
+        .search-demo {
+            margin-top: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid var(--neithal-light);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--kurinji-primary);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .badge-kurinji { background: var(--kurinji-light); color: white; }
+        .badge-neithal { background: var(--neithal-light); color: white; }
+        .badge-mullai { background: var(--mullai-light); color: white; }
+        .badge-life-pulse { background: var(--life-pulse); color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tinai Color Scheme Demo</h1>
+        <p class="subtitle">Tamil literature-inspired design system • திணை வண்ண அமைப்பு</p>
+
+        <!-- Color Palette Section -->
+        <div class="section">
+            <h2>Color Palette - வண்ண தட்டு</h2>
+            <div class="color-grid">
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--kurinji-primary)">Kurinji • குறிஞ்சி</div>
+                    <div class="color-label">
+                        <div class="color-name">Intellectual Depth</div>
+                        <div class="color-value">#2c5f8d</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--neithal-primary)">Neithal • நெய்தல்</div>
+                    <div class="color-label">
+                        <div class="color-name">Continuity</div>
+                        <div class="color-value">#5b9bc4</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--mullai-primary)">Mullai • முல்லை</div>
+                    <div class="color-label">
+                        <div class="color-name">Calm Ethics</div>
+                        <div class="color-value">#5ca37f</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--marutham-gold); color: var(--neutral-text)">Marutham • மருதம்</div>
+                    <div class="color-label">
+                        <div class="color-name">Social Life</div>
+                        <div class="color-value">#a8b854</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--paalai-primary)">Paalai • பாலை</div>
+                    <div class="color-label">
+                        <div class="color-name">Struggle</div>
+                        <div class="color-value">#c17a3a</div>
+                    </div>
+                </div>
+
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--life-pulse)">Life Pulse • உயிர்</div>
+                    <div class="color-label">
+                        <div class="color-name">Vital Accent</div>
+                        <div class="color-value">#c44545</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons Section -->
+        <div class="section">
+            <h2>Buttons & Actions</h2>
+            <div class="button-grid">
+                <button class="btn btn-kurinji">Primary Action</button>
+                <button class="btn btn-neithal">Secondary Action</button>
+                <button class="btn btn-mullai">Success</button>
+                <button class="btn btn-marutham">Info</button>
+                <button class="btn btn-paalai">Warning</button>
+                <button class="btn btn-life-pulse">Critical</button>
+            </div>
+        </div>
+
+        <!-- Cards Section -->
+        <div class="section">
+            <h2>Content Cards</h2>
+            <div class="card-grid">
+                <div class="card card-kurinji">
+                    <h3>குறிஞ்சி Kurinji</h3>
+                    <p>Mountain landscapes and intellectual pursuits. Deep thought and union.</p>
+                </div>
+                <div class="card card-neithal">
+                    <h3>நெய்தல் Neithal</h3>
+                    <p>Coastal regions symbolizing patience and longing across time.</p>
+                </div>
+                <div class="card card-mullai">
+                    <h3>முல்லை Mullai</h3>
+                    <p>Pastoral lands representing calm, faithful waiting and ethics.</p>
+                </div>
+                <div class="card card-marutham">
+                    <h3>மருதம் Marutham</h3>
+                    <p>Agricultural prosperity and vibrant social interactions.</p>
+                </div>
+                <div class="card card-paalai">
+                    <h3>பாலை Paalai</h3>
+                    <p>Desert hardship and the struggle of separation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Example -->
+        <div class="section">
+            <h2>Search Interface Example</h2>
+            <div class="search-demo">
+                <input type="text" class="search-input" placeholder="தமிழ் சொற்களை தேடுங்கள் / Search Tamil words...">
+                <div style="margin-top: 20px;">
+                    <span class="badge badge-kurinji">213 Usage</span>
+                    <span class="badge badge-neithal">5 Works</span>
+                    <span class="badge badge-mullai">156 Verses</span>
+                    <span class="badge badge-life-pulse">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="section">
+            <h2>Alerts & Notifications</h2>
+            <div class="alert alert-info">
+                <strong>Info:</strong> Search results sorted by collection order (Neithal - Continuity)
+            </div>
+            <div class="alert alert-success">
+                <strong>Success:</strong> Data imported successfully (Mullai - Calm completion)
+            </div>
+            <div class="alert alert-warning">
+                <strong>Warning:</strong> Database connection slow (Paalai - Challenge)
+            </div>
+            <div class="alert alert-error">
+                <strong>Error:</strong> Failed to load data (Life Pulse - Critical attention)
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <template>
   <div class="accordion-filter">
     <div class="accordion-header">
-      <h3>Filter by Collection</h3>
+      <h3>Select Collection/Work</h3>
       <div class="accordion-actions">
         <button @click="expandAll" class="action-btn" title="Expand all collections">
           Expand All
@@ -26,6 +26,22 @@
       >
         <!-- Collection Header -->
         <div class="accordion-item-header">
+          <button
+            @click="toggleCollection(collection.collection_id)"
+            class="accordion-toggle-icon"
+            :aria-expanded="isExpanded(collection.collection_id)"
+            title="Expand/Collapse"
+          >
+            <span class="expand-icon">
+              {{ isExpanded(collection.collection_id) ? '▼' : '▶' }}
+            </span>
+          </button>
+          <span class="collection-name-label">
+            {{ collection.collection_name_tamil || collection.collection_name }}
+            <span v-if="collection.work_count > 0" class="work-count">
+              ({{ collection.work_count }} {{ collection.work_count === 1 ? 'work' : 'works' }})
+            </span>
+          </span>
           <input
             v-if="collection.work_count > 0"
             type="checkbox"
@@ -35,22 +51,6 @@
             @click.stop
             title="Select/deselect all works in this collection"
           />
-          <button
-            @click="toggleCollection(collection.collection_id)"
-            class="accordion-toggle"
-            :class="{ 'no-checkbox': collection.work_count === 0 }"
-            :aria-expanded="isExpanded(collection.collection_id)"
-          >
-            <span class="toggle-icon">
-              {{ isExpanded(collection.collection_id) ? '▼' : '▶' }}
-            </span>
-            <span class="collection-name">
-              {{ collection.collection_name_tamil || collection.collection_name }}
-              <span v-if="collection.work_count > 0" class="work-count">
-                ({{ collection.work_count }} {{ collection.work_count === 1 ? 'work' : 'works' }})
-              </span>
-            </span>
-          </button>
         </div>
 
         <!-- Collection Content (Works List) -->
@@ -67,6 +67,10 @@
               :key="work.work_id"
               class="work-item"
             >
+              <label :for="`work-${work.work_id}`" class="work-label">
+                <span class="work-icon">📄</span>
+                <span class="work-name">{{ work.work_name_tamil || work.work_name }}</span>
+              </label>
               <input
                 type="checkbox"
                 :checked="isWorkSelected(work.work_id)"
@@ -74,10 +78,6 @@
                 class="work-checkbox"
                 :id="`work-${work.work_id}`"
               />
-              <label :for="`work-${work.work_id}`" class="work-label">
-                <span class="work-icon">📄</span>
-                <span class="work-name">{{ work.work_name_tamil || work.work_name }}</span>
-              </label>
             </div>
           </div>
         </div>
@@ -406,47 +406,58 @@ onMounted(async () => {
   margin: 0;
 }
 
-.accordion-toggle {
+.collection-name-label {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
   font-size: 1rem;
   color: #333;
-  min-height: 44px; /* Minimum touch target size for mobile */
-}
-
-.accordion-toggle.no-checkbox {
-  /* Add left padding when there's no checkbox to align with items that have checkboxes */
-  padding-left: 28px;
-}
-
-.accordion-toggle:hover {
-  color: #0066cc;
-}
-
-.toggle-icon {
-  font-size: 0.85rem;
-  width: 1.2rem;
-  text-align: center;
-  color: #666;
-  transition: transform 0.2s;
-}
-
-.collection-name {
-  flex: 1;
   font-weight: 500;
+  cursor: default;
+}
+
+.accordion-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: white;
+  color: var(--kurinji-primary);
+  border: 2px solid var(--kurinji-light);
+  border-bottom: 3px solid var(--life-pulse);
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.accordion-toggle-icon:hover {
+  border-color: var(--kurinji-primary);
+  border-bottom-color: var(--life-pulse);
+  color: var(--kurinji-dark);
+  transform: scale(1.05);
+}
+
+.accordion-toggle-icon:active {
+  transform: scale(1);
+}
+
+.accordion-item.is-expanded .accordion-toggle-icon {
+  background: var(--mullai-accent);
+  border-color: var(--mullai-primary);
+  border-bottom-color: var(--life-pulse);
+}
+
+.accordion-toggle-icon .expand-icon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .work-count {
   font-size: 0.85rem;
-  color: #666;
-  font-weight: normal;
+  color: var(--marutham-primary);
+  font-weight: 600;
   margin-left: 0.5rem;
 }
 
@@ -488,7 +499,7 @@ onMounted(async () => {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  margin-right: 0.75rem;
+  margin-left: 0.75rem;
   flex-shrink: 0;
 }
 

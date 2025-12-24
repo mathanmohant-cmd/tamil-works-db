@@ -11,18 +11,55 @@ html {
 }
 
 :root {
-  --primary-color: #d32f2f;
-  --primary-light: #ff6659;
-  --primary-dark: #9a0007;
-  --secondary-color: #1976d2;
-  --background: #f5f5f5;
+  /* Tinai-Inspired Color Palette */
+
+  /* Kurinji - Intellectual depth (mountain blue) - Primary actions */
+  --kurinji-primary: #2c5f8d;
+  --kurinji-light: #4a7ba7;
+  --kurinji-dark: #1a3a5a;
+
+  /* Neithal - Continuity (sea blue) - Secondary actions */
+  --neithal-primary: #5b9bc4;
+  --neithal-light: #7db8d9;
+  --neithal-dark: #3d7a9f;
+
+  /* Mullai - Calm ethics (sage green) - Success states */
+  --mullai-primary: #5ca37f;
+  --mullai-light: #7ec99e;
+  --mullai-accent: #f5f9f7;
+
+  /* Marutham - Social life (olive/gold green) - Info/highlights */
+  --marutham-primary: #6b9b3d;
+  --marutham-gold: #a8b854;
+  --marutham-light: #8fbb5f;
+
+  /* Paalai - Struggle (ochre/earth) - Warnings */
+  --paalai-primary: #c17a3a;
+  --paalai-light: #d89a5f;
+  --paalai-dark: #9a5f2d;
+
+  /* Life Pulse - Vital accent (red) - Critical/errors */
+  --life-pulse: #c44545;
+  --life-pulse-bright: #e05555;
+  --life-pulse-dark: #a03535;
+
+  /* Legacy variable mappings for backward compatibility */
+  --primary-color: var(--kurinji-primary);
+  --primary-light: var(--kurinji-light);
+  --primary-dark: var(--kurinji-dark);
+  --secondary-color: var(--neithal-primary);
+  --success: var(--mullai-primary);
+  --warning: var(--paalai-primary);
+  --error: var(--life-pulse);
+
+  /* Neutral colors */
+  --background: var(--mullai-accent);
   --surface: #ffffff;
-  --text-primary: #212121;
+  --text-primary: #2d2d2d;
   --text-secondary: #757575;
-  --border-color: #e0e0e0;
-  --success: #4caf50;
-  --warning: #ff9800;
-  --error: #f44336;
+  --border-color: #e0ddd8;
+
+  /* Fonts */
   --tamil-font: 'Noto Sans Tamil', 'Tamil Sangam MN', sans-serif;
   --english-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -49,7 +86,7 @@ body {
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background: var(--kurinji-primary);
   color: white;
   padding: 1.5rem 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -210,8 +247,8 @@ body {
 
 .filter-selection-button {
   padding: 0.5rem 1rem;
-  background: var(--warning);
-  color: white;
+  background: var(--marutham-gold);
+  color: var(--text-primary);
   border: none;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -222,7 +259,7 @@ body {
 }
 
 .filter-selection-button:hover {
-  background: #f57c00;
+  background: var(--marutham-light);
 }
 
 .work-filter-options {
@@ -256,37 +293,39 @@ body {
 
 .done-button-inline {
   padding: 0.5rem 1rem;
-  background: var(--success);
+  background: var(--mullai-primary);
   color: white;
   border: none;
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 6px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
   font-weight: 600;
 }
 
 .done-button-inline:hover {
-  background: #388e3c;
+  background: var(--mullai-light);
+  transform: translateY(-1px);
 }
 
 .clear-button {
   padding: 0.75rem 1.5rem;
-  background: var(--error);
+  background: var(--neithal-primary);
   color: white;
   border: none;
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
   white-space: nowrap;
 }
 
 .clear-button:hover {
-  background: #c62828;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+  background: var(--neithal-dark);
+  transform: translateY(-1px);
 }
 
 .clear-button:active {
@@ -329,18 +368,21 @@ body {
 }
 
 .clear-selection-btn {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.85rem;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 3px;
+  padding: 0.5rem 1.5rem;
+  background: var(--marutham-gold);
+  color: var(--text-primary);
+  border: 2px solid var(--marutham-primary);
+  border-bottom: 3px solid var(--life-pulse);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s;
 }
 
 .clear-selection-btn:hover {
-  background: #c82333;
+  background: var(--marutham-light);
+  transform: translateY(-1px);
 }
 
 /* Selected Works Preview (chip layout) */
@@ -438,8 +480,8 @@ body {
 
 .results-header {
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border-bottom: 2px solid var(--primary-color);
+  background: var(--mullai-accent);
+  border-bottom: 2px solid var(--kurinji-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -538,11 +580,11 @@ body {
 }
 
 .word-item-expandable.expanded {
-  background: linear-gradient(135deg, #fff5f5 0%, #fce4ec 100%);
-  border: 2px solid var(--primary-color);
+  background: var(--mullai-accent);
+  border: 2px solid var(--kurinji-primary);
   border-radius: 12px;
   margin: 0.5rem 0;
-  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15);
+  box-shadow: 0 4px 12px rgba(44, 95, 141, 0.15);
 }
 
 .word-header-row {
@@ -568,7 +610,7 @@ body {
 }
 
 .word-header-row:hover::before {
-  background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  background: var(--kurinji-primary);
 }
 
 .word-info {
@@ -596,9 +638,10 @@ body {
 }
 
 .word-count-badge {
-  background: white;
-  color: #333;
-  border: 2px solid rgba(211, 47, 47, 0.4);
+  background: var(--marutham-gold);
+  color: var(--text-primary);
+  border: 2px solid var(--marutham-primary);
+  border-bottom: 2px solid var(--life-pulse);
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
   font-size: 0.85rem;
@@ -617,7 +660,7 @@ body {
   font-size: 1.5rem;
   text-decoration: none;
   border: none;
-  background: rgba(211, 47, 47, 0.1);
+  background: var(--marutham-gold);
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0.6rem;
@@ -631,8 +674,8 @@ body {
 
 .action-icon:hover {
   transform: scale(1.15);
-  background: rgba(211, 47, 47, 0.2);
-  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+  background: var(--marutham-light);
+  box-shadow: 0 2px 8px rgba(168, 184, 84, 0.3);
 }
 
 .action-icon:active {
@@ -645,8 +688,9 @@ body {
   justify-content: center;
   padding: 0.75rem;
   background: white;
-  color: rgba(211, 47, 47, 0.7);
-  border: 2px solid rgba(211, 47, 47, 0.4);
+  color: var(--kurinji-primary);
+  border: 2px solid var(--kurinji-light);
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 50%;
   font-size: 1.1rem;
   font-weight: 600;
@@ -660,8 +704,9 @@ body {
 }
 
 .expand-collapse-button:hover {
-  border-color: rgba(211, 47, 47, 0.6);
-  color: rgba(211, 47, 47, 0.9);
+  border-color: var(--kurinji-primary);
+  border-bottom-color: var(--life-pulse);
+  color: var(--kurinji-dark);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
 }
@@ -672,15 +717,17 @@ body {
 }
 
 .expand-collapse-button.expanded {
-  background: rgba(211, 47, 47, 0.05);
-  border-color: rgba(211, 47, 47, 0.5);
-  color: rgba(211, 47, 47, 0.8);
+  background: var(--mullai-accent);
+  border-color: var(--mullai-primary);
+  border-bottom-color: var(--life-pulse);
+  color: var(--kurinji-dark);
 }
 
 .expand-collapse-button.expanded:hover {
-  background: rgba(211, 47, 47, 0.1);
-  border-color: rgba(211, 47, 47, 0.6);
-  color: rgba(211, 47, 47, 0.9);
+  background: var(--mullai-light);
+  border-color: var(--mullai-primary);
+  border-bottom-color: var(--life-pulse-dark);
+  color: var(--kurinji-dark);
   transform: scale(1.05);
 }
 
@@ -743,9 +790,10 @@ body {
 
 .export-button-small {
   padding: 0.75rem 1.25rem;
-  background: var(--success);
+  background: var(--mullai-primary);
   color: white;
   border: none;
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
@@ -754,29 +802,29 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 6px rgba(92, 163, 127, 0.3);
   min-height: 44px;
 }
 
 .export-button-small:hover {
-  background: #388e3c;
-  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+  background: var(--mullai-primary);
+  box-shadow: 0 4px 10px rgba(92, 163, 127, 0.4);
   transform: translateY(-2px);
 }
 
 .export-button-small:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 4px rgba(92, 163, 127, 0.3);
 }
 
 .export-button-pdf {
-  background: var(--error);
-  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+  background: var(--life-pulse);
+  box-shadow: 0 2px 6px rgba(196, 69, 69, 0.3);
 }
 
 .export-button-pdf:hover {
-  background: #c62828;
-  box-shadow: 0 4px 10px rgba(244, 67, 54, 0.4);
+  background: var(--life-pulse-dark);
+  box-shadow: 0 4px 10px rgba(196, 69, 69, 0.4);
 }
 
 .export-buttons-group {
@@ -811,16 +859,17 @@ body {
 }
 
 .occurrence-item:hover {
-  border-color: var(--primary-light);
-  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15);
+  border-color: var(--neithal-primary);
+  box-shadow: 0 4px 12px rgba(91, 155, 196, 0.15);
   transform: translateY(-1px);
 }
 
 .occurrence-number {
   font-weight: 700;
-  color: #333;
-  background: white;
-  border: 2px solid rgba(211, 47, 47, 0.4);
+  color: var(--text-primary);
+  background: var(--marutham-gold);
+  border: 2px solid var(--marutham-primary);
+  border-left: 3px solid var(--life-pulse);
   font-size: 0.85rem;
   min-width: 36px;
   height: 36px;
@@ -844,9 +893,9 @@ body {
   color: var(--text-primary);
   font-family: var(--tamil-font), var(--english-font);
   padding: 0.5rem 0.75rem;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  background: var(--mullai-accent);
   border-radius: 6px;
-  border-left: 3px solid var(--primary-color);
+  border-left: 3px solid var(--kurinji-primary);
   font-weight: 500;
   display: flex;
   flex-wrap: wrap;
@@ -856,7 +905,7 @@ body {
 
 .occurrence-metadata .work-name {
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--kurinji-dark);
 }
 
 .occurrence-metadata .separator {
@@ -886,7 +935,7 @@ body {
   padding: 0.75rem;
   background: #fafafa;
   border-radius: 6px;
-  border-left: 3px solid var(--secondary-color);
+  border-left: 3px solid var(--neithal-primary);
 }
 
 .collapse-footer {
@@ -898,7 +947,7 @@ body {
 
 .collapse-button {
   padding: 0.75rem 2.5rem;
-  background: var(--text-secondary);
+  background: var(--paalai-primary);
   color: white;
   border: none;
   border-radius: 10px;
@@ -906,13 +955,13 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(193, 122, 58, 0.3);
   min-height: 44px;
 }
 
 .collapse-button:hover {
-  background: var(--text-primary);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  background: var(--paalai-dark);
+  box-shadow: 0 4px 10px rgba(193, 122, 58, 0.4);
   transform: translateY(-2px);
 }
 
@@ -928,27 +977,30 @@ body {
 
 .load-more-button {
   padding: 0.75rem 2.5rem;
-  background: var(--secondary-color);
-  color: white;
-  border: none;
+  background: var(--marutham-gold);
+  color: var(--text-primary);
+  border: 2px solid var(--marutham-primary);
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 2px 6px rgba(168, 184, 84, 0.3);
   min-height: 44px;
 }
 
 .load-more-button:hover:not(:disabled) {
-  background: #1565c0;
-  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+  background: var(--marutham-light);
+  border-color: var(--marutham-primary);
+  border-bottom-color: var(--life-pulse);
+  box-shadow: 0 4px 10px rgba(168, 184, 84, 0.4);
   transform: translateY(-2px);
 }
 
 .load-more-button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 2px 4px rgba(168, 184, 84, 0.3);
 }
 
 .load-more-button:disabled {
@@ -969,8 +1021,8 @@ body {
 
 .panel-header {
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border-bottom: 2px solid var(--primary-color);
+  background: var(--mullai-accent);
+  border-bottom: 2px solid var(--kurinji-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1011,8 +1063,8 @@ body {
 }
 
 .word-item.active {
-  background: linear-gradient(90deg, #fff5f5 0%, #fce4ec 100%);
-  border-left: 4px solid var(--primary-color);
+  background: var(--mullai-accent);
+  border-left: 4px solid var(--kurinji-primary);
   padding-left: calc(1.5rem - 4px);
 }
 
@@ -1099,25 +1151,27 @@ body {
 }
 
 .autocomplete-item:hover {
-  background-color: rgba(211, 47, 47, 0.1);
-  color: var(--primary-color);
+  background-color: var(--mullai-accent);
+  color: var(--kurinji-primary);
   font-weight: 600;
 }
 
 .search-button {
-  padding: 0.75rem;
-  background: var(--primary-color);
+  padding: 0.75rem 1.5rem;
+  background: var(--neithal-primary);
   color: white;
   border: none;
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
 }
 
 .search-button:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: var(--neithal-dark);
+  transform: translateY(-1px);
 }
 
 .search-button:disabled {
@@ -1164,34 +1218,38 @@ body {
 
 .done-button {
   padding: 0.5rem 1.5rem;
-  background: var(--success);
-  color: white;
-  border: none;
+  background: var(--marutham-gold);
+  color: var(--text-primary);
+  border: 2px solid var(--marutham-primary);
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
 }
 
 .done-button:hover {
-  background: #388e3c;
+  background: var(--marutham-light);
+  transform: translateY(-1px);
 }
 
 .clear-filter-button {
-  padding: 0.5rem 1rem;
-  background: var(--error);
-  color: white;
-  border: none;
+  padding: 0.5rem 1.5rem;
+  background: var(--marutham-gold);
+  color: var(--text-primary);
+  border: 2px solid var(--marutham-primary);
+  border-bottom: 3px solid var(--life-pulse);
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
 }
 
 .clear-filter-button:hover {
-  background: #c62828;
+  background: var(--marutham-light);
+  transform: translateY(-1px);
 }
 
 .checkbox-group {
@@ -1247,12 +1305,12 @@ body {
 }
 
 .welcome-highlight {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border: 2px solid var(--warning);
+  background: var(--mullai-accent);
+  border: 2px solid var(--marutham-gold);
   border-radius: 12px;
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(168, 184, 84, 0.15);
 }
 
 .welcome-highlight h3 {
@@ -1360,16 +1418,16 @@ body {
 }
 
 .try-examples {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border: 2px solid var(--secondary-color);
+  background: var(--mullai-accent);
+  border: 2px solid var(--kurinji-primary);
   border-radius: 12px;
   padding: 1.5rem 2rem;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+  box-shadow: 0 2px 8px rgba(44, 95, 141, 0.1);
 }
 
 .try-examples h3 {
   margin: 0 0 1.25rem 0;
-  color: var(--secondary-color);
+  color: var(--kurinji-dark);
   font-size: 1.3rem;
   text-align: center;
 }
@@ -1384,27 +1442,27 @@ body {
 .example-btn {
   padding: 0.75rem 2rem;
   background: white;
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
+  color: var(--kurinji-primary);
+  border: 2px solid var(--kurinji-primary);
   border-radius: 8px;
   font-size: 1.3rem;
   font-family: var(--tamil-font), var(--english-font);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(211, 47, 47, 0.2);
+  box-shadow: 0 2px 6px rgba(44, 95, 141, 0.2);
 }
 
 .example-btn:hover {
-  background: var(--primary-color);
+  background: var(--kurinji-primary);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+  box-shadow: 0 4px 12px rgba(44, 95, 141, 0.3);
 }
 
 .example-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(211, 47, 47, 0.2);
+  box-shadow: 0 2px 4px rgba(44, 95, 141, 0.2);
 }
 
 /* Loading & Error States */
@@ -1519,23 +1577,23 @@ body {
 }
 
 .word-highlight {
-  background: rgba(211, 47, 47, 0.05);
+  background: rgba(92, 163, 127, 0.1);
   color: #333;
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   font-weight: 700;
   font-family: var(--tamil-font), var(--english-font);
-  border: 2px solid rgba(211, 47, 47, 0.5);
+  border: 2px solid var(--mullai-primary);
   display: inline-block;
   position: relative;
 }
 
 @keyframes highlightPulse {
   0%, 100% {
-    box-shadow: 0 2px 8px rgba(238, 90, 111, 0.4);
+    box-shadow: 0 2px 8px rgba(92, 163, 127, 0.4);
   }
   50% {
-    box-shadow: 0 2px 12px rgba(238, 90, 111, 0.6);
+    box-shadow: 0 2px 12px rgba(92, 163, 127, 0.6);
   }
 }
 
@@ -1554,7 +1612,7 @@ body {
 .sandhi-split {
   margin-top: 0.5rem;
   padding: 0.75rem;
-  background: #e3f2fd;
+  background: var(--mullai-accent);
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: var(--tamil-font), var(--english-font);
@@ -1562,7 +1620,7 @@ body {
 
 .word-meaning strong,
 .sandhi-split strong {
-  color: var(--secondary-color);
+  color: var(--kurinji-primary);
 }
 
 /* Pagination */
@@ -2100,8 +2158,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border-bottom: 2px solid var(--primary-color);
+  background: var(--mullai-accent);
+  border-bottom: 2px solid var(--kurinji-primary);
 }
 
 .word-table th {
@@ -2134,8 +2192,8 @@ body {
 }
 
 .word-row.active {
-  background: linear-gradient(90deg, #fff5f5 0%, #fce4ec 100%);
-  border-left: 4px solid var(--primary-color);
+  background: var(--mullai-accent);
+  border-left: 4px solid var(--kurinji-primary);
 }
 
 .word-row td {
@@ -2183,7 +2241,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  background: var(--mullai-accent);
 }
 
 .occurrences-table thead tr:first-child th {
