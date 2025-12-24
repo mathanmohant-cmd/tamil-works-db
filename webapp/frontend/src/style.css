@@ -653,29 +653,20 @@ body {
 }
 
 .action-icon {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   text-decoration: none;
   border: none;
-  background: var(--marutham-gold);
+  background: transparent;
   cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0.6rem;
+  transition: all 0.2s ease;
+  padding: 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  min-width: 44px;
-  min-height: 44px;
 }
 
 .action-icon:hover {
-  transform: scale(1.15);
-  background: var(--marutham-light);
-  box-shadow: 0 2px 8px rgba(168, 184, 84, 0.3);
-}
-
-.action-icon:active {
-  transform: scale(1.05);
+  transform: scale(1.2);
 }
 
 .expand-collapse-button {
