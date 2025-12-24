@@ -154,14 +154,14 @@
                 Clear All
               </button>
             </div>
-            <div v-if="selectedWorks.length > 0 && selectedWorks.length <= 10" class="selected-works-preview">
-              <div class="selected-work-chip" v-for="workId in sortedSelectedWorks.slice(0, 10)" :key="workId">
+            <div v-if="selectedWorks.length > 0" class="selected-works-preview">
+              <div class="selected-work-chip" v-for="workId in sortedSelectedWorks.slice(0, 15)" :key="workId">
                 <span class="work-chip-name">{{ getWorkName(workId) }}</span>
                 <button @click="removeWork(workId)" class="remove-chip-btn" title="Remove">×</button>
               </div>
-            </div>
-            <div v-else-if="selectedWorks.length > 10" class="selected-works-count">
-              {{ selectedWorks.length }} works selected
+              <div v-if="selectedWorks.length > 15" class="more-works-indicator">
+                +{{ selectedWorks.length - 15 }} more
+              </div>
             </div>
           </div>
         </div>
@@ -338,10 +338,10 @@
                       <div class="occurrence-metadata">
                         <span class="work-name">{{ result.work_name_tamil }}</span>
                         <template v-if="cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)">
-                          <span class="separator"> • </span>
+                          <span class="separator"> . </span>
                           <span>{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
                         </template>
-                        <span class="separator"> • </span>
+                        <span class="separator"> . </span>
                         <span class="verse-link-text" @click="openVerseView(result.verse_id, word.text)" title="Click to view full verse">{{ formatVerseAndLine(result, false) }}</span>
                       </div>
                       <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>

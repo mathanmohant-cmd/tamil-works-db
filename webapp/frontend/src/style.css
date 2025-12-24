@@ -57,7 +57,7 @@ html {
   --surface: #ffffff;
   --text-primary: #2d2d2d;
   --text-secondary: #757575;
-  --border-color: #e0ddd8;
+  --border-color: var(--life-pulse);
 
   /* Fonts */
   --tamil-font: 'Noto Sans Tamil', 'Tamil Sangam MN', sans-serif;
@@ -86,7 +86,7 @@ body {
 
 /* Header */
 .app-header {
-  background: var(--neithal-primary);
+  background: var(--kurinji-primary);
   color: white;
   padding: 1.5rem 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -351,7 +351,7 @@ body {
 .selected-works-summary {
   padding: 1rem;
   background: #f8f9fa;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--life-pulse);
   border-radius: 4px;
 }
 
@@ -406,7 +406,7 @@ body {
   padding: 0.4rem 0.6rem 0.4rem 0.75rem;
   background: white;
   color: #333;
-  border: 2px solid rgba(0, 102, 204, 0.4);
+  border: 2px solid var(--life-pulse);
   border-radius: 20px;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -414,7 +414,7 @@ body {
 }
 
 .selected-work-chip:hover {
-  border-color: rgba(0, 102, 204, 0.6);
+  border-color: var(--life-pulse-bright);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
@@ -422,6 +422,18 @@ body {
   font-weight: 500;
   white-space: nowrap;
   color: #333;
+}
+
+.more-works-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  background: #e3f2fd;
+  color: var(--kurinji-primary);
+  border: 2px solid var(--kurinji-primary);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .remove-chip-btn {
@@ -530,7 +542,7 @@ body {
 .lines-sort-options {
   padding: 0.75rem 1.5rem;
   background: #fff9f0;
-  border-bottom: 1px solid #e0d0c0;
+  border-bottom: 1px solid var(--life-pulse);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -1076,14 +1088,16 @@ body {
   padding: 0.75rem;
   font-size: 1rem;
   font-family: var(--tamil-font), var(--english-font);
-  border: 2px solid var(--border-color);
+  background: #fef5ed;
+  border: 2px solid var(--life-pulse);
   border-radius: 8px;
-  transition: border-color 0.3s;
+  transition: all 0.3s;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  background: #fdecd6;
+  border-color: var(--life-pulse-bright);
 }
 
 /* Autocomplete styles */
@@ -1097,8 +1111,8 @@ body {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 2px solid var(--border-color);
+  background: #fef5ed;
+  border: 2px solid var(--life-pulse);
   border-top: none;
   border-radius: 0 0 8px 8px;
   max-height: 300px;
@@ -1115,7 +1129,7 @@ body {
   color: var(--text-primary);
   cursor: pointer;
   transition: background-color 0.2s;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--paalai-light);
 }
 
 .autocomplete-item:last-child {
@@ -1123,8 +1137,8 @@ body {
 }
 
 .autocomplete-item:hover {
-  background-color: var(--mullai-accent);
-  color: var(--kurinji-primary);
+  background-color: #fdecd6;
+  color: var(--paalai-dark);
   font-weight: 600;
 }
 
