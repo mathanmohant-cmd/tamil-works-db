@@ -1,7 +1,10 @@
 <template>
   <div class="accordion-filter">
     <div class="accordion-header">
-      <h3>Select Collection/Work</h3>
+      <div class="header-content">
+        <h3>Select Collection/Work</h3>
+        <p class="instruction-text">Click ▶ to Expand Collection, ☐ to Select</p>
+      </div>
       <div class="accordion-actions">
         <button @click="expandAll" class="action-btn" title="Expand all collections">
           Expand All
@@ -36,12 +39,6 @@
               {{ isExpanded(collection.collection_id) ? '▼' : '▶' }}
             </span>
           </button>
-          <span class="collection-name-label">
-            {{ collection.collection_name_tamil || collection.collection_name }}
-            <span v-if="collection.work_count > 0" class="work-count">
-              ({{ collection.work_count }} {{ collection.work_count === 1 ? 'work' : 'works' }})
-            </span>
-          </span>
           <input
             v-if="collection.work_count > 0"
             type="checkbox"
@@ -51,6 +48,12 @@
             @click.stop
             title="Select/deselect all works in this collection"
           />
+          <span class="collection-name-label">
+            {{ collection.collection_name_tamil || collection.collection_name }}
+            <span v-if="collection.work_count > 0" class="work-count">
+              ({{ collection.work_count }} {{ collection.work_count === 1 ? 'work' : 'works' }})
+            </span>
+          </span>
         </div>
 
         <!-- Collection Content (Works List) -->
@@ -67,10 +70,6 @@
               :key="work.work_id"
               class="work-item"
             >
-              <label :for="`work-${work.work_id}`" class="work-label">
-                <span class="work-icon">📄</span>
-                <span class="work-name">{{ work.work_name_tamil || work.work_name }}</span>
-              </label>
               <input
                 type="checkbox"
                 :checked="isWorkSelected(work.work_id)"
@@ -78,6 +77,10 @@
                 class="work-checkbox"
                 :id="`work-${work.work_id}`"
               />
+              <label :for="`work-${work.work_id}`" class="work-label">
+                <span class="work-icon">📄</span>
+                <span class="work-name">{{ work.work_name_tamil || work.work_name }}</span>
+              </label>
             </div>
           </div>
         </div>
@@ -245,6 +248,20 @@ const collapseAll = () => {
   expandedCollections.value.clear()
 }
 
+// Check if any collection is expanded
+const hasAnyExpanded = computed(() => {
+  return expandedCollections.value.size > 0
+})
+
+// Toggle all collections (smart toggle based on current state)
+const toggleAllCollections = () => {
+  if (hasAnyExpanded.value) {
+    collapseAll()
+  } else {
+    expandAll()
+  }
+}
+
 // Clear all selections
 const clearSelections = () => {
   // This will be called from parent
@@ -300,10 +317,25 @@ onMounted(async () => {
   gap: 0.5rem;
 }
 
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
 .accordion-header h3 {
   margin: 0;
   font-size: 1.1rem;
   color: #333;
+  text-align: left;
+}
+
+.instruction-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
 }
 
 .accordion-actions {
@@ -403,7 +435,7 @@ onMounted(async () => {
   height: 20px;
   cursor: pointer;
   flex-shrink: 0;
-  margin: 0;
+  margin: 0 0.5rem;
 }
 
 .collection-name-label {
@@ -412,6 +444,10 @@ onMounted(async () => {
   color: #333;
   font-weight: 500;
   cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .accordion-toggle-icon {
@@ -499,7 +535,7 @@ onMounted(async () => {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  margin-left: 0.75rem;
+  margin-right: 0.75rem;
   flex-shrink: 0;
 }
 
@@ -511,6 +547,8 @@ onMounted(async () => {
   cursor: pointer;
   margin: 0;
   font-size: 0.95rem;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .work-icon {
@@ -519,6 +557,10 @@ onMounted(async () => {
 
 .work-name {
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 /* Mobile-specific styles */

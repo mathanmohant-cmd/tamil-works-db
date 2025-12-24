@@ -79,18 +79,18 @@
                 Exact
               </label>
             </div>
-            <div class="filter-group-inline">
+            <div class="filter-group-inline" :class="{ 'filter-disabled': matchType === 'exact' }">
               <span class="filter-label">Position:</span>
               <label>
-                <input type="radio" v-model="wordPosition" value="beginning" />
+                <input type="radio" v-model="wordPosition" value="beginning" :disabled="matchType === 'exact'" />
                 Beginning
               </label>
               <label>
-                <input type="radio" v-model="wordPosition" value="end" />
+                <input type="radio" v-model="wordPosition" value="end" :disabled="matchType === 'exact'" />
                 End
               </label>
               <label>
-                <input type="radio" v-model="wordPosition" value="anywhere" />
+                <input type="radio" v-model="wordPosition" value="anywhere" :disabled="matchType === 'exact'" />
                 Anywhere
               </label>
             </div>
