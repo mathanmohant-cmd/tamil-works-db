@@ -335,14 +335,14 @@
                   >
                     <div class="occurrence-number">{{ occIndex + 1 }}</div>
                     <div class="occurrence-content">
-                      <div class="occurrence-metadata" @click="openVerseView(result.verse_id, word.text)" title="Click to view full verse">
+                      <div class="occurrence-metadata">
                         <span class="work-name">{{ result.work_name_tamil }}</span>
                         <template v-if="cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)">
                           <span class="separator"> • </span>
                           <span>{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
                         </template>
                         <span class="separator"> • </span>
-                        <span>{{ formatVerseAndLine(result, false) }}</span>
+                        <span class="verse-link-text" @click="openVerseView(result.verse_id, word.text)" title="Click to view full verse">{{ formatVerseAndLine(result, false) }}</span>
                       </div>
                       <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>
                     </div>
