@@ -78,7 +78,6 @@
                 :id="`work-${work.work_id}`"
               />
               <label :for="`work-${work.work_id}`" class="work-label">
-                <span class="work-icon">📄</span>
                 <span class="work-name">{{ work.work_name_tamil || work.work_name }}</span>
               </label>
             </div>
@@ -436,6 +435,7 @@ onMounted(async () => {
   cursor: pointer;
   flex-shrink: 0;
   margin: 0 0.5rem;
+  accent-color: #2c5f8d;
 }
 
 .collection-name-label {
@@ -537,6 +537,7 @@ onMounted(async () => {
   cursor: pointer;
   margin-right: 0.75rem;
   flex-shrink: 0;
+  accent-color: #2c5f8d;
 }
 
 .work-label {
@@ -561,6 +562,7 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  font-weight: normal;
 }
 
 /* Mobile-specific styles */
