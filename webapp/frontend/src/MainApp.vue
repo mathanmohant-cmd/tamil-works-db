@@ -142,33 +142,30 @@
           </div>
         </div>
 
-        <!-- Side-by-side layout: Tree on left, Checkbox list on right -->
+        <!-- Accordion Filter -->
         <div class="filter-content-wrapper">
-          <!-- Collection Tree Filter (Left Side) -->
-          <div class="tree-panel">
-            <CollectionTree
-              ref="collectionTreeRef"
-              :selected-works="selectedWorks"
-              @update:selectedWorks="handleCollectionSelection"
-            />
-          </div>
+          <AccordionFilter
+            ref="accordionFilterRef"
+            :selected-works="selectedWorks"
+            @update:selectedWorks="handleCollectionSelection"
+          />
 
-          <!-- Selected Works List (Right Side) -->
-          <div class="checkbox-panel">
+          <!-- Selected Works Summary -->
+          <div class="selected-works-summary">
             <div class="selected-works-header">
-              <strong>Selected Works ({{ selectedWorks.length }})</strong>
+              <strong>Selected Works: {{ selectedWorks.length }}</strong>
               <button v-if="selectedWorks.length > 0" @click="clearFilters" class="clear-selection-btn">
                 Clear All
               </button>
             </div>
-            <div class="selected-works-list">
-              <div v-if="selectedWorks.length === 0" class="no-selection">
-                No works selected. Use the tree on the left to select works.
+            <div v-if="selectedWorks.length > 0 && selectedWorks.length <= 10" class="selected-works-preview">
+              <div class="selected-work-chip" v-for="workId in sortedSelectedWorks.slice(0, 10)" :key="workId">
+                <span class="work-chip-name">{{ getWorkName(workId) }}</span>
+                <button @click="removeWork(workId)" class="remove-chip-btn" title="Remove">×</button>
               </div>
-              <div v-else class="selected-work-item" v-for="workId in sortedSelectedWorks" :key="workId">
-                <span class="selected-work-name">{{ getWorkName(workId) }}</span>
-                <button @click="removeWork(workId)" class="remove-work-btn" title="Remove this work">×</button>
-              </div>
+            </div>
+            <div v-else-if="selectedWorks.length > 10" class="selected-works-count">
+              {{ selectedWorks.length }} works selected
             </div>
           </div>
         </div>
@@ -425,7 +422,7 @@ import Home from './Home.vue'
 import OurJourney from './OurJourney.vue'
 import Principles from './Principles.vue'
 import VerseView from './VerseView.vue'
-import CollectionTree from './components/CollectionTree.vue'
+import AccordionFilter from './components/AccordionFilter.vue'
 
 export default {
   name: 'App',
@@ -434,7 +431,7 @@ export default {
     OurJourney,
     Principles,
     VerseView,
-    CollectionTree
+    AccordionFilter
   },
   setup() {
     // Page navigation
@@ -452,7 +449,7 @@ export default {
     const selectedWorks = ref([])
     const selectAllWorks = ref(true)
     const rememberSelection = ref(false)
-    const collectionTreeRef = ref(null)  // Ref to CollectionTree component
+    const accordionFilterRef = ref(null)  // Ref to AccordionFilter component
     const works = ref([])
     const searchResults = ref(null)
     const selectedWord = ref(null)
@@ -980,9 +977,9 @@ export default {
     const clearFilters = () => {
       selectedWorks.value = []
       selectAllWorks.value = false
-      // Clear collection tree checkboxes
-      if (collectionTreeRef.value) {
-        collectionTreeRef.value.clearSelections()
+      // Clear accordion filter checkboxes
+      if (accordionFilterRef.value) {
+        accordionFilterRef.value.clearSelections()
       }
     }
 
@@ -991,17 +988,17 @@ export default {
       if (filterMode.value === 'all') {
         selectedWorks.value = works.value.map(w => w.work_id)
         selectAllWorks.value = true
-        // Mark all collections as selected in the tree
-        if (collectionTreeRef.value) {
-          collectionTreeRef.value.selectAll()
+        // Mark all collections as selected in the accordion
+        if (accordionFilterRef.value) {
+          accordionFilterRef.value.selectAll()
         }
       } else {
         // Switch to select mode - uncheck all by default
         selectedWorks.value = []
         selectAllWorks.value = false
-        // Clear collection tree checkboxes
-        if (collectionTreeRef.value) {
-          collectionTreeRef.value.clearSelections()
+        // Clear accordion filter checkboxes
+        if (accordionFilterRef.value) {
+          accordionFilterRef.value.clearSelections()
         }
         // Switch to search page and open filters panel for selection
         currentPage.value = 'search'
@@ -1616,7 +1613,7 @@ export default {
       selectedWorks,
       selectAllWorks,
       rememberSelection,
-      collectionTreeRef,
+      accordionFilterRef,
       works,
       searchResults,
       selectedWord,

@@ -308,26 +308,24 @@ body {
   margin-top: 1rem;
 }
 
-.tree-panel {
-  /* No max-height, no scroll - tree can expand fully */
-  border-bottom: 2px solid #dee2e6;
-  padding-bottom: 1rem;
-}
-
-.checkbox-panel {
-  /* Selected works at bottom, no scroll needed */
-  display: flex;
-  flex-direction: column;
+/* Selected Works Summary Section */
+.selected-works-summary {
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
 }
 
 .selected-works-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.selected-works-header strong {
+  font-size: 1rem;
+  color: #333;
 }
 
 .clear-selection-btn {
@@ -345,49 +343,46 @@ body {
   background: #c82333;
 }
 
-.selected-works-list {
-  /* Horizontal chip/pill layout */
+/* Selected Works Preview (chip layout) */
+.selected-works-preview {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.5rem;
-  min-height: 3rem;
 }
 
-.no-selection {
-  width: 100%;
-  padding: 1rem;
+.selected-works-count {
+  padding: 0.5rem 0;
   text-align: center;
-  color: #6c757d;
-  font-style: italic;
+  color: #666;
+  font-size: 0.95rem;
 }
 
-.selected-work-item {
+.selected-work-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.6rem 0.4rem 0.75rem;
   background: white;
   color: #333;
-  border: 2px solid rgba(211, 47, 47, 0.4);
+  border: 2px solid rgba(0, 102, 204, 0.4);
   border-radius: 20px;
   font-size: 0.9rem;
   transition: all 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.selected-work-item:hover {
-  border-color: rgba(211, 47, 47, 0.6);
+.selected-work-chip:hover {
+  border-color: rgba(0, 102, 204, 0.6);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.selected-work-name {
+.work-chip-name {
   font-weight: 500;
   white-space: nowrap;
   color: #333;
 }
 
-.remove-work-btn {
+.remove-chip-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,7 +392,7 @@ body {
   font-size: 1.2rem;
   font-weight: bold;
   background: transparent;
-  color: rgba(211, 47, 47, 0.6);
+  color: rgba(0, 102, 204, 0.6);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -405,9 +400,9 @@ body {
   line-height: 1;
 }
 
-.remove-work-btn:hover {
-  background: rgba(211, 47, 47, 0.1);
-  color: rgba(211, 47, 47, 0.9);
+.remove-chip-btn:hover {
+  background: rgba(0, 102, 204, 0.1);
+  color: rgba(0, 102, 204, 0.9);
   transform: scale(1.1);
 }
 
