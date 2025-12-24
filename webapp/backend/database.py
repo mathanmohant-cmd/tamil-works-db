@@ -802,6 +802,35 @@ class Database:
 
         return root_collections
 
+    def get_works_by_collection(self, collection_id: int) -> List[Dict]:
+        """
+        Get all works in a specific collection
+
+        Args:
+            collection_id: The collection ID
+
+        Returns:
+            List of works in the collection with their position
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        w.work_id,
+                        w.work_name,
+                        w.work_name_tamil,
+                        w.author,
+                        w.author_tamil,
+                        w.period,
+                        wc.position_in_collection,
+                        wc.is_primary
+                    FROM works w
+                    JOIN work_collections wc ON w.work_id = wc.work_id
+                    WHERE wc.collection_id = %s
+                    ORDER BY wc.position_in_collection NULLS LAST, w.work_name_tamil
+                """, [collection_id])
+                return [dict(row) for row in cur.fetchall()]
+
     # =========================================================================
     # Authentication Methods
     # =========================================================================

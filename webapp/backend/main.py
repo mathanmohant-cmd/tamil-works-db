@@ -281,6 +281,35 @@ def get_public_collections():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/collections/tree")
+def get_collections_tree():
+    """
+    Get collections as a nested tree structure for filter navigation
+
+    Returns hierarchical collection tree with work counts
+    """
+    try:
+        return db.get_collection_tree()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/collections/{collection_id}/works")
+def get_collection_works(collection_id: int):
+    """
+    Get all works in a specific collection
+
+    Args:
+        collection_id: The collection ID
+
+    Returns list of works in the collection
+    """
+    try:
+        return db.get_works_by_collection(collection_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Health check endpoint
 @app.get("/health")
 def health_check():

@@ -114,6 +114,10 @@ python kambaramayanam_bulk_import.py [database_url]
 python import_eighteen_lesser_texts.py [database_url]
 # Includes: Thirukkural + 17 other works (2,161 total verses)
 
+# Import all Five Great Epics at once (ஐம்பெருங்காப்பியங்கள்)
+python import_five_great_epics.py [database_url]
+# Includes: Silapathikaram, Manimegalai, Seevaka Sinthamani, Valayapathi, Kundalakesi
+
 # All parsers support:
 # - DATABASE_URL environment variable
 # - Command line argument for database URL

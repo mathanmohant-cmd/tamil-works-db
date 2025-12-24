@@ -141,15 +141,36 @@
             <button @click="closeFilters" class="done-button">Done</button>
           </div>
         </div>
-        <div class="checkbox-group">
-          <label>
-            <input type="checkbox" v-model="selectAllWorks" @change="toggleAllWorks" />
-            <strong>All Works</strong>
-          </label>
-          <label v-for="work in sortedWorks" :key="work.work_id">
-            <input type="checkbox" :value="work.work_id" v-model="selectedWorks" />
-            {{ work.work_name_tamil }} ({{ work.work_name }})
-          </label>
+
+        <!-- Side-by-side layout: Tree on left, Checkbox list on right -->
+        <div class="filter-content-wrapper">
+          <!-- Collection Tree Filter (Left Side) -->
+          <div class="tree-panel">
+            <CollectionTree
+              ref="collectionTreeRef"
+              :selected-works="selectedWorks"
+              @update:selectedWorks="handleCollectionSelection"
+            />
+          </div>
+
+          <!-- Selected Works List (Right Side) -->
+          <div class="checkbox-panel">
+            <div class="selected-works-header">
+              <strong>Selected Works ({{ selectedWorks.length }})</strong>
+              <button v-if="selectedWorks.length > 0" @click="clearFilters" class="clear-selection-btn">
+                Clear All
+              </button>
+            </div>
+            <div class="selected-works-list">
+              <div v-if="selectedWorks.length === 0" class="no-selection">
+                No works selected. Use the tree on the left to select works.
+              </div>
+              <div v-else class="selected-work-item" v-for="workId in sortedSelectedWorks" :key="workId">
+                <span class="selected-work-name">{{ getWorkName(workId) }}</span>
+                <button @click="removeWork(workId)" class="remove-work-btn" title="Remove this work">×</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -404,6 +425,7 @@ import Home from './Home.vue'
 import OurJourney from './OurJourney.vue'
 import Principles from './Principles.vue'
 import VerseView from './VerseView.vue'
+import CollectionTree from './components/CollectionTree.vue'
 
 export default {
   name: 'App',
@@ -411,7 +433,8 @@ export default {
     Home,
     OurJourney,
     Principles,
-    VerseView
+    VerseView,
+    CollectionTree
   },
   setup() {
     // Page navigation
@@ -429,6 +452,7 @@ export default {
     const selectedWorks = ref([])
     const selectAllWorks = ref(true)
     const rememberSelection = ref(false)
+    const collectionTreeRef = ref(null)  // Ref to CollectionTree component
     const works = ref([])
     const searchResults = ref(null)
     const selectedWord = ref(null)
@@ -856,6 +880,25 @@ export default {
       })
     })
 
+    // Computed: Sort selected works by canonical order
+    const sortedSelectedWorks = computed(() => {
+      if (!selectedWorks.value || selectedWorks.value.length === 0) return []
+      if (!works.value || works.value.length === 0) return selectedWorks.value
+
+      // Create a map of work_id to canonical_position for fast lookup
+      const positionMap = new Map()
+      works.value.forEach(work => {
+        positionMap.set(work.work_id, work.canonical_position || 999)
+      })
+
+      // Sort selected work IDs by their canonical position
+      return [...selectedWorks.value].sort((a, b) => {
+        const posA = positionMap.get(a) || 999
+        const posB = positionMap.get(b) || 999
+        return posA - posB
+      })
+    })
+
     // Computed: Works indicator text for filter button
     const worksFilterButtonText = computed(() => {
       if (filterMode.value === 'all' || selectedWorks.value.length === works.value.length) {
@@ -921,9 +964,26 @@ export default {
       }
     }
 
+    // Method: Get work name by ID
+    const getWorkName = (workId) => {
+      const work = works.value.find(w => w.work_id === workId)
+      return work ? (work.work_name_tamil || work.work_name) : 'Unknown'
+    }
+
+    // Method: Remove a single work from selection
+    const removeWork = (workId) => {
+      selectedWorks.value = selectedWorks.value.filter(id => id !== workId)
+      // Update selectAllWorks checkbox state
+      selectAllWorks.value = selectedWorks.value.length === works.value.length
+    }
+
     const clearFilters = () => {
       selectedWorks.value = []
       selectAllWorks.value = false
+      // Clear collection tree checkboxes
+      if (collectionTreeRef.value) {
+        collectionTreeRef.value.clearSelections()
+      }
     }
 
     // Method: Handle filter mode change
@@ -931,14 +991,34 @@ export default {
       if (filterMode.value === 'all') {
         selectedWorks.value = works.value.map(w => w.work_id)
         selectAllWorks.value = true
+        // Mark all collections as selected in the tree
+        if (collectionTreeRef.value) {
+          collectionTreeRef.value.selectAll()
+        }
       } else {
         // Switch to select mode - uncheck all by default
         selectedWorks.value = []
         selectAllWorks.value = false
+        // Clear collection tree checkboxes
+        if (collectionTreeRef.value) {
+          collectionTreeRef.value.clearSelections()
+        }
         // Switch to search page and open filters panel for selection
         currentPage.value = 'search'
         filtersExpanded.value = true
       }
+    }
+
+    // Method: Handle collection selection from tree
+    const handleCollectionSelection = (workIds) => {
+      selectedWorks.value = workIds
+      // Update selectAllWorks checkbox state
+      selectAllWorks.value = workIds.length === works.value.length
+      // Update filter mode to select if not all works are selected
+      if (workIds.length < works.value.length) {
+        filterMode.value = 'select'
+      }
+      console.log('[DEBUG] Collection selection updated:', workIds.length, 'works selected')
     }
 
     // Method: Highlight word in line text
@@ -1536,6 +1616,7 @@ export default {
       selectedWorks,
       selectAllWorks,
       rememberSelection,
+      collectionTreeRef,
       works,
       searchResults,
       selectedWord,
@@ -1548,6 +1629,7 @@ export default {
       filteredResults,
       hasCustomFilter,
       sortedWorks,
+      sortedSelectedWorks,
       worksFilterButtonText,
       getFilterButtonText,
       searchSummary,
@@ -1561,7 +1643,10 @@ export default {
       toggleFilters,
       closeFilters,
       clearFilters,
+      getWorkName,
+      removeWork,
       handleFilterModeChange,
+      handleCollectionSelection,
       highlightWord,
       exportWords,
       exportWordsToCSV,
