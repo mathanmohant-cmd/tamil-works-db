@@ -335,7 +335,7 @@
                   >
                     <div class="occurrence-number">{{ occIndex + 1 }}</div>
                     <div class="occurrence-content">
-                      <div class="occurrence-metadata">
+                      <div class="occurrence-metadata" @click="openVerseView(result.verse_id, word.text)" title="Click to view full verse">
                         <span class="work-name">{{ result.work_name_tamil }}</span>
                         <template v-if="cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)">
                           <span class="separator"> • </span>
@@ -343,7 +343,6 @@
                         </template>
                         <span class="separator"> • </span>
                         <span>{{ formatVerseAndLine(result, false) }}</span>
-                        <a href="#" @click.prevent="openVerseView(result.verse_id, word.text)" class="verse-link" title="View full verse">🔗</a>
                       </div>
                       <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>
                     </div>
@@ -1438,7 +1437,7 @@ export default {
         return level.trim()
       })
 
-      return cleanedLevels.join(' > ')
+      return cleanedLevels.join(' . ')
     }
 
     // Method: Format verse and line display with Tamil terminology
@@ -1460,8 +1459,8 @@ export default {
       }
 
       // For collection works (work_verse_count > 1), show verse number
-      // Show: verse_type_tamil verse_number > அடி line_number
-      return `${verseTypeTamil} ${result.verse_number} > அடி ${result.line_number}`
+      // Show: verse_type_tamil verse_number . அடி line_number
+      return `${verseTypeTamil} ${result.verse_number} . அடி ${result.line_number}`
     }
 
     // Method: Open verse view

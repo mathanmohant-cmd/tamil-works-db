@@ -641,7 +641,6 @@ body {
   background: var(--marutham-gold);
   color: var(--text-primary);
   border: 2px solid var(--marutham-primary);
-  border-bottom: 2px solid var(--life-pulse);
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
   font-size: 0.85rem;
@@ -901,6 +900,13 @@ body {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.occurrence-metadata:hover {
+  background: #e8f4ed;
+  border-left-color: var(--kurinji-dark);
 }
 
 .occurrence-metadata .work-name {
@@ -913,19 +919,6 @@ body {
   font-weight: normal;
 }
 
-.verse-link {
-  font-size: 1.1rem;
-  text-decoration: none;
-  transition: transform 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem;
-  margin-left: 0.5rem;
-}
-
-.verse-link:hover {
-  transform: scale(1.3);
-}
 
 .occurrence-line {
   font-size: 1.2rem;
