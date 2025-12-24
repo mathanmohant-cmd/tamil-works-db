@@ -357,25 +357,22 @@ export default {
 }
 
 .export-verse-button {
-  padding: 0.75rem 1.5rem;
-  background: var(--success);
-  color: white;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--kurinji-primary);
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .export-verse-button:hover {
-  background: #388e3c;
-  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
-  transform: translateY(-2px);
+  color: #1e4a66;
+  transform: translateY(-1px);
 }
 
 .export-menu {

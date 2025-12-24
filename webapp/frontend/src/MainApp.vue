@@ -263,7 +263,7 @@
                 <div class="word-info">
                   <span class="word-number">{{ index + 1 }}.</span>
                   <span class="word-text">{{ word.text }}</span>
-                  <span class="word-count-badge">{{ word.count }}</span>
+                  <span class="word-count-badge">({{ word.count }})</span>
                 </div>
                 <div class="word-actions">
                   <a
