@@ -428,10 +428,10 @@ export default {
 }
 
 .verse-lines-table {
-  background: white;
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: none;
   border-radius: 0;
-  padding: 1rem 0.5rem;
+  padding: 1rem 0;
   margin-bottom: 2rem;
   line-height: 1.5;
 }
@@ -441,7 +441,7 @@ export default {
   grid-template-columns: 60px 1fr;
   gap: 0.75rem;
   margin: 0;
-  padding: 0.5rem;
+  padding: 0.5rem 0.25rem;
   align-items: baseline;
   line-height: 1.5;
   border-bottom: 1px solid #f0f0f0;  /* Very mild separator line */
@@ -480,7 +480,7 @@ export default {
   .line-row {
     grid-template-columns: 30px 1fr;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.5rem 0.25rem;
   }
 
   .line-number {
@@ -493,7 +493,7 @@ export default {
   }
 
   .verse-lines-table {
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 0;
   }
 
   .verse-header {

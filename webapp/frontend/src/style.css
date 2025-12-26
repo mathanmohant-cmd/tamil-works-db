@@ -739,7 +739,7 @@ body {
 .word-expanded-content {
   background: #f9f9f9;
   border-top: 1px solid var(--border-color);
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem 0;
   animation: slideDown 0.3s ease-out;
 }
 
@@ -1749,7 +1749,7 @@ body {
   }
 
   .word-expanded-content {
-    padding: 0.5rem 0.5rem;
+    padding: 0.5rem 0;
   }
 
   .occurrence-item {
