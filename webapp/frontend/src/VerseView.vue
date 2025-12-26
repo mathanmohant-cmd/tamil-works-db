@@ -439,11 +439,19 @@ export default {
 .line-row {
   display: grid;
   grid-template-columns: 60px 1fr;
-  gap: 1.5rem;
+  gap: 0.75rem;
   margin: 0;
-  padding: 0;
+  padding: 0.5rem;
   align-items: baseline;
   line-height: 1.5;
+}
+
+.line-row:nth-child(odd) {
+  background: var(--mullai-accent);  /* Light sage green */
+}
+
+.line-row:nth-child(even) {
+  background: white;
 }
 
 .line-number {
@@ -475,6 +483,7 @@ export default {
   .line-row {
     grid-template-columns: 30px 1fr;
     gap: 0.5rem;
+    padding: 0.5rem;
   }
 
   .line-number {
