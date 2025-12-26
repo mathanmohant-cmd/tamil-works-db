@@ -444,14 +444,11 @@ export default {
   padding: 0.5rem;
   align-items: baseline;
   line-height: 1.5;
+  border-bottom: 1px solid #f0f0f0;  /* Very mild separator line */
 }
 
-.line-row:nth-child(odd) {
-  background: var(--mullai-accent);  /* Light sage green */
-}
-
-.line-row:nth-child(even) {
-  background: white;
+.line-row:last-child {
+  border-bottom: none;
 }
 
 .line-number {
