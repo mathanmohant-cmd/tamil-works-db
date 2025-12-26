@@ -540,7 +540,7 @@ body {
 
 /* Lines Sort Options (in expanded word section) */
 .lines-sort-options {
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 0.5rem;
   background: #fff9f0;
   border-bottom: 1px solid var(--life-pulse);
   display: flex;
@@ -592,11 +592,11 @@ body {
 }
 
 .word-item-expandable.expanded {
-  background: var(--mullai-accent);
-  border: 2px solid var(--kurinji-primary);
-  border-radius: 12px;
-  margin: 0.5rem 0;
-  box-shadow: 0 4px 12px rgba(44, 95, 141, 0.15);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
 }
 
 .word-header-row {
@@ -758,7 +758,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 0.65rem;
+  padding: 0.65rem 0.5rem;
   background: white;
   border-radius: 6px;
   margin-bottom: 0.75rem;
@@ -867,6 +867,7 @@ body {
   justify-content: center;
   border-radius: 6px;
   flex-shrink: 0;
+  margin-left: 0.5rem;
 }
 
 .occurrence-content {
@@ -875,6 +876,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  padding-right: 0.5rem;
 }
 
 .occurrence-metadata {
@@ -1747,17 +1749,22 @@ body {
   }
 
   .word-expanded-content {
-    padding: 0.5rem 0.35rem;
+    padding: 0.5rem 0.5rem;
   }
 
   .occurrence-item {
     flex-direction: column;
     gap: 0.35rem;
-    padding: 0.5rem;
+    padding: 0.5rem 0;
   }
 
   .occurrence-number {
     display: none;
+  }
+
+  .occurrence-content {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .occurrence-metadata {
@@ -1898,6 +1905,11 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
+    padding: 0.65rem 0.5rem;
+  }
+
+  .lines-sort-options {
+    padding: 0.75rem 0.5rem;
   }
 
   .export-button-small {

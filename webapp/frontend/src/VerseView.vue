@@ -308,15 +308,16 @@ export default {
 }
 
 .verse-header {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
+  background: white;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .verse-title-line {
@@ -325,35 +326,40 @@ export default {
 }
 
 .verse-header h2 {
-  font-size: 1.3rem;
+  font-size: 0.95rem;
   font-family: var(--tamil-font), var(--english-font);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  font-weight: 400;
 }
 
 .work-title {
-  font-weight: 700;
-  color: var(--primary-color);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
 }
 
 .separator {
   color: var(--text-secondary);
   font-weight: normal;
+  font-size: 1.1rem;
 }
 
 .hierarchy {
-  font-weight: 600;
+  font-weight: 400;
   color: var(--text-secondary);
+  font-size: 0.95rem;
 }
 
 .verse-info {
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
 }
 
 .export-verse-button {
@@ -423,9 +429,9 @@ export default {
 
 .verse-lines-table {
   background: white;
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
-  padding: 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  padding: 1rem 0.5rem;
   margin-bottom: 2rem;
   line-height: 1.5;
 }
@@ -481,8 +487,24 @@ export default {
   }
 
   .verse-lines-table {
-    padding: 0.75rem;
-    padding-left: 0.25rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .verse-header {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .verse-header h2 {
+    font-size: 0.85rem;
+  }
+
+  .work-title {
+    font-size: 0.85rem;
+  }
+
+  .hierarchy,
+  .verse-info {
+    font-size: 0.85rem;
   }
 }
 
