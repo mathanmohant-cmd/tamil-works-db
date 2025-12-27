@@ -1,0 +1,579 @@
+{
+  "collections": [
+    {
+      "collection_id": 1,
+      "collection_name": "Thirumurai",
+      "collection_name_tamil": "திருமுறை",
+      "collection_type": "tradition",
+      "description": "Twelve books of Shaivite devotional hymns",
+      "religion": "Shaivism",
+      "period": "6th-12th century CE",
+      "sort_order": 1,
+      "total_works": 13,
+      "status": "needs_more_analysis",
+      "notes": "Complex structure with multiple sub-works in some volumes. File 8 split into 8.1 and 8.2"
+    },
+    {
+      "collection_id": 2,
+      "collection_name": "Naalayira Divya Prabandham",
+      "collection_name_tamil": "நாலாயிரத் திவ்விய பிரபந்தம்",
+      "collection_type": "tradition",
+      "description": "Four thousand sacred verses by 12 Alvars (Vaishnavite saints) - 24 works",
+      "religion": "Vaishnavism",
+      "period": "7th-9th century CE",
+      "sort_order": 2,
+      "total_works": 24,
+      "status": "parser_created",
+      "parser_script": "naalayira_divya_prabandham_bulk_import.py"
+    }
+  ],
+  "works": {
+    "thirumurai": [
+      {
+        "work_id": "TM-01",
+        "work_name": "Thevaram - First Thirumurai",
+        "work_name_tamil": "தேவாரம் - முதலாம் திருமுறை",
+        "author": "Thirugnanasambanthar",
+        "author_tamil": "திருஞானசம்பந்தர்",
+        "file": "1.முதலாம் திருமுறை.txt",
+        "period": "7th century CE",
+        "canonical_order": 201,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-02",
+        "work_name": "Thevaram - Second Thirumurai",
+        "work_name_tamil": "தேவாரம் - இரண்டாம் திருமுறை",
+        "author": "Thirugnanasambanthar",
+        "author_tamil": "திருஞானசம்பந்தர்",
+        "file": "2.இரண்டாம் திருமுறை.txt",
+        "period": "7th century CE",
+        "canonical_order": 202,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-03",
+        "work_name": "Thevaram - Third Thirumurai",
+        "work_name_tamil": "தேவாரம் - மூன்றாம் திருமுறை",
+        "author": "Thirugnanasambanthar",
+        "author_tamil": "திருஞானசம்பந்தர்",
+        "file": "3.மூன்றாம் திருமுறை.txt",
+        "period": "7th century CE",
+        "canonical_order": 203,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-04",
+        "work_name": "Thevaram - Fourth Thirumurai",
+        "work_name_tamil": "தேவாரம் - நான்காம் திருமுறை",
+        "author": "Thirunavukkarasar (Appar)",
+        "author_tamil": "திருநாவுக்கரசர்",
+        "file": "4.நான்காம்_திருமுறை.txt",
+        "period": "7th century CE",
+        "canonical_order": 204,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-05",
+        "work_name": "Thevaram - Fifth Thirumurai",
+        "work_name_tamil": "தேவாரம் - ஐந்தாம் திருமுறை",
+        "author": "Thirunavukkarasar (Appar)",
+        "author_tamil": "திருநாவுக்கரசர்",
+        "file": "5.ஐந்தாம் திருமுறை.txt",
+        "period": "7th century CE",
+        "canonical_order": 205,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-06",
+        "work_name": "Thevaram - Sixth Thirumurai",
+        "work_name_tamil": "தேவாரம் - ஆறாம் திருமுறை",
+        "author": "Thirunavukkarasar (Appar)",
+        "author_tamil": "திருநாவுக்கரசர்",
+        "file": "6.ஆறாம் திருமுறை.txt",
+        "period": "7th century CE",
+        "canonical_order": 206,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-07",
+        "work_name": "Thevaram - Seventh Thirumurai",
+        "work_name_tamil": "தேவாரம் - ஏழாம் திருமுறை",
+        "author": "Sundarar",
+        "author_tamil": "சுந்தரர்",
+        "file": "7.ஏழாம் திருமுறை.txt",
+        "period": "8th century CE",
+        "canonical_order": 207,
+        "primary_collection": "Thirumurai"
+      },
+      {
+        "work_id": "TM-08A",
+        "work_name": "Thiruvasagam",
+        "work_name_tamil": "திருவாசகம்",
+        "author": "Manikkavasagar",
+        "author_tamil": "மாணிக்கவாசகர்",
+        "file": "8.1எட்டாம் திருமுறை.txt",
+        "period": "9th century CE",
+        "canonical_order": 208,
+        "primary_collection": "Thirumurai",
+        "notes": "Part of Eighth Thirumurai, contains sub-works marked with @"
+      },
+      {
+        "work_id": "TM-08B",
+        "work_name": "Thirukkovayar",
+        "work_name_tamil": "திருக்கோவையார்",
+        "author": "Manikkavasagar",
+        "author_tamil": "மாணிக்கவாசகர்",
+        "file": "8.2 எட்டாம் திருமுறை.txt",
+        "period": "9th century CE",
+        "canonical_order": 209,
+        "primary_collection": "Thirumurai",
+        "notes": "Part of Eighth Thirumurai, complex hierarchical structure with *, *n, *n.m markers"
+      },
+      {
+        "work_id": "TM-09",
+        "work_name": "Thiruvisaippa, Thiruppallandu",
+        "work_name_tamil": "திருவிசைப்பா, திருப்பல்லாண்டு",
+        "author": "Various",
+        "author_tamil": "பலர்",
+        "file": "9.ஒன்பதாம் திருமுறை.txt",
+        "period": "Various",
+        "canonical_order": 210,
+        "primary_collection": "Thirumurai",
+        "notes": "Multiple works by different authors, marked with & and @"
+      },
+      {
+        "work_id": "TM-10",
+        "work_name": "Thirumanthiram",
+        "work_name_tamil": "திருமந்திரம்",
+        "author": "Thirumular",
+        "author_tamil": "திருமூலர்",
+        "file": "10.பத்தாம் திருமுறை.txt",
+        "period": "6th-10th century CE (disputed)",
+        "canonical_order": 211,
+        "primary_collection": "Thirumurai",
+        "notes": "Shaiva Siddhanta philosophy in verse"
+      },
+      {
+        "work_id": "TM-11",
+        "work_name": "Saiva Prabandha Malai",
+        "work_name_tamil": "சைவப் பிரபந்த மாலை",
+        "author": "Various Nayanmars",
+        "author_tamil": "நாயன்மார்கள்",
+        "file": "11.பதினொன்றாம் திருமுறை.txt",
+        "period": "Various",
+        "canonical_order": 212,
+        "primary_collection": "Thirumurai",
+        "notes": "Collection of works by various Nayanmars, marked with & and @"
+      },
+      {
+        "work_id": "TM-12",
+        "work_name": "Periya Puranam",
+        "work_name_tamil": "பெரியபுராணம்",
+        "author": "Sekkizhar",
+        "author_tamil": "சேக்கிழார்",
+        "file": "12.பன்னிரண்டாம் திருமுறை.txt",
+        "period": "12th century CE",
+        "canonical_order": 213,
+        "primary_collection": "Thirumurai",
+        "notes": "Hagiography of 63 Nayanmars"
+      }
+    ],
+    "naalayira_divya_prabandham": [
+      {
+        "work_id": "NDP-01",
+        "work_name": "Thiruppallandu",
+        "work_name_tamil": "திருப்பல்லாண்டு",
+        "author": "Periyalvar",
+        "author_tamil": "பெரியாழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 1,
+        "canonical_order": 301,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-02",
+        "work_name": "Thirumozhi (Periyalvar)",
+        "work_name_tamil": "திருமொழி",
+        "author": "Periyalvar",
+        "author_tamil": "பெரியாழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 2,
+        "canonical_order": 302,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-03",
+        "work_name": "Thiruppavai",
+        "work_name_tamil": "திருப்பாவை",
+        "author": "Andal",
+        "author_tamil": "ஆண்டாள்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 3,
+        "canonical_order": 303,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-04",
+        "work_name": "Nachiyar Thirumozhi",
+        "work_name_tamil": "நாச்சியார் திருமொழி",
+        "author": "Andal",
+        "author_tamil": "ஆண்டாள்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 4,
+        "canonical_order": 304,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-05",
+        "work_name": "Perumal Thirumozhi",
+        "work_name_tamil": "பெருமாள் திருமொழி",
+        "author": "Kulasekhara Alvar",
+        "author_tamil": "குலசேகர ஆழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 5,
+        "canonical_order": 305,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-06",
+        "work_name": "Thiruchanda Virutham",
+        "work_name_tamil": "திருச்சந்த விருத்தம்",
+        "author": "Thirumalisai Alvar",
+        "author_tamil": "திருமழிசை ஆழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 6,
+        "canonical_order": 306,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-07",
+        "work_name": "Thirumalai",
+        "work_name_tamil": "திருமாலை",
+        "author": "Thondaradippodi Alvar",
+        "author_tamil": "தொண்டரடிப்பொடி ஆழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 7,
+        "canonical_order": 307,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-08",
+        "work_name": "Thiruppalliyezhuchi",
+        "work_name_tamil": "திருப்பள்ளியெழுச்சி",
+        "author": "Thondaradippodi Alvar",
+        "author_tamil": "தொண்டரடிப்பொடி ஆழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 8,
+        "canonical_order": 308,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-09",
+        "work_name": "Amalanathipiran",
+        "work_name_tamil": "அமலனாதிபிரான்",
+        "author": "Thiruppanalvar",
+        "author_tamil": "திருப்பாணாழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 9,
+        "canonical_order": 309,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-10",
+        "work_name": "Kanninun Siruthambu",
+        "work_name_tamil": "கண்ணிநுண் சிறுத்தாம்பு",
+        "author": "Madhurakavi Alvar",
+        "author_tamil": "மதுரகவி ஆழ்வார்",
+        "file": "13.நாலாயிரத் திவ்விய பிரபந்தம்-முதல் ஆயிரம்.txt",
+        "position_in_collection": 10,
+        "canonical_order": 310,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-11",
+        "work_name": "Periya Thirumozhi",
+        "work_name_tamil": "பெரிய திருமொழி",
+        "author": "Thirumangai Alvar",
+        "author_tamil": "திருமங்கை ஆழ்வார்",
+        "file": "14.நாலாயிரத் திவ்விய பிரபந்தம்-இரண்டாம் ஆயிரம்.txt",
+        "position_in_collection": 11,
+        "canonical_order": 311,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-12",
+        "work_name": "Thirukkurunthandakam",
+        "work_name_tamil": "திருக்குறுந்தாண்டகம்",
+        "author": "Thirumangai Alvar",
+        "author_tamil": "திருமங்கை ஆழ்வார்",
+        "file": "14.நாலாயிரத் திவ்விய பிரபந்தம்-இரண்டாம் ஆயிரம்.txt",
+        "position_in_collection": 12,
+        "canonical_order": 312,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-13",
+        "work_name": "Thirunedunthandakam",
+        "work_name_tamil": "திருநெடுந்தாண்டகம்",
+        "author": "Thirumangai Alvar",
+        "author_tamil": "திருமங்கை ஆழ்வார்",
+        "file": "14.நாலாயிரத் திவ்விய பிரபந்தம்-இரண்டாம் ஆயிரம்.txt",
+        "position_in_collection": 13,
+        "canonical_order": 313,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-14",
+        "work_name": "Mudhal Thiruvandadhi",
+        "work_name_tamil": "முதல் திருவந்தாதி",
+        "author": "Poigai Alvar",
+        "author_tamil": "பொய்கை ஆழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 14,
+        "canonical_order": 314,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-15",
+        "work_name": "Irandam Thiruvandadhi",
+        "work_name_tamil": "இரண்டாம் திருவந்தாதி",
+        "author": "Bhoothath Alvar",
+        "author_tamil": "பூதத்தாழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 15,
+        "canonical_order": 315,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-16",
+        "work_name": "Mundram Thiruvandadhi",
+        "work_name_tamil": "மூன்றாம் திருவந்தாதி",
+        "author": "Pey Alvar",
+        "author_tamil": "பேயாழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 16,
+        "canonical_order": 316,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-17",
+        "work_name": "Nanmugan Thiruvandadhi",
+        "work_name_tamil": "நான்முகன் திருவந்தாதி",
+        "author": "Thirumalisai Alvar",
+        "author_tamil": "திருமழிசை ஆழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 17,
+        "canonical_order": 317,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-18",
+        "work_name": "Thiruviruttam",
+        "work_name_tamil": "திருவிருத்தம்",
+        "author": "Nammalvar",
+        "author_tamil": "நம்மாழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 18,
+        "canonical_order": 318,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-19",
+        "work_name": "Thiruvasiriyam",
+        "work_name_tamil": "திருவாசிரியம்",
+        "author": "Nammalvar",
+        "author_tamil": "நம்மாழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 19,
+        "canonical_order": 319,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-20",
+        "work_name": "Periya Thiruvandadhi",
+        "work_name_tamil": "பெரியதிருவந்தாதி",
+        "author": "Nammalvar",
+        "author_tamil": "நம்மாழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 20,
+        "canonical_order": 320,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-21",
+        "work_name": "Thiruvezhukkurrirukkai",
+        "work_name_tamil": "திருவெழுக்கூற்றிருக்கை",
+        "author": "Thirumangai Alvar",
+        "author_tamil": "திருமங்கை ஆழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 21,
+        "canonical_order": 321,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-22",
+        "work_name": "Siriya Thirumadal",
+        "work_name_tamil": "சிறிய திருமடல்",
+        "author": "Thirumangai Alvar",
+        "author_tamil": "திருமங்கை ஆழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 22,
+        "canonical_order": 322,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-23",
+        "work_name": "Periya Thirumadal",
+        "work_name_tamil": "பெரிய திருமடல்",
+        "author": "Thirumangai Alvar",
+        "author_tamil": "திருமங்கை ஆழ்வார்",
+        "file": "15.நாலாயிரத் திவ்விய பிரபந்தம்-மூன்றாம் ஆயிரம்.txt",
+        "position_in_collection": 23,
+        "canonical_order": 323,
+        "primary_collection": "Naalayira Divya Prabandham"
+      },
+      {
+        "work_id": "NDP-24",
+        "work_name": "Thiruvaimozhi",
+        "work_name_tamil": "திருவாய்மொழி",
+        "author": "Nammalvar",
+        "author_tamil": "நம்மாழ்வார்",
+        "file": "16.நாலாயிரத் திவ்விய பிரபந்தம்-நான்காம் ஆயிரம்.txt",
+        "position_in_collection": 24,
+        "canonical_order": 324,
+        "primary_collection": "Naalayira Divya Prabandham",
+        "notes": "Most important work of Nammalvar, occupies entire fourth thousand"
+      }
+    ],
+    "standalone_works": [
+      {
+        "work_id": "SW-01",
+        "work_name": "Thiruppugazh",
+        "work_name_tamil": "திருப்புகழ்",
+        "author": "Arunagirinathar",
+        "author_tamil": "அருணகிரிநாதர்",
+        "file": "17.திருப்புகழ்.txt",
+        "period": "15th century CE",
+        "religion": "Hinduism (Murugan worship)",
+        "description": "Devotional songs in praise of Lord Murugan",
+        "canonical_order": 500,
+        "status": "parser_created",
+        "parser_script": "thiruppugazh_bulk_import.py"
+      },
+      {
+        "work_id": "SW-02",
+        "work_name": "Thembavani",
+        "work_name_tamil": "தேம்பாவணி",
+        "author": "Constantine Joseph Beschi (Veeramamunivar)",
+        "author_tamil": "வீரமாமுனிவர்",
+        "file": "18.தேம்பாவணி.txt",
+        "period": "18th century CE",
+        "religion": "Christianity",
+        "description": "Christian Tamil epic poem about St. Joseph - blend of Tamil literary tradition and Christian theology",
+        "canonical_order": 600,
+        "status": "parser_created",
+        "parser_script": "thembavani_bulk_import.py"
+      },
+      {
+        "work_id": "SW-03",
+        "work_name": "Seerapuranam",
+        "work_name_tamil": "சீறாப்புராணம்",
+        "author": "Umaruppulavar",
+        "author_tamil": "உமறுப்புலவர்",
+        "file": "19.சீறாப்புராணம்.txt",
+        "period": "16th century CE",
+        "religion": "Islam",
+        "description": "Islamic Tamil epic about Prophet Muhammad - blend of Tamil literary tradition and Islamic theology",
+        "canonical_order": 610,
+        "status": "parser_created",
+        "parser_script": "seerapuranam_bulk_import.py"
+      },
+      {
+        "work_id": "SW-04",
+        "work_name": "Thiruvarutpa",
+        "work_name_tamil": "திருவருட்பா",
+        "author": "Saint Ramalinga Swamigal",
+        "author_tamil": "இராமலிங்க சுவாமிகள்",
+        "file": "20.திருவருட்பா.txt",
+        "period": "19th century CE",
+        "religion": "Shaivism/Universalism",
+        "description": "Devotional poems by Saint Ramalinga Swamigal",
+        "canonical_order": 620,
+        "status": "incomplete",
+        "notes": "File is empty or incomplete (only 1 line)"
+      }
+    ]
+  },
+  "file_structure_markers": {
+    "thirumurai": {
+      "thevaram_pattern": {
+        "header": "[Author] - தேவாரம் [Volume number]. [Volume name]",
+        "temple_section": "[Number]. [Temple Name] : பண் - [Musical Mode]",
+        "verse": "#[number]",
+        "separator": "மேல்",
+        "notes": "Verses numbered sequentially across volumes"
+      },
+      "thiruvasagam_pattern": {
+        "header": "மாணிக்கவாசகர் - திருவாசகம் 8. எட்டாம் திருமுறை",
+        "sub_work": "@[number] [name]",
+        "verse": "#[number] or continuous",
+        "separator": "மேல்"
+      },
+      "thirukkovayar_pattern": {
+        "header": "மாணிக்கவாசகர் - திருக்கோவையார் 8. எட்டாம் திருமுறை",
+        "main_section": "* [name] - [name in Tamil]",
+        "subsection": "*[number] [name]",
+        "sub_subsection": "*[number].[subnumber] [name]",
+        "verse": "#[number]",
+        "separator": "மேல்"
+      }
+    },
+    "naalayira_divya_prabandham": {
+      "header": "[Number]. [ஆயிரம் name]",
+      "work": "@[Author] - [Work Name]",
+      "verse": "#[number]",
+      "separator": "மேல் (optional)",
+      "verse_type": "pasuram (பாசுரம்)",
+      "notes": "Multiple authors per file, flat structure within each work"
+    },
+    "thiruppugazh": {
+      "header": "அருணகிரிநாதர் - திருப்புகழ் [Section Number].[Section Name]",
+      "verse": "#[number]",
+      "separator": "மேல்",
+      "verse_type": "song (பாடல்)"
+    },
+    "thembavani": {
+      "section": "@[number] [section name]",
+      "verse": "#[number]",
+      "separator": "மேல்",
+      "section_type": "Padalam (படலம்)",
+      "verse_type": "verse (செய்யுள்)"
+    },
+    "seerapuranam": {
+      "kandam": "* [number] [name] OR header with காண்டம்",
+      "padalam": "*[number]. [name] (period after number)",
+      "reference": "$[kandam].[padalam].[verse_group] (metadata, skip)",
+      "verse": "#[number]",
+      "separator": "மேல்",
+      "hierarchy": "Kandam → Padalam → Verses",
+      "verse_type": "verse (செய்யுள்)"
+    }
+  },
+  "summary": {
+    "total_collections": 2,
+    "total_works": 40,
+    "works_with_parsers": 27,
+    "works_needing_analysis": 13,
+    "files_total": 20,
+    "incomplete_files": 1,
+    "religions_represented": [
+      "Shaivism",
+      "Vaishnavism",
+      "Murugan worship",
+      "Christianity",
+      "Islam"
+    ],
+    "time_span": "6th century CE - 19th century CE"
+  }
+}

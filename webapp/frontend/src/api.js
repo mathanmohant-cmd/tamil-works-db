@@ -3,7 +3,19 @@
  */
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Auto-detect API URL based on current hostname
+// If VITE_API_URL is set in .env, use it; otherwise use current hostname with port 8000
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  // Use the same hostname as the frontend, but on port 8000
+  const protocol = window.location.protocol // http: or https:
+  const hostname = window.location.hostname // localhost or 192.168.1.198
+  return `${protocol}//${hostname}:8000`
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 const api = axios.create({
   baseURL: API_BASE_URL,

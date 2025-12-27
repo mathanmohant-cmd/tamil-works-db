@@ -53,8 +53,8 @@
       <!-- Lines displayed in two columns -->
       <div class="verse-lines-table">
         <div v-for="(line, index) in verse.lines" :key="line.line_id" class="line-row">
-          <span class="line-number">{{ shouldShowLineNumber(index + 1) ? (index + 1) : '' }}</span>
           <span class="line-text" v-html="highlightSearchWord(line.line_text)"></span>
+          <span v-if="(index + 1) % 5 === 0" class="line-number">{{ index + 1 }}</span>
         </div>
       </div>
 
@@ -164,9 +164,8 @@ export default {
     const exportVerseToCSV = () => {
       if (!verse.value) return
 
-      const headers = ['Line Number', 'Line Text']
-      const rows = verse.value.lines.map((line, index) => [
-        index + 1,
+      const headers = ['Line Text']
+      const rows = verse.value.lines.map((line) => [
         line.line_text
       ])
 
@@ -221,13 +220,8 @@ export default {
       }
       content += '\n---\n\n'
 
-      verse.value.lines.forEach((line, index) => {
-        const lineNum = index + 1
-        if (lineNum % 5 === 0) {
-          content += `${lineNum}. ${line.line_text}\n`
-        } else {
-          content += `    ${line.line_text}\n`
-        }
+      verse.value.lines.forEach((line) => {
+        content += `${line.line_text}\n`
       })
 
       const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
@@ -437,14 +431,13 @@ export default {
 }
 
 .line-row {
-  display: grid;
-  grid-template-columns: 60px 1fr;
-  gap: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
   margin: 0;
-  padding: 0.5rem 0.25rem;
+  padding: 0.25rem 0;
   align-items: baseline;
-  line-height: 1.5;
-  border-bottom: 1px solid #f0f0f0;  /* Very mild separator line */
+  line-height: 1.3;
+  border-bottom: 1px solid #d0d0d0;  /* More visible separator line */
 }
 
 .line-row:last-child {
@@ -452,44 +445,39 @@ export default {
 }
 
 .line-number {
-  text-align: right;
   font-weight: 600;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  padding-right: 0.5rem;
-  border-right: 2px solid var(--border-color);
-  line-height: 1.5;
-  margin: 0;
+  margin-left: 0.5rem;
 }
 
 .line-text {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.3;
   margin: 0;
   padding: 0;
+  flex: 1;
 }
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .line-row {
-    grid-template-columns: 30px 1fr;
-    gap: 0.5rem;
-    padding: 0.5rem 0.25rem;
+    gap: 0.35rem;
+    padding: 0.2rem 0;
   }
 
   .line-number {
-    font-size: 0.7rem;
-    padding-right: 0.25rem;
+    font-size: 0.65rem;
   }
 
   .line-text {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .verse-lines-table {

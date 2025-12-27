@@ -4,18 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Tamil literature database and search application that stores and analyzes five major Tamil literary works with word-level granularity. The system consists of:
+This is a Tamil literature database and search application that stores and analyzes Tamil literary works with word-level granularity. The system consists of:
 - PostgreSQL database with hierarchical data model
 - FastAPI REST API backend
 - Vue.js 3 frontend with Vite
 - Python parsers for importing Tamil literature texts
 
-**Supported Works:**
-1. Tolkāppiyam (தொல்காப்பியம்) - Ancient grammar text
-2. Sangam Literature (சங்க இலக்கியம்) - Classical poetry
-3. Thirukkural (திருக்குறள்) - 1,330 ethical couplets
-4. Silapathikaram (சிலப்பதிகாரம்) - Epic narrative
-5. Kambaramayanam (கம்பராமாயணம்) - Tamil Ramayana
+**Supported Work Categories:**
+1. **Sangam Era & Classical:**
+   - Tolkāppiyam (தொல்காப்பியம்) - Ancient grammar text
+   - Sangam Literature (சங்க இலக்கியம்) - 18 classical poetry anthologies
+   - Eighteen Lesser Texts (பதினெண்கீழ்க்கணக்கு) - Including Thirukkural
+
+2. **Five Great Epics (ஐம்பெருங்காப்பியங்கள்):**
+   - Silapathikaram, Manimegalai, Seevaka Sinthamani, Valayapathi, Kundalakesi
+   - Kambaramayanam (கம்பராமாயணம்) - Tamil Ramayana
+
+3. **Devotional Literature (பக்தி இலக்கியம்) - ~40 works:**
+   - Thirumurai (திருமுறை) - 14 Shaivite works, Collection 321
+   - Naalayira Divya Prabandham (நாலாயிரத் திவ்விய பிரபந்தம்) - 24 Vaishnavite works, Collection 322
+   - Thiruppugazh (Murugan worship), Thembavani (Christian), Seerapuranam (Islamic)
 
 **Note:** Experimental grammar analysis tools (morphology analyzer, pronunciation evaluator) are located in `tamil-grammar-tools/` directory. These are separate side projects for future exploration and not part of the main search application.
 
@@ -117,6 +125,28 @@ python import_eighteen_lesser_texts.py [database_url]
 # Import all Five Great Epics at once (ஐம்பெருங்காப்பியங்கள்)
 python import_five_great_epics.py [database_url]
 # Includes: Silapathikaram, Manimegalai, Seevaka Sinthamani, Valayapathi, Kundalakesi
+
+# Import all Devotional Literature at once (பக்தி இலக்கியம்)
+python import_devotional_literature.py [database_url]
+# Includes:
+#  - Thirumurai (திருமுறை) - 14 works, Collection 321
+#  - Naalayira Divya Prabandham - 24 works, Collection 322
+#  - Thiruppugazh, Thembavani, Seerapuranam - 3 standalone works
+# Total: ~40 works spanning 6th-19th centuries CE
+
+# ===== INDIVIDUAL DEVOTIONAL LITERATURE PARSERS =====
+# Thirumurai Collection (14 works from Files 1-12)
+python thirumurai_bulk_import.py [database_url]
+# Includes: Devaram (7 works), Thiruvasagam, Thirukkovayar, Thiruvisaippa,
+#           Thiruppallandu, Thirumanthiram, Saiva Prabandha Malai, Periya Puranam
+
+# Naalayira Divya Prabandham (24 works from Files 13-16)
+python naalayira_divya_prabandham_bulk_import.py [database_url]
+
+# Standalone devotional works
+python thiruppugazh_bulk_import.py [database_url]
+python thembavani_bulk_import.py [database_url]
+python seerapuranam_bulk_import.py [database_url]
 
 # All parsers support:
 # - DATABASE_URL environment variable
@@ -540,3 +570,4 @@ When searching with `limit=0`:
 ```
 
 **Note:** The `work_breakdown` array contains one entry per verse (not per work), so the frontend must aggregate by `work_name` to get unique work counts and total usage per work.
+- read the tables first before writing parser

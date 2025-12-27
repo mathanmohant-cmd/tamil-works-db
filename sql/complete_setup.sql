@@ -25,7 +25,7 @@
 
 -- Literary works table
 CREATE TABLE works (
-    work_id INTEGER PRIMARY KEY,
+    work_id SERIAL PRIMARY KEY,
     work_name VARCHAR(200) NOT NULL,
     work_name_tamil VARCHAR(200) NOT NULL,
     period VARCHAR(100),
@@ -43,7 +43,7 @@ CREATE TABLE works (
 
 -- Collections table (literary periods, traditions, genres, canons)
 CREATE TABLE collections (
-    collection_id INTEGER PRIMARY KEY,
+    collection_id SERIAL PRIMARY KEY,
     collection_name VARCHAR(100) NOT NULL UNIQUE,
     collection_name_tamil VARCHAR(100),
     collection_type VARCHAR(50) NOT NULL,  -- 'period', 'tradition', 'genre', 'canon', 'custom'
@@ -85,7 +85,7 @@ CREATE INDEX idx_work_collections_collection ON work_collections(collection_id);
 
 -- Hierarchical sections table (flexible structure for all levels)
 CREATE TABLE sections (
-    section_id INTEGER PRIMARY KEY,
+    section_id SERIAL PRIMARY KEY,
     work_id INTEGER NOT NULL,
     parent_section_id INTEGER,  -- NULL for top-level sections
     level_type VARCHAR(50) NOT NULL,  -- e.g., 'paal', 'kandam', 'adhikaram', 'padalam'
@@ -106,7 +106,7 @@ CREATE INDEX idx_sections_work ON sections(work_id);
 
 -- Verses/Poems/Sutras table (the atomic textual unit before lines)
 CREATE TABLE verses (
-    verse_id INTEGER PRIMARY KEY,
+    verse_id SERIAL PRIMARY KEY,
     work_id INTEGER NOT NULL,
     section_id INTEGER NOT NULL,  -- Links to the most specific section (e.g., adhikaram)
     verse_number INTEGER NOT NULL,
@@ -125,7 +125,7 @@ CREATE INDEX idx_verses_work ON verses(work_id);
 
 -- Lines table
 CREATE TABLE lines (
-    line_id INTEGER PRIMARY KEY,
+    line_id SERIAL PRIMARY KEY,
     verse_id INTEGER NOT NULL,
     line_number INTEGER NOT NULL,  -- Line number within the verse (1, 2, 3, 4...)
     line_text TEXT NOT NULL,
@@ -139,7 +139,7 @@ CREATE INDEX idx_lines_verse ON lines(verse_id);
 
 -- Words table (every word with its position)
 CREATE TABLE words (
-    word_id INTEGER PRIMARY KEY,
+    word_id SERIAL PRIMARY KEY,
     line_id INTEGER NOT NULL,
     word_position INTEGER NOT NULL,  -- Position in the line (1, 2, 3...)
     word_text VARCHAR(200) NOT NULL,
@@ -166,7 +166,7 @@ CREATE INDEX idx_words_root ON words(word_root);
 
 -- Commentary/annotations on verses
 CREATE TABLE commentaries (
-    commentary_id INTEGER PRIMARY KEY,
+    commentary_id SERIAL PRIMARY KEY,
     verse_id INTEGER NOT NULL,
     commentator VARCHAR(200),
     commentator_tamil VARCHAR(200),
@@ -177,7 +177,7 @@ CREATE TABLE commentaries (
 
 -- Cross-references between verses
 CREATE TABLE cross_references (
-    reference_id INTEGER PRIMARY KEY,
+    reference_id SERIAL PRIMARY KEY,
     source_verse_id INTEGER NOT NULL,
     target_verse_id INTEGER NOT NULL,
     reference_type VARCHAR(50),  -- 'parallel', 'quote', 'allusion', etc.
@@ -234,14 +234,13 @@ SELECT
     v.verse_type_tamil,
     w.work_name,
     w.work_name_tamil,
-    wc_canon.position_in_collection as canonical_position,  -- Position in Traditional Canon collection
+    w.canonical_order as canonical_position,  -- Direct from works table
     sp.path_names as hierarchy_path,
     sp.path_names_tamil as hierarchy_path_tamil,
     sp.depth as hierarchy_depth
 FROM verses v
 INNER JOIN works w ON v.work_id = w.work_id
-INNER JOIN section_path sp ON v.section_id = sp.section_id
-LEFT JOIN work_collections wc_canon ON w.work_id = wc_canon.work_id AND wc_canon.collection_id = 100;  -- 100 = Traditional Canon
+INNER JOIN section_path sp ON v.section_id = sp.section_id;
 
 -- Complete word information with full context
 CREATE VIEW word_details AS
@@ -271,7 +270,7 @@ SELECT
     vh.verse_type_tamil,
     vh.work_name,
     vh.work_name_tamil,
-    vh.canonical_position,  -- From Traditional Canon collection (collection_id = 100)
+    vh.canonical_position,  -- From works.canonical_order (via verse_hierarchy view)
     vh.hierarchy_path,
     vh.hierarchy_path_tamil,
     wvc.work_verse_count  -- Total verses in the work

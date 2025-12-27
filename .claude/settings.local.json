@@ -9,7 +9,12 @@
       "Bash(git push)",
       "Bash(taskkill:*)",
       "Bash(grep:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(done)",
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

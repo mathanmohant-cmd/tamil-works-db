@@ -867,7 +867,6 @@ body {
   justify-content: center;
   border-radius: 6px;
   flex-shrink: 0;
-  margin-left: 0.5rem;
 }
 
 .occurrence-content {
@@ -1088,7 +1087,7 @@ body {
 .occurrences-list {
   overflow-y: auto;
   flex: 1;
-  padding: 1.5rem;
+  padding: 1rem 0.5rem;
 }
 
 .search-input {
@@ -2086,7 +2085,7 @@ body {
 .filter-label {
   font-weight: 600;
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.0rem;
 }
 
 /* Result metadata */

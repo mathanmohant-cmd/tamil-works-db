@@ -2,8 +2,9 @@
   <div id="app">
     <!-- Header -->
     <header class="app-header">
-      <h1>தமிழ் இலக்கிய சொல் தேடல் | Thamizh Literary Words Search</h1>
-
+      <h1>தமிழ் இலக்கியத் தொடரடைவு</h1>
+      <h2 >Searchable Concordance for Thamizh Literature</h2 >
+  
       <!-- Database Summary -->
       <div class="database-summary" v-if="stats">
         <span>{{ stats.total_works }} Works | {{ stats.total_verses.toLocaleString() }} Verses | {{ stats.distinct_words.toLocaleString() }} Distinct Words | {{ stats.total_words.toLocaleString() }} Usage</span>
@@ -17,7 +18,7 @@
                 <input
                   v-model="searchQuery"
                   type="text"
-                  placeholder="Enter Thamizh word... (e.g., அறம்)"
+                  placeholder="Enter a word... (e.g., அறம்)"
                   @keyup.enter="performSearch"
                   @input="handleAutocompleteInput"
                   @focus="showAutocomplete = true"
@@ -99,7 +100,7 @@
           <nav class="main-nav">
             <button @click="currentPage = 'home'" :class="{active: currentPage === 'home'}">Acknowledgment</button>
             <button @click="currentPage = 'search'; showWelcome = true" :class="{active: currentPage === 'search'}">Search</button>
-            <button @click="currentPage = 'principles'" :class="{active: currentPage === 'principles'}">Word Segmentation Principles</button>
+            <button @click="currentPage = 'about'" :class="{active: currentPage === 'about'}">About & Help</button>
             <button @click="currentPage = 'journey'" :class="{active: currentPage === 'journey'}">The Story Behind</button>
           </nav>
         </div>
@@ -108,6 +109,9 @@
 
     <!-- Home Page (Acknowledgment) -->
     <Home v-if="currentPage === 'home'" />
+
+    <!-- About Concordance Page -->
+    <AboutConcordance v-if="currentPage === 'about'" />
 
     <!-- Principles Page -->
     <Principles v-if="currentPage === 'principles'" />
@@ -172,26 +176,21 @@
     <div class="main-container">
       <!-- Help/Welcome Message -->
       <div v-if="currentPage === 'search' && !loading && showWelcome" class="welcome">
-        <h2>Welcome to Thamizh Literary Words Search</h2>
+        <h2>Welcome to Searchable Thamizh Concordance</h2>
         <p class="welcome-subtitle">Search for words across Thamizh literary works</p>
-
-        <div class="welcome-highlight">
-          <h3>💡 About This Database</h3>
-          <p>This database is built using the comprehensive concordance of Thamizh literary works developed by Prof. Dr. P. Pandiyaraja. Understanding the <strong>word segmentation principles</strong> he has adopted will help you use this tool more effectively.
-          </p>
-          <p class="learn-more">
-            <a href="#" @click.prevent="currentPage = 'principles'" class="principles-link">Learn about word segmentation principles →</a>
-          </p>
-        </div>
-
         <div class="quick-start">
-          <h3>Quick Start</h3>
+          <h3>&#128640; Quick Start</h3>
           <ul class="tips-list">
             <li><strong>Type a Thamizh word</strong> in the search box above — it auto-completes as you type!</li>
             <li><strong>Choose match type:</strong> Partial (finds similar words) or Exact (precise match)</li>
             <li><strong>Set position:</strong> Beginning, End, or Anywhere in the word</li>
             <li><strong>Filter by works</strong> (optional) to search specific texts</li>
           </ul>
+          <p>Understanding what a concordance is and the <strong>word segmentation principles</strong> will help you use this tool more effectively.
+          </p>
+          <p class="learn-more">
+            <a href="#" @click.prevent="currentPage = 'about'" class="principles-link">Learn more about concordance and how it works →</a>
+          </p>
         </div>
 
         <div class="try-examples">
@@ -416,6 +415,7 @@ import api from './api.js'
 import Home from './Home.vue'
 import OurJourney from './OurJourney.vue'
 import Principles from './Principles.vue'
+import AboutConcordance from './AboutConcordance.vue'
 import VerseView from './VerseView.vue'
 import AccordionFilter from './components/AccordionFilter.vue'
 
@@ -425,6 +425,7 @@ export default {
     Home,
     OurJourney,
     Principles,
+    AboutConcordance,
     VerseView,
     AccordionFilter
   },
