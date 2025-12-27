@@ -847,35 +847,20 @@ body {
 }
 
 .occurrence-item {
-  display: flex;
-  gap: 0.5rem;
+  display: block;
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border-color);
 }
 
 .occurrence-number {
-  font-weight: 700;
-  color: var(--text-primary);
-  background: var(--marutham-gold);
-  border: 2px solid var(--life-pulse);
-  border-left: 3px solid var(--life-pulse);
-  font-size: 0.85rem;
-  min-width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-right: 0.25rem;
 }
 
 .occurrence-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding-right: 0.5rem;
+  display: block;
 }
 
 .occurrence-metadata {
@@ -883,17 +868,14 @@ body {
   color: var(--text-secondary);
   font-family: var(--tamil-font), var(--english-font);
   font-weight: 400;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
+  display: inline;
   margin-bottom: 0.25rem;
 }
 
 .occurrence-metadata .work-name {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .verse-link-text {
@@ -902,6 +884,8 @@ body {
   text-decoration: underline;
   text-decoration-style: dotted;
   transition: color 0.2s;
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 .verse-link-text:hover {
@@ -911,12 +895,13 @@ body {
 
 .occurrence-metadata .separator {
   color: var(--text-secondary);
-  font-weight: bold;
-  font-size: 1.2rem;
+  font-weight: normal;
+  font-size: 1rem;
 }
 
 .hierarchy-path {
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 
@@ -925,7 +910,8 @@ body {
   line-height: 1.6;
   font-family: var(--tamil-font), var(--english-font);
   color: var(--text-primary);
-  padding: 0.35rem 0;
+  padding: 0.25rem 0 0.35rem 0;
+  display: block;
 }
 
 .collapse-footer {
@@ -1536,11 +1522,7 @@ body {
   font-family: var(--tamil-font), var(--english-font);
 }
 
-.hierarchy-path {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-family: var(--tamil-font), var(--english-font);
-}
+/* Removed duplicate .hierarchy-path - see line 919 for the active definition */
 
 .line-text {
   font-size: 1.2rem;
@@ -1753,18 +1735,11 @@ body {
   }
 
   .occurrence-item {
-    flex-direction: column;
-    gap: 0.35rem;
     padding: 0.5rem 0;
   }
 
   .occurrence-number {
-    display: none;
-  }
-
-  .occurrence-content {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    font-size: 0.9rem;
   }
 
   .occurrence-metadata {

@@ -1,7 +1,7 @@
 <template>
   <div class="journey-page">
     <div class="container">
-      <h1>The Story Behind</h1>
+      <h1>The Story Behind This Platform</h1>
       <p class="author-name">— T. Mathan Mohan</p>
 
       <!-- Introduction -->
@@ -13,7 +13,7 @@
           It also awakened a desire to engage more deeply with works such as <em>Tholkappiyam, Thirukkural, Sangam Literature, Silapathikaram,</em> and <em>Kambaramayanam</em>—the foundational texts of Thamizh literary and cultural consciousness.
         </p>
         <p class="intro">
-          What might have remained a dormant wish became possible through the தமிழ்ச் சான்றோர்—the scholars and teachers—whose work guided me along the way.
+          What might have remained a dormant wish came alive through the தமிழ்ச் சான்றோர்—the scholars, and exemplars whose lifelong work illuminated the path and shaped my understanding.
         </p>
       </section>
 
@@ -31,7 +31,7 @@
             </svg>
           </div>
           <div class="mentor-text">
-            <h3>Ms. Vaidehi Herbert</h3>
+            <h3>Mrs. Vaidehi Herbert</h3>
             <p>
               A defining moment was the <em>Introduction to Sangam Literature</em> course she conducted. For many Thamizhs educated primarily in English, approaching classical Thamizh texts—and even their traditional commentaries—can feel daunting.
             </p>
@@ -108,7 +108,7 @@
           <div class="mentor-text">
             <h3>Mr. R. Balakrishnan, IAS</h3>
             <p>
-              His ability to unearth profound phrases from Sangam Literature—comparable to the Mahavakyas of Vedic tradition—and make them accessible to ordinary Thamizh people is unparalleled. This reflects unwavering discipline, deep scholarship, and intellectual rigor. Beyond his scholarly work, his vast administrative experience and keen social observation enable him to bring people together, opening new pathways to carry Sangam Literature forward beyond literary circles.
+              His ability to unearth profound phrases from Sangam Literature—comparable to the Mahavakyas of Vedic tradition—and make them accessible to Thamizh community is rare. This reflects unwavering discipline, deep scholarship, and intellectual rigor. Beyond his scholarly work, his vast administrative experience and keen social observation enable him to bring people together, opening new pathways to carry Sangam Literature forward beyond literary circles.
             </p>
             <p>
               He is a reminder that with passion, discipline, and honest and open enquiry, one can excel in many domains and make impactful contributions in all.
@@ -147,14 +147,10 @@
           These are moments of curiosity that many readers encounter while engaging with the texts. Yet following such threads across poems, genres, and commentaries can be difficult without simple ways to search and compare.
         </p>
         <p>
-          This platform grew out of that need. At present, it offers a basic search across selected works, helping readers locate words and usages more easily. Over time, additional references and tools may be added to support deeper exploration. The aim remains careful reading rather than quick conclusions.
+          With the help of AI tools and online collaboration, it is now possible to build thoughtful, reader-centered tools that support close engagement with classical literature. Used with care, these technologies can assist—rather than replace—the patient work of reading, comparison, and interpretation.
         </p>
-        <p>
-          The path through classical Thamizh literature is rarely linear. It unfolds through questions, comparisons, and the slow accumulation of understanding. This platform is an attempt to support that process—offering simple tools that make exploration a little easier, and perhaps a little more inviting.
-        </p>
-        <p>
-          I hope it serves as a bridge for readers who wish to enter these texts thoughtfully, one word and one insight at a time.
-        </p>
+        <p>This platform is a small step in that direction, and it stands consciously in the lineage of the Tamil Concordance created by Prof. P. Pandiaraja, whose decades of meticulous scholarly work demonstrated how systematic indexing and close reading can open new paths of understanding. </p>
+        <p>With humility, care, and collaboration, we can continue that tradition—building tools that help more readers access these texts, learn from their wisdom and carry it forward.</p>
       </section>
 
       <!-- Call to Action -->

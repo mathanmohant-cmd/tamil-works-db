@@ -22,7 +22,6 @@
       <!-- Q&A Tab Content -->
       <article v-if="activeTab === 'qa'" class="content-section qa-content">
         <header class="page-header">
-          <h1>Understanding Concordance</h1>
           <p class="subtitle">A Guide for First-Time Users</p>
         </header>
 
@@ -45,7 +44,7 @@
                 </div>
                 <div class="comparison-item">
                   <strong>Concordance:</strong>
-                  <p>Shows you all the places where "அறம்" appears in Tamil literature, with the complete verses and context</p>
+                  <p>Shows you all the places where "அறம்" appears in Tamil literature, with the complete line and context</p>
                 </div>
               </div>
             </div>
@@ -143,8 +142,8 @@
               <h3>Research and Analysis</h3>
               <p>For students writing essays or researchers studying Tamil literature:</p>
               <ul>
-                <li>Find all verses about a specific topic (like rain, love, war, virtue)</li>
-                <li>Compare how different authors expressed the same idea</li>
+                <li>Find all verses with a specific word</li>
+                <li>Compare how different authors developed the word usage</li>
                 <li>Track the evolution of word usage over time</li>
               </ul>
             </div>
@@ -230,13 +229,13 @@
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-5')" :class="{ expanded: expandedSections.has('qa-5') }" data-section="qa-5">
-            <h2>How Can Students Use This Tool?</h2>
+            <h2>How to Use This Tool?</h2>
             <span class="accordion-icon">{{ expandedSections.has('qa-5') ? '−' : '+' }}</span>
           </div>
           <div v-if="expandedSections.has('qa-5')" class="accordion-content">
 
           <div class="student-uses">
-            <div class="use-case">
+            <div class="importance-item">
               <h3>For Tamil Language Learning:</h3>
               <ul>
                 <li>See how words are actually used in sentences</li>
@@ -245,7 +244,7 @@
               </ul>
             </div>
 
-            <div class="use-case">
+            <div class="importance-item">
               <h3>For Research Projects:</h3>
               <ul>
                 <li>Gather all references to a specific topic</li>
@@ -254,7 +253,7 @@
               </ul>
             </div>
 
-            <div class="use-case">
+            <div class="importance-item">
               <h3>For Personal Exploration:</h3>
               <ul>
                 <li>Discover beautiful verses you've never read</li>
@@ -273,7 +272,7 @@
             <span class="accordion-icon">{{ expandedSections.has('qa-6') ? '−' : '+' }}</span>
           </div>
           <div v-if="expandedSections.has('qa-6')" class="accordion-content">
-          <p>If we can work togather, here are some exciting possibilities:</p>
+          <p>With broder collaboration, there are many exciting possibilities:</p>
 
           <div class="features-grid">
             <div class="feature-item">
@@ -392,16 +391,15 @@
 
       <!-- Principles Tab Content (complete content from Principles.vue) -->
       <article v-if="activeTab === 'principles'" class="content-section principles-content">
-        <header class="principles-header">
-          <h1>சொற்பிரிப்பு - ஓர் ஆறிமுகம்</h1>
-          <p class="lead">The principles of word segmentation based on Prof. Dr. P. Pandiyaraja</p>
+        <header class="page-header">
+          <p class="subtitle">The principles of word segmentation (சொற்பிரிப்பு நெறிகள்) based on Prof. Dr. P. Pandiyaraja</p>
           <p class="source-link">Source: <a href="http://tamilconcordance.in/Principles.html" target="_blank" rel="noopener noreferrer">tamilconcordance.in/Principles.html</a></p>
         </header>
 
         <main>
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('principles-intro')" :class="{ expanded: expandedSections.has('principles-intro') }" data-section="principles-intro">
-              <h2>அறிமுகம் / Introduction</h2>
+              <h2>சொற்பிரிப்பு நெறிகள்</h2>
               <span class="accordion-icon">{{ expandedSections.has('principles-intro') ? '−' : '+' }}</span>
             </div>
             <div v-if="expandedSections.has('principles-intro')" class="accordion-content">
@@ -892,12 +890,18 @@
 </template>
 
 <script>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, watch, onMounted } from 'vue'
 
 export default {
   name: 'AboutConcordance',
-  setup() {
-    const activeTab = ref('qa')
+  props: {
+    initialTab: {
+      type: String,
+      default: 'qa'
+    }
+  },
+  setup(props) {
+    const activeTab = ref(props.initialTab)
     const expandedSections = ref(new Set())
 
     const toggleSection = (sectionId) => {
@@ -920,6 +924,16 @@ export default {
         expandedSections.value = newSet
       }
     }
+
+    // Scroll to top when component mounts
+    onMounted(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+
+    // Scroll to top when tab changes
+    watch(activeTab, () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
 
     return {
       activeTab,

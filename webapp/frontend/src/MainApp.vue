@@ -111,7 +111,7 @@
     <Home v-if="currentPage === 'home'" />
 
     <!-- About Concordance Page -->
-    <AboutConcordance v-if="currentPage === 'about'" />
+    <AboutConcordance v-if="currentPage === 'about'" :initialTab="aboutInitialTab" />
 
     <!-- Principles Page -->
     <Principles v-if="currentPage === 'principles'" />
@@ -190,7 +190,7 @@
           <p>Understanding what a concordance is and the <strong>word segmentation principles</strong> will help you use this tool more effectively.
           </p>
           <p class="learn-more">
-            <a href="#" @click.prevent="currentPage = 'about'" class="principles-link">Learn more about concordance and how it works →</a>
+            <a href="#" @click.prevent="aboutInitialTab = 'qa'; currentPage = 'about'" class="principles-link">Learn more about concordance and how it works →</a>
           </p>
         </div>
 
@@ -331,18 +331,19 @@
                   <div
                     v-for="(result, occIndex) in getSortedWordOccurrences(word.text)"
                     :key="result.word_id"
+                    :data-word-id="result.word_id"
                     class="occurrence-item"
                   >
-                    <div class="occurrence-number">{{ occIndex + 1 }}</div>
                     <div class="occurrence-content">
                       <div class="occurrence-metadata">
+                        <span class="occurrence-number">{{ occIndex + 1 }}.</span>
                         <span class="work-name">{{ result.work_name_tamil }}</span>
                         <template v-if="cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)">
-                          <span class="separator"> ● </span>
+                          <span class="separator"> • </span>
                           <span class="hierarchy-path">{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
                         </template>
-                        <span class="separator"> ● </span>
-                        <span class="verse-link-text" @click="openVerseView(result.verse_id, word.text)" title="Click to view full verse">{{ formatVerseAndLine(result, false) }}</span>
+                        <span class="separator"> • </span>
+                        <span class="verse-link-text" @click="openVerseView(result.verse_id, word.text, result.word_id)" title="Click to view full verse">{{ formatVerseAndLine(result, false) }}</span>
                       </div>
                       <div class="occurrence-line" v-html="highlightWord(result.line_text, word.text)"></div>
                     </div>
@@ -411,7 +412,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
 import api from './api.js'
 import Home from './Home.vue'
 import OurJourney from './OurJourney.vue'
@@ -434,6 +435,7 @@ export default {
     // Page navigation
     const currentPage = ref('search')  // Default to search page
     const showWelcome = ref(true)
+    const aboutInitialTab = ref('qa')  // Track which About tab to show
 
     // State
     const searchQuery = ref('')
@@ -467,6 +469,7 @@ export default {
     const showVerseView = ref(false)
     const selectedVerseId = ref(null)
     const verseViewSearchWord = ref('')
+    const clickedOccurrenceWordId = ref(null)  // Track which occurrence was clicked
 
     // Export menu state
     const showWordsExportMenu = ref(false)
@@ -1439,7 +1442,7 @@ export default {
         return level.trim()
       })
 
-      return cleanedLevels.join(' ● ')
+      return cleanedLevels.join(' • ')
     }
 
     // Method: Format verse and line display with Tamil terminology
@@ -1461,14 +1464,15 @@ export default {
       }
 
       // For collection works (work_verse_count > 1), show verse number
-      // Show: verse_type_tamil verse_number ● அடி line_number
-      return `${verseTypeTamil} ${result.verse_number} ● அடி ${result.line_number}`
+      // Show: verse_type_tamil verse_number • அடி line_number
+      return `${verseTypeTamil} ${result.verse_number} • அடி ${result.line_number}`
     }
 
     // Method: Open verse view
-    const openVerseView = (verseId, searchWord = '') => {
+    const openVerseView = (verseId, searchWord = '', wordId = null) => {
       selectedVerseId.value = verseId
       verseViewSearchWord.value = searchWord
+      clickedOccurrenceWordId.value = wordId
       showVerseView.value = true
     }
 
@@ -1477,6 +1481,17 @@ export default {
       showVerseView.value = false
       selectedVerseId.value = null
       verseViewSearchWord.value = ''
+
+      // Scroll back to the clicked occurrence
+      if (clickedOccurrenceWordId.value) {
+        nextTick(() => {
+          const element = document.querySelector(`[data-word-id="${clickedOccurrenceWordId.value}"]`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+          clickedOccurrenceWordId.value = null
+        })
+      }
     }
 
     // Method: Export lines for a specific word (CSV or TXT)
@@ -1590,6 +1605,7 @@ export default {
     return {
       currentPage,
       showWelcome,
+      aboutInitialTab,
       searchQuery,
       matchType,
       wordPosition,

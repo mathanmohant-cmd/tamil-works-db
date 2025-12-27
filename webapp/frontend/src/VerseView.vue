@@ -126,7 +126,7 @@ export default {
         return level.trim()
       }).filter(level => level !== null)  // Remove nulls
 
-      return cleanedLevels.join(' ● ')
+      return cleanedLevels.join(' • ')
     }
 
     const highlightSearchWord = (lineText) => {
@@ -335,25 +335,25 @@ export default {
 .work-title {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .separator {
   color: var(--text-secondary);
   font-weight: normal;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .hierarchy {
   font-weight: 400;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .verse-info {
   font-weight: 400;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .export-verse-button {
@@ -493,12 +493,13 @@ export default {
   }
 
   .work-title {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
+  .separator,
   .hierarchy,
   .verse-info {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 }
 
