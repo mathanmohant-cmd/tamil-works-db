@@ -23,7 +23,7 @@
       <article v-if="activeTab === 'qa'" class="content-section qa-content">
         <header class="page-header">
           <h1>Understanding Concordance</h1>
-          <p class="subtitle">A Guide for Students and First-Time Users</p>
+          <p class="subtitle">A Guide for First-Time Users</p>
         </header>
 
         <section class="accordion-section">
@@ -273,7 +273,7 @@
             <span class="accordion-icon">{{ expandedSections.has('qa-6') ? '−' : '+' }}</span>
           </div>
           <div v-if="expandedSections.has('qa-6')" class="accordion-content">
-          <p>Here are some exciting possibilities:</p>
+          <p>If we can work togather, here are some exciting possibilities:</p>
 
           <div class="features-grid">
             <div class="feature-item">
@@ -1029,6 +1029,7 @@ export default {
   border-bottom: 1px solid var(--border-color);
   overflow: hidden;
   transition: all 0.3s ease;
+  font-size: 1rem;
 }
 
 .accordion-section:hover .accordion-header {
@@ -1194,6 +1195,7 @@ export default {
   padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--border-color);
   line-height: 1.5;
+  font-size: 1.0rem
 }
 
 .table-row:last-child .table-cell {
@@ -1234,6 +1236,7 @@ export default {
   border-radius: 8px;
   margin: 0 0 1rem 0;
   border: 2px solid var(--border-color);
+  font-size: 1.0rem;
 }
 
 .definition {
@@ -1529,6 +1532,7 @@ export default {
   border-top: 2px solid var(--border-color);
   text-align: center;
   color: var(--text-secondary);
+  font-size: .9rem;
 }
 
 .page-footer p {

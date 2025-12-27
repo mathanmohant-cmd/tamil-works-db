@@ -185,6 +185,7 @@
             <li><strong>Choose match type:</strong> Partial (finds similar words) or Exact (precise match)</li>
             <li><strong>Set position:</strong> Beginning, End, or Anywhere in the word</li>
             <li><strong>Filter by works</strong> (optional) to search specific texts</li>
+            <li></li>
           </ul>
           <p>Understanding what a concordance is and the <strong>word segmentation principles</strong> will help you use this tool more effectively.
           </p>
