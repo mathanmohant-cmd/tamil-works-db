@@ -262,17 +262,20 @@
               </ul>
             </div>
           </div>
+              <p><em>* Note: This tool was developed for personal use and does not gaurantee accadamic level accuracy. *</em>
+              </p>
             <div class="accordion-close" @click="toggleSection('qa-5')">−</div>
           </div>
+          
         </section>
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-6')" :class="{ expanded: expandedSections.has('qa-6') }" data-section="qa-6">
-            <h2>What Features Could Be Added in the Future?</h2>
+            <h2>What other Features are possible?</h2>
             <span class="accordion-icon">{{ expandedSections.has('qa-6') ? '−' : '+' }}</span>
           </div>
           <div v-if="expandedSections.has('qa-6')" class="accordion-content">
-          <p>With broder collaboration, there are many exciting possibilities:</p>
+          <p>With collaboration from experts across multiple domains, there are exciting possibilities to explore together.</p>
 
           <div class="features-grid">
             <div class="feature-item">

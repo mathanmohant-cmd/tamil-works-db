@@ -146,15 +146,19 @@
         <p>
           These are moments of curiosity that many readers encounter while engaging with the texts. Yet following such threads across poems, genres, and commentaries can be difficult without simple ways to search and compare.
         </p>
-        <p>
-          With the help of AI tools and online collaboration, it is now possible to build thoughtful, reader-centered tools that support close engagement with classical literature. Used with care, these technologies can assist—rather than replace—the patient work of reading, comparison, and interpretation.
+        <p>With the help of AI tools and online collaboration, it is now possible to build thoughtful, reader-centered tools that support close engagement with classical literature. Used with care, these technologies can assist—rather than replace—the patient work of reading, comparison, and interpretation.
         </p>
-        <p>This platform is a small step in that direction, and it stands consciously in the lineage of the Tamil Concordance created by Prof. P. Pandiaraja, whose decades of meticulous scholarly work demonstrated how systematic indexing and close reading can open new paths of understanding. </p>
-        <p>With humility, care, and collaboration, we can continue that tradition—building tools that help more readers access these texts, learn from their wisdom and carry it forward.</p>
+        <p>Prof. P. Pandiaraja's Tamil Concordance helped me get closer to Sangam Literature. My attempt is to bring it one more step forward. I hope others will take it further.
+        </p>
       </section>
-
       <!-- Call to Action -->
       <section class="invite" aria-labelledby="share">
+        <h2><em>கற்றது கைமண் அளவு; கல்லாதது உலகளவு</em></h2>
+        <p class="closing-reflection">
+          
+          <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility. Selective patterns drawn from searches cannot substitute for close reading, historical context, and the patient work of interpretation. Claims about 'what Tamil literature is' based on word frequencies or isolated examples will always be incomplete—and often misleading.
+          <br>These tools are meant to support deeper engagement with the texts, not to reduce them to data points in service of predetermined conclusions.
+        </p>
         <h2 id="share">
           <a href="mailto:thamizh.words@gmail.com?subject=Thamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Share your ideas and feedback</a>
         </h2>
@@ -374,6 +378,7 @@ h2 {
 
 .invite h2 {
   margin: 0;
+  text-align: center;
 }
 
 .journey-link {
