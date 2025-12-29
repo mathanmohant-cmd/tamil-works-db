@@ -174,6 +174,58 @@ class TolkappiyamBulkImporter:
             self.conn.commit()
             print(f"  Created Tolkappiyam work entry")
 
+            # Create collection and link work to it
+            self._create_collection_and_link()
+
+    def _create_collection_and_link(self):
+        """Create தமிழ் இலக்கண நூல்கள் collection and link Tolkappiyam to it"""
+        collection_id = 101
+        collection_name = 'Tamil Grammar Works'
+        collection_name_tamil = 'தமிழ் இலக்கண நூல்கள்'
+
+        # Check if collection exists
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
+        existing = self.cursor.fetchone()
+
+        if not existing:
+            print(f"  Creating collection: {collection_name_tamil}")
+            collection_data = [{
+                'collection_id': collection_id,
+                'collection_name': collection_name,
+                'collection_name_tamil': collection_name_tamil,
+                'collection_type': 'genre',
+                'description': 'Tamil Grammar Texts - Classical Tamil grammatical works',
+                'parent_collection_id': None,
+                'sort_order': 101
+            }]
+            self._bulk_copy('collections', collection_data,
+                           ['collection_id', 'collection_name', 'collection_name_tamil',
+                            'collection_type', 'description', 'parent_collection_id', 'sort_order'])
+            self.conn.commit()
+            print(f"  ✓ Created collection {collection_name_tamil}")
+        else:
+            print(f"  Collection {collection_name_tamil} already exists")
+
+        # Link work to collection
+        print(f"  Linking Tolkappiyam to collection...")
+        work_collection_data = [{
+            'work_id': self.work_id,
+            'collection_id': collection_id,
+            'position_in_collection': 1,
+            'is_primary': True,
+            'notes': 'First and foremost Tamil grammar text'
+        }]
+
+        # Use INSERT with ON CONFLICT to handle duplicates
+        self.cursor.execute("""
+            INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary, notes)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (work_id, collection_id) DO NOTHING
+        """, (self.work_id, collection_id, 1, True, 'First and foremost Tamil grammar text'))
+
+        self.conn.commit()
+        print(f"  ✓ Linked Tolkappiyam to collection (position 1)")
+
     def _get_or_create_adhikaram_section(self, adhikaram_num: int, adhikaram_info: Dict):
         """Get or create Adhikaram (top-level section)"""
         cache_key = ('adhikaram', adhikaram_num)

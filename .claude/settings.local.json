@@ -14,7 +14,11 @@
       "Bash(head:*)",
       "Bash(done)",
       "Bash(PGPASSWORD=postgres psql:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:docs.google.com)",
+      "Bash(test:*)",
+      "Bash(set PGPASSWORD=postgres:*)",
+      "Bash(PGPASSWORD=postgres python:*)"
     ],
     "deny": [],
     "ask": []

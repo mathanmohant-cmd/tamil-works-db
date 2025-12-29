@@ -212,28 +212,42 @@ class Database:
                     params.append(word_root)
 
                 # Determine ORDER BY clause based on sort_by parameter
-                if sort_by == "canonical":
-                    # Sort by traditional Tamil literary canon order
+                # Default is now hierarchical (canonical) sorting
+                if sort_by == "alphabetical":
+                    # Alphabetical by work name, then hierarchical within work
                     order_clause = """
-                        ORDER BY w.canonical_order ASC NULLS LAST,
-                                 wd.verse_id, wd.line_number, wd.word_position
+                        ORDER BY wd.work_name ASC,
+                                 s.sort_order ASC NULLS LAST,
+                                 v.sort_order ASC NULLS LAST,
+                                 wd.line_number ASC,
+                                 wd.word_position ASC
                     """
                 elif sort_by == "chronological":
-                    # Sort by estimated chronological composition date
+                    # Sort by estimated chronological composition date, then hierarchical within work
                     order_clause = """
                         ORDER BY w.chronology_start_year ASC NULLS LAST,
-                                 wd.verse_id, wd.line_number, wd.word_position
+                                 s.sort_order ASC NULLS LAST,
+                                 v.sort_order ASC NULLS LAST,
+                                 wd.line_number ASC,
+                                 wd.word_position ASC
                     """
                 elif sort_by == "collection" and collection_id:
-                    # Sort by position in the specified collection
-                    # Fallback to Tamil work name for works with same position
+                    # Sort by position in collection, then hierarchical within work
                     order_clause = """
                         ORDER BY wc.position_in_collection ASC NULLS LAST,
-                        wd.work_name_tamil, wd.verse_id, wd.line_number, wd.word_position
+                                 s.sort_order ASC NULLS LAST,
+                                 v.sort_order ASC NULLS LAST,
+                                 wd.line_number ASC,
+                                 wd.word_position ASC
                     """
-                else:  # alphabetical (default)
+                else:  # canonical (default - hierarchical by literary canon order)
+                    # Sort by traditional Tamil literary canon order, then hierarchical within work
                     order_clause = """
-                        ORDER BY wd.work_name, wd.verse_id, wd.line_number, wd.word_position
+                        ORDER BY w.canonical_order ASC NULLS LAST,
+                                 s.sort_order ASC NULLS LAST,
+                                 v.sort_order ASC NULLS LAST,
+                                 wd.line_number ASC,
+                                 wd.word_position ASC
                     """
 
                 # Add ordering and pagination

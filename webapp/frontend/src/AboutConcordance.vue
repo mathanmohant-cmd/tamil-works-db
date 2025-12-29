@@ -395,8 +395,7 @@
       <!-- Principles Tab Content (complete content from Principles.vue) -->
       <article v-if="activeTab === 'principles'" class="content-section principles-content">
         <header class="page-header">
-          <p class="subtitle">The principles of word segmentation (சொற்பிரிப்பு நெறிகள்) based on Prof. Dr. P. Pandiyaraja</p>
-          <p class="source-link">Source: <a href="http://tamilconcordance.in/Principles.html" target="_blank" rel="noopener noreferrer">tamilconcordance.in/Principles.html</a></p>
+          <p class="subtitle">Summary of word segmentation principles (சொற்பிரிப்பு நெறிகள்) used in <a href="http://tamilconcordance.in/Principles.html" target="_blank" rel="noopener noreferrer">tamilconcordance.in/Principles.html</a> by Prof. P. Pandiyaraja</p>
         </header>
 
         <main>

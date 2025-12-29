@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Thiruppugazh Bulk Import Script
-================================
-Imports Thiruppugazh (திருப்புகழ்) by Arunagirinathar
+Thiruvasagam Bulk Import Script
+=================================
+Imports Thiruvasagam (Thirumurai File 8.1) by Manikkavasagar
 
-Standalone devotional work dedicated to Lord Murugan
-Period: 15th century CE
-Author: Arunagirinathar (அருணகிரிநாதர்)
+Collection: Thirumurai (திருமுறை) - Collection ID 321
+Work: Thiruvasagam (திருவாசகம்) by Manikkavasagar (மாணிக்கவாசகர்)
 
 Structure:
-    அருணகிரிநாதர் ^ திருப்புகழ்
-    @section_number section_name
-    #verse_number
-    verse_lines...
+    மாணிக்கவாசகர் ^ திருவாசகம்
+    @number pathigam_name
+    continuous lines (line numbers at multiples of 5 on right)
     மேல்
+
+Each pathigam is treated as ONE verse with multiple lines.
 
 Uses 2-phase bulk COPY pattern for optimal performance.
 """
@@ -24,12 +24,13 @@ import sys
 import re
 import json
 import io
+import csv
 import psycopg2
 from typing import List, Dict
 
-class ThiruppugazhBulkImporter:
+class ThiruvasagamBulkImporter:
     def __init__(self, db_connection_string: str):
-        """Initialize the Thiruppugazh bulk importer"""
+        """Initialize the Thiruvasagam bulk importer"""
         self.db_connection_string = db_connection_string
         self.conn = None
         self.cursor = None
@@ -58,6 +59,9 @@ class ThiruppugazhBulkImporter:
         print("Connecting to database...")
         self.conn = psycopg2.connect(self.db_connection_string)
         self.cursor = self.conn.cursor()
+
+        # Ensure Thirumurai collection exists
+        self.ensure_collection_exists()
 
         # Get MAX IDs
         self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
@@ -100,55 +104,95 @@ class ThiruppugazhBulkImporter:
 
         return section_id
 
+    def ensure_collection_exists(self):
+        """Ensure the 8th Thirumurai collection exists"""
+        # Check if main Thirumurai collection exists (321)
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 321")
+        if not self.cursor.fetchone():
+            print("  Creating main Thirumurai collection (321)...")
+            self.cursor.execute("""
+                INSERT INTO collections (collection_id, collection_name, collection_name_tamil,
+                                       collection_type, description, sort_order)
+                VALUES (321, 'Thirumurai', 'திருமுறை', 'devotional',
+                        'Thirumurai - 12 books of Shaivite devotional literature', 321)
+            """)
+            self.conn.commit()
+
+        # Check if 8th Thirumurai collection exists (3218)
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 3218")
+        result = self.cursor.fetchone()
+
+        if not result:
+            print("  Creating 8th Thirumurai collection (3218)...")
+            self.cursor.execute("""
+                INSERT INTO collections (collection_id, collection_name, collection_name_tamil,
+                                       collection_type, parent_collection_id, description, sort_order)
+                VALUES (3218, 'Eighth Thirumurai', 'எட்டாம் திருமுறை', 'devotional', 321,
+                        '8th Thirumurai - Thiruvasagam and Thirukovayar by Manikkavasagar', 3218)
+            """)
+            self.conn.commit()
+            print("  [OK] 8th Thirumurai collection created")
+        else:
+            print("  [OK] 8th Thirumurai collection already exists")
+
+        # Query and return the collection_id
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 3218")
+        self.eighth_thirumurai_collection_id = self.cursor.fetchone()[0]
+        return self.eighth_thirumurai_collection_id
 
     def parse_file(self, file_path: str):
-        """Parse Thiruppugazh file"""
-        print("\n=== PHASE 1: Parsing Thiruppugazh into memory ===")
+        """Parse Thiruvasagam file"""
+        print("\n=== PHASE 1: Parsing Thiruvasagam into memory ===")
 
         # Create work
         work_metadata = {
             'tradition': 'Shaivite',
-            'deity_focus': 'Murugan (Kartikeya)',
-            'time_period': '15th century CE',
-            'place': 'திருவண்ணாமலை (Thiruvannamalai)',
-            'saint': 'அருணகிரிநாதர்',
-            'saint_transliteration': 'Arunagirinathar',
+            'collection_id': self.eighth_thirumurai_collection_id,
+            'collection_name': 'Eighth Thirumurai',
+            'collection_name_tamil': 'எட்டாம் திருமுறை',
+            'thirumurai_number': 8,
+            'file_part': '8.1',
+            'saint': 'மாணிக்கவாசகர்',
+            'saint_transliteration': 'Manikkavasagar',
+            'time_period': '9th century CE',
+            'place': 'திருவாதவூர்',
+            'deity_focus': 'Shiva (as Nataraja)',
             'musical_tradition': True,
             'liturgical_use': True,
             'philosophical_depth': 'high',
             'emotional_intensity': 'high',
-            'themes': ['devotion to Murugan', 'divine grace', 'spiritual liberation', 'mystical experience'],
-            'verse_count': 1334,
-            'language': 'Tamil',
-            'style': 'elaborate poetic compositions with complex meter'
+            'themes': ['divine love', 'longing', 'mystical union', 'surrender']
         }
 
         work_dict = {
             'work_id': self.work_id,
-            'work_name': "Thiruppugazh",
-            'work_name_tamil': "திருப்புகழ்",
-            'period': '15th century CE',
-            'author': "Arunagirinathar",
-            'author_tamil': "அருணகிரிநாதர்",
-            'description': "திருப்புகழ் - Shaivite devotional hymns to Lord Murugan",
-            'canonical_order': 500,
-            'primary_collection_id': None,
+            'work_name': "Thiruvasagam",
+            'work_name_tamil': "திருவாசகம்",
+            'period': '9th century CE',
+            'author': "Manikkavasagar",
+            'author_tamil': "மாணிக்கவாசகர்",
+            'description': "திருவாசகம் - Shaivite devotional masterpiece",
+            'canonical_order': 328,
+            'primary_collection_id': self.eighth_thirumurai_collection_id,
             'metadata': work_metadata
         }
         self.works.append(work_dict)
         self.current_work_id = self.work_id
-        print(f"  Created work: திருப்புகழ் (ID: {self.work_id})")
+        print(f"  Created work: திருவாசகம் (ID: {self.work_id})")
         self.work_id += 1
 
         # Parse file
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
-        current_section_number = None
-        current_section_name = None
-        current_section_id = None
-        current_verse_number = None
-        current_verse_lines = []
+        # Create a default section for this work (fallback if no pathigams found)
+        # This ensures verse_hierarchy and word_details views work correctly
+        default_section = self._get_or_create_section_id(self.current_work_id)
+
+        current_pathigam_number = None
+        current_pathigam_name = None
+        current_pathigam_lines = []
+        current_section_id = default_section  # Start with default, update when pathigam found
 
         for line in lines:
             line_stripped = line.strip()
@@ -157,38 +201,38 @@ class ThiruppugazhBulkImporter:
             if '^' in line_stripped:
                 continue
 
-            # Section marker: @number section_name
-            section_match = re.match(r'^@(\d+)\s+(.+)', line_stripped)
-            if section_match:
-                # Save previous verse if any
-                if current_verse_lines and current_verse_number is not None:
-                    self.create_verse(
-                        current_verse_number,
-                        current_verse_lines,
+            # Pathigam marker: @number pathigam_name
+            pathigam_match = re.match(r'^@(\d+)\s+(.+)', line_stripped)
+            if pathigam_match:
+                # Save previous pathigam
+                if current_pathigam_lines:
+                    self.create_pathigam_verse(
+                        current_pathigam_number,
+                        current_pathigam_name,
+                        current_pathigam_lines,
                         current_section_id
                     )
-                    current_verse_lines = []
-                    current_verse_number = None
+                    current_pathigam_lines = []
 
-                current_section_number = int(section_match.group(1))
-                current_section_name = section_match.group(2).strip()
+                current_pathigam_number = int(pathigam_match.group(1))
+                current_pathigam_name = pathigam_match.group(2).strip()
 
-                # Create section (தொகுதி = volume)
+                # Create section (pathigam)
                 self.section_sort_order += 1
                 section_metadata = {
-                    'section_type': 'thoguthi',
-                    'section_type_tamil': 'தொகுதி'
+                    'section_type': 'pathigam',
+                    'section_type_tamil': 'பதிகம்'
                 }
 
                 section_dict = {
                     'section_id': self.section_id,
                     'work_id': self.current_work_id,
                     'parent_section_id': None,
-                    'level_type': 'Volume',
-                    'level_type_tamil': 'தொகுதி',
-                    'section_number': current_section_number,
-                    'section_name': current_section_name,
-                    'section_name_tamil': current_section_name,
+                    'level_type': 'Pathigam',
+                    'level_type_tamil': 'பதிகம்',
+                    'section_number': current_pathigam_number,
+                    'section_name': current_pathigam_name,
+                    'section_name_tamil': current_pathigam_name,
                     'sort_order': self.section_sort_order,
                     'metadata': section_metadata
                 }
@@ -197,68 +241,57 @@ class ThiruppugazhBulkImporter:
                 self.section_id += 1
                 continue
 
-            # Verse marker: #number
-            verse_match = re.match(r'^#(\d+)', line_stripped)
-            if verse_match:
-                # Save previous verse if any
-                if current_verse_lines and current_verse_number is not None:
-                    self.create_verse(
-                        current_verse_number,
-                        current_verse_lines,
-                        current_section_id
-                    )
-                    current_verse_lines = []
-
-                current_verse_number = int(verse_match.group(1))
-                continue
-
-            # End of verse
+            # End of pathigam
             if line_stripped == 'மேல்':
-                if current_verse_lines and current_verse_number is not None:
-                    self.create_verse(
-                        current_verse_number,
-                        current_verse_lines,
+                if current_pathigam_lines:
+                    self.create_pathigam_verse(
+                        current_pathigam_number,
+                        current_pathigam_name,
+                        current_pathigam_lines,
                         current_section_id
                     )
-                    current_verse_lines = []
-                    current_verse_number = None
+                    current_pathigam_lines = []
                 continue
 
-            # Collect verse lines
-            if line_stripped and current_verse_number is not None:
-                # Remove trailing line numbers if any
+            # Collect pathigam lines (remove line numbers on right)
+            if line_stripped and current_pathigam_number is not None:
+                # Remove trailing line numbers (appear as \t followed by digits)
                 clean_line = re.sub(r'\t+\d+\s*$', '', line_stripped)
                 if clean_line:
-                    current_verse_lines.append(clean_line)
+                    current_pathigam_lines.append(clean_line)
 
-        # Handle last verse
-        if current_verse_lines and current_verse_number is not None:
-            self.create_verse(
-                current_verse_number,
-                current_verse_lines,
+        # Handle last pathigam
+        if current_pathigam_lines:
+            self.create_pathigam_verse(
+                current_pathigam_number,
+                current_pathigam_name,
+                current_pathigam_lines,
                 current_section_id
             )
 
-        print(f"  [OK] Parsed {len(self.sections)} sections, {len(self.verses)} verses")
+        print(f"  [OK] Parsed {len(self.sections)} pathigams, {len(self.verses)} verses")
         print(f"       {len(self.lines)} lines, {len(self.words)} words")
 
-    def create_verse(self, verse_num: int, verse_lines: List[str], section_id: int):
-        """Create a verse"""
+    def create_pathigam_verse(self, pathigam_num: int, pathigam_name: str,
+                             verse_lines: List[str], section_id: int):
+        """Create a verse for the pathigam"""
         self.verse_sort_order += 1
 
         verse_metadata = {
-            'saint': 'அருணகிரிநாதர்',
-            'deity': 'Murugan',
+            'saint': 'மாணிக்கவாசகர்',
+            'deity': 'Shiva',
+            'pathigam_name': pathigam_name,
             'line_count': len(verse_lines),
             'liturgical_use': True,
-            'emotional_tone': 'devotional praise'
+            'theological_tradition': 'Shaiva Siddhanta',
+            'emotional_tone': 'devotional longing'
         }
 
         verse_dict = {
             'verse_id': self.verse_id,
             'work_id': self.current_work_id,
             'section_id': section_id,
-            'verse_number': verse_num,
+            'verse_number': pathigam_num,
             'verse_type': 'Devotional Hymn',
             'verse_type_tamil': 'பக்தி பாடல்',
             'total_lines': len(verse_lines),
@@ -349,6 +382,41 @@ class ThiruppugazhBulkImporter:
             null='')
         print(f"  [OK] Bulk inserted {len(self.works)} works")
 
+    def bulk_insert_work_collections(self):
+        """Link work to Thiruvasagam collection"""
+        if not self.works:
+            return
+
+        print(f"  Linking work to Thiruvasagam collection...")
+
+        # Get next available position in this collection
+        self.cursor.execute("""
+            SELECT COALESCE(MAX(position_in_collection), 0) + 1
+            FROM work_collections
+            WHERE collection_id = %s
+        """, (self.eighth_thirumurai_collection_id,))
+        next_position = self.cursor.fetchone()[0]
+
+        buffer = io.StringIO()
+        for work in self.works:
+            # Link work to 8th Thirumurai collection (dynamic)
+            fields = [
+                str(work['work_id']),
+                str(self.eighth_thirumurai_collection_id),  # collection_id (dynamic)
+                str(next_position),     # position_in_collection (dynamic)
+                't',     # is_primary (true)
+                ''       # notes (NULL)
+            ]
+            buffer.write('\t'.join(fields) + '\n')
+            next_position += 1  # Increment for each work in loop
+
+        buffer.seek(0)
+        self.cursor.copy_from(
+            buffer, 'work_collections',
+            columns=['work_id', 'collection_id', 'position_in_collection', 'is_primary', 'notes'],
+            null=''
+        )
+        print(f"    ✓ Linked work to collection")
 
     def bulk_insert_sections(self):
         """Bulk insert sections using PostgreSQL COPY"""
@@ -457,21 +525,13 @@ class ThiruppugazhBulkImporter:
             return
 
         buffer = io.StringIO()
+        writer = csv.writer(buffer, delimiter='\t', quoting=csv.QUOTE_MINIMAL, escapechar='\\')
 
         for word in self.words:
-            # Manual TSV construction - clean word_text
-            word_text = str(word['word_text']).replace('\t', ' ').replace('\n', ' ').replace('\r', '')
-            sandhi_split = str(word.get('sandhi_split', '')).replace('\t', ' ').replace('\n', ' ').replace('\r', '') if word.get('sandhi_split') else ''
-
-            fields = [
-                str(word['word_id']),
-                str(word['line_id']),
-                str(word['word_position']),
-                word_text,
-                sandhi_split
-            ]
-
-            buffer.write('\t'.join(fields) + '\n')
+            writer.writerow([
+                word['word_id'], word['line_id'], word['word_position'],
+                word['word_text'], word.get('sandhi_split', '')
+            ])
 
         buffer.seek(0)
         self.cursor.copy_from(buffer, 'words',
@@ -483,12 +543,13 @@ class ThiruppugazhBulkImporter:
         print("\n=== PHASE 2: Bulk inserting into database ===")
         try:
             self.bulk_insert_works()
+            self.bulk_insert_work_collections()
             self.bulk_insert_sections()
             self.bulk_insert_verses()
             self.bulk_insert_lines()
             self.bulk_insert_words()
             self.conn.commit()
-            print("\n[SUCCESS] Thiruppugazh imported successfully!")
+            print("\n[SUCCESS] Thiruvasagam imported successfully!")
         except Exception as e:
             self.conn.rollback()
             print(f"\n[ERROR] Import failed: {e}")
@@ -514,16 +575,16 @@ def main():
         os.path.dirname(os.path.dirname(__file__)),
         'Tamil-Source-TamilConcordence',
         '6_பக்தி இலக்கியம்',
-        '17.திருப்புகழ்.txt'
+        '8.1எட்டாம் திருமுறை.txt'
     )
 
     print("=" * 70)
-    print("THIRUPPUGAZH BULK IMPORT (File 17)")
+    print("THIRUVASAGAM BULK IMPORT (Thirumurai File 8.1)")
     print("=" * 70)
     print(f"Database: {db_url}")
     print(f"Source file: {file_path}")
 
-    importer = ThiruppugazhBulkImporter(db_url)
+    importer = ThiruvasagamBulkImporter(db_url)
 
     try:
         importer.connect()

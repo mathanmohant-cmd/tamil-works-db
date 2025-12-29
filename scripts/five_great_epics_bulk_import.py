@@ -27,14 +27,9 @@ import time
 from pathlib import Path
 from datetime import datetime
 
-# Set UTF-8 encoding for Windows console
+# Set UTF-8 encoding for Windows console (environment variable only - let individual parsers handle streams)
 if sys.platform == 'win32':
-    # Use environment variable method (safer than wrapping)
     os.environ['PYTHONIOENCODING'] = 'utf-8'
-    # Reconfigure stdout/stderr to use utf-8
-    if hasattr(sys.stdout, 'reconfigure'):
-        sys.stdout.reconfigure(encoding='utf-8')
-        sys.stderr.reconfigure(encoding='utf-8')
 
 # Add scripts directory to path for imports
 script_dir = Path(__file__).parent
@@ -142,6 +137,68 @@ def print_summary(results):
     print("=" * 80)
 
 
+def create_collection(db_url):
+    """Create the ஐம்பெரும்காப்பியங்கள் collection if it doesn't exist"""
+    import psycopg2
+
+    collection_id = 251
+    collection_name = 'Five Great Epics'
+    collection_name_tamil = 'ஐம்பெரும்காப்பியங்கள்'
+
+    conn = psycopg2.connect(db_url)
+    cursor = conn.cursor()
+
+    try:
+        # Check if collection exists
+        cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
+        existing = cursor.fetchone()
+
+        if not existing:
+            print(f"Creating collection: {collection_name_tamil}")
+            cursor.execute("""
+                INSERT INTO collections (collection_id, collection_name, collection_name_tamil,
+                                        collection_type, description, parent_collection_id, sort_order)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (collection_id, collection_name, collection_name_tamil, 'genre',
+                  'Five Great Epics - Classic Tamil epic poetry from 2nd to 10th century CE',
+                  None, 251))
+            conn.commit()
+            print(f"✓ Created collection {collection_name_tamil}\n")
+        else:
+            print(f"Collection {collection_name_tamil} already exists\n")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def link_work_to_collection(db_url, work_name, position):
+    """Link a work to the ஐம்பெரும்காப்பியங்கள் collection"""
+    import psycopg2
+
+    collection_id = 251
+
+    conn = psycopg2.connect(db_url)
+    cursor = conn.cursor()
+
+    try:
+        # Get work_id by name
+        cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name,))
+        result = cursor.fetchone()
+
+        if result:
+            work_id = result[0]
+            cursor.execute("""
+                INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary, notes)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (work_id, collection_id) DO NOTHING
+            """, (work_id, collection_id, position, True, None))
+            conn.commit()
+            print(f"  ✓ Linked to collection (position {position})")
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def main():
     """Main execution function"""
     # Get database URL from command line or environment
@@ -154,6 +211,9 @@ def main():
     print_header()
     print(f"Database: {db_url.split('@')[-1] if '@' in db_url else db_url}")
     print()
+
+    # Create collection before importing works
+    create_collection(db_url)
 
     # Track results
     results = []
@@ -180,6 +240,9 @@ def main():
             success = True
             duration = time.time() - start_time
             print(f"✓ Completed in {duration:.2f}s")
+
+            # Link work to collection
+            link_work_to_collection(db_url, work['name'], i)
 
         except Exception as e:
             duration = time.time() - start_time

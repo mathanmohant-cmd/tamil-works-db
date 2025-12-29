@@ -382,9 +382,7 @@ def main():
     """Main execution function."""
     # Fix Windows console encoding for Tamil characters
     if sys.platform == 'win32':
-        import io
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
 
     # Database connection - check for environment variable or use default
     db_connection = os.getenv('DATABASE_URL',

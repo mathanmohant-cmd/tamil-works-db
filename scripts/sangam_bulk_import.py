@@ -226,7 +226,75 @@ class SangamBulkImporter:
                             'chronology_start_year', 'chronology_end_year',
                             'chronology_confidence', 'chronology_notes', 'canonical_order'])
             self.conn.commit()
-            print(f"  ✓ Created {len(self.works)} new work entries. Use collection management utility to assign to collections.")
+            print(f"  ✓ Created {len(self.works)} new work entries.")
+
+            # Create collection and link all works to it
+            self._create_collection_and_link_works()
+
+    def _create_collection_and_link_works(self):
+        """Create பதினெண்மேல்கணக்கு collection and link all 18 Sangam works to it"""
+        collection_id = 51
+        collection_name = 'Eighteen Major Works'
+        collection_name_tamil = 'பதினெண்மேல்கணக்கு'
+
+        # Check if collection exists
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
+        existing = self.cursor.fetchone()
+
+        if not existing:
+            print(f"  Creating collection: {collection_name_tamil}")
+            collection_data = [{
+                'collection_id': collection_id,
+                'collection_name': collection_name,
+                'collection_name_tamil': collection_name_tamil,
+                'collection_type': 'period',
+                'description': 'Sangam Literature - Classical Tamil poetry anthologies from 300 BCE to 300 CE',
+                'parent_collection_id': None,
+                'sort_order': 51
+            }]
+            self._bulk_copy('collections', collection_data,
+                           ['collection_id', 'collection_name', 'collection_name_tamil',
+                            'collection_type', 'description', 'parent_collection_id', 'sort_order'])
+            self.conn.commit()
+            print(f"  ✓ Created collection {collection_name_tamil}")
+        else:
+            print(f"  Collection {collection_name_tamil} already exists")
+
+        # Link all works to collection using traditional_order as position
+        print(f"  Linking {len(self.works)} Sangam works to collection...")
+        work_collections = []
+
+        for filename, work_info in self.SANGAM_WORKS.items():
+            # Position in collection is based on traditional_order minus 1
+            # (traditional_order goes 2-19, so positions will be 1-18)
+            position = work_info['traditional_order'] - 1
+
+            work_collections.append({
+                'work_id': work_info['work_id'],
+                'collection_id': collection_id,
+                'position_in_collection': position,
+                'is_primary': True,
+                'notes': None
+            })
+
+        if work_collections:
+            # Use bulk copy for work_collections
+            buffer = io.StringIO()
+            writer = csv.writer(buffer, delimiter='\t')
+            for wc in work_collections:
+                writer.writerow([
+                    wc['work_id'],
+                    wc['collection_id'],
+                    wc['position_in_collection'],
+                    wc['is_primary'],
+                    '\\N' if wc['notes'] is None else wc['notes']
+                ])
+            buffer.seek(0)
+            self.cursor.copy_from(buffer, 'work_collections',
+                                 columns=['work_id', 'collection_id', 'position_in_collection', 'is_primary', 'notes'],
+                                 null='\\N')
+            self.conn.commit()
+            print(f"  ✓ Linked {len(work_collections)} works to collection")
 
     def _reset_data_containers(self):
         """Clear data containers for next work"""

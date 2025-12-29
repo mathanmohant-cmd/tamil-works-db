@@ -103,7 +103,9 @@ def check_existing_schema(connection_string):
             SELECT COUNT(*)
             FROM information_schema.tables
             WHERE table_schema = 'public'
-            AND table_name IN ('works', 'collections', 'sections', 'verses', 'words');
+            AND table_name IN ('works', 'collections', 'work_collections',
+                               'section_collections', 'verse_collections',
+                               'sections', 'verses', 'words');
         """)
         existing_tables_count = cursor.fetchone()[0]
 

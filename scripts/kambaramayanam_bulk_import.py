@@ -230,7 +230,10 @@ class KambaramayanamBulkImporter:
                 400  # Medieval epic
             ))
             self.conn.commit()
-            print(f"  ✓ Work created (ID: {self.work_id}). Use collection management utility to assign to collections.")
+            print(f"  ✓ Work created (ID: {self.work_id}).")
+
+            # Create collection and link work to it
+            self._create_collection_and_link()
 
         # Get starting IDs for batch processing
         self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
@@ -244,6 +247,41 @@ class KambaramayanamBulkImporter:
 
         self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
         self.word_id = self.cursor.fetchone()[0] + 1
+
+    def _create_collection_and_link(self):
+        """Create காப்பியங்கள் collection and link Kambaramayanam to it"""
+        collection_id = 500
+        collection_name = 'Epics'
+        collection_name_tamil = 'காப்பியங்கள்'
+
+        # Check if collection exists
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
+        existing = self.cursor.fetchone()
+
+        if not existing:
+            print(f"  Creating collection: {collection_name_tamil}")
+            self.cursor.execute("""
+                INSERT INTO collections (collection_id, collection_name, collection_name_tamil,
+                                        collection_type, description, parent_collection_id, sort_order)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (collection_id, collection_name, collection_name_tamil, 'genre',
+                  'Tamil Epic Poetry - Major epic works in Tamil literature',
+                  None, 500))
+            self.conn.commit()
+            print(f"  ✓ Created collection {collection_name_tamil}")
+        else:
+            print(f"  Collection {collection_name_tamil} already exists")
+
+        # Link work to collection
+        print(f"  Linking Kambaramayanam to collection...")
+        self.cursor.execute("""
+            INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary, notes)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (work_id, collection_id) DO NOTHING
+        """, (self.work_id, collection_id, 1, True, 'Tamil retelling of Ramayana by Kambar'))
+
+        self.conn.commit()
+        print(f"  ✓ Linked Kambaramayanam to collection (position 1)")
 
     def parse_all_files(self):
         """Phase 1: Parse all Kandam files into memory"""

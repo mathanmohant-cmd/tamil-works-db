@@ -38,7 +38,8 @@ CREATE TABLE works (
     chronology_notes TEXT,  -- Scholarly variations and dating debates
     canonical_order INTEGER,  -- Traditional Tamil literary canon ordering (100=Tolkappiyam, 200s=Sangam, 260=Thirukkural, 280=Silapathikaram, 400=Kambaramayanam)
     primary_collection_id INTEGER,  -- Primary collection this work belongs to (FK added after collections table)
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB  -- Flexible metadata: tradition, collection info, saints/authors, musical tradition, themes, etc.
 );
 
 -- Collections table (literary periods, traditions, genres, canons)
@@ -47,6 +48,7 @@ CREATE TABLE collections (
     collection_name VARCHAR(100) NOT NULL UNIQUE,
     collection_name_tamil VARCHAR(100),
     collection_type VARCHAR(50) NOT NULL,  -- 'period', 'tradition', 'genre', 'canon', 'custom'
+    entity_type VARCHAR(20) DEFAULT 'work',  -- 'work', 'section', 'verse', or 'mixed'
     description TEXT,
     parent_collection_id INTEGER,  -- For hierarchical collections (FK self-reference added below)
     sort_order INTEGER,  -- For ordering collections themselves
@@ -76,8 +78,9 @@ CREATE TABLE work_collections (
     UNIQUE (collection_id, position_in_collection)
 );
 
--- Indexes for collections
+-- Indexes for collections (work_collections created above)
 CREATE INDEX idx_collections_type ON collections(collection_type);
+CREATE INDEX idx_collections_entity_type ON collections(entity_type);
 CREATE INDEX idx_collections_parent ON collections(parent_collection_id);
 CREATE INDEX idx_works_primary_collection ON works(primary_collection_id);
 CREATE INDEX idx_work_collections_work ON work_collections(work_id);
@@ -95,6 +98,7 @@ CREATE TABLE sections (
     section_name_tamil VARCHAR(200),
     description TEXT,
     sort_order INTEGER NOT NULL,  -- For maintaining order within same level
+    metadata JSONB,  -- Flexible metadata: musical mode (pann), thematic category, temple location, etc.
     FOREIGN KEY (work_id) REFERENCES works(work_id),
     FOREIGN KEY (parent_section_id) REFERENCES sections(section_id),
     UNIQUE (work_id, parent_section_id, level_type, section_number)
@@ -115,6 +119,7 @@ CREATE TABLE verses (
     meter VARCHAR(100),  -- Poetic meter if applicable
     total_lines INTEGER NOT NULL,
     sort_order INTEGER NOT NULL,
+    metadata JSONB,  -- Flexible metadata: saint/alvar, deity, raga/talam, themes, literary devices, divya desam, etc.
     FOREIGN KEY (work_id) REFERENCES works(work_id),
     FOREIGN KEY (section_id) REFERENCES sections(section_id),
     UNIQUE (work_id, section_id, verse_number)
@@ -131,6 +136,7 @@ CREATE TABLE lines (
     line_text TEXT NOT NULL,
     line_text_transliteration TEXT,  -- Roman transliteration
     line_text_translation TEXT,  -- English/other language translation
+    metadata JSONB,  -- Flexible metadata: line-specific annotations, rhetorical figures, syntax notes, etc.
     FOREIGN KEY (verse_id) REFERENCES verses(verse_id),
     UNIQUE (verse_id, line_number)
 );
@@ -148,6 +154,7 @@ CREATE TABLE words (
     word_type VARCHAR(50),  -- noun, verb, adjective, etc.
     sandhi_split VARCHAR(500),  -- If word is result of sandhi, show components
     meaning TEXT,
+    metadata JSONB,  -- Flexible metadata: etymology, semantic field, theological significance, frequency, etc.
     FOREIGN KEY (line_id) REFERENCES lines(line_id),
     UNIQUE (line_id, word_position)
 );
@@ -155,6 +162,45 @@ CREATE TABLE words (
 CREATE INDEX idx_words_line ON words(line_id);
 CREATE INDEX idx_words_text ON words(word_text);
 CREATE INDEX idx_words_root ON words(word_root);
+
+-- Junction table: Sections can belong to multiple collections
+-- Enables collections by theme (thinai), structure type, etc.
+CREATE TABLE section_collections (
+    section_collection_id SERIAL PRIMARY KEY,
+    section_id INTEGER NOT NULL,
+    collection_id INTEGER NOT NULL,
+    position_in_collection INTEGER,  -- Order within this specific collection
+    notes TEXT,  -- Collection-specific notes about this section
+    FOREIGN KEY (section_id) REFERENCES sections(section_id) ON DELETE CASCADE,
+    FOREIGN KEY (collection_id) REFERENCES collections(collection_id) ON DELETE CASCADE,
+    UNIQUE (section_id, collection_id)
+);
+
+-- Junction table: Verses can belong to multiple collections
+-- Enables collections by author, meter, theme, thinai, etc.
+CREATE TABLE verse_collections (
+    verse_collection_id SERIAL PRIMARY KEY,
+    verse_id INTEGER NOT NULL,
+    collection_id INTEGER NOT NULL,
+    position_in_collection INTEGER,  -- Order within this specific collection
+    notes TEXT,  -- Collection-specific notes about this verse (author, meter, etc.)
+    FOREIGN KEY (verse_id) REFERENCES verses(verse_id) ON DELETE CASCADE,
+    FOREIGN KEY (collection_id) REFERENCES collections(collection_id) ON DELETE CASCADE,
+    UNIQUE (verse_id, collection_id)
+);
+
+-- Indexes for junction tables
+CREATE INDEX idx_section_collections_section ON section_collections(section_id);
+CREATE INDEX idx_section_collections_collection ON section_collections(collection_id);
+CREATE INDEX idx_verse_collections_verse ON verse_collections(verse_id);
+CREATE INDEX idx_verse_collections_collection ON verse_collections(collection_id);
+
+-- GIN indexes for JSONB metadata columns (for fast JSON queries)
+CREATE INDEX idx_works_metadata ON works USING GIN (metadata);
+CREATE INDEX idx_sections_metadata ON sections USING GIN (metadata);
+CREATE INDEX idx_verses_metadata ON verses USING GIN (metadata);
+CREATE INDEX idx_lines_metadata ON lines USING GIN (metadata);
+CREATE INDEX idx_words_metadata ON words USING GIN (metadata);
 
 -- Full-text search for words (if your database supports it)
 -- For SQLite:
@@ -293,7 +339,7 @@ FROM works w
 LEFT JOIN work_collections wc ON w.work_id = wc.work_id AND wc.is_primary = TRUE
 LEFT JOIN collections c ON wc.collection_id = c.collection_id;
 
--- View: Collection hierarchy with work counts
+-- View: Collection hierarchy with item counts (works, sections, verses)
 CREATE VIEW collection_hierarchy AS
 WITH RECURSIVE coll_tree AS (
     -- Base case: top-level collections
@@ -302,6 +348,7 @@ WITH RECURSIVE coll_tree AS (
         c.collection_name,
         c.collection_name_tamil,
         c.collection_type,
+        c.entity_type,
         c.parent_collection_id,
         c.sort_order,
         0 AS depth,
@@ -318,6 +365,7 @@ WITH RECURSIVE coll_tree AS (
         c.collection_name,
         c.collection_name_tamil,
         c.collection_type,
+        c.entity_type,
         c.parent_collection_id,
         c.sort_order,
         ct.depth + 1,
@@ -328,11 +376,15 @@ WITH RECURSIVE coll_tree AS (
 )
 SELECT
     ct.*,
-    COUNT(DISTINCT wc.work_id) AS work_count
+    COUNT(DISTINCT wc.work_id) AS work_count,
+    COUNT(DISTINCT sc.section_id) AS section_count,
+    COUNT(DISTINCT vc.verse_id) AS verse_count
 FROM coll_tree ct
 LEFT JOIN work_collections wc ON ct.collection_id = wc.collection_id
+LEFT JOIN section_collections sc ON ct.collection_id = sc.collection_id
+LEFT JOIN verse_collections vc ON ct.collection_id = vc.collection_id
 GROUP BY ct.collection_id, ct.collection_name, ct.collection_name_tamil,
-         ct.collection_type, ct.parent_collection_id, ct.sort_order,
+         ct.collection_type, ct.entity_type, ct.parent_collection_id, ct.sort_order,
          ct.depth, ct.path, ct.full_path
 ORDER BY ct.path;
 
@@ -355,6 +407,51 @@ JOIN work_collections wc ON w.work_id = wc.work_id
 JOIN collections c ON wc.collection_id = c.collection_id
 LEFT JOIN collections pc ON c.parent_collection_id = pc.collection_id
 ORDER BY c.collection_id, wc.position_in_collection;
+
+-- View: Sections in collections with hierarchy
+CREATE VIEW sections_in_collections AS
+SELECT
+    s.section_id,
+    s.work_id,
+    s.section_name,
+    s.section_name_tamil,
+    s.level_type,
+    s.level_type_tamil,
+    c.collection_id,
+    c.collection_name,
+    c.collection_name_tamil,
+    c.collection_type,
+    sc.position_in_collection,
+    sc.notes,
+    pc.collection_name AS parent_collection_name,
+    pc.collection_name_tamil AS parent_collection_name_tamil
+FROM sections s
+JOIN section_collections sc ON s.section_id = sc.section_id
+JOIN collections c ON sc.collection_id = c.collection_id
+LEFT JOIN collections pc ON c.parent_collection_id = pc.collection_id
+ORDER BY c.collection_id, sc.position_in_collection;
+
+-- View: Verses in collections with hierarchy
+CREATE VIEW verses_in_collections AS
+SELECT
+    v.verse_id,
+    v.work_id,
+    v.verse_number,
+    v.verse_type,
+    v.verse_type_tamil,
+    c.collection_id,
+    c.collection_name,
+    c.collection_name_tamil,
+    c.collection_type,
+    vc.position_in_collection,
+    vc.notes,
+    pc.collection_name AS parent_collection_name,
+    pc.collection_name_tamil AS parent_collection_name_tamil
+FROM verses v
+JOIN verse_collections vc ON v.verse_id = vc.verse_id
+JOIN collections c ON vc.collection_id = c.collection_id
+LEFT JOIN collections pc ON c.parent_collection_id = pc.collection_id
+ORDER BY c.collection_id, vc.position_in_collection;
 
 -- ============================================================================
 -- COMMON QUERY EXAMPLES
