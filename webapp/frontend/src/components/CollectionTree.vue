@@ -432,14 +432,22 @@ onMounted(async () => {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .tree-content {
-    max-height: 400px;
+  .collection-tree {
+    padding: 0.75rem; /* Reduced padding */
+    margin-bottom: 1rem;
+    overflow-x: hidden; /* Prevent horizontal scroll */
   }
 
   .tree-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tree-header h3 {
+    font-size: 1rem; /* Slightly smaller on mobile */
+    margin: 0;
   }
 
   .tree-actions {
@@ -449,6 +457,25 @@ onMounted(async () => {
 
   .tree-action-btn {
     flex: 1;
+    padding: 0.4rem 0.5rem; /* Slightly smaller buttons */
+    font-size: 0.85rem;
+  }
+
+  .tree-content {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    padding-right: 0.25rem; /* Reduced padding */
+  }
+
+  /* Hide scrollbar on mobile for cleaner look */
+  .tree-content::-webkit-scrollbar {
+    width: 4px; /* Thinner scrollbar */
+  }
+
+  .tree-content::-webkit-scrollbar-thumb {
+    background: #aaa;
+    border-radius: 2px;
   }
 }
 </style>

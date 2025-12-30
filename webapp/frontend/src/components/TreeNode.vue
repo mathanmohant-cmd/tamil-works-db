@@ -330,33 +330,81 @@ const handleCheckboxChange = (event) => {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
+  /* Reduce nesting indentation to prevent horizontal scroll */
+  .node-children {
+    margin-left: 0.5rem; /* Reduced from 1.5rem to 0.5rem */
+    padding-left: 0.25rem; /* Reduced from 0.5rem */
+  }
+
+  /* Reduce toggle icon size to save space */
   .toggle-icon {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 36px; /* Reduced from 44px */
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    width: 36px; /* Fixed width for alignment */
   }
 
-  .node-children {
-    margin-left: 0.75rem; /* Reduce indentation on mobile */
+  .toggle-spacer {
+    width: 36px; /* Match toggle-icon width */
   }
 
+  /* Hide emoji icons to save horizontal space */
+  .node-icon {
+    display: none;
+  }
+
+  /* Consistent checkbox sizing and alignment */
+  .collection-checkbox,
+  .work-checkbox {
+    width: 20px;
+    height: 20px;
+    margin: 0 0.5rem; /* Consistent margins */
+    flex-shrink: 0; /* Prevent checkbox from shrinking */
+    cursor: pointer;
+  }
+
+  .checkbox-spacer {
+    width: 20px; /* Match checkbox width */
+    margin: 0 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Text wrapping and sizing */
+  .node-name,
+  .work-name {
+    font-size: 0.85rem; /* Slightly smaller text */
+    word-break: break-word; /* Allow wrapping of long Tamil words */
+    overflow-wrap: anywhere; /* Wrap anywhere if needed */
+    line-height: 1.4; /* Better readability for wrapped text */
+  }
+
+  .work-count {
+    font-size: 0.75rem;
+    white-space: nowrap; /* Prevent work count from wrapping */
+  }
+
+  /* Ensure rows have consistent minimum height */
   .node-item {
     min-height: 44px;
-    padding: 0.5rem;
+    padding: 0.4rem 0.25rem; /* Reduced horizontal padding */
+    display: flex;
+    align-items: center;
   }
 
   .work-node {
     min-height: 44px;
-    padding: 0.5rem;
+    padding: 0.4rem 0.25rem; /* Reduced horizontal padding */
+    display: flex;
+    align-items: center;
   }
 
-  .collection-checkbox,
-  .work-checkbox {
-    width: 22px;
-    height: 22px;
+  /* Prevent horizontal overflow */
+  .tree-node {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 </style>
