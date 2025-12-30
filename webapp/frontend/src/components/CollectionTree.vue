@@ -38,8 +38,9 @@
 import { ref, onMounted, watch, defineEmits, defineProps } from 'vue'
 import axios from 'axios'
 import TreeNode from './TreeNode.vue'
+import api from '../api.js'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = api.getBaseURL()
 
 const props = defineProps({
   selectedWorks: {

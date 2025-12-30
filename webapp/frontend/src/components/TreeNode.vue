@@ -182,10 +182,10 @@ const loadWorks = async () => {
   // Emit load-works and wait for it to return the works
   emit('load-works', props.collection.collection_id)
 
-  // The parent will handle loading, but we need to get the works
-  // We'll use a workaround by importing axios here
+  // Import API module to get correct base URL
+  const { default: api } = await import('../api.js')
   const axios = (await import('axios')).default
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  const API_BASE_URL = api.getBaseURL()
 
   try {
     const response = await axios.get(`${API_BASE_URL}/collections/${props.collection.collection_id}/works`)

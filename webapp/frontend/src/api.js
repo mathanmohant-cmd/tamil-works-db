@@ -27,6 +27,13 @@ const api = axios.create({
 
 export default {
   /**
+   * Get the base URL for direct API calls
+   */
+  getBaseURL() {
+    return API_BASE_URL
+  },
+
+  /**
    * Search for words
    */
   searchWords(params) {
