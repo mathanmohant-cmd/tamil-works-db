@@ -258,8 +258,12 @@ Located in `webapp/backend/`:
 
 **Configuration:**
 - Database URL via `.env` file (use `.env.example` as template)
-- CORS configured for Vue.js dev server (localhost:5173, 3000, 8080)
+- CORS configuration (2025-12-29):
+  - Development mode: Set `CORS_ALLOW_ALL=true` to allow all origins (mobile testing)
+  - Production mode: Set `CORS_ALLOW_ALL=false` and specify `ALLOWED_ORIGINS`
+  - Enables testing from mobile devices on local network (e.g., 192.168.1.198:5173)
 - API runs on port 8000 by default
+- Set `API_HOST=0.0.0.0` to allow network access (required for mobile testing)
 
 ### Frontend Architecture (Vue.js)
 
@@ -283,8 +287,15 @@ Located in `webapp/frontend/`:
 - Uses `CollectionTree.vue` component (replaced AccordionFilter in 2025-12)
 - Loads designated collection (ID=1) on mount from `/settings/designated_filter_collection`
 - Displays full hierarchical tree with expand/collapse functionality
-- Mobile-optimized with 44px touch targets and reduced indentation
+- Mobile-optimized (2025-12-29):
+  - No horizontal scroll: Reduced indentation from 1.5rem to 0.5rem on mobile
+  - Perfect checkbox alignment: All checkboxes 20px × 20px with consistent spacing
+  - Hidden emoji icons on mobile to save horizontal space
+  - Text wrapping for long Tamil collection/work names
+  - Minimum 44px touch targets maintained
+  - Works perfectly on screens as small as 375px (iPhone SE)
 - Supports work selection at any level (selecting parent selects all descendants)
+- Auto-detects API URL based on hostname (works with localhost and IP addresses)
 
 ### Data Import Architecture
 
@@ -440,6 +451,63 @@ Search for "சொல்" with "Collection Order" (Sangam Literature), expand a 
 
 See `TESTING_CHECKLIST.md` for complete test scenarios.
 
+## Mobile Testing and Network Access
+
+### Setup for Mobile Device Testing
+
+The application supports testing on mobile devices over your local network. This requires proper configuration of both frontend and backend.
+
+**Backend Configuration** (`webapp/backend/.env`):
+```env
+# Listen on all network interfaces
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# Allow CORS from all origins (development only)
+CORS_ALLOW_ALL=true
+
+# Database connection
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tamil_literature
+```
+
+**Frontend Configuration**:
+- The frontend automatically detects the API URL based on hostname
+- Access via `localhost:5173` → API at `localhost:8000`
+- Access via `192.168.1.198:5173` → API at `192.168.1.198:8000`
+- No manual configuration needed!
+
+**Start Frontend with Network Access**:
+```bash
+cd webapp/frontend
+npm run dev -- --host
+```
+
+**Testing from Mobile**:
+1. Find your laptop's IP address: `ipconfig` (Windows) or `ifconfig` (Mac/Linux)
+2. Connect mobile to same WiFi network
+3. Open browser on mobile: `http://<your-laptop-ip>:5173`
+4. Example: `http://192.168.1.198:5173`
+
+**Mobile UI Optimizations** (2025-12-29):
+- No horizontal scroll on any screen size (down to 375px)
+- Reduced tree indentation: 0.5rem per level (was 1.5rem)
+- Hidden emoji icons on mobile to save space
+- Perfect checkbox alignment: 20px × 20px consistent sizing
+- Text wrapping for long Tamil names
+- Touch targets: minimum 44px for tappability
+- Thinner scrollbar (4px) for cleaner look
+
+**Troubleshooting**:
+- **"Network Error" loading collections**: Check backend is running with `API_HOST=0.0.0.0`
+- **CORS errors**: Verify `CORS_ALLOW_ALL=true` in backend `.env`
+- **Can't access from mobile**: Ensure firewall allows port 8000, or run `npm run dev -- --host`
+- **Horizontal scroll on mobile**: Clear browser cache and reload
+
+**Documentation**:
+- See `MOBILE_TESTING.md` for complete setup guide
+- See `MOBILE_FILTER_OPTIMIZATION.md` for technical details on mobile UI optimization
+- See `mobile-filter-ui-options.md` for alternative UI approaches considered
+
 ## Important File Locations
 
 ### Documentation
@@ -449,6 +517,12 @@ See `TESTING_CHECKLIST.md` for complete test scenarios.
 - `NEON_SETUP_GUIDE.md` - Cloud database hosting guide
 - `tamil_literature_database_guide.md` - Comprehensive DB documentation
 - `scripts/WORD_SEGMENTATION_PRINCIPLES.md` - Word parsing guidelines
+- `DESIGNATED_COLLECTION_PATTERN.md` - Designated collection pattern (2025-12-29)
+- `PLAN_DECISIONS_2025-12-29.md` - Design decisions for designated collection
+- `MOBILE_TESTING.md` - Mobile device testing setup guide (2025-12-29)
+- `MOBILE_FILTER_OPTIMIZATION.md` - Mobile UI optimization details (2025-12-29)
+- `mobile-filter-ui-options.md` - Analysis of 5 mobile UI alternatives
+- `COLLECTION_IDS.md` - Collection ID scheme and conventions
 
 ### Database
 - `sql/complete_setup.sql` - Core database schema (canonical)

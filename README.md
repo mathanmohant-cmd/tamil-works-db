@@ -27,6 +27,14 @@ tamil-works-db/
 
 ## Features
 
+### Web Application
+- **Full-text search** across all Tamil literary works
+- **Hierarchical filtering** by collection, work, and time period
+- **Mobile-optimized UI** - Works perfectly on phones and tablets (375px+)
+- **Auto-detecting API** - Works with localhost and network IPs
+- **Vue.js 3 frontend** with FastAPI backend
+- See `MOBILE_TESTING.md` for mobile setup guide
+
 ### Flexible Hierarchical Structure
 - Supports different organizational levels for each work
 - Self-referencing sections table for unlimited depth
@@ -48,6 +56,7 @@ Every word is stored with:
 - Search by word root to find all derived forms
 - Retrieve entire sections with proper ordering
 - Compare usage across different works
+- Filter by designated collection hierarchy (ID=1: Tamil Literature)
 
 ## Quick Start
 
