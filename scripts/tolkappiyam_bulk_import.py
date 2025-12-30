@@ -179,7 +179,7 @@ class TolkappiyamBulkImporter:
 
     def _create_collection_and_link(self):
         """Create தமிழ் இலக்கண நூல்கள் collection and link Tolkappiyam to it"""
-        collection_id = 101
+        collection_id = 11
         collection_name = 'Tamil Grammar Works'
         collection_name_tamil = 'தமிழ் இலக்கண நூல்கள்'
 
@@ -196,7 +196,7 @@ class TolkappiyamBulkImporter:
                 'collection_type': 'genre',
                 'description': 'Tamil Grammar Texts - Classical Tamil grammatical works',
                 'parent_collection_id': None,
-                'sort_order': 101
+                'sort_order': 11
             }]
             self._bulk_copy('collections', collection_data,
                            ['collection_id', 'collection_name', 'collection_name_tamil',

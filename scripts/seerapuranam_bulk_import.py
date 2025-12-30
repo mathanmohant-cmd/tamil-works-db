@@ -249,10 +249,9 @@ class SeerapuranamBulkImporter:
                 INSERT INTO works (
                     work_id, work_name, work_name_tamil, description, period, author, author_tamil,
                     chronology_start_year, chronology_end_year,
-                    chronology_confidence, chronology_notes, canonical_order,
-                    primary_collection_id
+                    chronology_confidence, chronology_notes, canonical_order
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.work_id,
                 work_name_english,
@@ -263,8 +262,7 @@ class SeerapuranamBulkImporter:
                 'உமறுப்புலவர்',
                 1550, 1600, 'high',
                 'Islamic devotional epic by Umaruppulavar',
-                502,  # Devotional Literature standalone
-                None  # Standalone work, no collection
+                502  # Devotional Literature standalone
             ))
             self.conn.commit()
             print(f"  ✓ Work created (ID: {self.work_id}). Standalone work, no collection assignment needed.")
@@ -480,6 +478,56 @@ class SeerapuranamBulkImporter:
         self.conn.close()
 
 
+def ensure_collection_exists(cursor):
+    """
+    Ensure shared collection 323 (பக்தி இலக்கியம்) exists.
+    This is the parent collection for all devotional literature.
+    """
+    cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 323")
+    if cursor.fetchone():
+        return  # Collection already exists
+
+    print("\nCreating shared collection 323 (பக்தி இலக்கியம்)...")
+    cursor.execute("""
+        INSERT INTO collections (
+            collection_id, collection_name, collection_name_tamil,
+            description, parent_collection_id, sort_order
+        )
+        VALUES (
+            323,
+            'Bhakti Literature',
+            'பக்தி இலக்கியம்',
+            'Devotional literature spanning Shaivite, Vaishnavite, Murugan, Christian, and Islamic traditions',
+            NULL,
+            300
+        )
+    """)
+    print("  ✓ Collection 323 created")
+
+
+def link_work_to_collection(cursor, work_id):
+    """
+    Link the work to shared collection 323 (பக்தி இலக்கியம்).
+    Position 43 = Seerapuranam in devotional literature.
+    """
+    # Check if link already exists
+    cursor.execute("""
+        SELECT 1 FROM work_collections
+        WHERE work_id = %s AND collection_id = 323
+    """, (work_id,))
+
+    if cursor.fetchone():
+        print(f"  ℹ Work already linked to collection 323")
+        return
+
+    print(f"\nLinking work {work_id} to collection 323 (பக்தி இலக்கியம்)...")
+    cursor.execute("""
+        INSERT INTO work_collections (work_id, collection_id, position_in_collection)
+        VALUES (%s, 323, 43)
+    """, (work_id,))
+    print(f"  ✓ Work linked to collection 323 at position 43")
+
+
 def main():
     """Main execution function."""
     # Fix Windows console encoding for Tamil characters
@@ -517,6 +565,14 @@ def main():
         importer._ensure_work_exists()
         importer.parse_file()
         importer.bulk_insert()
+
+        # Add to shared collection (பக்தி இலக்கியம்)
+        ensure_collection_exists(importer.cursor)
+        link_work_to_collection(importer.cursor, importer.work_id)
+
+        # Commit collection changes
+        importer.conn.commit()
+
         print("\n" + "=" * 70)
         print("✓ Seerapuranam import completed successfully!")
         print("=" * 70)

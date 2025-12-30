@@ -5,7 +5,7 @@ Delete Periya Puranam work and collection
 
 This script deletes:
 - Periya Puranam work (பெரிய புராணம்)
-- Collection 321112 (பன்னிரண்டாம் திருமுறை - 12th Thirumurai)
+- Collection 32119 (பன்னிரண்டாம் திருமுறை - 12th Thirumurai / Twelfth Thirumurai)
 
 Usage:
     python delete_periya_puranam.py [database_url]
@@ -31,7 +31,7 @@ def delete_periya_puranam(connection_string):
             SELECT w.work_id, w.work_name, w.work_name_tamil
             FROM works w
             JOIN work_collections wc ON w.work_id = wc.work_id
-            WHERE wc.collection_id = 321112
+            WHERE wc.collection_id = 32119
         """)
         work_row = cursor.fetchone()
 
@@ -43,7 +43,7 @@ def delete_periya_puranam(connection_string):
         print(f"\nFound work: {work_name_tamil} ({work_name}) - ID: {work_id}")
         print("\nThis will delete:")
         print(f"  - Work: {work_name_tamil} (all data: sections, verses, lines, words)")
-        print(f"  - Collection 321112 (பன்னிரண்டாம் திருமுறை - 12th Thirumurai)")
+        print(f"  - Collection 32119 (பன்னிரண்டாம் திருமுறை - 12th Thirumurai / Twelfth Thirumurai)")
 
         response = input("\nAre you sure? (yes/no): ").strip().lower()
         if response not in ['yes', 'y']:
@@ -57,8 +57,8 @@ def delete_periya_puranam(connection_string):
         delete_work_by_id(cursor, work_id)
 
         # 2. Delete collection
-        print("  Deleting collection 321112 (பன்னிரண்டாம் திருமுறை)...")
-        cursor.execute("DELETE FROM collections WHERE collection_id = 321112")
+        print("  Deleting collection 32119 (பன்னிரண்டாம் திருமுறை - Twelfth Thirumurai)...")
+        cursor.execute("DELETE FROM collections WHERE collection_id = 32119")
 
         conn.commit()
         print("\n✓ Successfully deleted Periya Puranam work and collection")

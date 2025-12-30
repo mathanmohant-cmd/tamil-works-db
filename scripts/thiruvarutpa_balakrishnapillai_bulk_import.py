@@ -37,6 +37,7 @@ class ThiruvarutpaImporter:
         self.verses = []
         self.lines = []
         self.words = []
+        self.work_collections = []
 
         # ID counters - CRITICAL: Query MAX IDs from database
         self.work_id = 1
@@ -51,6 +52,10 @@ class ThiruvarutpaImporter:
         self.current_subsection_id = None
         self.section_sort_order = 0
         self.verse_sort_order = 0
+
+        # Collection tracking
+        self.collection_id = 323
+        self.position_in_collection = None  # Will be set in connect()
 
         # File mappings for both editions
         self.file_mappings = [
@@ -76,6 +81,9 @@ class ThiruvarutpaImporter:
         self.conn = psycopg2.connect(self.db_connection_string)
         self.cursor = self.conn.cursor()
 
+        # Ensure collection 323 exists
+        self.ensure_collection_exists()
+
         # CRITICAL: Get MAX IDs from database
         self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
         self.work_id = self.cursor.fetchone()[0]
@@ -92,7 +100,40 @@ class ThiruvarutpaImporter:
         self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) + 1 FROM words")
         self.word_id = self.cursor.fetchone()[0]
 
+        # Get next available position in collection 323
+        self.cursor.execute("SELECT COALESCE(MAX(position_in_collection), 0) + 1 FROM work_collections WHERE collection_id = 323")
+        self.position_in_collection = self.cursor.fetchone()[0]
+
         print(f"  Starting IDs: work={self.work_id}, section={self.section_id}, verse={self.verse_id}, line={self.line_id}, word={self.word_id}")
+        print(f"  Next position in collection 323: {self.position_in_collection}")
+
+    def ensure_collection_exists(self):
+        """Ensure collection 323 (Thiruvarutpa Collection) exists"""
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 323")
+        result = self.cursor.fetchone()
+
+        if not result:
+            print("  Creating Thiruvarutpa Collection (323)...")
+            self.cursor.execute("""
+                INSERT INTO collections (collection_id, collection_name, collection_name_tamil,
+                                       collection_type, description, sort_order)
+                VALUES (323, 'Thiruvarutpa Collection', 'திருவருட்பா தொகுப்பு',
+                        'devotional', 'Thiruvarutpa - Collection of Ramalinga Swamigal works', 323)
+            """)
+            self.conn.commit()
+            print("  [OK] Thiruvarutpa Collection created")
+        else:
+            print("  [OK] Thiruvarutpa Collection already exists")
+
+    def link_work_to_collection(self, work_id: int, position: int):
+        """Link a work to collection 323"""
+        self.work_collections.append({
+            'work_id': work_id,
+            'collection_id': self.collection_id,
+            'position_in_collection': position,
+            'is_primary': True,
+            'notes': None
+        })
 
     def parse_file(self, file_path: str, edition_name: str, canonical_order: int):
         """Parse a single Thiruvarutpa edition file"""
@@ -126,11 +167,15 @@ class ThiruvarutpaImporter:
             'chronology_confidence': 'high',
             'chronology_notes': 'Composed by Saint Ramalinga Swamigal (Vallalar) in the 19th century',
             'canonical_order': canonical_order,
-            'primary_collection_id': None,  # Standalone work
             'metadata': work_metadata
         }
         self.works.append(work_dict)
         self.current_work_id = self.work_id
+
+        # Link work to collection 323
+        self.link_work_to_collection(self.work_id, self.position_in_collection)
+        self.position_in_collection += 1
+
         self.work_id += 1
 
         # Reset state for this work
@@ -351,15 +396,29 @@ class ThiruvarutpaImporter:
                               f"{work['period']}\t{work['author']}\t{work['author_tamil']}\t"
                               f"{work['description']}\t{work['chronology_start_year']}\t{work['chronology_end_year']}\t"
                               f"{work['chronology_confidence']}\t{work['chronology_notes']}\t"
-                              f"{work['canonical_order']}\t\\N\t{metadata_json}\n")
+                              f"{work['canonical_order']}\t{metadata_json}\n")
             works_tsv.seek(0)
             self.cursor.copy_from(works_tsv, 'works',
                                 columns=('work_id', 'work_name', 'work_name_tamil', 'period',
                                        'author', 'author_tamil', 'description',
                                        'chronology_start_year', 'chronology_end_year',
                                        'chronology_confidence', 'chronology_notes',
-                                       'canonical_order', 'primary_collection_id', 'metadata'))
+                                       'canonical_order', 'metadata'))
             print(f"  [OK] Inserted {len(self.works)} works")
+
+            # Link works to collection 323
+            if self.work_collections:
+                print(f"  Linking {len(self.work_collections)} work(s) to collection 323...")
+                collections_tsv = io.StringIO()
+                for wc in self.work_collections:
+                    is_primary = 't' if wc['is_primary'] else 'f'
+                    notes = wc['notes'] if wc['notes'] else ''
+                    collections_tsv.write(f"{wc['work_id']}\t{wc['collection_id']}\t{wc['position_in_collection']}\t{is_primary}\t{notes}\n")
+                collections_tsv.seek(0)
+                self.cursor.copy_from(collections_tsv, 'work_collections',
+                                    columns=('work_id', 'collection_id', 'position_in_collection', 'is_primary', 'notes'),
+                                    null='')
+                print(f"  [OK] Linked {len(self.work_collections)} work(s) to collection 323")
 
             # Insert sections
             print(f"  Inserting {len(self.sections)} sections...")

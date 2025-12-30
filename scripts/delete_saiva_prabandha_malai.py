@@ -5,7 +5,7 @@ Delete Saiva Prabandha Malai works and collection
 
 This script deletes:
 - 40 Saiva Prabandha Malai works
-- Collection 321111 (பதினொன்றாம் திருமுறை - 11th Thirumurai)
+- Collection 32118 (பதினொன்றாம் திருமுறை - 11th Thirumurai / Eleventh Thirumurai)
 
 Usage:
     python delete_saiva_prabandha_malai.py [database_url]
@@ -30,7 +30,7 @@ def delete_saiva_prabandha_malai(connection_string):
         cursor.execute("""
             SELECT COUNT(*) FROM works w
             JOIN work_collections wc ON w.work_id = wc.work_id
-            WHERE wc.collection_id = 321111
+            WHERE wc.collection_id = 32118
         """)
         work_count = cursor.fetchone()[0]
 
@@ -41,7 +41,7 @@ def delete_saiva_prabandha_malai(connection_string):
         print(f"\nFound {work_count} Saiva Prabandha Malai works")
         print("\nThis will delete:")
         print(f"  - {work_count} works (all data: sections, verses, lines, words)")
-        print(f"  - Collection 321111 (பதினொன்றாம் திருமுறை - 11th Thirumurai)")
+        print(f"  - Collection 32118 (பதினொன்றாம் திருமுறை - 11th Thirumurai / Eleventh Thirumurai)")
 
         response = input("\nAre you sure? (yes/no): ").strip().lower()
         if response not in ['yes', 'y']:
@@ -52,7 +52,7 @@ def delete_saiva_prabandha_malai(connection_string):
 
         # 1. Delete all works
         cursor.execute("""
-            SELECT work_id FROM work_collections WHERE collection_id = 321111
+            SELECT work_id FROM work_collections WHERE collection_id = 32118
         """)
         work_ids = [row[0] for row in cursor.fetchall()]
 
@@ -61,8 +61,8 @@ def delete_saiva_prabandha_malai(connection_string):
             delete_work_by_id(cursor, work_id)
 
         # 2. Delete collection
-        print("  Deleting collection 321111 (பதினொன்றாம் திருமுறை)...")
-        cursor.execute("DELETE FROM collections WHERE collection_id = 321111")
+        print("  Deleting collection 32118 (பதினொன்றாம் திருமுறை - Eleventh Thirumurai)...")
+        cursor.execute("DELETE FROM collections WHERE collection_id = 32118")
 
         conn.commit()
         print("\n✓ Successfully deleted all Saiva Prabandha Malai data")

@@ -142,11 +142,12 @@
           </div>
         </div>
 
-        <!-- Accordion Filter -->
+        <!-- Collection Tree Filter -->
         <div class="filter-content-wrapper">
-          <AccordionFilter
-            ref="accordionFilterRef"
+          <CollectionTree
+            ref="collectionTreeRef"
             :selected-works="selectedWorks"
+            :root-collection-id="designatedCollectionId"
             @update:selectedWorks="handleCollectionSelection"
           />
 
@@ -413,13 +414,14 @@
 
 <script>
 import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import axios from 'axios'
 import api from './api.js'
 import Home from './Home.vue'
 import OurJourney from './OurJourney.vue'
 import Principles from './Principles.vue'
 import AboutConcordance from './AboutConcordance.vue'
 import VerseView from './VerseView.vue'
-import AccordionFilter from './components/AccordionFilter.vue'
+import CollectionTree from './components/CollectionTree.vue'
 
 export default {
   name: 'App',
@@ -429,7 +431,7 @@ export default {
     Principles,
     AboutConcordance,
     VerseView,
-    AccordionFilter
+    CollectionTree
   },
   setup() {
     // Page navigation
@@ -447,7 +449,8 @@ export default {
     const filterMode = ref('all')  // 'all' or 'select'
     const selectedWorks = ref([])
     const selectAllWorks = ref(true)
-    const accordionFilterRef = ref(null)  // Ref to AccordionFilter component
+    const collectionTreeRef = ref(null)  // Ref to CollectionTree component
+    const designatedCollectionId = ref(null)  // ID of the designated filter collection
     const works = ref([])
     const searchResults = ref(null)
     const selectedWord = ref(null)
@@ -501,6 +504,16 @@ export default {
         } catch (collErr) {
           console.warn('[DEBUG] Failed to load collections:', collErr.message)
           collections.value = []
+        }
+
+        // Load designated filter collection ID
+        try {
+          const settingsResponse = await axios.get(`${api.getBaseURL()}/settings/designated_filter_collection`)
+          designatedCollectionId.value = settingsResponse.data.collection_id
+          console.log('[DEBUG] Loaded designated collection ID:', designatedCollectionId.value)
+        } catch (settingsErr) {
+          console.warn('[DEBUG] Failed to load designated collection, using default tree view:', settingsErr.message)
+          designatedCollectionId.value = null
         }
 
         // Check for saved selection in session storage (always restore if available)
@@ -968,8 +981,8 @@ export default {
       selectedWorks.value = []
       selectAllWorks.value = false
       // Clear accordion filter checkboxes
-      if (accordionFilterRef.value) {
-        accordionFilterRef.value.clearSelections()
+      if (collectionTreeRef.value) {
+        collectionTreeRef.value.clearSelections()
       }
     }
 
@@ -979,16 +992,16 @@ export default {
         selectedWorks.value = works.value.map(w => w.work_id)
         selectAllWorks.value = true
         // Mark all collections as selected in the accordion
-        if (accordionFilterRef.value) {
-          accordionFilterRef.value.selectAll()
+        if (collectionTreeRef.value) {
+          collectionTreeRef.value.selectAll()
         }
       } else {
         // Switch to select mode - uncheck all by default
         selectedWorks.value = []
         selectAllWorks.value = false
         // Clear accordion filter checkboxes
-        if (accordionFilterRef.value) {
-          accordionFilterRef.value.clearSelections()
+        if (collectionTreeRef.value) {
+          collectionTreeRef.value.clearSelections()
         }
         // Switch to search page and open filters panel for selection
         currentPage.value = 'search'
@@ -1615,7 +1628,8 @@ export default {
       filterMode,
       selectedWorks,
       selectAllWorks,
-      accordionFilterRef,
+      collectionTreeRef,
+      designatedCollectionId,
       works,
       searchResults,
       selectedWord,

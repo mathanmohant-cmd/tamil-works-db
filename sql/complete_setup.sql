@@ -37,7 +37,6 @@ CREATE TABLE works (
     chronology_confidence VARCHAR(20),  -- 'high', 'medium', 'low', 'disputed'
     chronology_notes TEXT,  -- Scholarly variations and dating debates
     canonical_order INTEGER,  -- Traditional Tamil literary canon ordering (100=Tolkappiyam, 200s=Sangam, 260=Thirukkural, 280=Silapathikaram, 400=Kambaramayanam)
-    primary_collection_id INTEGER,  -- Primary collection this work belongs to (FK added after collections table)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     metadata JSONB  -- Flexible metadata: tradition, collection info, saints/authors, musical tradition, themes, etc.
 );
@@ -60,9 +59,8 @@ ALTER TABLE collections
     ADD CONSTRAINT fk_collections_parent
     FOREIGN KEY (parent_collection_id) REFERENCES collections(collection_id);
 
-ALTER TABLE works
-    ADD CONSTRAINT fk_works_primary_collection
-    FOREIGN KEY (primary_collection_id) REFERENCES collections(collection_id);
+-- Removed: primary_collection_id FK constraint
+-- Use work_collections many-to-many table instead
 
 -- Junction table: Works can belong to multiple collections
 CREATE TABLE work_collections (
@@ -82,9 +80,19 @@ CREATE TABLE work_collections (
 CREATE INDEX idx_collections_type ON collections(collection_type);
 CREATE INDEX idx_collections_entity_type ON collections(entity_type);
 CREATE INDEX idx_collections_parent ON collections(parent_collection_id);
-CREATE INDEX idx_works_primary_collection ON works(primary_collection_id);
+-- Index on primary_collection_id removed (column no longer exists)
 CREATE INDEX idx_work_collections_work ON work_collections(work_id);
 CREATE INDEX idx_work_collections_collection ON work_collections(collection_id);
+
+-- Insert designated filter collection (Tamil Literature root)
+-- This collection serves as the root for the filter UI tree
+-- User can build the hierarchy under this collection via Admin UI
+INSERT INTO collections (collection_id, collection_name, collection_name_tamil, collection_type, description, parent_collection_id, sort_order)
+VALUES (1, 'Tamil Literature', 'தமிழ் இலக்கியம்', 'canon', 'Root collection for canonical Tamil Literature hierarchy - used by filter UI', NULL, 1)
+ON CONFLICT (collection_id) DO NOTHING;
+
+-- Reset sequence to prevent conflicts (collection_id is SERIAL)
+SELECT setval('collections_collection_id_seq', (SELECT COALESCE(MAX(collection_id), 0) + 1 FROM collections), false);
 
 -- Hierarchical sections table (flexible structure for all levels)
 CREATE TABLE sections (
@@ -326,18 +334,9 @@ INNER JOIN verses v ON l.verse_id = v.verse_id
 INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id
 INNER JOIN work_verse_counts wvc ON v.work_id = wvc.work_id;
 
--- View: Works with their primary collection
-CREATE VIEW works_with_primary_collection AS
-SELECT
-    w.*,
-    c.collection_name,
-    c.collection_name_tamil,
-    c.collection_type,
-    wc.position_in_collection,
-    wc.notes AS collection_notes
-FROM works w
-LEFT JOIN work_collections wc ON w.work_id = wc.work_id AND wc.is_primary = TRUE
-LEFT JOIN collections c ON wc.collection_id = c.collection_id;
+-- Removed: works_with_primary_collection view
+-- Use work_collections table for collection relationships instead
+-- Query example: SELECT w.*, c.* FROM works w JOIN work_collections wc ON w.work_id = wc.work_id JOIN collections c ON wc.collection_id = c.collection_id WHERE wc.is_primary = TRUE;
 
 -- View: Collection hierarchy with item counts (works, sections, verses)
 CREATE VIEW collection_hierarchy AS

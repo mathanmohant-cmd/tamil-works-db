@@ -2,10 +2,20 @@
 
 This document defines the collection IDs used across all devotional literature parsers.
 
+## Designated Filter Collection (Special)
+
+- **1**: தமிழ் இலக்கியம் (Tamil Literature) - **ROOT COLLECTION FOR FILTER UI**
+  - Created automatically by `sql/complete_setup.sql`
+  - Serves as the designated collection for the filter hierarchy
+  - All other collections can be nested under this root
+  - Backend endpoint `/settings/designated_filter_collection` returns `{"collection_id": 1}`
+  - **See**: `DESIGNATED_COLLECTION_PATTERN.md` for full documentation
+
 ## Main Collections
 
 - **321**: திருமுறை (Thirumurai) - Main collection for all 12 Thirumurai books
 - **322**: நாலாயிரத் திவ்விய பிரபந்தம் (Naalayira Divya Prabandham) - Main Vaishnavite collection
+- **323**: பக்தி இலக்கியம் (Devotional Literature) - Standalone devotional works from various traditions
 
 ## Thirumurai Sub-Collections (Files 1-12)
 
@@ -82,9 +92,34 @@ Work 10 (திருப்பல்லாண்டு) is linked to ONE collect
 | `saiva_prabandha_malai_bulk_import.py` | `delete_saiva_prabandha_malai.py` | 32118 |
 | `periya_puranam_bulk_import.py` | `delete_periya_puranam.py` | 32119 |
 | `naalayira_divya_prabandham_bulk_import.py` | `delete_naalayira_divya_prabandham.py` | 322, 3221-3224 |
+| `thiruppugazh_bulk_import.py` | `delete_thiruppugazh.py` | 323 (shared) |
+| `thembavani_bulk_import.py` | `delete_thembavani.py` | 323 (shared) |
+| `seerapuranam_bulk_import.py` | `delete_seerapuranam.py` | 323 (shared) |
+| `thiruvarutpa_balakrishnapillai_bulk_import.py` | `delete_thiruvarutpa_balakrishnapillai.py` | 323 (shared) |
+| `thiruvarutpa_uran_bulk_import.py` | `delete_thiruvarutpa_uran.py` | 323 (shared) |
+
+## Standalone Devotional Literature (Collection 323)
+
+**Collection 323** (பக்தி இலக்கியம் - Devotional Literature) is a **shared collection** for standalone devotional works that don't belong to Thirumurai or Naalayira Divya Prabandham.
+
+### Works in Collection 323:
+1. **Thiruppugazh** (திருப்புகழ்) - Arunagirinathar, Murugan devotion, 15th century CE
+2. **Thembavani** (தேம்பாவணி) - Veeramaamunivar, Christian devotion, 18th century CE
+3. **Seerapuranam** (சீறாப்புராணம்) - Umaru Pulavar, Islamic devotion, 19th century CE
+4. **Thiruvarutpa - Balakrishnapillai Edition** (திருவருட்பா - பாலகிருஷ்ணபிள்ளை பதிப்பு) - Ramalinga Swamigal
+5. **Thiruvarutpa - Uran Adigal Edition** (திருவருட்பா - ஊரன் அடிகள் பதிப்பு) - Ramalinga Swamigal
+
+### Collection 323 Management:
+- **Creation**: Each parser checks if collection 323 exists; creates it if missing
+- **Linking**: Each work is linked to collection 323 with dynamic position assignment
+- **Deletion**: Each delete script checks if collection 323 is empty after work deletion
+  - If empty: Collection 323 is automatically deleted
+  - If not empty: Collection 323 is retained for remaining works
 
 ## Notes
 
-- Collection 3218 (8th Thirumurai) is shared by two works, so neither delete script removes the collection
+- **Collection 3218** (8th Thirumurai) is shared by two works (Thiruvasagam + Thirukovayar), so neither delete script removes the collection
+- **Collection 323** (பக்தி இலக்கியம்) is shared by 5 standalone devotional works; delete scripts remove it only when empty
 - Devaram has the most complex structure with 3-level collection hierarchy
 - All collection IDs use dynamic queries, not hardcoded values in work metadata or bulk insert methods
+- Standalone devotional works (collection 323) span multiple religious traditions: Shaivite, Christian, Islamic, and Siddha

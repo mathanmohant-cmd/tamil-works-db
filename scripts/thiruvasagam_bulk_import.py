@@ -173,8 +173,7 @@ class ThiruvasagamBulkImporter:
             'author_tamil': "மாணிக்கவாசகர்",
             'description': "திருவாசகம் - Shaivite devotional masterpiece",
             'canonical_order': 328,
-            'primary_collection_id': self.eighth_thirumurai_collection_id,
-            'metadata': work_metadata
+                        'metadata': work_metadata
         }
         self.works.append(work_dict)
         self.current_work_id = self.work_id
@@ -357,7 +356,6 @@ class ThiruvasagamBulkImporter:
                 work.get('chronology_confidence', ''),
                 work.get('chronology_notes', ''),
                 str(work['canonical_order']) if work.get('canonical_order') is not None else '',
-                str(work['primary_collection_id']) if work.get('primary_collection_id') is not None else '',
                 metadata_json
             ]
 
@@ -378,7 +376,7 @@ class ThiruvasagamBulkImporter:
             columns=('work_id', 'work_name', 'work_name_tamil', 'period', 'author',
                     'author_tamil', 'description', 'chronology_start_year',
                     'chronology_end_year', 'chronology_confidence', 'chronology_notes',
-                    'canonical_order', 'primary_collection_id', 'metadata'),
+                    'canonical_order', 'metadata'),
             null='')
         print(f"  [OK] Bulk inserted {len(self.works)} works")
 

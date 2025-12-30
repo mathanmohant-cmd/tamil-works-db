@@ -162,8 +162,7 @@ class ThirukovayarBulkImporter:
             'author_tamil': 'மாணிக்கவாசகர்',
             'period': '9th century CE',
             'canonical_order': 329,
-            'primary_collection_id': self.eighth_thirumurai_collection_id,
-            'metadata': work_metadata
+                        'metadata': work_metadata
         })
 
         print(f"  Created work: திருக்கோவையார் (ID: {self.current_work_id})")
@@ -341,7 +340,6 @@ class ThirukovayarBulkImporter:
                 work['author'],
                 work['author_tamil'],
                 str(work['canonical_order']),
-                str(work['primary_collection_id']),
                 metadata_json
             ]
             buffer.write('\t'.join(fields) + '\n')
@@ -350,7 +348,7 @@ class ThirukovayarBulkImporter:
         self.cursor.copy_from(
             buffer, 'works',
             columns=['work_id', 'work_name', 'work_name_tamil', 'period', 'author',
-                    'author_tamil', 'canonical_order', 'primary_collection_id', 'metadata'],
+                    'author_tamil', 'canonical_order', 'metadata'],
             null=''
         )
         print(f"  [OK] Bulk inserted {len(self.works)} work(s)")

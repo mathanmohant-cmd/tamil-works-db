@@ -29,18 +29,36 @@ This is a Tamil literature database and search application that stores and analy
 
 ## Common Commands
 
+### PostgreSQL Authentication - CRITICAL
+
+**ALWAYS use username and password when connecting to PostgreSQL:**
+
+```bash
+# Correct: Always specify -U postgres (or appropriate username)
+psql -U postgres -d tamil_literature
+
+# When running SQL files
+psql -U postgres -d tamil_literature -f sql/complete_setup.sql
+
+# When using Python scripts with default database URL
+# Default URL format: postgresql://postgres:postgres@localhost/tamil_literature
+# This includes username (postgres) and password (postgres)
+```
+
+**NEVER run psql commands without authentication parameters on this system.**
+
 ### Database Setup
 
 ```bash
 # Local PostgreSQL setup
-createdb tamil_literature
-psql tamil_literature -f sql/complete_setup.sql
+createdb -U postgres tamil_literature
+psql -U postgres -d tamil_literature -f sql/complete_setup.sql
 
 # Verify database
-psql tamil_literature -f verify_setup.sql
+psql -U postgres -d tamil_literature -f verify_setup.sql
 
 # Connect to database
-psql tamil_literature
+psql -U postgres -d tamil_literature
 
 # For Windows (using Python setup script)
 python scripts/setup_database.py
@@ -198,6 +216,21 @@ Work (meta-level)
 - `words` - Every word with position and linguistic analysis
 - `commentaries` - Traditional commentaries
 - `cross_references` - Links between related verses
+- `collections` - Hierarchical collections for organizing works (periods, traditions, genres, canons)
+- `work_collections` - Junction table linking works to collections with positioning
+
+**Designated Filter Collection Pattern:**
+- Collection ID = 1 is reserved for "Tamil Literature" (தமிழ் இலக்கியம்) - the root collection for filter UI
+- Created automatically by `sql/complete_setup.sql` during schema setup
+- Backend endpoint `/settings/designated_filter_collection` returns `{"collection_id": 1}`
+- Frontend `CollectionTree.vue` uses this as the root for displaying hierarchical work filters
+- User builds the collection hierarchy manually via Admin UI:
+  - Create child collections (Sangam, Devotional, etc.) under collection_id = 1
+  - Set `parent_collection_id` to nest collections
+  - Set `sort_order` to maintain traditional Tamil literature ordering
+  - Add works via drag-and-drop in Admin UI
+- Import scripts create first-level collections (321=Thirumurai, 322=Naalayira Divya Prabandham, 323=Devotional)
+- **Design Decision**: Hardcoded collection_id = 1 instead of separate app_settings table (simpler, self-documenting)
 
 ### Backend Architecture (FastAPI)
 
@@ -210,6 +243,12 @@ Located in `webapp/backend/`:
 - `/verse/{id}` - Get complete verse with context
 - `/stats` - Database statistics
 - `/health` - Health check
+- `/collections` - Get all collections (public endpoint for sort options)
+- `/collections/tree` - Get collections as nested tree (supports `?root=N` for subtree)
+- `/collections/{id}/works` - Get all works in a collection
+- `/settings/designated_filter_collection` - Returns `{"collection_id": 1}` for filter UI
+- `/admin/collections` - CRUD operations for collections (create, read, update, delete)
+- `/admin/collections/{id}/works` - Add/remove works from collections
 
 **database.py** - Database abstraction layer:
 - Connection pooling via psycopg2
@@ -232,10 +271,20 @@ Located in `webapp/frontend/`:
 - Axios (HTTP client)
 
 **Key Files:**
-- `src/App.vue` - Main search interface component
+- `src/MainApp.vue` - Main search interface component
+- `src/components/CollectionTree.vue` - Hierarchical collection filter component
+- `src/components/TreeNode.vue` - Recursive tree node for collections/works
+- `src/components/Admin.vue` - Admin UI for managing collections and works
 - `src/style.css` - Global styles
 - `index.html` - Entry HTML
 - `vite.config.js` - Vite configuration
+
+**Collection Filter UI:**
+- Uses `CollectionTree.vue` component (replaced AccordionFilter in 2025-12)
+- Loads designated collection (ID=1) on mount from `/settings/designated_filter_collection`
+- Displays full hierarchical tree with expand/collapse functionality
+- Mobile-optimized with 44px touch targets and reduced indentation
+- Supports work selection at any level (selecting parent selects all descendants)
 
 ### Data Import Architecture
 

@@ -5,7 +5,7 @@ Delete Seerapuranam work
 
 This script deletes:
 - Seerapuranam work (சீறாப்புராணம்)
-- Standalone devotional work (no collection)
+- Collection 323 (பக்தி இலக்கியம்) if empty after work deletion
 
 Usage:
     python delete_seerapuranam.py [database_url]
@@ -42,7 +42,7 @@ def delete_seerapuranam(connection_string):
         print(f"\nFound work: {work_name_tamil} ({work_name}) - ID: {work_id}")
         print("\nThis will delete:")
         print(f"  - Work: {work_name_tamil} (all data: sections, verses, lines, words)")
-        print(f"  - NOTE: Seerapuranam is a standalone work (no collection)")
+        print(f"  - Collection 323 (பக்தி இலக்கியம்) if empty after work deletion")
 
         response = input("\nAre you sure? (yes/no): ").strip().lower()
         if response not in ['yes', 'y']:
@@ -52,6 +52,9 @@ def delete_seerapuranam(connection_string):
         print("\nDeleting Seerapuranam work...")
         print(f"  Deleting work {work_id}...")
         delete_work_by_id(cursor, work_id)
+
+        # Check and delete collection 323 if empty
+        delete_collection_if_empty(cursor, 323)
 
         conn.commit()
         print("\n✓ Successfully deleted Seerapuranam work")
@@ -69,6 +72,25 @@ def delete_seerapuranam(connection_string):
             cursor.close()
         if conn:
             conn.close()
+
+def delete_collection_if_empty(cursor, collection_id=323):
+    """
+    Delete collection 323 (பக்தி இலக்கியம்) if it has no more works.
+    This should be called AFTER the work has been deleted.
+    """
+    # Check if collection 323 has any works left
+    cursor.execute("""
+        SELECT COUNT(*) FROM work_collections WHERE collection_id = %s
+    """, (collection_id,))
+    work_count = cursor.fetchone()[0]
+
+    if work_count == 0:
+        print(f"\n  Collection {collection_id} (பக்தி இலக்கியம்) is now empty")
+        print(f"  Deleting collection {collection_id}...")
+        cursor.execute("DELETE FROM collections WHERE collection_id = %s", (collection_id,))
+        print(f"  ✓ Deleted empty collection {collection_id}")
+    else:
+        print(f"\n  Collection {collection_id} still has {work_count} work(s), keeping it")
 
 def delete_work_by_id(cursor, work_id):
     """Delete a work and all its data (within a transaction)"""

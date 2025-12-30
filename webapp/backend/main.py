@@ -60,7 +60,6 @@ class Work(BaseModel):
     author_tamil: Optional[str]
     period: Optional[str]
     description: Optional[str]
-    primary_collection_id: Optional[int]
     canonical_position: Optional[int]  # Position in Traditional Canon collection (if applicable)
     chronology_start_year: Optional[int]
     chronology_end_year: Optional[int]
@@ -285,15 +284,29 @@ def get_public_collections():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/settings/designated_filter_collection")
+def get_designated_filter_collection():
+    """
+    Get the designated collection ID for the filter UI
+
+    Returns collection_id = 1 (Tamil Literature root collection)
+    This collection is created by the schema and serves as the root for the filter hierarchy
+    """
+    return {"collection_id": 1}
+
+
 @app.get("/collections/tree")
-def get_collections_tree():
+def get_collections_tree(root: int = Query(None, description="Root collection ID to filter tree")):
     """
     Get collections as a nested tree structure for filter navigation
+
+    Args:
+        root: Optional collection_id to use as root (returns only this subtree)
 
     Returns hierarchical collection tree with work counts
     """
     try:
-        return db.get_collection_tree()
+        return db.get_collection_tree(root_collection_id=root)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -45,6 +45,10 @@ const props = defineProps({
   selectedWorks: {
     type: Array,
     required: true
+  },
+  rootCollectionId: {
+    type: Number,
+    default: null  // If null, show all top-level collections
   }
 })
 
@@ -62,8 +66,17 @@ const loadCollectionTree = async () => {
   loading.value = true
   error.value = null
   try {
-    const response = await axios.get(`${API_BASE_URL}/collections/tree`)
+    let url = `${API_BASE_URL}/collections/tree`
+    if (props.rootCollectionId) {
+      url += `?root=${props.rootCollectionId}`
+    }
+    const response = await axios.get(url)
     collectionTree.value = response.data
+
+    // Auto-expand designated collection if specified
+    if (props.rootCollectionId && response.data.length > 0) {
+      expandedNodes.value.add(response.data[0].collection_id)
+    }
   } catch (err) {
     error.value = 'Failed to load collections: ' + err.message
     console.error('Error loading collection tree:', err)
@@ -392,8 +405,9 @@ onMounted(async () => {
 }
 
 .tree-content {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   padding-right: 0.5rem;
 }
 
@@ -413,5 +427,27 @@ onMounted(async () => {
 
 .tree-content::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .tree-content {
+    max-height: 400px;
+  }
+
+  .tree-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .tree-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tree-action-btn {
+    flex: 1;
+  }
 }
 </style>

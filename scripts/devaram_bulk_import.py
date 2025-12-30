@@ -358,7 +358,6 @@ class DevaramBulkImporter:
             'author_tamil': file_info['author_tamil'],
             'description': f"{file_info['work_name_tamil']} - Part of {thirumurai_collection_tamil}",
             'canonical_order': 320 + thirumurai_num,  # 321-327
-            'primary_collection_id': thirumurai_collection_id,  # Individual Thirumurai collection as primary
             'metadata': work_metadata
         }
         self.works.append(work_dict)
@@ -551,7 +550,6 @@ class DevaramBulkImporter:
                 work.get('chronology_confidence', ''),
                 work.get('chronology_notes', ''),
                 str(work['canonical_order']) if work.get('canonical_order') is not None else '',
-                str(work['primary_collection_id']) if work.get('primary_collection_id') is not None else '',
                 metadata_json
             ]
 
@@ -576,7 +574,7 @@ class DevaramBulkImporter:
             columns=('work_id', 'work_name', 'work_name_tamil', 'period', 'author',
                     'author_tamil', 'description', 'chronology_start_year',
                     'chronology_end_year', 'chronology_confidence', 'chronology_notes',
-                    'canonical_order', 'primary_collection_id', 'metadata'),
+                    'canonical_order', 'metadata'),
             null=''
         )
 

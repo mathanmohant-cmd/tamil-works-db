@@ -132,7 +132,6 @@ class ThiruppugazhBulkImporter:
             'author_tamil': "அருணகிரிநாதர்",
             'description': "திருப்புகழ் - Shaivite devotional hymns to Lord Murugan",
             'canonical_order': 500,
-            'primary_collection_id': None,
             'metadata': work_metadata
         }
         self.works.append(work_dict)
@@ -305,6 +304,53 @@ class ThiruppugazhBulkImporter:
         words = [w for w in words if w.strip()]
         return words
 
+    def ensure_collection_exists(self):
+        """
+        Ensure the shared "பக்தி இலக்கியம்" (Devotional Literature) collection exists.
+        Collection ID: 323
+        Returns the collection_id.
+        """
+        print("\n  Checking for shared collection பக்தி இலக்கியம் (323)...")
+
+        # Check if collection 323 exists
+        self.cursor.execute("""
+            SELECT collection_id FROM collections WHERE collection_id = 323
+        """)
+        result = self.cursor.fetchone()
+
+        if result:
+            print("  ✓ Collection 323 (பக்தி இலக்கியம்) already exists")
+            return 323
+
+        # Create collection 323
+        print("  Creating collection 323: பக்தி இலக்கியம் (Devotional Literature)...")
+        self.cursor.execute("""
+            INSERT INTO collections (collection_id, collection_name, collection_name_tamil, collection_type, entity_type, description, sort_order)
+            VALUES (323, 'Devotional Literature', 'பக்தி இலக்கியம்', 'tradition', 'work', 'Standalone devotional works from various traditions', 5)
+        """)
+        print("  ✓ Created collection 323")
+        return 323
+
+    def link_work_to_collection(self):
+        """Link the work to collection 323 with dynamic position"""
+        collection_id = 323
+
+        # Get the next position in collection 323
+        self.cursor.execute("""
+            SELECT COALESCE(MAX(position_in_collection), 0) + 1
+            FROM work_collections
+            WHERE collection_id = %s
+        """, (collection_id,))
+        position = self.cursor.fetchone()[0]
+
+        # Insert work_collection link
+        self.cursor.execute("""
+            INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary)
+            VALUES (%s, %s, %s, TRUE)
+        """, (self.current_work_id, collection_id, position))
+
+        print(f"  ✓ Linked work to collection 323 at position {position}")
+
     def bulk_insert_works(self):
         """Bulk insert works using PostgreSQL COPY"""
         if not self.works:
@@ -324,7 +370,6 @@ class ThiruppugazhBulkImporter:
                 work.get('chronology_confidence', ''),
                 work.get('chronology_notes', ''),
                 str(work['canonical_order']) if work.get('canonical_order') is not None else '',
-                str(work['primary_collection_id']) if work.get('primary_collection_id') is not None else '',
                 metadata_json
             ]
 
@@ -345,7 +390,7 @@ class ThiruppugazhBulkImporter:
             columns=('work_id', 'work_name', 'work_name_tamil', 'period', 'author',
                     'author_tamil', 'description', 'chronology_start_year',
                     'chronology_end_year', 'chronology_confidence', 'chronology_notes',
-                    'canonical_order', 'primary_collection_id', 'metadata'),
+                    'canonical_order', 'metadata'),
             null='')
         print(f"  [OK] Bulk inserted {len(self.works)} works")
 
@@ -482,11 +527,18 @@ class ThiruppugazhBulkImporter:
         """Execute bulk imports"""
         print("\n=== PHASE 2: Bulk inserting into database ===")
         try:
+            # Ensure collection exists BEFORE inserting works (FK constraint)
+            self.ensure_collection_exists()
+
             self.bulk_insert_works()
             self.bulk_insert_sections()
             self.bulk_insert_verses()
             self.bulk_insert_lines()
             self.bulk_insert_words()
+
+            # Link work to collection
+            self.link_work_to_collection()
+
             self.conn.commit()
             print("\n[SUCCESS] Thiruppugazh imported successfully!")
         except Exception as e:

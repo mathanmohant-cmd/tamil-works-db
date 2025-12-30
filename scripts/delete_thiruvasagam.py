@@ -5,8 +5,8 @@ Delete Thiruvasagam work
 
 This script deletes:
 - Thiruvasagam work (திருவாசகம்)
-- NOTE: Does NOT delete collection 3218 (எட்டாம் திருமுறை - 8th Thirumurai)
-  because it contains 2 works (Thiruvasagam + Thirukovayar)
+- Collection 3218 (எட்டாம் திருமுறை - 8th Thirumurai) IF it becomes empty
+  (i.e., if Thirukovayar has also been deleted)
 
 Usage:
     python delete_thiruvasagam.py [database_url]
@@ -17,7 +17,7 @@ import sys
 import psycopg2
 
 def delete_thiruvasagam(connection_string):
-    """Delete Thiruvasagam work (but not the collection)"""
+    """Delete Thiruvasagam work and collection 3218 if it becomes empty"""
     print("\n" + "="*70)
     print("  DELETE THIRUVASAGAM")
     print("="*70)
@@ -43,10 +43,20 @@ def delete_thiruvasagam(connection_string):
 
         work_id, work_name, work_name_tamil = work_row
         print(f"\nFound work: {work_name_tamil} ({work_name}) - ID: {work_id}")
+
+        # Check how many works are in collection 3218
+        cursor.execute("""
+            SELECT COUNT(*) FROM work_collections WHERE collection_id = 3218
+        """)
+        work_count = cursor.fetchone()[0]
+
         print("\nThis will delete:")
         print(f"  - Work: {work_name_tamil} (all data: sections, verses, lines, words)")
-        print(f"  - NOTE: Collection 3218 (எட்டாம் திருமுறை) will NOT be deleted")
-        print(f"    because it contains 2 works (Thiruvasagam + Thirukovayar)")
+        if work_count <= 1:
+            print(f"  - Collection 3218 (எட்டாம் திருமுறை) - will be DELETED (becomes empty)")
+        else:
+            print(f"  - NOTE: Collection 3218 (எட்டாம் திருமுறை) will NOT be deleted")
+            print(f"    because it still contains {work_count - 1} other work(s)")
 
         response = input("\nAre you sure? (yes/no): ").strip().lower()
         if response not in ['yes', 'y']:
@@ -56,6 +66,17 @@ def delete_thiruvasagam(connection_string):
         print("\nDeleting Thiruvasagam work...")
         print(f"  Deleting work {work_id}...")
         delete_work_by_id(cursor, work_id)
+
+        # Check if collection 3218 is now empty and delete if so
+        cursor.execute("""
+            SELECT COUNT(*) FROM work_collections WHERE collection_id = 3218
+        """)
+        remaining_works = cursor.fetchone()[0]
+
+        if remaining_works == 0:
+            print(f"  Collection 3218 (எட்டாம் திருமுறை) is now empty, deleting...")
+            cursor.execute("DELETE FROM collections WHERE collection_id = 3218")
+            print(f"  ✓ Deleted empty collection 3218")
 
         conn.commit()
         print("\n✓ Successfully deleted Thiruvasagam work")

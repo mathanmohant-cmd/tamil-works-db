@@ -229,8 +229,7 @@ class SaivaPrabandhaMalaiBulkImporter:
             'author_tamil': author_name,
             'period': '6th-13th century CE',
             'canonical_order': 342 + work_num,  # 343-382 (40 works)
-            'primary_collection_id': self.eleventh_thirumurai_collection_id,
-            'metadata': work_metadata
+                        'metadata': work_metadata
         })
 
         print(f"  Created work {self.current_work_num}: {work_name[:40]}... (Author: {author_name[:30]}...)")
@@ -340,7 +339,6 @@ class SaivaPrabandhaMalaiBulkImporter:
                 work['author'],
                 work['author_tamil'],
                 str(work['canonical_order']),
-                str(work['primary_collection_id']),
                 metadata_json
             ]
             buffer.write('\t'.join(fields) + '\n')
@@ -349,7 +347,7 @@ class SaivaPrabandhaMalaiBulkImporter:
         self.cursor.copy_from(
             buffer, 'works',
             columns=['work_id', 'work_name', 'work_name_tamil', 'period', 'author',
-                    'author_tamil', 'canonical_order', 'primary_collection_id', 'metadata'],
+                    'author_tamil', 'canonical_order', 'metadata'],
             null=''
         )
         print(f"  [OK] Bulk inserted {len(self.works)} work(s)")

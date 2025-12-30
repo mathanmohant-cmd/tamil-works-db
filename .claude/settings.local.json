@@ -18,7 +18,13 @@
       "WebFetch(domain:docs.google.com)",
       "Bash(test:*)",
       "Bash(set PGPASSWORD=postgres:*)",
-      "Bash(PGPASSWORD=postgres python:*)"
+      "Bash(PGPASSWORD=postgres python:*)",
+      "Bash(cmd /c \"set PGPASSWORD=postgres && psql -U postgres -d tamil_literature -c \"\"SELECT collection_id, collection_name, collection_name_tamil FROM collections WHERE collection_id = 321111;\"\"\")",
+      "Bash(cmd /c \"set PGPASSWORD=postgres && psql -U postgres -d tamil_literature -c \"\"SELECT COUNT(*) FROM work_collections WHERE collection_id = 321111;\"\"\")",
+      "Bash(timeout /t 3)",
+      "Bash(exit 0)",
+      "Bash(cmd /c \"set PGPASSWORD=postgres && psql -U postgres -d tamil_literature -c \"\"SELECT collection_id, collection_name, collection_name_tamil FROM collections ORDER BY collection_id;\"\"\")",
+      "Bash(cmd /c \"set PGPASSWORD=postgres && psql -U postgres -d tamil_literature -c \"\"SELECT COUNT(*) FROM work_collections;\"\"\")"
     ],
     "deny": [],
     "ask": []

@@ -450,7 +450,6 @@ class Database:
                         w.chronology_end_year,
                         w.chronology_confidence,
                         w.chronology_notes,
-                        w.primary_collection_id,
                         w.canonical_order as canonical_position
                     {from_clause}
                     {order_clause}
@@ -783,8 +782,16 @@ class Database:
                 """, [position, collection_id, work_id])
                 return cur.rowcount > 0
 
-    def get_collection_tree(self) -> List[Dict]:
-        """Get collections as a nested tree structure"""
+    def get_collection_tree(self, root_collection_id: int = None) -> List[Dict]:
+        """
+        Get collections as a nested tree structure
+
+        Args:
+            root_collection_id: Optional collection ID to use as root (returns only this subtree)
+
+        Returns:
+            List of collection trees with work counts
+        """
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""
@@ -813,6 +820,10 @@ class Database:
                 collection_map[parent_id]['children'].append(coll_with_children)
             else:
                 root_collections.append(coll_with_children)
+
+        # If root_collection_id specified, return only that subtree
+        if root_collection_id and root_collection_id in collection_map:
+            return [collection_map[root_collection_id]]
 
         return root_collections
 

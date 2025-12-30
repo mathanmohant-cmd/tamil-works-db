@@ -255,8 +255,7 @@ class ThiruvisaippaBulkImporter:
             'author_tamil': author_name,
             'period': '6th-12th century CE',
             'canonical_order': 330 + work_num,  # 331-340
-            'primary_collection_id': collection_id,
-            'metadata': work_metadata
+                        'metadata': work_metadata
         })
 
         print(f"  Created work {self.current_work_num}: {work_name} (Author: {author_name}, Collection: {collection_name_tamil})")
@@ -364,7 +363,6 @@ class ThiruvisaippaBulkImporter:
                 work['author'],
                 work['author_tamil'],
                 str(work['canonical_order']),
-                str(work['primary_collection_id']),
                 metadata_json
             ]
             buffer.write('\t'.join(fields) + '\n')
@@ -373,7 +371,7 @@ class ThiruvisaippaBulkImporter:
         self.cursor.copy_from(
             buffer, 'works',
             columns=['work_id', 'work_name', 'work_name_tamil', 'period', 'author',
-                    'author_tamil', 'canonical_order', 'primary_collection_id', 'metadata'],
+                    'author_tamil', 'canonical_order', 'metadata'],
             null=''
         )
         print(f"  [OK] Bulk inserted {len(self.works)} work(s)")

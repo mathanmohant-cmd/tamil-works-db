@@ -375,10 +375,10 @@ class NaalayiraDivyaPrabandhamImporter:
                     'author_tamil': current_alvar,
                     'description': f"{current_work_name} by {current_alvar} - Part of {file_info['collection_name']}",
                     'canonical_order': 400 + position_in_main_collection,  # 401-424
-                    'primary_collection_id': sub_collection_id,  # Use dynamic sub-collection ID
                     'metadata': work_metadata,
                     'position_in_main_collection': position_in_main_collection,
-                    'position_in_sub_collection': position_in_sub_collection
+                    'position_in_sub_collection': position_in_sub_collection,
+                    'sub_collection_id': sub_collection_id  # Store for work_collections linking
                 }
                 self.works.append(work_dict)
                 self.current_work_id = self.work_id
@@ -524,7 +524,6 @@ class NaalayiraDivyaPrabandhamImporter:
                 work.get('chronology_confidence', ''),
                 work.get('chronology_notes', ''),
                 str(work['canonical_order']) if work.get('canonical_order') is not None else '',
-                str(work['primary_collection_id']) if work.get('primary_collection_id') is not None else '',
                 metadata_json
             ]
 
@@ -549,7 +548,7 @@ class NaalayiraDivyaPrabandhamImporter:
             columns=('work_id', 'work_name', 'work_name_tamil', 'period', 'author',
                     'author_tamil', 'description', 'chronology_start_year',
                     'chronology_end_year', 'chronology_confidence', 'chronology_notes',
-                    'canonical_order', 'primary_collection_id', 'metadata'),
+                    'canonical_order', 'metadata'),
             null=''
         )
 
@@ -572,11 +571,14 @@ class NaalayiraDivyaPrabandhamImporter:
 
         buffer = io.StringIO()
         for work in self.works:
+            # Get the sub-collection ID from work metadata
+            sub_collection_id = work.get('sub_collection_id')
+
             # Link to sub-collection (primary)
             fields = [
                 str(work['work_id']),
-                str(work['primary_collection_id']),
-                str(work['position_in_sub_collection']),
+                str(sub_collection_id),  # collection_id
+                str(work['position_in_sub_collection']),  # position_in_collection
                 't',  # is_primary (true)
                 ''  # notes (NULL)
             ]

@@ -327,4 +327,36 @@ const handleCheckboxChange = (event) => {
   font-size: 0.9rem;
   color: #555;
 }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .toggle-icon {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .node-children {
+    margin-left: 0.75rem; /* Reduce indentation on mobile */
+  }
+
+  .node-item {
+    min-height: 44px;
+    padding: 0.5rem;
+  }
+
+  .work-node {
+    min-height: 44px;
+    padding: 0.5rem;
+  }
+
+  .collection-checkbox,
+  .work-checkbox {
+    width: 22px;
+    height: 22px;
+  }
+}
 </style>

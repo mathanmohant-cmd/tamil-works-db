@@ -56,6 +56,9 @@ def delete_thiruvarutpa_balakrishnapillai(connection_string):
             print(f"  Deleting work {work_id}: {work_name_tamil}...")
             delete_work_by_id(cursor, work_id)
 
+        # Check and delete collection 323 if empty
+        delete_collection_if_empty(cursor, 323)
+
         conn.commit()
         print("\n✓ Successfully deleted Thiruvarutpa works")
         return True
@@ -72,6 +75,25 @@ def delete_thiruvarutpa_balakrishnapillai(connection_string):
             cursor.close()
         if conn:
             conn.close()
+
+def delete_collection_if_empty(cursor, collection_id=323):
+    """
+    Delete collection 323 (பக்தி இலக்கியம்) if it has no more works.
+    This should be called AFTER the work has been deleted.
+    """
+    # Check if collection 323 has any works left
+    cursor.execute("""
+        SELECT COUNT(*) FROM work_collections WHERE collection_id = %s
+    """, (collection_id,))
+    work_count = cursor.fetchone()[0]
+
+    if work_count == 0:
+        print(f"\n  Collection {collection_id} (பக்தி இலக்கியம்) is now empty")
+        print(f"  Deleting collection {collection_id}...")
+        cursor.execute("DELETE FROM collections WHERE collection_id = %s", (collection_id,))
+        print(f"  ✓ Deleted empty collection {collection_id}")
+    else:
+        print(f"\n  Collection {collection_id} still has {work_count} work(s), keeping it")
 
 def delete_work_by_id(cursor, work_id):
     """Delete a work and all its data (within a transaction)"""
