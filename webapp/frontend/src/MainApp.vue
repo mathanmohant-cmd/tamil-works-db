@@ -282,7 +282,9 @@
                     :class="{ expanded: expandedWords.has(word.text) }"
                     :title="expandedWords.has(word.text) ? 'Collapse' : 'Expand'"
                   >
-                    <span class="expand-icon">{{ expandedWords.has(word.text) ? '▼' : '▶' }}</span>
+                    <span class="expand-icon">
+                      <span class="chevron-icon" :class="expandedWords.has(word.text) ? 'chevron-down' : 'chevron-right'"></span>
+                    </span>
                   </button>
                 </div>
               </div>
@@ -365,7 +367,7 @@
                 <!-- Collapse Button at Bottom -->
                 <div class="collapse-footer">
                   <button @click="toggleWordExpansion(word.text)" class="collapse-button">
-                    ▲ Collapse
+                    <span class="chevron-icon chevron-up"></span> Collapse
                   </button>
                 </div>
               </div>
@@ -620,6 +622,7 @@ export default {
       // Switch to search page to show results
       currentPage.value = 'search'
       showWelcome.value = false // Hide welcome/help content when searching
+      filtersExpanded.value = false // Collapse filters to show results
 
       loading.value = true
       error.value = null
@@ -952,7 +955,10 @@ export default {
 
     // Method: Toggle filters
     const toggleFilters = () => {
-      filtersExpanded.value = !filtersExpanded.value
+      // Ensure we're on the search page
+      currentPage.value = 'search'
+      // Expand filters for selection
+      filtersExpanded.value = true
     }
 
     // Method: Close filters
