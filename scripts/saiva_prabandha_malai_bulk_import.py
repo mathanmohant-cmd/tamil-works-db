@@ -143,13 +143,19 @@ class SaivaPrabandhaMalaiBulkImporter:
                 work_name = re.sub(r'^\*\*\s+', '', work_name)
 
                 current_work_id = self._create_work(work_num, author_name, work_name)
-                current_section_id = None
+
+                # Create default section for this work to ensure verses have a section_id
+                current_section_id = self._create_section(
+                    current_work_id,
+                    0,  # Default section number
+                    'Main Section'  # Default section name
+                )
                 current_pan_metadata = None
                 verse_count = 0
                 continue
 
-            # Check for section marker: @N [Section Name]
-            section_match = re.match(r'^@(\d+)\s+(.+)', line)
+            # Check for section marker: @N [Section Name] or @[Section Name]
+            section_match = re.match(r'^@(?:(\d+)\s+)?(.+)', line)
             if section_match and current_work_id:
                 # Save previous verse if any
                 if current_verse_lines and current_section_id:
@@ -157,8 +163,10 @@ class SaivaPrabandhaMalaiBulkImporter:
                                   current_verse_lines, current_pan_metadata)
                     current_verse_lines = []
 
-                section_num = int(section_match.group(1))
+                section_num_str = section_match.group(1)  # May be None
                 section_name = section_match.group(2).strip()
+                # Use sequential numbering if no digit in source
+                section_num = int(section_num_str) if section_num_str else len([s for s in self.sections if s['work_id'] == current_work_id]) + 1
 
                 current_section_id = self._create_section(
                     current_work_id, section_num, section_name
@@ -537,6 +545,12 @@ class SaivaPrabandhaMalaiBulkImporter:
 
 
 def main():
+    # Fix console encoding for Tamil characters on Windows
+    if sys.platform == 'win32':
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
     # Get database connection string
     db_connection = os.getenv('DATABASE_URL', "postgresql://postgres:postgres@localhost/tamil_literature")
     if len(sys.argv) > 1:
@@ -551,7 +565,7 @@ def main():
     print("  SAIVA PRABANDHA MALAI BULK IMPORT (FILE 11)")
     print("="*70)
     print(f"Database: {db_connection[:50]}...")
-    print(f"File: {file_path.name}")
+    print("File: 11.Eleventh Thirumurai.txt")
 
     if not file_path.exists():
         print(f"\n[ERROR] File not found: {file_path}")
