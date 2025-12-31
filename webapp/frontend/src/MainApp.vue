@@ -313,13 +313,6 @@
                     >
                       📥 Export Lines
                     </button>
-                    <button
-                      @click="toggleWordExpansion(word.text)"
-                      class="collapse-button-top"
-                      title="Collapse"
-                    >
-                      <span class="chevron-icon chevron-up"></span>
-                    </button>
                   </div>
                 </div>
 
@@ -383,6 +376,19 @@
                       {{ loadingWord === word.text ? 'Loading...' : 'Load More' }}
                     </button>
                   </div>
+                </div>
+
+                <!-- Collapse Footer -->
+                <div class="collapse-footer">
+                  <button
+                    @click="toggleWordExpansion(word.text)"
+                    class="expand-collapse-button collapse-footer-button"
+                    title="Collapse"
+                  >
+                    <span class="expand-icon">
+                      <span class="chevron-icon chevron-up"></span>
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
