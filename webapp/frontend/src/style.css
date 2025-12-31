@@ -685,54 +685,65 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem;
-  background: white;
+  padding: 0.5rem;
+  background: transparent;
   color: var(--kurinji-primary);
-  border: 2px solid var(--kurinji-light);
-  border-bottom: 3px solid var(--life-pulse);
-  border-radius: 50%;
-  font-size: 1.1rem;
-  font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  min-width: 44px;
+  transition: all 0.2s ease;
+  min-width: 44px;  /* Keep for accessibility */
   min-height: 44px;
-  width: 44px;
-  height: 44px;
 }
 
 .expand-collapse-button:hover {
-  border-color: var(--kurinji-primary);
-  border-bottom-color: var(--life-pulse);
   color: var(--kurinji-dark);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .expand-collapse-button:active {
   transform: scale(1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .expand-collapse-button.expanded {
-  background: var(--mullai-accent);
-  border-color: var(--mullai-primary);
-  border-bottom-color: var(--life-pulse);
-  color: var(--kurinji-dark);
+  color: var(--mullai-primary);
 }
 
 .expand-collapse-button.expanded:hover {
-  background: var(--mullai-light);
-  border-color: var(--mullai-primary);
-  border-bottom-color: var(--life-pulse-dark);
-  color: var(--kurinji-dark);
-  transform: scale(1.05);
+  color: var(--mullai-dark);
+  transform: scale(1.1);
 }
 
 .expand-icon {
-  font-size: 1rem;
-  line-height: 1;
+  width: 1.3rem;   /* Fixed width for consistent proportions */
+  height: 1.3rem;  /* Fixed height for consistent proportions */
+  display: inline-flex;  /* Use flex for better control */
+  align-items: center;
+  justify-content: center;
+}
+
+/* CSS Triangle Chevron Icons */
+.chevron-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-style: solid;
+  border-color: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.chevron-right {
+  border-width: 2px 2px 0 0;
+  transform: rotate(45deg);
+}
+
+.chevron-down {
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.chevron-up {
+  border-width: 2px 0 0 2px;
+  transform: rotate(45deg);
 }
 
 /* Expanded Content */
@@ -1751,12 +1762,9 @@ body {
   }
 
   .expand-collapse-button {
-    min-width: 40px;
-    min-height: 40px;
-    width: 40px;
-    height: 40px;
-    padding: 0.6rem;
-    font-size: 0.9rem;
+    min-width: 44px;  /* Keep same for better mobile touch */
+    min-height: 44px;
+    padding: 0.5rem;
   }
 
   .work-counts {
