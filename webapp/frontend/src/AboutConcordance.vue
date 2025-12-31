@@ -28,7 +28,9 @@
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-1')" :class="{ expanded: expandedSections.has('qa-1') }" data-section="qa-1">
             <h2>What is a Concordance?</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-1') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-1') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-1')" class="accordion-content">
             <p>Think of a concordance as a <strong>super-powered search engine for books</strong>.</p>
@@ -48,14 +50,18 @@
                 </div>
               </div>
             </div>
-            <div class="accordion-close" @click="toggleSection('qa-1')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-1')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
         </section>
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-2')" :class="{ expanded: expandedSections.has('qa-2') }" data-section="qa-2">
             <h2>How is Concordance Different from a Dictionary?</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-2') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-2') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-2')" class="accordion-content">
             <p>Great question! Here's the key difference:</p>
@@ -108,14 +114,18 @@
                 <strong>The difference?</strong> You're not just learning what the word means — you're learning how great Tamil poets and saints actually used it across 2,000 years of literature!
               </div>
             </div>
-            <div class="accordion-close" @click="toggleSection('qa-2')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-2')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
         </section>
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-3')" :class="{ expanded: expandedSections.has('qa-3') }" data-section="qa-3">
             <h2>Why is Concordance Important?</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-3') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-3') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-3')" class="accordion-content">
 
@@ -154,14 +164,18 @@
               <p>Instead of reading one work in isolation, you can see the <strong>conversation between authors across centuries</strong>. Tamil literature is like a long conversation — concordance lets you see all the threads.</p>
             </div>
           </div>
-            <div class="accordion-close" @click="toggleSection('qa-3')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-3')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
         </section>
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-4')" :class="{ expanded: expandedSections.has('qa-4') }" data-section="qa-4">
             <h2>How Does This Tool Search Across Literary Works?</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-4') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-4') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-4')" class="accordion-content">
             <p>This tool is built like a powerful database that <strong>breaks down every verse</strong> into individual words and remembers where each word came from.</p>
@@ -223,14 +237,18 @@
             <p>Please click on the <strong>Selcet from works</strong> in the Search Filter to see the complete list of works available for search</p>
             <p class="note"><em>Note: The collection continues to grow as more literary works are added to the database.</em></p>
           </div>
-            <div class="accordion-close" @click="toggleSection('qa-4')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-4')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
         </section>
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-5')" :class="{ expanded: expandedSections.has('qa-5') }" data-section="qa-5">
             <h2>How to Use This Tool?</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-5') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-5') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-5')" class="accordion-content">
 
@@ -264,7 +282,9 @@
           </div>
               <p><em>* Note: This tool was developed for personal use and does not gaurantee accadamic level accuracy. *</em>
               </p>
-            <div class="accordion-close" @click="toggleSection('qa-5')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-5')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
           
         </section>
@@ -272,7 +292,9 @@
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-6')" :class="{ expanded: expandedSections.has('qa-6') }" data-section="qa-6">
             <h2>What other Features are possible?</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-6') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-6') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-6')" class="accordion-content">
           <p>With collaboration from experts across multiple domains, there are exciting possibilities to explore together.</p>
@@ -363,7 +385,9 @@
               </ul>
             </div>
           </div>
-            <div class="accordion-close" @click="toggleSection('qa-6')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-6')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
         </section>
 
@@ -371,7 +395,9 @@
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-7')" :class="{ expanded: expandedSections.has('qa-7') }" data-section="qa-7">
             <h2>Final Thoughts</h2>
-            <span class="accordion-icon">{{ expandedSections.has('qa-7') ? '−' : '+' }}</span>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-7') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
           </div>
           <div v-if="expandedSections.has('qa-7')" class="accordion-content">
           <div class="highlight-box">
@@ -382,7 +408,9 @@
           <p>This tool is your gateway to exploring 2,000+ years of Tamil literary genius. Every search is an adventure — you never know what beautiful verse or profound insight you'll discover next.</p>
 
           <p>Think of it as having a <strong>super-smart librarian</strong> who has read every Tamil book ever written and can instantly show you every page where your favorite word appears. That's the power of concordance!</p>
-            <div class="accordion-close" @click="toggleSection('qa-7')">−</div>
+            <div class="accordion-close" @click="toggleSection('qa-7')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
           </div>
         </section>
 
@@ -402,7 +430,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('principles-intro')" :class="{ expanded: expandedSections.has('principles-intro') }" data-section="principles-intro">
               <h2>சொற்பிரிப்பு நெறிகள்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('principles-intro') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('principles-intro') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('principles-intro')" class="accordion-content">
             <p>தமிழ் மொழியில் உள்ள புணர்ச்சி விதிகளால், தமிழ் இலக்கியங்களின் மரபு வழி மூலங்களைப் படித்துப் புரிந்துகொள்வது மிகவும் கடினமாக அமைகின்றது.</p>
@@ -422,7 +452,9 @@
             <p>ஒரு குறிப்பிட்ட நூலாசிரியரின் சொல்வளம் (vocabulary) பற்றிய ஆய்வில் சொற்களைப் பிரிப்பதிலும் அல்லது பிரிக்காமல் இருப்பதிலும் பலவித மயக்கங்கள் (ambiguities) வரலாம். 'கண்' என்பதற்குப் பதிலாக 'விழி' என்றும் ஆசிரியர் அழைக்கலாம். எனவே 'கண்', 'விழி' என்ற சொற்களின் எண்ணிக்கை ஆசிரியரின் நடையை விளக்கவும் புரிந்துகொள்ளவும் உதவும்.</p>
 
             <P>வேற்றுமை உருபுகள், கால இடைநிலைகள், விகுதிகள் போன்றவற்றை வேர்ச்சொல்லோடு சேர்த்துப் பயன்படுத்துவதில் ஆசிரியருக்கு உரிமையில்லை. காட்டாக, கண்ணை, கண்ணோடு, கண்ணால், கண்ணுக்கு என்பவை தனிச்சொற்களாகவே கொள்ளப்பட்டாலும், இவை 'கண்' என்ற ஒரு சொல்லின் இலக்கண வேறுபாடுகளே (grammatical variations).</p>
-            <div class="accordion-close" @click="toggleSection('principles-intro')">−</div>
+            <div class="accordion-close" @click="toggleSection('principles-intro')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -430,7 +462,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-1')" :class="{ expanded: expandedSections.has('neri-1') }" data-section="neri-1">
               <h2>நெறி 1 - புணர்ச்சி விதிகளைக் களைதல்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-1') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-1') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-1')" class="accordion-content">
 
@@ -458,7 +492,9 @@
                 <code>பெருஞ்சிறப்பு</code> <span class="arrow">→</span> <code>பெரும் சிறப்பு</code>
               </div>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-1')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-1')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -466,7 +502,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-2')" :class="{ expanded: expandedSections.has('neri-2') }" data-section="neri-2">
               <h2>நெறி 2 - வேற்றுமை உருபுகள்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-2') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-2') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-2')" class="accordion-content">
 
@@ -477,7 +515,9 @@
             <div class="example-block">
               <p><strong>எடுத்துக்காட்டு:</strong> 'கண்' என்ற ஏழன் உருபு 'அதன்கண்' என்பது போன்று வருமிடங்களில் 'அதன்-கண்' என்று எடுக்கப்பட்டுள்ளது.</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-2')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-2')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -485,7 +525,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-3')" :class="{ expanded: expandedSections.has('neri-3') }" data-section="neri-3">
               <h2>நெறி 3 - கூட்டுச்சொற்கள் (Compound words)</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-3') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-3') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-3')" class="accordion-content">
 
@@ -585,7 +627,9 @@
               <div class="word-item">பேரியாறு</div>
               <div class="word-item">பேரியாழ்</div>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-3')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-3')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -593,7 +637,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-4')" :class="{ expanded: expandedSections.has('neri-4') }" data-section="neri-4">
               <h2>நெறி 4 - துணைவினைகள் (Auxiliary verbs)</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-4') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-4') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-4')" class="accordion-content">
 
@@ -660,7 +706,9 @@
               <p><em>கிளை கவின்று எழுதரு கீழ் நீர் செ அரும்பு</em> — திரு 29</p>
               <p><em>நெடு வரை இழிதரு நீத்தம் சால் அருவி</em> — மலை 554</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-4')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-4')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -668,7 +716,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-5')" :class="{ expanded: expandedSections.has('neri-5') }" data-section="neri-5">
               <h2>நெறி 5 - 'அன்ன' என்ற உவம உருபு</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-5') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-5') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-5')" class="accordion-content">
 
@@ -686,7 +736,9 @@
               <p><em>குன்று குயின்றன்ன அந்தணர் பள்ளியும்</em> — மது 474</p>
               <p class="commentary">பிரிப்பு: குயின்று அன்ன</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-5')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-5')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -694,7 +746,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-6')" :class="{ expanded: expandedSections.has('neri-6') }" data-section="neri-6">
               <h2>நெறி 6 - 'தொறு/தொறும், தோறு/தோறும்' என்ற கட்டுருபன்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-6') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-6') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-6')" class="accordion-content">
 
@@ -708,7 +762,9 @@
             <div class="example-block">
               <p>குறியீடு: எறி_தொறும், நுழை_தொறும், வைகல்_தொறும், நாள்_தொறும்</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-6')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-6')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -716,7 +772,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-7')" :class="{ expanded: expandedSections.has('neri-7') }" data-section="neri-7">
               <h2>நெறி 7 - அசைச்சொற்கள்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-7') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-7') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-7')" class="accordion-content">
 
@@ -728,7 +786,9 @@
               <p><em>அறிந்தனை ஒழுகு_மதி அறனும்_ஆர் அதுவே</em> — ஐங் 44/4</p>
               <p><em>உண்_மின் கள்ளே அடு_மின் சோறே</em> — பதி 18/1</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-7')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-7')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -736,7 +796,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-8')" :class="{ expanded: expandedSections.has('neri-8') }" data-section="neri-8">
               <h2>நெறி 8 - 'என்', 'என' என்னும் சொற்கள்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-8') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-8') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-8')" class="accordion-content">
 
@@ -756,7 +818,9 @@
               <p><em>இருவேம் ஆய்ந்த மன்றல் இது என</em> — குறி 21</p>
               <p><em>அணங்கு என உருத்த சுணங்கு அணி ஆகத்து</em> — பொரு 35</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-8')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-8')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -764,7 +828,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-9')" :class="{ expanded: expandedSections.has('neri-9') }" data-section="neri-9">
               <h2>நெறி 9 - 'உழி' என்னும் சொல்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-9') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-9') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-9')" class="accordion-content">
 
@@ -775,7 +841,9 @@
               <p class="commentary">'செல்வுழி' = 'செல்லும் இடம்'</p>
               <p>குறியீடு: செல்வு_உழி, கேட்பு_உழி</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-9')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-9')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -783,7 +851,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-10')" :class="{ expanded: expandedSections.has('neri-10') }" data-section="neri-10">
               <h2>நெறி 10 - அடுக்குத்தொடர் அல்லது சொல் இரட்டிப்பு (Repetitions)</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-10') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-10') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-10')" class="accordion-content">
 
@@ -804,7 +874,9 @@
               <p><em>முயங்குதொறும்முயங்குதொறும் உயங்க முகந்து கொண்டு</em> — அகம் 328/10</p>
               <p class="commentary">இவை தனித்தனிச் சொற்களாகவே கொள்ளப்பட்டுள்ளன.</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-10')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-10')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -812,7 +884,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('neri-11')" :class="{ expanded: expandedSections.has('neri-11') }" data-section="neri-11">
               <h2>நெறி 11 - 'ஆங்கு' எனும் சொல்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('neri-11') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('neri-11') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('neri-11')" class="accordion-content">
 
@@ -833,7 +907,9 @@
               <p><em>பெறல் அரும் கலத்தில் பெட்டாங்கு உண்க என</em> — பொரு 156</p>
               <p class="commentary">வேண்டியவாறு/வேண்டியபடி, விரும்பியவாறு/விரும்பியபடி</p>
             </div>
-            <div class="accordion-close" @click="toggleSection('neri-11')">−</div>
+            <div class="accordion-close" @click="toggleSection('neri-11')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -841,7 +917,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('notation')" :class="{ expanded: expandedSections.has('notation') }" data-section="notation">
               <h2>சொற்குறியீட்டு முறை</h2>
-              <span class="accordion-icon">{{ expandedSections.has('notation') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('notation') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('notation')" class="accordion-content">
 
@@ -861,7 +939,9 @@
               <p><strong>எடுத்துக்காட்டு:</strong></p>
               <p><code>ஆற்றலர்-மன்னே</code>, <code>நாள்-தொறும்</code>, <code>விடுநள்-மன்-கொல்லோ</code></p>
             </div>
-            <div class="accordion-close" @click="toggleSection('notation')">−</div>
+            <div class="accordion-close" @click="toggleSection('notation')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
 
@@ -869,7 +949,9 @@
           <section class="accordion-section">
             <div class="accordion-header" @click="toggleSection('references')" :class="{ expanded: expandedSections.has('references') }" data-section="references">
               <h2>பார்வை நூல்கள்</h2>
-              <span class="accordion-icon">{{ expandedSections.has('references') ? '−' : '+' }}</span>
+              <span class="accordion-icon">
+                <span class="chevron-icon" :class="expandedSections.has('references') ? 'chevron-down' : 'chevron-right'"></span>
+              </span>
             </div>
             <div v-if="expandedSections.has('references')" class="accordion-content">
 
@@ -878,7 +960,9 @@
               <li><strong>A Word Index for Cankam Literature</strong> — Thomas Lehmann and Thomas Malten, Institute of Asian Studies, Chennai, Second Edition 2007 (முன்னுரை - முனைவர்.முத்துச்சண்முகன்)</li>
               <li><strong>சங்க இலக்கியங்கள்</strong> — பன்னிரண்டு பாகங்கள், பதிப்பு - ஆசிரியர் குழு, மர்ரே எஸ்.ராஜம் பதிப்பு, வெளியிட்டோர் - நியூ செஞ்சுரி புக் ஹவுஸ் பிரைவேட் லிமிடெட், சென்னை, இரண்டாம் பதிப்பு - 1981</li>
             </ol>
-            <div class="accordion-close" @click="toggleSection('references')">−</div>
+            <div class="accordion-close" @click="toggleSection('references')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
             </div>
           </section>
         </main>
@@ -1087,18 +1171,23 @@ export default {
 }
 
 .accordion-icon {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 1rem;
   transition: all 0.3s ease;
-  min-width: 30px;
-  text-align: center;
 }
 
-.accordion-header.expanded .accordion-icon {
-  color: white;
-  transform: rotate(180deg);
+.accordion-icon .chevron-icon {
+  width: 10px;
+  height: 10px;
+  border-color: var(--primary-color);
+}
+
+.accordion-header.expanded .accordion-icon .chevron-icon {
+  border-color: white;
 }
 
 .accordion-content {
@@ -1122,13 +1211,17 @@ export default {
   cursor: pointer;
   user-select: none;
   transition: all 0.2s ease;
-  font-size: 1.5rem;
-  font-weight: 700;
   color: var(--primary-color);
 }
 
-.accordion-close:hover {
-  color: #c17a3a;
+.accordion-close .chevron-icon {
+  width: 10px;
+  height: 10px;
+  border-color: var(--primary-color);
+}
+
+.accordion-close:hover .chevron-icon {
+  border-color: #c17a3a;
 }
 
 @keyframes slideDown {
