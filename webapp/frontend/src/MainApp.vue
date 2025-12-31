@@ -161,7 +161,12 @@
             </div>
             <div v-if="selectedWorks.length > 0" class="selected-works-preview">
               <div class="selected-work-chip" v-for="workId in sortedSelectedWorks.slice(0, 15)" :key="workId">
-                <span class="work-chip-name">{{ getWorkName(workId) }}</span>
+                <span
+                  class="work-chip-name"
+                  :title="getWorkChronologyTooltip(getWorkById(workId))"
+                >
+                  {{ getWorkName(workId) }}
+                </span>
                 <button @click="removeWork(workId)" class="remove-chip-btn" title="Remove">×</button>
               </div>
               <div v-if="selectedWorks.length > 15" class="more-works-indicator">
@@ -319,6 +324,10 @@
                     Traditional Canon
                   </label>
                   <label>
+                    <input type="radio" v-model="sortBy" value="chronological" />
+                    Chronological
+                  </label>
+                  <label>
                     <input type="radio" v-model="sortBy" value="alphabetical" />
                     Alphabetical
                   </label>
@@ -340,7 +349,12 @@
                     <div class="occurrence-content">
                       <div class="occurrence-metadata">
                         <span class="occurrence-number">{{ occIndex + 1 }}.</span>
-                        <span class="work-name">{{ result.work_name_tamil }}</span>
+                        <span
+                          class="work-name"
+                          :title="getWorkChronologyTooltip(result)"
+                        >
+                          {{ result.work_name_tamil }}
+                        </span>
                         <template v-if="cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)">
                           <span class="separator"> • </span>
                           <span class="hierarchy-path">{{ cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path) }}</span>
@@ -1621,6 +1635,44 @@ export default {
       document.body.removeChild(link)
     }
 
+    // Get work object by ID
+    const getWorkById = (workId) => {
+      return works.value.find(w => w.work_id === workId)
+    }
+
+    // Format chronology tooltip text
+    const getWorkChronologyTooltip = (work) => {
+      if (!work) return ''
+
+      const startYear = work.chronology_start_year
+      const endYear = work.chronology_end_year
+      const confidence = work.chronology_confidence
+      const notes = work.chronology_notes
+
+      if (!startYear || !endYear) return ''
+
+      // Format years using standard BCE/CE notation
+      const formatYear = (year) => {
+        if (year < 0) return `${Math.abs(year)} BCE`
+        return `${year} CE`
+      }
+
+      let tooltip = `Period: ${formatYear(startYear)} - ${formatYear(endYear)}`
+
+      if (confidence) {
+        const confidenceLabel = confidence.charAt(0).toUpperCase() + confidence.slice(1)
+        tooltip += `\nConfidence: ${confidenceLabel}`
+      }
+
+      if (notes) {
+        // Truncate long notes for tooltip (max ~200 chars)
+        const truncatedNotes = notes.length > 200 ? notes.substring(0, 197) + '...' : notes
+        tooltip += `\n${truncatedNotes}`
+      }
+
+      return tooltip
+    }
+
     return {
       currentPage,
       showWelcome,
@@ -1697,7 +1749,9 @@ export default {
       showWordsExportMenu,
       currentExportWordText,
       showLinesExportMenu,
-      tryExampleSearch
+      tryExampleSearch,
+      getWorkById,
+      getWorkChronologyTooltip
     }
   }
 }

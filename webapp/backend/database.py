@@ -69,7 +69,7 @@ class Database:
                 # Build the query dynamically based on filters
                 # Add JOIN for sorting methods that need works table data
                 if sort_by in ("canonical", "chronological"):
-                    # Need works table for canonical_order and chronology_start_year
+                    # Need works table for canonical_order and chronology fields
                     query = """
                         SELECT
                             wd.word_id,
@@ -96,6 +96,9 @@ class Database:
                             wd.work_verse_count,
                             w.canonical_order,
                             w.chronology_start_year,
+                            w.chronology_end_year,
+                            w.chronology_confidence,
+                            w.chronology_notes,
                             w.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
@@ -134,6 +137,11 @@ class Database:
                             wd.total_lines,
                             wd.work_verse_count,
                             wc.position_in_collection,
+                            w.canonical_order,
+                            w.chronology_start_year,
+                            w.chronology_end_year,
+                            w.chronology_confidence,
+                            w.chronology_notes,
                             w.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
@@ -147,7 +155,7 @@ class Database:
                     """
                     params = [collection_id]
                 else:
-                    # Alphabetical - still need fields for frontend sorting
+                    # Alphabetical - still need fields for frontend sorting and tooltips
                     query = """
                         SELECT
                             wd.word_id,
@@ -172,6 +180,11 @@ class Database:
                             wd.canonical_position,
                             wd.total_lines,
                             wd.work_verse_count,
+                            w.canonical_order,
+                            w.chronology_start_year,
+                            w.chronology_end_year,
+                            w.chronology_confidence,
+                            w.chronology_notes,
                             w.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
