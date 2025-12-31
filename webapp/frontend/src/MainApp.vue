@@ -565,11 +565,8 @@ export default {
 
     watch(selectedWorks, (newVal) => {
       selectAllWorks.value = newVal.length === works.value.length
-      // Clear search results when filter changes if we have active search
-      if (searchResults.value && searchQuery.value) {
-        // Auto-search with new filter selection
-        performSearch()
-      }
+      // Note: We do NOT auto-search when filter changes
+      // User must click Search button to apply the new filter
     })
 
     // Watch sortBy to reload occurrences for expanded words with new sort order
