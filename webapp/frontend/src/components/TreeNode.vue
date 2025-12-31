@@ -1,16 +1,6 @@
 <template>
   <div class="tree-node">
     <div class="node-item" :class="{ 'has-children': hasChildren }">
-      <!-- Expand/Collapse Icon (only this is clickable for expand/collapse) -->
-      <span
-        v-if="hasChildren"
-        @click.stop="handleToggle"
-        class="toggle-icon"
-      >
-        {{ isExpanded ? '▼' : '▶' }}
-      </span>
-      <span v-else class="toggle-spacer"></span>
-
       <!-- Checkbox for selecting collection works -->
       <input
         v-if="hasWorksInTree"
@@ -22,8 +12,12 @@
       />
       <span v-else class="checkbox-spacer"></span>
 
-      <!-- Folder/Document Icon -->
-      <span class="node-icon">
+      <!-- Folder/Document Icon - Clickable for expand/collapse -->
+      <span
+        class="node-icon"
+        :class="{ 'clickable': hasChildren }"
+        @click.stop="hasChildren ? handleToggle() : null"
+      >
         {{ hasChildren ? (isExpanded ? '📂' : '📁') : '📄' }}
       </span>
 
@@ -230,7 +224,7 @@ const handleCheckboxChange = (event) => {
 
 .node-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;  /* Changed from center to flex-start for top alignment */
   padding: 0.4rem 0.5rem;
   cursor: pointer;
   border-radius: 3px;
@@ -241,40 +235,42 @@ const handleCheckboxChange = (event) => {
   background-color: #e9ecef;
 }
 
-.toggle-icon {
-  cursor: pointer;
-  user-select: none;
-  font-size: 0.75rem;
-  width: 1rem;
-  display: inline-block;
-  color: #666;
-}
-
-.toggle-icon:hover {
-  color: #000;
-}
-
-.toggle-spacer {
-  width: 1rem;
-  display: inline-block;
-}
 
 .collection-checkbox {
   margin: 0 0.5rem;
   cursor: pointer;
   width: 16px;
   height: 16px;
+  flex-shrink: 0;  /* Prevent shrinking */
+  margin-top: 0.1rem;  /* Slight adjustment for optical alignment */
 }
 
 .checkbox-spacer {
   width: 16px;
   margin: 0 0.5rem;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .node-icon {
   margin: 0 0.5rem;
   font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+  transition: transform 0.1s ease;
+}
+
+.node-icon.clickable {
+  cursor: pointer;
+}
+
+.node-icon.clickable:hover {
+  transform: scale(1.15);
+}
+
+.node-icon.clickable:active {
+  transform: scale(0.95);
 }
 
 .node-name {
@@ -304,7 +300,7 @@ const handleCheckboxChange = (event) => {
 
 .work-node {
   display: flex;
-  align-items: center;
+  align-items: flex-start;  /* Match node-item alignment */
   padding: 0.3rem 0.5rem;
   cursor: pointer;
   border-radius: 3px;
@@ -320,6 +316,8 @@ const handleCheckboxChange = (event) => {
   cursor: pointer;
   width: 16px;
   height: 16px;
+  flex-shrink: 0;  /* Prevent shrinking */
+  margin-top: 0.1rem;  /* Slight adjustment for optical alignment */
 }
 
 .work-name {
@@ -336,24 +334,18 @@ const handleCheckboxChange = (event) => {
     padding-left: 0.25rem; /* Reduced from 0.5rem */
   }
 
-  /* Reduce toggle icon size to save space */
-  .toggle-icon {
-    min-width: 36px; /* Reduced from 44px */
-    min-height: 36px;
-    display: flex;
+  /* Keep folder icons visible since they're now the expand/collapse control */
+  .node-icon {
+    font-size: 1.2rem;  /* Slightly larger for easier touch target */
+    margin: 0 0.4rem;
+  }
+
+  .node-icon.clickable {
+    min-width: 44px;  /* WCAG touch target minimum */
+    min-height: 44px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
-    width: 36px; /* Fixed width for alignment */
-  }
-
-  .toggle-spacer {
-    width: 36px; /* Match toggle-icon width */
-  }
-
-  /* Hide emoji icons to save horizontal space */
-  .node-icon {
-    display: none;
   }
 
   /* Consistent checkbox sizing and alignment */
