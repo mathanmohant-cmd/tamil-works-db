@@ -20,9 +20,10 @@ WITH RECURSIVE section_path AS (
         section_name,
         section_name_tamil,
         sort_order,
-        ARRAY[section_name]::VARCHAR[] as path_names,
-        ARRAY[section_name_tamil]::VARCHAR[] as path_names_tamil,
-        1 as depth
+        1 as depth,
+        section_id::TEXT as path,
+        level_type || ':' || section_name as path_names,
+        COALESCE(level_type_tamil, level_type) || ':' || COALESCE(section_name_tamil, section_name) as path_names_tamil
     FROM sections
     WHERE parent_section_id IS NULL
 
@@ -38,9 +39,10 @@ WITH RECURSIVE section_path AS (
         s.section_name,
         s.section_name_tamil,
         s.sort_order,
-        sp.path_names || s.section_name,
-        sp.path_names_tamil || s.section_name_tamil,
-        sp.depth + 1
+        sp.depth + 1,
+        sp.path || '\' || s.section_id::TEXT,
+        sp.path_names || ' > ' || s.level_type || ':' || s.section_name,
+        sp.path_names_tamil || ' > ' || COALESCE(s.level_type_tamil, s.level_type) || ':' || COALESCE(s.section_name_tamil, s.section_name)
     FROM sections s
     INNER JOIN section_path sp ON s.parent_section_id = sp.section_id
 )
