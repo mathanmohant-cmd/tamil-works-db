@@ -577,27 +577,32 @@ export default {
 
     // Watch sortBy to reload occurrences for expanded words with new sort order
     watch(sortBy, async (newSortBy, oldSortBy) => {
+      console.log('[DEBUG] sortBy watcher triggered:', { oldSortBy, newSortBy, expandedWordsCount: expandedWords.value.size })
+
       // Only reload if there are expanded words and sort actually changed
-      if (expandedWords.value.size === 0 || newSortBy === oldSortBy) return
+      if (expandedWords.value.size === 0 || newSortBy === oldSortBy) {
+        console.log('[DEBUG] Skipping reload - no expanded words or sort unchanged')
+        return
+      }
 
       const wordsToReload = Array.from(expandedWords.value)
+      console.log('[DEBUG] Reloading words with new sort:', wordsToReload)
 
+      // Clear ALL results (simpler and safer than filtering per word)
+      if (searchResults.value && searchResults.value.results) {
+        console.log('[DEBUG] Clearing results, had', searchResults.value.results.length, 'results')
+        searchResults.value.results = []
+      }
+
+      // Reset tracking for all expanded words
       for (const wordText of wordsToReload) {
-        // Remove all occurrences for this word
-        if (searchResults.value && searchResults.value.results) {
-          searchResults.value.results = searchResults.value.results.filter(
-            r => r.word_text !== wordText
-          )
-        }
-
-        // Reset tracking to reload from beginning
         loadedOccurrences.value[wordText] = {
           offset: 0,
           hasMore: true
         }
       }
 
-      // Now reload each word's first batch sequentially
+      // Now reload each word's first batch sequentially with new sort order
       for (const wordText of wordsToReload) {
         await loadMoreOccurrences(wordText)
       }
@@ -1313,6 +1318,8 @@ export default {
           sort_by: sortBy.value
         }
 
+        console.log('[DEBUG] loadMoreOccurrences called:', { wordText, offset: tracking.offset, sort_by: sortBy.value })
+
         if (selectedWorks.value.length > 0 && selectedWorks.value.length < works.value.length) {
           params.work_ids = selectedWorks.value.join(',')
         }
@@ -1323,13 +1330,22 @@ export default {
 
         const response = await api.searchWords(params)
 
-        // Append new results to existing results (don't remove existing ones for this word)
+        // Append new results (watcher clears all results when sort changes)
         const newResults = response.data.results || []
+
+        console.log('[DEBUG] Received', newResults.length, 'results from backend')
+        console.log('[DEBUG] First 5 results chronology:', newResults.slice(0, 5).map(r => ({
+          work_name: r.work_name_tamil?.substring(0, 10) + '...',
+          chronology: r.chronology_start_year,
+          line_number: r.line_number
+        })))
 
         searchResults.value = {
           ...searchResults.value,
           results: [...searchResults.value.results, ...newResults]
         }
+
+        console.log('[DEBUG] Total results after append:', searchResults.value.results.length)
 
         // Update tracking
         loadedOccurrences.value[wordText] = {
@@ -1350,45 +1366,10 @@ export default {
     }
 
     // Method: Get sorted occurrences for a specific word
-    // Sort by: user's sort order (canonical/alphabetical for works) → section hierarchy → verse → line
+    // IMPORTANT: Backend already returns correctly sorted data based on sortBy parameter
+    // Do NOT re-sort here - just filter and return in the order received from backend
     const getSortedWordOccurrences = (wordText) => {
-      const occurrences = getWordOccurrences(wordText)
-
-      // Sort by user's preference, then by hierarchy
-      return occurrences.sort((a, b) => {
-        // First, sort by work according to user's selected sort order
-        if (a.work_id !== b.work_id) {
-          if (sortBy.value === 'alphabetical') {
-            // Alphabetical sort by work name (Tamil)
-            const aWorkName = a.work_name_tamil || a.work_name
-            const bWorkName = b.work_name_tamil || b.work_name
-            return aWorkName.localeCompare(bWorkName, 'ta')
-          } else {
-            // Canonical sort by canonical_position
-            const aCanonical = a.canonical_position !== undefined ? a.canonical_position : a.work_id
-            const bCanonical = b.canonical_position !== undefined ? b.canonical_position : b.work_id
-            return aCanonical - bCanonical
-          }
-        }
-
-        // Within same work, sort by section_id (sections are numbered sequentially in canonical order)
-        // The section_id represents the canonical order better than section_sort_order
-        // because it was assigned during import in the correct sequence
-        if (a.section_id !== b.section_id) {
-          return a.section_id - b.section_id
-        }
-
-        // Then sort by verse_sort_order (if available) or verse_number
-        const aVerseOrder = a.verse_sort_order !== undefined ? a.verse_sort_order : a.verse_number
-        const bVerseOrder = b.verse_sort_order !== undefined ? b.verse_sort_order : b.verse_number
-
-        if (aVerseOrder !== bVerseOrder) {
-          return aVerseOrder - bVerseOrder
-        }
-
-        // Finally, sort by line_number
-        return a.line_number - b.line_number
-      })
+      return getWordOccurrences(wordText)
     }
 
     // Method: Check if there are more occurrences to load

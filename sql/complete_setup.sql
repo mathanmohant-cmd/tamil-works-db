@@ -289,6 +289,9 @@ SELECT
     w.work_name,
     w.work_name_tamil,
     w.canonical_order as canonical_position,  -- Direct from works table
+    w.chronology_start_year,
+    w.chronology_end_year,
+    w.chronology_confidence,
     sp.path_names as hierarchy_path,
     sp.path_names_tamil as hierarchy_path_tamil,
     sp.depth as hierarchy_depth
@@ -319,12 +322,16 @@ SELECT
     l.line_text,
     v.verse_id,
     v.verse_number,
+    v.work_id,  -- Work ID for efficient JOINs
     v.total_lines,  -- Total lines in this verse
     vh.verse_type,
     vh.verse_type_tamil,
     vh.work_name,
     vh.work_name_tamil,
     vh.canonical_position,  -- From works.canonical_order (via verse_hierarchy view)
+    vh.chronology_start_year,
+    vh.chronology_end_year,
+    vh.chronology_confidence,
     vh.hierarchy_path,
     vh.hierarchy_path_tamil,
     wvc.work_verse_count  -- Total verses in the work

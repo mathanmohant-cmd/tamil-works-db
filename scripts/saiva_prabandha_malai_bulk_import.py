@@ -144,12 +144,8 @@ class SaivaPrabandhaMalaiBulkImporter:
 
                 current_work_id = self._create_work(work_num, author_name, work_name)
 
-                # Create default section for this work to ensure verses have a section_id
-                current_section_id = self._create_section(
-                    current_work_id,
-                    0,  # Default section number
-                    'Main Section'  # Default section name
-                )
+                # Initialize to None - lazy creation when first verse is encountered
+                current_section_id = None
                 current_pan_metadata = None
                 verse_count = 0
                 continue
@@ -190,7 +186,15 @@ class SaivaPrabandhaMalaiBulkImporter:
 
             # Check for verse marker: #N
             verse_match = re.match(r'^#(\d+)', line)
-            if verse_match and current_work_id and current_section_id:
+            if verse_match and current_work_id:
+                # Lazy creation: create default section if needed
+                if current_section_id is None:
+                    current_section_id = self._create_section(
+                        current_work_id,
+                        1,  # Default section number
+                        None  # No name for default section
+                    )
+
                 # Save previous verse if any
                 if current_verse_lines:
                     self._add_verse(current_work_id, current_section_id, verse_count,

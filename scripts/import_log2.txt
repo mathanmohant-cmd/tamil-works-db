@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "C:\Claude\Projects\tamil-works-db\scripts\saiva_prabandha_malai_bulk_import.py", line 575, in main
+    importer.parse_file_11(file_path)
+  File "C:\Claude\Projects\tamil-works-db\scripts\saiva_prabandha_malai_bulk_import.py", line 112, in parse_file_11
+    print(f"\n=== PHASE 1: Parsing {Path(file_path).name} ===")
+  File "C:\Users\t_mat\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 26-36: character maps to <undefined>
+======================================================================
+  SAIVA PRABANDHA MALAI BULK IMPORT (FILE 11)
+======================================================================
+Database: postgresql://postgres:postgres@localhost/tamil_lit...
+File: 11.Eleventh Thirumurai.txt
+Starting IDs: work=135, section=2057, verse=64787, line=308135, word=2013555
+  [OK] 11th Thirumurai collection already exists
+
+[ERROR] Import failed: 'charmap' codec can't encode characters in position 26-36: character maps to <undefined>

@@ -67,9 +67,9 @@ class Database:
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Build the query dynamically based on filters
-                # Add JOIN for sorting methods that need works table data
+                # Canonical and chronological sorting use fields from word_details view
                 if sort_by in ("canonical", "chronological"):
-                    # Need works table for canonical_order and chronology fields
+                    # canonical_position and chronology fields now in word_details view
                     query = """
                         SELECT
                             wd.word_id,
@@ -94,24 +94,21 @@ class Database:
                             wd.canonical_position,
                             wd.total_lines,
                             wd.work_verse_count,
-                            w.canonical_order,
-                            w.chronology_start_year,
-                            w.chronology_end_year,
-                            w.chronology_confidence,
-                            w.chronology_notes,
-                            w.work_id,
+                            wd.chronology_start_year,
+                            wd.chronology_end_year,
+                            wd.chronology_confidence,
+                            wd.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
                             v.sort_order as verse_sort_order
                         FROM word_details wd
-                        LEFT JOIN works w ON wd.work_name = w.work_name
                         LEFT JOIN verses v ON wd.verse_id = v.verse_id
                         LEFT JOIN sections s ON v.section_id = s.section_id
                         WHERE 1=1
                     """
                     params = []
                 elif sort_by == "collection" and collection_id:
-                    # Need works and work_collections tables for collection sorting
+                    # Need work_collections table for collection position
                     query = """
                         SELECT
                             wd.word_id,
@@ -136,26 +133,23 @@ class Database:
                             wd.canonical_position,
                             wd.total_lines,
                             wd.work_verse_count,
+                            wd.chronology_start_year,
+                            wd.chronology_end_year,
+                            wd.chronology_confidence,
+                            wd.work_id,
                             wc.position_in_collection,
-                            w.canonical_order,
-                            w.chronology_start_year,
-                            w.chronology_end_year,
-                            w.chronology_confidence,
-                            w.chronology_notes,
-                            w.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
                             v.sort_order as verse_sort_order
                         FROM word_details wd
-                        LEFT JOIN works w ON wd.work_name = w.work_name
                         LEFT JOIN verses v ON wd.verse_id = v.verse_id
                         LEFT JOIN sections s ON v.section_id = s.section_id
-                        LEFT JOIN work_collections wc ON w.work_id = wc.work_id AND wc.collection_id = %s
+                        LEFT JOIN work_collections wc ON wd.work_id = wc.work_id AND wc.collection_id = %s
                         WHERE 1=1
                     """
                     params = [collection_id]
                 else:
-                    # Alphabetical - still need fields for frontend sorting and tooltips
+                    # Alphabetical - all needed fields are in word_details view
                     query = """
                         SELECT
                             wd.word_id,
@@ -180,17 +174,14 @@ class Database:
                             wd.canonical_position,
                             wd.total_lines,
                             wd.work_verse_count,
-                            w.canonical_order,
-                            w.chronology_start_year,
-                            w.chronology_end_year,
-                            w.chronology_confidence,
-                            w.chronology_notes,
-                            w.work_id,
+                            wd.chronology_start_year,
+                            wd.chronology_end_year,
+                            wd.chronology_confidence,
+                            wd.work_id,
                             v.section_id,
                             s.sort_order as section_sort_order,
                             v.sort_order as verse_sort_order
                         FROM word_details wd
-                        LEFT JOIN works w ON wd.work_name = w.work_name
                         LEFT JOIN verses v ON wd.verse_id = v.verse_id
                         LEFT JOIN sections s ON v.section_id = s.section_id
                         WHERE 1=1
@@ -238,7 +229,7 @@ class Database:
                 elif sort_by == "chronological":
                     # Sort by estimated chronological composition date, then hierarchical within work
                     order_clause = """
-                        ORDER BY w.chronology_start_year ASC NULLS LAST,
+                        ORDER BY wd.chronology_start_year ASC NULLS LAST,
                                  s.sort_order ASC NULLS LAST,
                                  v.sort_order ASC NULLS LAST,
                                  wd.line_number ASC,
@@ -256,7 +247,7 @@ class Database:
                 else:  # canonical (default - hierarchical by literary canon order)
                     # Sort by traditional Tamil literary canon order, then hierarchical within work
                     order_clause = """
-                        ORDER BY w.canonical_order ASC NULLS LAST,
+                        ORDER BY wd.canonical_position ASC NULLS LAST,
                                  s.sort_order ASC NULLS LAST,
                                  v.sort_order ASC NULLS LAST,
                                  wd.line_number ASC,

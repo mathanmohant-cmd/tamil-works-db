@@ -184,14 +184,21 @@ UPDATE works SET
     chronology_notes = 'Shaivite devotional poetry by Manikkavasagar, 9th century CE. Contains 400 poems. Compiled with Thiruvasagam as 8th Thirumurai. Same author and period as Thiruvasagam. Dating based on attribution to Manikkavasagar and inclusion in Thirumurai canonical collection compiled in 10th-12th century.'
 WHERE work_name LIKE '%திருக்கோவையார்%' OR work_name LIKE '%Thirukovayar%';
 
--- File 9: Thiruvisaippa (திருவிசைப்பா)
+-- File 9: Thiruvisaippa (திருவிசைப்பா) and Ninth Thirumurai (ஒன்பதாம் திருமுறை)
 -- Multiple authors, 10th century CE
 UPDATE works SET
     chronology_start_year = 900,
     chronology_end_year = 1000,
     chronology_confidence = 'medium',
-    chronology_notes = 'Part of 9th Thirumurai, Shaivite devotional poetry by eight authors from 10th century. Authors include Thirumaligai Thevar, Senthanar, Karuvur Thevar, Ponnthuruthi Nambi, and others. Kandarathithar, one contributor, was prince descended from Chola king Parantaka I. Collection discovered in Chidambaram temple during Rajaraja Chola I reign (10th century) and compiled by Nambi Andar Nambi.'
-WHERE work_name LIKE '%திருவிசைப்பா%' OR work_name LIKE '%Thiruvisaippa%';
+    chronology_notes = 'Part of 9th Thirumurai (Thiruvisaippa), Shaivite devotional poetry by eight authors from 10th century. Authors include Thirumaligai Thevar, Senthanar, Karuvur Thevar, Ponnthuruthi Nambi, Kandarathithar, Puruttothaman Nambi, Venattadikal, and Thiruvaliya Mudhanar. Kandarathithar was prince descended from Chola king Parantaka I. Collection discovered in Chidambaram temple during Rajaraja Chola I reign (10th century) and compiled by Nambi Andar Nambi.'
+WHERE chronology_start_year IS NULL
+  AND (work_name LIKE '%திருவிசைப்பா%' OR work_name LIKE '%Thiruvisaippa%'
+      OR work_id IN (SELECT wc.work_id FROM work_collections wc WHERE wc.collection_id IN (3219, 32191))
+      OR author_tamil IN (
+          'திருமாளிகைத் தேவர்', 'சேந்தனார்', 'கருவூர்த் தேவர்',
+          'பூந்துருத்தி நம்பி காடநம்பி', 'கண்டராதித்தர்', 'வேணாட்டடிகள்',
+          'திருவாலியமுதனார்', 'புருடோத்தம நம்பி', 'சேதிராயர்'
+      ));
 
 -- File 10: Thirumanthiram (திருமந்திரம்)
 -- By Tirumular, highly disputed dating (5th-12th century CE)
@@ -203,14 +210,37 @@ UPDATE works SET
     chronology_notes = 'Shaivite philosophical text by Tirumular. Dating extremely controversial among scholars, ranging from pre-Common Era to 12th century CE. S. Vaiyapuripillai suggests early 8th century based on references to Tevaram hymns, late words, and weekday mentions. Dominic Goodall suggests 11th-12th century based on religious concepts with datable Tamil labels. Some scholars propose ancient core with later interpolations. Over 3,000 verses. Wide dating range reflects fundamental scholarly disagreement and likely layered composition over centuries.'
 WHERE work_name LIKE '%திருமந்திரம்%' OR work_name LIKE '%Thirumanthiram%';
 
--- File 11: Saiva Prabandha Malai
--- 11th-12th century compilation of various Shaivite texts
+-- File 11: Saiva Prabandha Malai (Eleventh Thirumurai)
+-- Individual works composed 6th-9th century, compiled 11th-12th century by Nambi Andar Nambi
+-- IMPORTANT: Using composition dates, not compilation dates
+
+-- Karaikkal Ammaiyar (காரைக்கால் அம்மையார்) - 6th century, earliest Nayanar
 UPDATE works SET
-    chronology_start_year = 1000,
-    chronology_end_year = 1200,
-    chronology_confidence = 'low',
-    chronology_notes = 'Collection of Shaivite devotional texts forming 11th Thirumurai. Compilation dates to 11th-12th century during Chola period. Contains works by multiple authors. Part of Panniru Thirumurai (Twelve Thirumurai) canonical collection compiled by Nambi Andar Nambi. Dating based on compilation period rather than original composition dates of individual texts, which may vary.'
-WHERE work_name LIKE '%சைவ பிரபந்த மாலை%' OR work_name LIKE '%Saiva Prabandha Malai%';
+    chronology_start_year = 500,
+    chronology_end_year = 600,
+    chronology_confidence = 'medium',
+    chronology_notes = 'Shaivite devotional poetry by Karaikkal Ammaiyar (காரைக்கால் அம்மையார்), one of earliest Nayanar saints. Composed approximately 6th century CE (~550 CE). One of few female Tamil saint-poets. Pre-dates Tevaram poets (Sambandar, Appar, Sundarar). Part of Eleventh Thirumurai (Saiva Prabandha Malai) collection compiled in 11th-12th century. Dating based on hagiographical records and literary analysis.'
+WHERE author_tamil LIKE '%காரைக்கால் அம்மையார்%';
+
+-- Other Eleventh Thirumurai works - 6th-9th century composition
+-- By various Nayanars and saints (Nakkiradevar, Cheraman Perumal, etc.)
+UPDATE works SET
+    chronology_start_year = 600,
+    chronology_end_year = 900,
+    chronology_confidence = 'medium',
+    chronology_notes = 'Part of Eleventh Thirumurai (Saiva Prabandha Malai - சைவப் பிரபந்த மாலை), Shaivite devotional poetry. Individual works composed 6th-9th centuries CE during Tamil Shaiva Bhakti movement by various Nayanar saints and devotees (Nakkiradevar, Cheraman Perumal, Pattinatthadiyar, Thirumaligai Thevar, and others). Collection compiled in 11th-12th century by Nambi Andar Nambi as part of Panniru Thirumurai (Twelve Thirumurai). Dating based on hagiographical records in Periya Puranam (12th century), historical inscriptions, and literary analysis. Note: Dates reflect original composition period, not later compilation period.'
+WHERE chronology_start_year IS NULL
+  AND (work_id IN (
+      SELECT wc.work_id
+      FROM work_collections wc
+      WHERE wc.collection_id = 32118  -- Eleventh Thirumurai collection
+  ) OR work_name LIKE '%சைவ பிரபந்த மாலை%' OR work_name LIKE '%Saiva Prabandha Malai%'
+  OR author_tamil IN (
+      'நக்கீரதேவ நாயனார்', 'நம்பியாண்டார் நம்பி', 'நம்பியாண்டார் நம்பிகள்', 'பட்டினத்து அடிகள்',
+      'கபில தேவ நாயனார்', 'கபிலதேவ நாயனார்', 'சேரமான் பெருமாள் நாயனார்', 'சேரமான் பெருமாள்',
+      'அதிரா அடிகள்', 'இளம் பெருமாள் அடிகள்', 'ஐயடிகள் காடவர் கோன் நாயனார்',
+      'கல்லாட தேவ நாயனார்', 'சிவபெருமான் திருஅந்தாதி', 'திருஆலவாய் உடையார்'
+  ));
 
 -- File 12: Periya Puranam (பெரியபுராணம்)
 -- By Sekkizhar, 1133-1150 CE under Kulottunga II
@@ -223,27 +253,136 @@ WHERE work_name LIKE '%பெரியபுராணம்%' OR work_name LIKE 
 
 -- =============================================================================
 -- NAALAYIRA DIVYA PRABANDHAM - VAISHNAVITE DEVOTIONAL LITERATURE
+-- Composed by 12 Alvars (6th-9th century), compiled 9th-10th century by Nathamuni
 -- =============================================================================
 
--- All 24 works of Naalayira Divya Prabandham
+-- FIRST THREE ALVARS (Mudhal Alvars) - 7th century CE
+-- Poigai Alvar (பொய்கை ஆழ்வார்) - 7th century
+UPDATE works SET
+    chronology_start_year = 600,
+    chronology_end_year = 700,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Poigai Alvar (பொய்கை ஆழ்வார்), one of first three Alvars (Mudhal Alvars). Composed in 7th century CE during Tamil Bhakti movement. Part of Naalayira Divya Prabandham compiled by Nathamuni in 9th-10th century. Dating established through historical records, temple inscriptions, and literary cross-references. Contemporary with Bhoothathalvar and Pey Alvar.'
+WHERE author_tamil = 'பொய்கை ஆழ்வார்';
+
+-- Bhoothathalvar (பூதத்தாழ்வார்) - 7th century
+UPDATE works SET
+    chronology_start_year = 600,
+    chronology_end_year = 700,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Bhoothathalvar (பூதத்தாழ்வார்), one of first three Alvars (Mudhal Alvars). Composed in 7th century CE during Tamil Bhakti movement. Part of Naalayira Divya Prabandham. Contemporary with Poigai Alvar and Pey Alvar.'
+WHERE author_tamil = 'பூதத்தாழ்வார்';
+
+-- Pey Alvar (பேயாழ்வார்) - 7th century
+UPDATE works SET
+    chronology_start_year = 600,
+    chronology_end_year = 700,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Pey Alvar (பேயாழ்வார்), one of first three Alvars (Mudhal Alvars). Composed in 7th century CE during Tamil Bhakti movement. Part of Naalayira Divya Prabandham. Contemporary with Poigai Alvar and Bhoothathalvar.'
+WHERE author_tamil = 'பேயாழ்வார்';
+
+-- MIDDLE PERIOD ALVARS
+-- Thirumalisai Alvar (திருமழிசை ஆழ்வார்) - 7th-8th century
+UPDATE works SET
+    chronology_start_year = 650,
+    chronology_end_year = 750,
+    chronology_confidence = 'medium',
+    chronology_notes = 'Vaishnavite devotional poetry by Thirumalisai Alvar (திருமழிசை ஆழ்வார்). Composed in late 7th - early 8th century CE. Part of Naalayira Divya Prabandham. Known for Nanmugan Thiruvandhadhi and Thiruchchanda Viruttam. Dating based on literary references and position in Alvar chronology.'
+WHERE author_tamil LIKE '%திருமழிசை%';
+
+-- LATER ALVARS - 8th-9th century CE
+-- Nammalvar (நம்மாழ்வார்) - 8th-9th century, most prolific Alvar
+UPDATE works SET
+    chronology_start_year = 750,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Nammalvar (நம்மாழ்வார்), most prolific and revered Alvar. Composed in 8th-9th century CE. Contributed 1,102 verses to Naalayira Divya Prabandham, including Thiruvaimozhi (1,000 verses), Thiruviruttam, Thiruvasiriyam, and Periya Thiruvandhadhi. Dating well-established through historical records and commentary traditions. Considered supreme among Alvars in Sri Vaishnava tradition.'
+WHERE author_tamil LIKE '%நம்மாழ்%';
+
+-- Periyalvar (பெரியாழ்வார்) - 9th century
+UPDATE works SET
+    chronology_start_year = 800,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Periyalvar (பெரியாழ்வார்). Composed in 9th century CE. Part of Naalayira Divya Prabandham. Father/guru of Andal. Contributed Periyalvar Thirumozhi (Thiruppallandu) and other works celebrating child Krishna.'
+WHERE author_tamil LIKE '%பெரியாழ்%' OR author = 'Periyalvar';
+
+-- Andal (ஆண்டாள்) - 9th century, only female Alvar
+UPDATE works SET
+    chronology_start_year = 800,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Andal (ஆண்டாள்), only female Alvar. Composed in 9th century CE. Daughter/disciple of Periyalvar. Famous for Thiruppavai (30 verses) and Nachiar Thirumozhi (143 verses). Revered as incarnation of Bhudevi in Sri Vaishnava tradition. Her works emphasize intimate devotion to Vishnu/Krishna.'
+WHERE author_tamil = 'ஆண்டாள்' OR author = 'Andal';
+
+-- Kulasekara Alvar (குலசேகர ஆழ்வார்) - 9th century
+UPDATE works SET
+    chronology_start_year = 800,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Kulasekara Alvar (குலசேகர ஆழ்வார்). Composed in 9th century CE. Chera king who became Alvar. Part of Naalayira Divya Prabandham. Known for Perumal Thirumozhi expressing royal devotion to Vishnu.'
+WHERE author_tamil LIKE '%குலசேகர%' OR author LIKE '%Kulasekara%';
+
+-- Thondaradippodi Alvar (தொண்டரடிப்பொடி ஆழ்வார்) - 9th century
+UPDATE works SET
+    chronology_start_year = 800,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Thondaradippodi Alvar (தொண்டரடிப்பொடி ஆழ்வார்). Composed in 9th century CE. Part of Naalayira Divya Prabandham. Known for Thirumalai and Thiruppalliyezhuchi expressing intimate devotional style.'
+WHERE author_tamil LIKE '%தொண்டரடிப்%' OR author LIKE '%Thondaradippodi%';
+
+-- Thiruppan Alvar (திருப்பாணாழ்வார்) - 9th century
+UPDATE works SET
+    chronology_start_year = 800,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Thiruppan Alvar (திருப்பாணாழ்வார்). Composed in 9th century CE. Part of Naalayira Divya Prabandham. Famous for Amalanadipiran (10 verses) expressing intense devotional experience.'
+WHERE author_tamil LIKE '%திருப்பாண%' OR author LIKE '%Thiruppan%';
+
+-- Madhurakavi Alvar (மதுரகவி ஆழ்வார்) - 9th century
+UPDATE works SET
+    chronology_start_year = 800,
+    chronology_end_year = 900,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Madhurakavi Alvar (மதுரகவி ஆழ்வார்). Composed in 9th century CE. Only Alvar who sang exclusively about another Alvar (Nammalvar). Part of Naalayira Divya Prabandham. Known for Kanni Nun Siruthambu (11 verses) celebrating his guru Nammalvar.'
+WHERE author_tamil LIKE '%மதுரகவி%' OR author LIKE '%Madhurakavi%';
+
+-- Thirumangai Alvar (திருமங்கை ஆழ்வார்) - 7th-9th century (disputed)
+UPDATE works SET
+    chronology_start_year = 700,
+    chronology_end_year = 900,
+    chronology_confidence = 'medium',
+    chronology_notes = 'Vaishnavite devotional poetry by Thirumangai Alvar (திருமங்கை ஆழ்வார்). Dating disputed, ranging from 7th to 9th century CE. Contributed significant portions to Naalayira Divya Prabandham including Periya Thirumozhi (1,084 verses), Thirukurunthandagam, and Thirunedunthandagam. Commander-general who became Alvar. Scholarly debate on precise dating continues.'
+WHERE author_tamil LIKE '%திருமங்கை%' OR author LIKE '%Thirumangai%';
+
+-- Thiruvrangatthu Amudhanar (திருவரங்கத்து அமுதனார்) - 12th century, disciple of Ramanuja
+UPDATE works SET
+    chronology_start_year = 1100,
+    chronology_end_year = 1200,
+    chronology_confidence = 'high',
+    chronology_notes = 'Vaishnavite devotional poetry by Thiruvrangatthu Amudhanar (திருவரங்கத்து அமுதனார்), disciple of Ramanuja. Composed in 12th century CE. Latest contributor to Naalayira Divya Prabandham tradition. Known for Ramanuja Nootrandhadhi (108 verses praising Ramanuja). Well-documented dating through connection to Ramanuja (1017-1137 CE).'
+WHERE author_tamil LIKE '%அமுதனார்%' OR author LIKE '%Amudhanar%';
+
+-- CATCH-ALL: Remaining Naalayira Divya Prabandham works (if any missed by author-specific updates)
 -- Composed by Alvars (6th-9th century), compiled 9th-10th century by Nathamuni
 UPDATE works SET
     chronology_start_year = 600,
     chronology_end_year = 900,
     chronology_confidence = 'high',
     chronology_notes = 'Part of Naalayira Divya Prabandham (4,000 Divine Verses), Vaishnavite devotional poetry. Composed by 12 Alvars (Vaishnavite saint-poets) between 6th-9th centuries CE. Collection compiled in 9th-10th century by Nathamuni. Alvars were contemporary with Nayanars (Shaivite poets) during Tamil Bhakti movement. Well-documented dating through historical records, temple inscriptions, and literary cross-references. Represents Tamil Vaishnavite parallel to Shaivite Tevaram tradition.'
-WHERE work_name_tamil LIKE '%திவ்ய பிரபந்தம்%'
-   OR work_name LIKE '%Divya Prabandham%'
-   OR work_name IN (
-       'Periyalvar Thirumozhi', 'Thiruppavai', 'Nachiar Thirumozhi',
-       'Perumal Thirumozhi', 'Thiruchanda Viruttam', 'Thirumalai',
-       'Thiruppallandu', 'Amalanadipiran', 'Kanni Nun Siruthambu',
-       'Peria Thirumozhi', 'Thirukurunthandagam', 'Thirunedunthandagam',
-       'Thiruviruttam', 'Periya Thirumadal', 'Siriya Thirumadal',
-       'Ramanuja Nootrandhadhi', 'Thiruvoymozhi', 'Peria Thiruvandhadhi',
-       'Iyarpa', 'Thiruviruththam', 'Thiruvaimozhi',
-       'Thiruvachiriyam', 'Periya Thiruvandhadhi', 'Mummanikkovai'
-   );
+WHERE chronology_start_year IS NULL
+  AND (work_name_tamil LIKE '%திவ்ய பிரபந்தம்%'
+       OR work_name LIKE '%Divya Prabandham%'
+       OR work_name IN (
+           'Periyalvar Thirumozhi', 'Thiruppavai', 'Nachiar Thirumozhi',
+           'Perumal Thirumozhi', 'Thiruchanda Viruttam', 'Thirumalai',
+           'Thiruppallandu', 'Amalanadipiran', 'Kanni Nun Siruthambu',
+           'Peria Thirumozhi', 'Thirukurunthandagam', 'Thirunedunthandagam',
+           'Thiruviruttam', 'Periya Thirumadal', 'Siriya Thirumadal',
+           'Ramanuja Nootrandhadhi', 'Thiruvoymozhi', 'Peria Thiruvandhadhi',
+           'Iyarpa', 'Thiruviruththam', 'Thiruvaimozhi',
+           'Thiruvachiriyam', 'Periya Thiruvandhadhi', 'Mummanikkovai'
+       ));
 
 -- =============================================================================
 -- OTHER DEVOTIONAL LITERATURE

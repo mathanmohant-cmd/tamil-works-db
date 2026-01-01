@@ -1,0 +1,13 @@
+======================================================================
+  SAIVA PRABANDHA MALAI BULK IMPORT (FILE 11)
+======================================================================
+Database: postgresql://postgres:postgres@localhost/tamil_lit...
+Traceback (most recent call last):
+  File "C:\Claude\Projects\tamil-works-db\scripts\saiva_prabandha_malai_bulk_import.py", line 599, in <module>
+    main()
+  File "C:\Claude\Projects\tamil-works-db\scripts\saiva_prabandha_malai_bulk_import.py", line 562, in main
+    print(f"File: {file_path.name}")
+  File "C:\Users\t_mat\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 9-19: character maps to <undefined>
