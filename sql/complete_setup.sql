@@ -136,7 +136,6 @@ CREATE TABLE verses (
 
 CREATE INDEX idx_verses_section ON verses(section_id);
 CREATE INDEX idx_verses_work ON verses(work_id);
-CREATE INDEX idx_verses_chronology_sort ON verses(work_id, chronology_start_year, sort_order);
 
 -- Lines table
 CREATE TABLE lines (
