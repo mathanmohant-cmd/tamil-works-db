@@ -83,6 +83,7 @@ CREATE INDEX idx_collections_parent ON collections(parent_collection_id);
 -- Index on primary_collection_id removed (column no longer exists)
 CREATE INDEX idx_work_collections_work ON work_collections(work_id);
 CREATE INDEX idx_work_collections_collection ON work_collections(collection_id);
+CREATE INDEX idx_work_collections_position ON work_collections(collection_id, position_in_collection);
 
 -- Insert designated filter collection (Tamil Literature root)
 -- This collection serves as the root for the filter UI tree
@@ -135,6 +136,7 @@ CREATE TABLE verses (
 
 CREATE INDEX idx_verses_section ON verses(section_id);
 CREATE INDEX idx_verses_work ON verses(work_id);
+CREATE INDEX idx_verses_chronology_sort ON verses(work_id, chronology_start_year, sort_order);
 
 -- Lines table
 CREATE TABLE lines (
@@ -170,6 +172,8 @@ CREATE TABLE words (
 CREATE INDEX idx_words_line ON words(line_id);
 CREATE INDEX idx_words_text ON words(word_text);
 CREATE INDEX idx_words_root ON words(word_root);
+CREATE INDEX idx_words_text_line ON words(word_text, line_id);
+CREATE INDEX idx_words_root_text ON words(word_root, word_text) WHERE word_root IS NOT NULL;
 
 -- Junction table: Sections can belong to multiple collections
 -- Enables collections by theme (thinai), structure type, etc.
@@ -323,6 +327,7 @@ SELECT
     v.verse_id,
     v.verse_number,
     v.work_id,  -- Work ID for efficient JOINs
+    v.section_id,  -- Section ID for efficient JOINs
     v.total_lines,  -- Total lines in this verse
     vh.verse_type,
     vh.verse_type_tamil,
@@ -334,10 +339,13 @@ SELECT
     vh.chronology_confidence,
     vh.hierarchy_path,
     vh.hierarchy_path_tamil,
-    wvc.work_verse_count  -- Total verses in the work
+    wvc.work_verse_count,  -- Total verses in the work
+    s.sort_order as section_sort_order,  -- Section sort order for hierarchical sorting
+    v.sort_order as verse_sort_order     -- Verse sort order for hierarchical sorting
 FROM words w
 INNER JOIN lines l ON w.line_id = l.line_id
 INNER JOIN verses v ON l.verse_id = v.verse_id
+INNER JOIN sections s ON v.section_id = s.section_id
 INNER JOIN verse_hierarchy vh ON v.verse_id = vh.verse_id
 INNER JOIN work_verse_counts wvc ON v.work_id = wvc.work_id;
 

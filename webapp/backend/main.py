@@ -49,8 +49,14 @@ else:
         allow_headers=["*"],
     )
 
-# Initialize database
+# Initialize database with connection pool
 db = Database()
+
+# Shutdown event to close connection pool gracefully
+@app.on_event("shutdown")
+def shutdown_event():
+    """Close database connection pool on shutdown"""
+    db.close_all_connections()
 
 # Note: Admin user setup is handled lazily on first login attempt
 # The ensure_admin_user_exists() is called when verifying credentials

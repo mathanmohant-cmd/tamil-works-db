@@ -2,25 +2,47 @@
 Database connection and query functions for Tamil Words Search
 """
 import os
+import time
+import logging
 from typing import List, Dict, Optional
 import psycopg2
+from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 import bcrypt
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class Database:
     def __init__(self, connection_string: str = None):
-        """Initialize database connection"""
+        """Initialize database connection pool"""
         self.connection_string = connection_string or os.getenv(
             "DATABASE_URL",
             "postgresql://postgres:postgres@localhost:5432/tamil_literature"
         )
 
+        # Initialize connection pool
+        # minconn=2: Keep at least 2 connections alive
+        # maxconn=10: Allow up to 10 concurrent connections
+        try:
+            self.connection_pool = pool.SimpleConnectionPool(
+                minconn=2,
+                maxconn=10,
+                dsn=self.connection_string
+            )
+            if self.connection_pool:
+                print("✓ Connection pool created successfully")
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(f"✗ Error creating connection pool: {error}")
+            raise
+
     @contextmanager
     def get_connection(self):
-        """Context manager for database connections"""
-        conn = psycopg2.connect(self.connection_string)
+        """Context manager for database connections from the pool"""
+        conn = self.connection_pool.getconn()
         try:
             yield conn
             conn.commit()
@@ -28,7 +50,14 @@ class Database:
             conn.rollback()
             raise
         finally:
-            conn.close()
+            # Return connection to pool instead of closing
+            self.connection_pool.putconn(conn)
+
+    def close_all_connections(self):
+        """Close all connections in the pool (call on shutdown)"""
+        if self.connection_pool:
+            self.connection_pool.closeall()
+            print("✓ All database connections closed")
 
     def _escape_like_pattern(self, pattern: str) -> str:
         """
@@ -36,6 +65,100 @@ class Database:
         """
         # Escape backslash first, then % and _
         return pattern.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+
+    def _build_search_filters(self, search_term: str, match_type: str, word_position: str,
+                              work_ids: Optional[List[int]] = None, word_root: Optional[str] = None) -> tuple:
+        """
+        Build WHERE clause and parameters for search queries
+
+        Args:
+            search_term: The word to search for
+            match_type: "exact" or "partial"
+            word_position: "beginning", "end", or "anywhere"
+            work_ids: Optional list of work IDs to filter by
+            word_root: Optional word root to filter by
+
+        Returns:
+            Tuple of (where_clause, params)
+        """
+        where_clauses = []
+        params = []
+
+        # Add search term filter
+        if match_type == "exact":
+            where_clauses.append("word_text = %s")
+            params.append(search_term)
+        else:  # partial - apply word_position with escaped pattern
+            escaped_term = self._escape_like_pattern(search_term)
+            if word_position == "beginning":
+                where_clauses.append("word_text LIKE %s ESCAPE '\\'")
+                params.append(f"{escaped_term}%")
+            elif word_position == "end":
+                where_clauses.append("word_text LIKE %s ESCAPE '\\'")
+                params.append(f"%{escaped_term}")
+            else:  # anywhere
+                where_clauses.append("word_text LIKE %s ESCAPE '\\'")
+                params.append(f"%{escaped_term}%")
+
+        # Add work filter
+        if work_ids:
+            placeholders = ','.join(['%s'] * len(work_ids))
+            where_clauses.append(f"work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))")
+            params.extend(work_ids)
+
+        # Add word root filter
+        if word_root:
+            where_clauses.append("word_root = %s")
+            params.append(word_root)
+
+        where_clause = " AND ".join(where_clauses) if where_clauses else "1=1"
+        return where_clause, params
+
+    def _execute_query_with_timing(self, cursor, query: str, params=None, query_name: str = "query"):
+        """
+        Execute a query and log its execution time
+
+        Args:
+            cursor: Database cursor
+            query: SQL query string
+            params: Query parameters (optional)
+            query_name: Name for logging (e.g., "main_search", "count")
+
+        Returns:
+            float: Elapsed time in milliseconds
+        """
+        start_time = time.time()
+
+        # Run EXPLAIN ANALYZE if enabled (development only)
+        if os.getenv('ENABLE_QUERY_ANALYSIS') == 'true':
+            try:
+                explain_query = f"EXPLAIN ANALYZE {query}"
+                cursor.execute(explain_query, params)
+                plan = cursor.fetchall()
+                logger.info(f"\n=== EXPLAIN ANALYZE for {query_name} ===")
+                for row in plan:
+                    logger.info(row[0] if isinstance(row, tuple) else row)
+                logger.info("=" * 50)
+                # Reset cursor for actual query execution
+                cursor.connection.rollback()
+            except Exception as e:
+                logger.warning(f"EXPLAIN ANALYZE failed for {query_name}: {e}")
+
+        # Execute actual query
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+
+        elapsed_ms = (time.time() - start_time) * 1000
+
+        # Log slow queries (>100ms threshold)
+        if elapsed_ms > 100:
+            logger.warning(f"⚠️  Slow query ({elapsed_ms:.2f}ms) - {query_name}: {query[:150]}...")
+        else:
+            logger.info(f"✓ Query completed ({elapsed_ms:.2f}ms) - {query_name}")
+
+        return elapsed_ms
 
     def search_words(
         self,
@@ -69,7 +192,7 @@ class Database:
                 # Build the query dynamically based on filters
                 # Canonical and chronological sorting use fields from word_details view
                 if sort_by in ("canonical", "chronological"):
-                    # canonical_position and chronology fields now in word_details view
+                    # All fields now available in word_details view (no joins needed)
                     query = """
                         SELECT
                             wd.word_id,
@@ -98,17 +221,16 @@ class Database:
                             wd.chronology_end_year,
                             wd.chronology_confidence,
                             wd.work_id,
-                            v.section_id,
-                            s.sort_order as section_sort_order,
-                            v.sort_order as verse_sort_order
+                            wd.section_id,
+                            wd.section_sort_order,
+                            wd.verse_sort_order,
+                            COUNT(*) OVER() as total_count
                         FROM word_details wd
-                        LEFT JOIN verses v ON wd.verse_id = v.verse_id
-                        LEFT JOIN sections s ON v.section_id = s.section_id
                         WHERE 1=1
                     """
                     params = []
                 elif sort_by == "collection" and collection_id:
-                    # Need work_collections table for collection position
+                    # Join work_collections for collection position only
                     query = """
                         SELECT
                             wd.word_id,
@@ -137,19 +259,18 @@ class Database:
                             wd.chronology_end_year,
                             wd.chronology_confidence,
                             wd.work_id,
+                            wd.section_id,
                             wc.position_in_collection,
-                            v.section_id,
-                            s.sort_order as section_sort_order,
-                            v.sort_order as verse_sort_order
+                            wd.section_sort_order,
+                            wd.verse_sort_order,
+                            COUNT(*) OVER() as total_count
                         FROM word_details wd
-                        LEFT JOIN verses v ON wd.verse_id = v.verse_id
-                        LEFT JOIN sections s ON v.section_id = s.section_id
                         LEFT JOIN work_collections wc ON wd.work_id = wc.work_id AND wc.collection_id = %s
                         WHERE 1=1
                     """
                     params = [collection_id]
                 else:
-                    # Alphabetical - all needed fields are in word_details view
+                    # Alphabetical - all needed fields are in word_details view (no joins needed)
                     query = """
                         SELECT
                             wd.word_id,
@@ -178,42 +299,21 @@ class Database:
                             wd.chronology_end_year,
                             wd.chronology_confidence,
                             wd.work_id,
-                            v.section_id,
-                            s.sort_order as section_sort_order,
-                            v.sort_order as verse_sort_order
+                            wd.section_id,
+                            wd.section_sort_order,
+                            wd.verse_sort_order,
+                            COUNT(*) OVER() as total_count
                         FROM word_details wd
-                        LEFT JOIN verses v ON wd.verse_id = v.verse_id
-                        LEFT JOIN sections s ON v.section_id = s.section_id
                         WHERE 1=1
                     """
                     params = []
 
-                # Add search term condition based on match_type and word_position
-                if match_type == "exact":
-                    query += " AND wd.word_text = %s"
-                    params.append(search_term)
-                else:  # partial - apply word_position with escaped pattern
-                    escaped_term = self._escape_like_pattern(search_term)
-                    if word_position == "beginning":
-                        query += " AND wd.word_text LIKE %s ESCAPE '\\'"
-                        params.append(f"{escaped_term}%")
-                    elif word_position == "end":
-                        query += " AND wd.word_text LIKE %s ESCAPE '\\'"
-                        params.append(f"%{escaped_term}")
-                    else:  # anywhere
-                        query += " AND wd.word_text LIKE %s ESCAPE '\\'"
-                        params.append(f"%{escaped_term}%")
-
-                # Add work filter
-                if work_ids:
-                    placeholders = ','.join(['%s'] * len(work_ids))
-                    query += f" AND wd.work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
-                    params.extend(work_ids)
-
-                # Add word root filter
-                if word_root:
-                    query += " AND wd.word_root = %s"
-                    params.append(word_root)
+                # Add search filters using helper method
+                filter_where, filter_params = self._build_search_filters(
+                    search_term, match_type, word_position, work_ids, word_root
+                )
+                query += f" AND {filter_where}"
+                params.extend(filter_params)
 
                 # Determine ORDER BY clause based on sort_by parameter
                 # Default is now hierarchical (canonical) sorting
@@ -221,8 +321,8 @@ class Database:
                     # Alphabetical by work name, then hierarchical within work
                     order_clause = """
                         ORDER BY wd.work_name ASC,
-                                 s.sort_order ASC NULLS LAST,
-                                 v.sort_order ASC NULLS LAST,
+                                 wd.section_sort_order ASC NULLS LAST,
+                                 wd.verse_sort_order ASC NULLS LAST,
                                  wd.line_number ASC,
                                  wd.word_position ASC
                     """
@@ -230,8 +330,8 @@ class Database:
                     # Sort by estimated chronological composition date, then hierarchical within work
                     order_clause = """
                         ORDER BY wd.chronology_start_year ASC NULLS LAST,
-                                 s.sort_order ASC NULLS LAST,
-                                 v.sort_order ASC NULLS LAST,
+                                 wd.section_sort_order ASC NULLS LAST,
+                                 wd.verse_sort_order ASC NULLS LAST,
                                  wd.line_number ASC,
                                  wd.word_position ASC
                     """
@@ -239,8 +339,8 @@ class Database:
                     # Sort by position in collection, then hierarchical within work
                     order_clause = """
                         ORDER BY wc.position_in_collection ASC NULLS LAST,
-                                 s.sort_order ASC NULLS LAST,
-                                 v.sort_order ASC NULLS LAST,
+                                 wd.section_sort_order ASC NULLS LAST,
+                                 wd.verse_sort_order ASC NULLS LAST,
                                  wd.line_number ASC,
                                  wd.word_position ASC
                     """
@@ -248,8 +348,8 @@ class Database:
                     # Sort by traditional Tamil literary canon order, then hierarchical within work
                     order_clause = """
                         ORDER BY wd.canonical_position ASC NULLS LAST,
-                                 s.sort_order ASC NULLS LAST,
-                                 v.sort_order ASC NULLS LAST,
+                                 wd.section_sort_order ASC NULLS LAST,
+                                 wd.verse_sort_order ASC NULLS LAST,
                                  wd.line_number ASC,
                                  wd.word_position ASC
                     """
@@ -258,95 +358,42 @@ class Database:
                 query += f"{order_clause} LIMIT %s OFFSET %s"
                 params.extend([limit, offset])
 
-                # Execute search query
-                cur.execute(query, params)
+                # Execute search query with timing
+                self._execute_query_with_timing(cur, query, params, "main_search")
                 raw_results = cur.fetchall()
 
                 # Convert to regular dicts to ensure all fields are included
                 results = [dict(row) for row in raw_results]
 
-                # Debug
+                # Extract total_count from window function (same for all rows, just get from first)
+                # If no results, total_count is 0
                 if results:
+                    total_count = results[0].get('total_count', 0)
+                    # Remove total_count from results (not part of API response schema)
+                    for row in results:
+                        row.pop('total_count', None)
+
+                    # Debug
                     import sys
                     sys.stderr.write(f"\nDEBUG Keys: {list(results[0].keys())}\n")
                     sys.stderr.flush()
-
-                # Get total count for pagination
-                count_query = """
-                    SELECT COUNT(*)
-                    FROM word_details wd
-                    WHERE 1=1
-                """
-
-                # Build count_params separately (without collection_id at start)
-                count_params = []
-
-                # Add the same filters as the main query
-                if match_type == "exact":
-                    count_query += " AND wd.word_text = %s"
-                    count_params.append(search_term)
-                else:  # partial - apply word_position with escaped pattern
-                    escaped_term = self._escape_like_pattern(search_term)
-                    if word_position == "beginning":
-                        count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
-                        count_params.append(f"{escaped_term}%")
-                    elif word_position == "end":
-                        count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
-                        count_params.append(f"%{escaped_term}")
-                    else:  # anywhere
-                        count_query += " AND wd.word_text LIKE %s ESCAPE '\\'"
-                        count_params.append(f"%{escaped_term}%")
-
-                if work_ids:
-                    placeholders = ','.join(['%s'] * len(work_ids))
-                    count_query += f" AND wd.work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
-                    count_params.extend(work_ids)
-
-                if word_root:
-                    count_query += " AND wd.word_root = %s"
-                    count_params.append(word_root)
-
-                cur.execute(count_query, count_params)
-                total_count = cur.fetchone()['count']
+                else:
+                    total_count = 0
 
                 # Get unique words with counts, work breakdown, and verse count for the complete list (no pagination)
-                words_query = """
+                # Build filters once using helper method
+                filter_where, filter_params = self._build_search_filters(
+                    search_term, match_type, word_position, work_ids, word_root
+                )
+
+                words_query = f"""
                     WITH word_stats AS (
                         SELECT
                             word_text,
                             COUNT(*) as count,
                             COUNT(DISTINCT verse_id) as verse_count
                         FROM word_details
-                        WHERE 1=1
-                """
-
-                # Add the same filters as the main query
-                words_params = []
-                if match_type == "exact":
-                    words_query += " AND word_text = %s"
-                    words_params.append(search_term)
-                else:  # partial - apply word_position with escaped pattern
-                    escaped_term = self._escape_like_pattern(search_term)
-                    if word_position == "beginning":
-                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
-                        words_params.append(f"{escaped_term}%")
-                    elif word_position == "end":
-                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
-                        words_params.append(f"%{escaped_term}")
-                    else:  # anywhere
-                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
-                        words_params.append(f"%{escaped_term}%")
-
-                if work_ids:
-                    placeholders = ','.join(['%s'] * len(work_ids))
-                    words_query += f" AND work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
-                    words_params.extend(work_ids)
-
-                if word_root:
-                    words_query += " AND word_root = %s"
-                    words_params.append(word_root)
-
-                words_query += """
+                        WHERE {filter_where}
                         GROUP BY word_text
                     ),
                     work_breakdown_stats AS (
@@ -356,37 +403,15 @@ class Database:
                             work_name_tamil,
                             COUNT(*) as work_count
                         FROM word_details
-                        WHERE 1=1
-                """
-
-                # Add the same filters for the work breakdown subquery
-                if match_type == "exact":
-                    words_query += " AND word_text = %s"
-                    words_params.append(search_term)
-                else:
-                    escaped_term = self._escape_like_pattern(search_term)
-                    if word_position == "beginning":
-                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
-                        words_params.append(f"{escaped_term}%")
-                    elif word_position == "end":
-                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
-                        words_params.append(f"%{escaped_term}")
-                    else:
-                        words_query += " AND word_text LIKE %s ESCAPE '\\'"
-                        words_params.append(f"%{escaped_term}%")
-
-                if work_ids:
-                    placeholders = ','.join(['%s'] * len(work_ids))
-                    words_query += f" AND work_name IN (SELECT work_name FROM works WHERE work_id IN ({placeholders}))"
-                    words_params.extend(work_ids)
-
-                if word_root:
-                    words_query += " AND word_root = %s"
-                    words_params.append(word_root)
-
-                words_query += """
+                        WHERE {filter_where}
                         GROUP BY word_text, work_name, work_name_tamil
                     )
+                """
+
+                # Duplicate filter params for both CTEs
+                words_params = filter_params + filter_params
+
+                words_query += """
                     SELECT
                         ws.word_text,
                         ws.count,
@@ -402,7 +427,7 @@ class Database:
                     ORDER BY ws.word_text
                 """
 
-                cur.execute(words_query, words_params)
+                self._execute_query_with_timing(cur, words_query, words_params, "unique_words")
                 unique_words = [dict(row) for row in cur.fetchall()]
 
                 return {

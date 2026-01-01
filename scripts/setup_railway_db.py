@@ -65,6 +65,7 @@ def test_connection(connection_string):
 def run_sql_file(connection_string, sql_file_path, description):
     """Run a SQL file on the database"""
     import psycopg2
+    from psycopg2 import sql
 
     print(f"\n{description}...")
 
@@ -77,18 +78,53 @@ def run_sql_file(connection_string, sql_file_path, description):
             sql_content = f.read()
 
         conn = psycopg2.connect(connection_string)
+        conn.autocommit = False  # Use transactions
         cursor = conn.cursor()
-        cursor.execute(sql_content)
-        conn.commit()
-        cursor.close()
-        conn.close()
 
-        print(f"✓ {description} completed successfully!")
-        return True
+        # Execute the entire SQL file as one block
+        # psycopg2 can handle multiple statements separated by semicolons
+        try:
+            cursor.execute(sql_content)
+            conn.commit()
+            print(f"✓ {description} completed successfully!")
+            return True
+        except Exception as e:
+            conn.rollback()
+            print(f"✗ Error executing SQL: {e}")
+            print(f"\nTrying alternative method with psql...")
+            cursor.close()
+            conn.close()
+
+            # Fallback: Use psql command if available
+            import subprocess
+            try:
+                result = subprocess.run(
+                    ['psql', connection_string, '-f', sql_file_path],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                print(f"✓ {description} completed successfully (via psql)!")
+                return True
+            except subprocess.CalledProcessError as psql_error:
+                print(f"✗ psql also failed: {psql_error.stderr}")
+                return False
+            except FileNotFoundError:
+                print(f"✗ psql command not found. Please install PostgreSQL client tools.")
+                print(f"\nOriginal error: {e}")
+                return False
 
     except Exception as e:
         print(f"✗ Error: {e}")
+        import traceback
+        traceback.print_exc()
         return False
+    finally:
+        try:
+            cursor.close()
+            conn.close()
+        except:
+            pass
 
 def check_existing_schema(connection_string):
     """Check if our tables already exist"""

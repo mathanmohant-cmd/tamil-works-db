@@ -508,35 +508,41 @@ export default {
       try {
         console.log('[DEBUG] onMounted: Loading initial data...')
 
-        // Load works
-        const worksResponse = await api.getWorks()
+        // Load works, collections, designated collection, and stats in parallel
+        const [worksResponse, collectionsResponse, settingsResponse, statsResponse] = await Promise.all([
+          // 1. Load works (required)
+          api.getWorks(),
+
+          // 2. Load collections (optional - fallback to empty on error)
+          (api.getPublicCollections ? api.getPublicCollections() : Promise.resolve({ data: [] }))
+            .catch(err => {
+              console.warn('[DEBUG] Failed to load collections:', err.message)
+              return { data: [] }
+            }),
+
+          // 3. Load designated filter collection ID (optional - fallback to null on error)
+          axios.get(`${api.getBaseURL()}/settings/designated_filter_collection`)
+            .catch(err => {
+              console.warn('[DEBUG] Failed to load designated collection:', err.message)
+              return { data: { collection_id: null } }
+            }),
+
+          // 4. Load stats (required)
+          api.getStatistics()
+        ])
+
+        // Assign loaded data
         works.value = worksResponse.data
         console.log('[DEBUG] Loaded works:', works.value.length)
 
-        // Load collections for sort options (optional - fallback to empty if not available)
-        try {
-          if (api.getPublicCollections) {
-            const collectionsResponse = await api.getPublicCollections()
-            collections.value = collectionsResponse.data
-            console.log('[DEBUG] Loaded collections:', collections.value.length)
-          } else {
-            console.warn('[DEBUG] getPublicCollections not available, skipping')
-            collections.value = []
-          }
-        } catch (collErr) {
-          console.warn('[DEBUG] Failed to load collections:', collErr.message)
-          collections.value = []
-        }
+        collections.value = collectionsResponse.data
+        console.log('[DEBUG] Loaded collections:', collections.value.length)
 
-        // Load designated filter collection ID
-        try {
-          const settingsResponse = await axios.get(`${api.getBaseURL()}/settings/designated_filter_collection`)
-          designatedCollectionId.value = settingsResponse.data.collection_id
-          console.log('[DEBUG] Loaded designated collection ID:', designatedCollectionId.value)
-        } catch (settingsErr) {
-          console.warn('[DEBUG] Failed to load designated collection, using default tree view:', settingsErr.message)
-          designatedCollectionId.value = null
-        }
+        designatedCollectionId.value = settingsResponse.data.collection_id
+        console.log('[DEBUG] Loaded designated collection ID:', designatedCollectionId.value)
+
+        stats.value = statsResponse.data
+        console.log('[DEBUG] Loaded stats:', stats.value)
 
         // Check for saved selection in session storage (always restore if available)
         const savedSelection = sessionStorage.getItem('selectedWorks')
@@ -551,11 +557,6 @@ export default {
           filterMode.value = 'all'
           console.log('[DEBUG] Initialized all works:', selectedWorks.value.length, 'works')
         }
-
-        // Load stats
-        const statsResponse = await api.getStatistics()
-        stats.value = statsResponse.data
-        console.log('[DEBUG] Loaded stats:', stats.value)
       } catch (err) {
         console.error('[DEBUG] onMounted error:', err)
         error.value = 'Failed to load initial data: ' + err.message
@@ -602,10 +603,10 @@ export default {
         }
       }
 
-      // Now reload each word's first batch sequentially with new sort order
-      for (const wordText of wordsToReload) {
-        await loadMoreOccurrences(wordText)
-      }
+      // Now reload each word's first batch in parallel with new sort order
+      await Promise.all(
+        wordsToReload.map(wordText => loadMoreOccurrences(wordText))
+      )
     })
 
     // Note: We no longer auto-clear on empty searchQuery since we have a dedicated Clear button
