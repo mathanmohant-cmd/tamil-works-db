@@ -60,7 +60,7 @@
               </label>
               <label>
                 <input type="radio" v-model="filterMode" value="select" @change="handleFilterModeChange" />
-                Select from {{ works.length }} works
+                Selected works
               </label>
             </div>
             <button v-if="filterMode === 'select'" @click="toggleFilters" class="filter-selection-button">
@@ -84,7 +84,7 @@
               <span class="filter-label">Position:</span>
               <label>
                 <input type="radio" v-model="wordPosition" value="beginning" :disabled="matchType === 'exact'" />
-                Beginning
+                Start
               </label>
               <label>
                 <input type="radio" v-model="wordPosition" value="end" :disabled="matchType === 'exact'" />
@@ -92,7 +92,7 @@
               </label>
               <label>
                 <input type="radio" v-model="wordPosition" value="anywhere" :disabled="matchType === 'exact'" />
-                Anywhere
+                Any
               </label>
             </div>
           </div>
@@ -706,6 +706,18 @@ export default {
           ...response.data,
           results: [] // Start with empty results
         }
+
+        // Auto-scroll to results section after successful search
+        nextTick(() => {
+          const resultsSection = document.querySelector('.results-layout')
+          if (resultsSection) {
+            resultsSection.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            })
+          }
+        })
+
         console.log('[DEBUG] searchResults after assignment:', {
           hasUniqueWords: !!searchResults.value.unique_words,
           uniqueWordsLength: searchResults.value.unique_words?.length
@@ -937,7 +949,7 @@ export default {
       if (filterMode.value === 'all' || selectedWorks.value.length === works.value.length) {
         return 'All works'
       }
-      return `${selectedWorks.value.length}/${works.value.length} works selected - Change selection`
+      return `${selectedWorks.value.length}/${works.value.length} Selected - Change`
     })
 
     // Computed: Get filter button text
@@ -982,6 +994,17 @@ export default {
       currentPage.value = 'search'
       // Expand filters for selection
       filtersExpanded.value = true
+
+      // Auto-scroll to filters panel when opened
+      nextTick(() => {
+        const filtersPanel = document.querySelector('.filters-panel')
+        if (filtersPanel) {
+          filtersPanel.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          })
+        }
+      })
     }
 
     // Method: Close filters
