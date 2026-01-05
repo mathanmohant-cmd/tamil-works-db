@@ -182,8 +182,8 @@
     <div class="main-container">
       <!-- Help/Welcome Message -->
       <div v-if="currentPage === 'search' && !loading && showWelcome" class="welcome">
-        <h2>Experience Thamizh Literature Through Its Words</h2>
-        <p class="welcome-subtitle">Search for words across Thamizh literary works</p>
+        <h2>Find Words, Step Into Literature</h2>
+        <p class="welcome-subtitle">Trace the journey of words across centuries</p>
         <div class="quick-start">
           <h3>&#128640; Quick Start</h3>
           <ul class="tips-list">
