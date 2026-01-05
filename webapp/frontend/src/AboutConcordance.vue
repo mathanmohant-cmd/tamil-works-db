@@ -406,10 +406,9 @@
 
           <p>This tool is your gateway to exploring 2,000+ years of Tamil literary genius. Every search is an adventure — you never know what beautiful verse or profound insight you'll discover next.</p>
 
-          <p>Think of it as having a <strong>super-smart librarian</strong> who has read every Tamil book ever written and can instantly show you every page where your favorite word appears. That's the power of concordance!</p>
-            <div class="accordion-close" @click="toggleSection('qa-7')">
-              <span class="chevron-icon chevron-up"></span>
-            </div>
+          <div class="accordion-close" @click="toggleSection('qa-7')">
+            <span class="chevron-icon chevron-up"></span>
+          </div>
           </div>
         </section>
 
