@@ -236,13 +236,20 @@ body {
   opacity: 0.95;
 }
 
-.match-type-options input {
+.match-type-options input[type="radio"] {
   cursor: pointer;
-  transform: scale(1.2);
+  width: 16px;
+  height: 16px;
 }
 
 .work-filter-options label {
   font-size: 1rem;
+}
+
+.work-filter-options input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
 }
 
 .filter-selection-button {

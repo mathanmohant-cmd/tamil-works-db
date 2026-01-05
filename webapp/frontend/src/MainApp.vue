@@ -2,8 +2,8 @@
   <div id="app">
     <!-- Header -->
     <header class="app-header">
-      <h1>தமிழ் இலக்கியத் தொடரடைவு</h1>
-      <h2 >Searchable Concordance for Thamizh Literature</h2 >
+      <h1>தமிழ் இலக்கியத் சொல் தேடல்</h1>
+      <h2 >Find words across Thamizh Literature</h2 >
   
       <!-- Database Summary -->
       <div class="database-summary" v-if="stats">
@@ -182,7 +182,7 @@
     <div class="main-container">
       <!-- Help/Welcome Message -->
       <div v-if="currentPage === 'search' && !loading && showWelcome" class="welcome">
-        <h2>Welcome to Searchable Thamizh Concordance</h2>
+        <h2>Experience Thamizh Literature Through Its Words</h2>
         <p class="welcome-subtitle">Search for words across Thamizh literary works</p>
         <div class="quick-start">
           <h3>&#128640; Quick Start</h3>
@@ -196,7 +196,7 @@
           <p>Understanding what a concordance is and the <strong>word segmentation principles</strong> will help you use this tool more effectively.
           </p>
           <p class="learn-more">
-            <a href="#" @click.prevent="aboutInitialTab = 'qa'; currentPage = 'about'" class="principles-link">Learn more about concordance and how it works →</a>
+            <a href="#" @click.prevent="aboutInitialTab = 'qa'; currentPage = 'about'" class="principles-link">Learn more about this tool →</a>
           </p>
         </div>
 

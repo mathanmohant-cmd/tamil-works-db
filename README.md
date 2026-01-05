@@ -1,14 +1,27 @@
 # Tamil Literary Works Database
 
-A comprehensive PostgreSQL database schema for storing and analyzing five major Tamil literary works with word-level granularity and hierarchical structure.
+A comprehensive PostgreSQL database schema for storing and analyzing Tamil literary works with word-level granularity and hierarchical structure.
 
 ## Supported Works
 
-1. **Tolkāppiyam** (தொல்காப்பியம்) - Ancient Tamil grammar text
-2. **Sangam Literature** (சங்க இலக்கியம்) - Classical Tamil poetry collections
-3. **Thirukkural** (திருக்குறள்) - Classic Tamil couplets on ethics, politics, and love
-4. **Silapathikaram** (சிலப்பதிகாரம்) - Epic narrative of Kannagi and Kovalan
-5. **Kambaramayanam** (கம்பராமாயணம்) - Tamil version of the Ramayana
+### Classical & Sangam Literature
+- **Tolkāppiyam** (தொல்காப்பியம்) - Ancient Tamil grammar text
+- **Sangam Literature** (சங்க இலக்கியம்) - 18 classical poetry anthologies
+- **Eighteen Lesser Texts** (பதினெண்கீழ்க்கணக்கு) - Including Thirukkural
+
+### Five Great Epics (ஐம்பெருங்காப்பியங்கள்)
+- **Silapathikaram** (சிலப்பதிகாரம்), **Manimegalai** (மணிமேகலை)
+- **Seevaka Sinthamani** (சீவக சிந்தாமணி), **Valayapathi** (வளையாபதி), **Kundalakesi** (குண்டலகேசி)
+- **Kambaramayanam** (கம்பராமாயணம்) - Tamil Ramayana
+
+### Devotional Literature (~40 works)
+- **Thirumurai** (திருமுறை) - 14 Shaivite works (Collection 321)
+- **Naalayira Divya Prabandham** - 24 Vaishnavite works (Collection 322)
+- **Thiruppugazh**, **Thembavani**, **Seerapuranam** - Standalone devotional works
+
+### Ethical Literature (21 works)
+- **நீதிநூல்கள்** (Collection 325) - Auvaiyar's didactic poetry, Thirukkural commentary, modern ethical works
+- Includes: Aathichudi, Konrai Venthan, Thirukkural Kumaresa Venpa, Pudhiya Aathichudi (Bharathiyar)
 
 ## Project Structure
 

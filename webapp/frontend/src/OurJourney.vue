@@ -148,7 +148,7 @@
         </p>
         <p>With the help of AI tools and online collaboration, it is now possible to build thoughtful, reader-centered tools that support close engagement with classical literature. Used with care, these technologies can assist—rather than replace—the patient work of reading, comparison, and interpretation.
         </p>
-        <p>Prof. P. Pandiaraja's Tamil Concordance helped me get closer to Sangam Literature. My attempt is to bring it one more step forward. I hope others will take it further.
+        <p>Prof. P. Pandiaraja's <a href="http://tamilconcordance.in/">Thamizh Concordance</a> helped me get closer to Sangam Literature. My attempt is to bring it one more step forward. I hope others will take it further.
         </p>
       </section>
       <!-- Call to Action -->
@@ -156,7 +156,7 @@
         <h2><em>கற்றது கைமண் அளவு; கல்லாதது உலகளவு</em></h2>
         <p class="closing-reflection">
           
-          <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility. Selective patterns drawn from searches cannot substitute for close reading, historical context, and the patient work of interpretation. Claims about 'what Tamil literature is' based on word frequencies or isolated examples will always be incomplete—and often misleading.
+          <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility. Selective patterns drawn from searches cannot substitute for close reading, historical context, and the patient work of interpretation. Claims about 'what Thamizh literature is' based on word frequencies or isolated examples will always be incomplete—and often misleading.
           <br>These tools are meant to support deeper engagement with the texts, not to reduce them to data points in service of predetermined conclusions.
         </p>
         <h2 id="share">

@@ -25,6 +25,12 @@ This is a Tamil literature database and search application that stores and analy
    - Naalayira Divya Prabandham (நாலாயிரத் திவ்விய பிரபந்தம்) - 24 Vaishnavite works, Collection 322
    - Thiruppugazh (Murugan worship), Thembavani (Christian), Seerapuranam (Islamic)
 
+4. **Ethical Literature (நீதிநூல்கள்) - Collection 325:**
+   - 21 ethical literature works spanning 3rd-20th century CE
+   - Includes Auvaiyar's didactic poetry (Aathichudi, Konrai Venthan, Moodhurai, Nalvazhi)
+   - Thirukkural commentary (Thirukkural Kumaresa Venpa - 1,331 verses)
+   - Modern works by Bharathiyar (Pudhiya Aathichudi)
+
 **Note:** Experimental grammar analysis tools (morphology analyzer, pronunciation evaluator) are located in `tamil-grammar-tools/` directory. These are separate side projects for future exploration and not part of the main search application.
 
 ## Common Commands
@@ -165,6 +171,16 @@ python naalayira_divya_prabandham_bulk_import.py [database_url]
 python thiruppugazh_bulk_import.py [database_url]
 python thembavani_bulk_import.py [database_url]
 python seerapuranam_bulk_import.py [database_url]
+
+# ===== ETHICAL LITERATURE (நீதிநூல்கள்) =====
+# Import all 21 ethical literature works (Collection 325)
+python neethinoolkal_bulk_import.py [database_url]
+# Includes: Aathichudi, Konrai Venthan, Moodhurai, Nalvazhi (Auvaiyar),
+#           Thirukkural Kumaresa Venpa (1,331 verses), Pudhiya Aathichudi (Bharathiyar)
+# Total: 21 works, ~3,980 verses spanning 3rd-20th centuries CE
+
+# Delete நீதிநூல்கள் collection and all 21 works
+python delete_neethinoolkal.py [database_url]
 
 # All parsers support:
 # - DATABASE_URL environment variable

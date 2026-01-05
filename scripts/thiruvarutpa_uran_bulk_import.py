@@ -521,7 +521,7 @@ def main():
     try:
         importer = ThiruvarutpaImporter(db_connection)
         importer.connect()
-        importer.parse_file(file_path, 'Uran Adigal Edition', 504)
+        importer.parse_file(file_path, 'ஊரன் அடிகள் பதிப்பு', 504)
         importer.bulk_insert()
         importer.close()
 

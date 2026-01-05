@@ -8,7 +8,7 @@
           :class="{ active: activeTab === 'qa' }"
           class="tab-button"
         >
-          Understanding Concordance
+          Understanding this tool
         </button>
         <button
           @click="activeTab = 'principles'"
@@ -24,6 +24,80 @@
         <header class="page-header">
           <p class="subtitle">A Guide for First-Time Users</p>
         </header>
+
+        <section class="accordion-section">
+          <div class="accordion-header" @click="toggleSection('qa-4')" :class="{ expanded: expandedSections.has('qa-4') }" data-section="qa-4">
+            <h2>How Does This Tool Search Across Literary Works?</h2>
+            <span class="accordion-icon">
+              <span class="chevron-icon" :class="expandedSections.has('qa-4') ? 'chevron-down' : 'chevron-right'"></span>
+            </span>
+          </div>
+          <div v-if="expandedSections.has('qa-4')" class="accordion-content">
+            <p>This tool is built like a powerful database that <strong>breaks down every verse</strong> into individual words and remembers where each word came from.</p>
+
+            <div class="process-section">
+            <h3>Here's What Happens Behind the Scenes:</h3>
+
+            <div class="process-step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h4>Data Preparation:</h4>
+                <p><strong>Acknowledgment:</strong> This searchable concordance is built upon the comprehensive data compiled by <strong>Prof. Dr. P. Pandiyaraja</strong> and available at <a href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer" class="external-link">tamilconcordance.in</a>. His meticulous work in creating concordance files for Tamil literary works forms the foundation of this database.</p>
+                <p>To preserve the integrity of his structure and methodology:</p>
+                <ul>
+                  <li><strong>Sections</strong> of each work are faithfully captured</li>
+                  <li><strong>Verses</strong> within each section are clearly marked</li>
+                  <li>Each verse is broken into constituent <strong>lines</strong></li>
+                  <li>Each line is segmented into individual <strong>words</strong> following word Segmentation Principles</li>
+                  <li>Every word's <strong>position and context</strong> is stored in the database</li>
+                  <li>Works are gropued in to <strong>collections</strong> for targeted search</li>
+                </ul>
+
+                <p class="segmentation-link">
+                  To understand how Tamil words are segmented — and why segmentation is essential for accurate search, concordance, and interpretation — see
+                  <a href="#" @click.prevent="activeTab = 'principles'" class="tab-link">Word Segmentation Principles →</a>
+                </p>
+              </div>
+            </div>
+
+            <div class="process-step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h4>When You Search:</h4>
+                <ul>
+                  <li>You type a Tamil word (like "அறம்")</li>
+                  <li>The tool instantly searches through <strong>millions of stored words</strong></li>
+                  <li>It finds every match across all literary works</li>
+                  <li>It shows you the complete verse and context for each occurrence</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="process-step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h4>Smart Features:</h4>
+                <ul>
+                  <li><strong>Exact Match:</strong> Find only "அறம்" (not "அறமது" or "அறங்கள்")</li>
+                  <li><strong>Partial Match:</strong> Find all words containing "அற" (including அறம், அறன், அறிவு, etc.)</li>
+                  <li><strong>Filter by Work:</strong> Search only in Thirukkural or only in Sangam literature</li>
+                  <li><strong>Sort by Collection:</strong> See results organized by the chronological order of Tamil literature</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="database-info">
+            <h3>What's Inside the Database?</h3>
+            <p><strong>The database currently includes works from selected collections:</strong></p>
+            <p>Please click on the <strong>Selcet from works</strong> in the Search Filter to see the complete list of works available for search</p>
+            <p class="note"><em>Note: The collection continues to grow as more literary works are added to the database.</em></p>
+          </div>
+            <div class="accordion-close" @click="toggleSection('qa-4')">
+              <span class="chevron-icon chevron-up"></span>
+            </div>
+          </div>
+        </section>
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-1')" :class="{ expanded: expandedSections.has('qa-1') }" data-section="qa-1">
@@ -171,79 +245,6 @@
         </section>
 
         <section class="accordion-section">
-          <div class="accordion-header" @click="toggleSection('qa-4')" :class="{ expanded: expandedSections.has('qa-4') }" data-section="qa-4">
-            <h2>How Does This Tool Search Across Literary Works?</h2>
-            <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-4') ? 'chevron-down' : 'chevron-right'"></span>
-            </span>
-          </div>
-          <div v-if="expandedSections.has('qa-4')" class="accordion-content">
-            <p>This tool is built like a powerful database that <strong>breaks down every verse</strong> into individual words and remembers where each word came from.</p>
-
-            <div class="process-section">
-            <h3>Here's What Happens Behind the Scenes:</h3>
-
-            <div class="process-step">
-              <div class="step-number">1</div>
-              <div class="step-content">
-                <h4>Data Preparation:</h4>
-                <p><strong>Acknowledgment:</strong> This searchable concordance is built upon the comprehensive data compiled by <strong>Prof. Dr. P. Pandiyaraja</strong> and available at <a href="http://tamilconcordance.in/" target="_blank" rel="noopener noreferrer" class="external-link">tamilconcordance.in</a>. His meticulous work in creating concordance files for Tamil literary works forms the foundation of this database.</p>
-
-                <p>Every literary work is carefully analyzed using Prof. Pandiyaraja's <strong>word segmentation principles</strong>:</p>
-                <ul>
-                  <li>Each <strong>verse</strong> is identified (like a stanza in a poem)</li>
-                  <li>Each verse is broken into <strong>lines</strong></li>
-                  <li>Each line is split into individual <strong>words</strong> following specific Tamil grammar rules</li>
-                  <li>Every word's <strong>position and context</strong> is stored in the database</li>
-                </ul>
-
-                <p class="segmentation-link">
-                  To understand how Tamil words are segmented and why this matters, see the
-                  <a href="#" @click.prevent="activeTab = 'principles'" class="tab-link">Word Segmentation Principles →</a>
-                </p>
-              </div>
-            </div>
-
-            <div class="process-step">
-              <div class="step-number">2</div>
-              <div class="step-content">
-                <h4>When You Search:</h4>
-                <ul>
-                  <li>You type a Tamil word (like "அறம்")</li>
-                  <li>The tool instantly searches through <strong>millions of stored words</strong></li>
-                  <li>It finds every match across all literary works</li>
-                  <li>It shows you the complete verse and context for each occurrence</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="process-step">
-              <div class="step-number">3</div>
-              <div class="step-content">
-                <h4>Smart Features:</h4>
-                <ul>
-                  <li><strong>Exact Match:</strong> Find only "அறம்" (not "அறமது" or "அறங்கள்")</li>
-                  <li><strong>Partial Match:</strong> Find all words containing "அற" (including அறம், அறன், அறிவு, etc.)</li>
-                  <li><strong>Filter by Work:</strong> Search only in Thirukkural or only in Sangam literature</li>
-                  <li><strong>Sort by Collection:</strong> See results organized by the chronological order of Tamil literature</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div class="database-info">
-            <h3>What's Inside the Database?</h3>
-            <p><strong>The database currently includes works from selected collections:</strong></p>
-            <p>Please click on the <strong>Selcet from works</strong> in the Search Filter to see the complete list of works available for search</p>
-            <p class="note"><em>Note: The collection continues to grow as more literary works are added to the database.</em></p>
-          </div>
-            <div class="accordion-close" @click="toggleSection('qa-4')">
-              <span class="chevron-icon chevron-up"></span>
-            </div>
-          </div>
-        </section>
-
-        <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-5')" :class="{ expanded: expandedSections.has('qa-5') }" data-section="qa-5">
             <h2>How to Use This Tool?</h2>
             <span class="accordion-icon">
@@ -280,13 +281,12 @@
               </ul>
             </div>
           </div>
-              <p><em>* Note: This tool was developed for personal use and does not gaurantee accadamic level accuracy. *</em>
+              <p><em>* Rigorous care has been taken to preserve the accuracy of the data presented on tamilconcordance.in. However, this tool is designed for quick and convenient access, and it should not be considered a substitute for individual verification when used for academic or scholarly work. *</em>
               </p>
             <div class="accordion-close" @click="toggleSection('qa-5')">
               <span class="chevron-icon chevron-up"></span>
             </div>
           </div>
-          
         </section>
 
         <section class="accordion-section">
@@ -390,7 +390,6 @@
             </div>
           </div>
         </section>
-
 
         <section class="accordion-section">
           <div class="accordion-header" @click="toggleSection('qa-7')" :class="{ expanded: expandedSections.has('qa-7') }" data-section="qa-7">

@@ -515,7 +515,7 @@ def main():
     try:
         importer = ThiruvarutpaImporter(db_connection)
         importer.connect()
-        importer.parse_file(file_path, 'Balakrishnapillai Edition', 503)
+        importer.parse_file(file_path, 'பாலகிருஷ்ணபிள்ளை பதிப்பு', 503)
         importer.bulk_insert()
         importer.close()
 

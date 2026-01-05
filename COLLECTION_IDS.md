@@ -16,6 +16,8 @@ This document defines the collection IDs used across all devotional literature p
 - **321**: திருமுறை (Thirumurai) - Main collection for all 12 Thirumurai books
 - **322**: நாலாயிரத் திவ்விய பிரபந்தம் (Naalayira Divya Prabandham) - Main Vaishnavite collection
 - **323**: பக்தி இலக்கியம் (Devotional Literature) - Standalone devotional works from various traditions
+- **324**: சிற்றிலக்கியங்கள் (Minor Literary Works) - Five Jain minor epics
+- **325**: நீதிநூல்கள் (Ethical Literature) - 21 ethical literature works spanning 3rd-20th century CE
 
 ## Thirumurai Sub-Collections (Files 1-12)
 
@@ -97,6 +99,8 @@ Work 10 (திருப்பல்லாண்டு) is linked to ONE collect
 | `seerapuranam_bulk_import.py` | `delete_seerapuranam.py` | 323 (shared) |
 | `thiruvarutpa_balakrishnapillai_bulk_import.py` | `delete_thiruvarutpa_balakrishnapillai.py` | 323 (shared) |
 | `thiruvarutpa_uran_bulk_import.py` | `delete_thiruvarutpa_uran.py` | 323 (shared) |
+| `sitrilakkiyangal_bulk_import.py` | `delete_sitrilakkiyangal.py` | 324 |
+| `neethinoolkal_bulk_import.py` | `delete_neethinoolkal.py` | 325 |
 
 ## Standalone Devotional Literature (Collection 323)
 
@@ -116,10 +120,45 @@ Work 10 (திருப்பல்லாண்டு) is linked to ONE collect
   - If empty: Collection 323 is automatically deleted
   - If not empty: Collection 323 is retained for remaining works
 
+## Ethical Literature (Collection 325)
+
+**Collection 325** (நீதிநூல்கள் - Ethical Literature) contains 21 ethical literature works spanning 3rd-20th century CE.
+
+### Works in Collection 325:
+1. **Aathichudi** (ஆத்திசூடி) - Auvaiyar II, 12th century CE, 110 verses
+2. **Konrai Venthan** (கொன்றைவேந்தன்) - Auvaiyar II, 12th century CE, 92 verses
+3. **Moodhurai (Vaakkundaam)** (மூதுரை - வாக்குண்டாம்) - Auvaiyar II, 12th century CE, 31 verses
+4. **Nalvazhi** (நல்வழி) - Auvaiyar II, 12th century CE, 41 verses
+5. **Vetri Vetkai (Narunthokai)** (வெற்றி வேற்கை - நறுந்தொகை) - Unknown, 3rd-6th century CE, 85 verses
+6. **Ulaga Neethi** (உலக நீதி) - Unknown, 6th-10th century CE, 14 verses
+7. **Neethineeri Vilakkam** (நீதிநெறி விளக்கம்) - Unknown, 6th-10th century CE, 102 verses
+8. **Araneri Chaaram** (அறநெறிச்சாரம்) - Unknown, 6th-10th century CE, 226 verses
+9. **Neethi Nool** (நீதி நூல்) - Munusep Vedhanayagam Pillai, 19th century CE, 602 verses
+10. **Nanneri** (நன்னெறி) - Siva Prakasar, 17th-18th century CE, 41 verses
+11. **Neethi Chudamani** (நீதி சூடாமணி) - Unknown, 10th-15th century CE, 136 verses
+12. **Somesar** (சோமேசர்) - Unknown, 10th-15th century CE, 134 verses
+13. **Viveka Chinthamani** (விவேக சிந்தாமணி) - Unknown, 10th-15th century CE, 136 verses
+14. **Aathichudi Venpa** (ஆத்திசூடி வெண்பா) - Unknown, 12th-17th century CE, 109 verses
+15. **Neethi Venpa** (நீதி வெண்பா) - Unknown, 12th-17th century CE, 101 verses
+16. **Nanmadhi Venpa** (நன்மதி வெண்பா) - Unknown, 12th-17th century CE, 109 verses
+17. **Arungalach Cheppu** (அருங்கலச்செப்பு) - Unknown, 10th-15th century CE, 182 verses
+18. **Mudhumozhimael Vaippu** (முதுமொழிமேல் வைப்பு) - Unknown, 10th-15th century CE, 198 verses
+19. **Pudhiya Aathichudi** (புதிய ஆத்திசூடி) - Bharathiyar, 20th century CE, 111 verses
+20. **Ilaiyaar Aathichudi** (இளையார் ஆத்திசூடி) - Unknown, 15th-19th century CE, 89 verses
+21. **Thirukkural Kumaresa Venpa** (திருக்குறள் குமரேச வெண்பா) - Kumaresa Guruparar, 18th-19th century CE, 1,331 verses
+
+### Collection 325 Details:
+- **Total:** 21 works, 3,980 verses, 14,300 lines, 73,363 words
+- **Special Handling:** File 21 (Thirukkural Kumaresa Venpa) has 134 sections with verses renumbered per section
+- **Authors:** Includes works by Auvaiyar, Siva Prakasar, Bharathiyar, Kumaresa Guruparar, and others
+- **Unified Parser:** Single script (`neethinoolkal_bulk_import.py`) handles all 21 works using 2-phase bulk COPY pattern
+
 ## Notes
 
 - **Collection 3218** (8th Thirumurai) is shared by two works (Thiruvasagam + Thirukovayar), so neither delete script removes the collection
 - **Collection 323** (பக்தி இலக்கியம்) is shared by 5 standalone devotional works; delete scripts remove it only when empty
+- **Collection 324** (சிற்றிலக்கியங்கள்) contains 5 Jain minor epics; delete script removes collection when empty
+- **Collection 325** (நீதிநூல்கள்) contains 21 ethical literature works; delete script removes collection when empty
 - Devaram has the most complex structure with 3-level collection hierarchy
 - All collection IDs use dynamic queries, not hardcoded values in work metadata or bulk insert methods
 - Standalone devotional works (collection 323) span multiple religious traditions: Shaivite, Christian, Islamic, and Siddha
