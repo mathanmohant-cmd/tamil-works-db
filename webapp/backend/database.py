@@ -366,8 +366,8 @@ class Database:
                 results = [dict(row) for row in raw_results]
 
                 # Extract total_count from window function (same for all rows, just get from first)
-                # If no results, total_count is 0
-                if results:
+                # If no results OR limit=0, we need to get the count separately
+                if results and limit > 0:
                     total_count = results[0].get('total_count', 0)
                     # Remove total_count from results (not part of API response schema)
                     for row in results:
@@ -378,7 +378,20 @@ class Database:
                     sys.stderr.write(f"\nDEBUG Keys: {list(results[0].keys())}\n")
                     sys.stderr.flush()
                 else:
-                    total_count = 0
+                    # When limit=0 or no results, run a separate count query
+                    # Build count query with same filters
+                    count_query = "SELECT COUNT(*) as total FROM word_details WHERE 1=1"
+                    count_params = []
+
+                    # Add the same search filters
+                    filter_where, filter_params = self._build_search_filters(
+                        search_term, match_type, word_position, work_ids, word_root
+                    )
+                    count_query += f" AND {filter_where}"
+                    count_params.extend(filter_params)
+
+                    self._execute_query_with_timing(cur, count_query, count_params, "count_query")
+                    total_count = cur.fetchone()['total']
 
                 # Get unique words with counts, work breakdown, and verse count for the complete list (no pagination)
                 # Build filters once using helper method
