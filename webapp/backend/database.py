@@ -327,9 +327,12 @@ class Database:
                                  wd.word_position ASC
                     """
                 elif sort_by == "chronological":
-                    # Sort by estimated chronological composition date, then hierarchical within work
+                    # Sort by estimated chronological composition date,
+                    # then alphabetically by work name for same dates,
+                    # then hierarchical within work
                     order_clause = """
                         ORDER BY wd.chronology_start_year ASC NULLS LAST,
+                                 wd.work_name ASC,
                                  wd.section_sort_order ASC NULLS LAST,
                                  wd.verse_sort_order ASC NULLS LAST,
                                  wd.line_number ASC,
