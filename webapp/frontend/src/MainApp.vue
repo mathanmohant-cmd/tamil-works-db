@@ -313,6 +313,13 @@
                     >
                       📥 Export Lines
                     </button>
+                    <button
+                      @click="showVersesExportMenu(word.text)"
+                      class="export-button-combined"
+                      title="Export complete verses for this word"
+                    >
+                      📥 Export Verses
+                    </button>
                   </div>
                 </div>
 
@@ -431,6 +438,22 @@
       </div>
     </div>
 
+    <!-- Export Verses Menu -->
+    <div v-if="currentExportVersesWordText" class="export-modal" @click="currentExportVersesWordText = null">
+      <div class="export-modal-content" @click.stop>
+        <h3>Export Verses for "{{ currentExportVersesWordText }}"</h3>
+        <button @click="exportWordVerses('csv', currentExportVersesWordText)" class="export-modal-option">
+          📊 Export as CSV
+        </button>
+        <button @click="exportWordVerses('txt', currentExportVersesWordText)" class="export-modal-option">
+          📄 Export as TXT
+        </button>
+        <button @click="currentExportVersesWordText = null" class="export-modal-cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -499,6 +522,7 @@ export default {
     // Export menu state
     const showWordsExportMenu = ref(false)
     const currentExportWordText = ref(null)
+    const currentExportVersesWordText = ref(null)
 
     // Word list sort state
     const wordListSortBy = ref('alphabetical')
@@ -1108,6 +1132,11 @@ export default {
       currentExportWordText.value = wordText
     }
 
+    // Method: Show verses export menu
+    const showVersesExportMenu = (wordText) => {
+      currentExportVersesWordText.value = wordText
+    }
+
     // Method: Export words to CSV
     const exportWordsToCSV = () => {
       if (!uniqueWords.value || uniqueWords.value.length === 0) return
@@ -1555,9 +1584,22 @@ export default {
       const usageCount = wordInfo?.count || occurrences.length
       const verseCount = wordInfo?.verse_count || 0
 
-      // Get work breakdown
+      // Get work breakdown in user's selected sort order
       const workCounts = getWorkCounts(wordText)
-      const worksList = workCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+      // Extract unique works in the order they appear in sorted occurrences
+      const workOrderMap = new Map()
+      occurrences.forEach((result, index) => {
+        if (!workOrderMap.has(result.work_name)) {
+          workOrderMap.set(result.work_name, index)
+        }
+      })
+      // Sort workCounts by the order they appear in occurrences
+      const sortedWorkCounts = [...workCounts].sort((a, b) => {
+        const indexA = workOrderMap.get(a.work_name) ?? Infinity
+        const indexB = workOrderMap.get(b.work_name) ?? Infinity
+        return indexA - indexB
+      })
+      const worksList = sortedWorkCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
 
       // Create CSV content
       const headers = ['Work & Location', 'Line']
@@ -1606,9 +1648,22 @@ export default {
       const usageCount = wordInfo?.count || occurrences.length
       const verseCount = wordInfo?.verse_count || 0
 
-      // Get work breakdown
+      // Get work breakdown in user's selected sort order
       const workCounts = getWorkCounts(wordText)
-      const worksList = workCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+      // Extract unique works in the order they appear in sorted occurrences
+      const workOrderMap = new Map()
+      occurrences.forEach((result, index) => {
+        if (!workOrderMap.has(result.work_name)) {
+          workOrderMap.set(result.work_name, index)
+        }
+      })
+      // Sort workCounts by the order they appear in occurrences
+      const sortedWorkCounts = [...workCounts].sort((a, b) => {
+        const indexA = workOrderMap.get(a.work_name) ?? Infinity
+        const indexB = workOrderMap.get(b.work_name) ?? Infinity
+        return indexA - indexB
+      })
+      const worksList = sortedWorkCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
 
       // Create TXT content
       let content = 'Data Source: tamilconcordence.in\n'
@@ -1637,6 +1692,262 @@ export default {
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
       link.setAttribute('download', `tamizh_lines_${wordText}_${new Date().toISOString().split('T')[0]}.txt`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    // Method: Export verses for a specific word (CSV or TXT)
+    const exportWordVerses = async (format, wordText) => {
+      currentExportVersesWordText.value = null
+      if (format === 'csv') {
+        await exportVersesToCSV(wordText)
+      } else if (format === 'txt') {
+        await exportVersesToTXT(wordText)
+      }
+    }
+
+    // Method: Export complete verses for a specific word to CSV
+    const exportVersesToCSV = async (wordText) => {
+      const occurrences = getWordOccurrences(wordText)
+      if (occurrences.length === 0) return
+
+      // Get word details
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+      const usageCount = wordInfo?.count || occurrences.length
+      const verseCount = wordInfo?.verse_count || 0
+
+      // Get work breakdown in user's selected sort order
+      const workCounts = getWorkCounts(wordText)
+      // Extract unique works in the order they appear in sorted occurrences
+      const workOrderMap = new Map()
+      occurrences.forEach((result, index) => {
+        if (!workOrderMap.has(result.work_name)) {
+          workOrderMap.set(result.work_name, index)
+        }
+      })
+      // Sort workCounts by the order they appear in occurrences
+      const sortedWorkCounts = [...workCounts].sort((a, b) => {
+        const indexA = workOrderMap.get(a.work_name) ?? Infinity
+        const indexB = workOrderMap.get(b.work_name) ?? Infinity
+        return indexA - indexB
+      })
+      const worksList = sortedWorkCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+
+      // Get unique verses - preserve order from user's selected sort preference
+      const uniqueVerses = new Map()
+      occurrences.forEach((result, index) => {
+        if (!uniqueVerses.has(result.verse_id)) {
+          uniqueVerses.set(result.verse_id, { result, firstIndex: index })
+        }
+      })
+
+      // Fetch complete verse data for each unique verse
+      const verses = []
+      for (const [verseId, { result, firstIndex }] of uniqueVerses) {
+        try {
+          const response = await api.getVerse(verseId)
+          const verseData = response.data
+
+          // Combine all lines into complete verse text (or partial if > 10 lines)
+          const allLines = verseData.lines.sort((a, b) => a.line_number - b.line_number)
+          let verseText
+          let isPartial = false
+
+          if (allLines.length > 10) {
+            // Find line containing the word
+            const matchIndex = allLines.findIndex(line => line.line_text.includes(wordText))
+
+            if (matchIndex !== -1) {
+              isPartial = true
+              const startIdx = Math.max(0, matchIndex - 3)
+              const endIdx = Math.min(allLines.length, matchIndex + 4)
+
+              const contextLines = allLines.slice(startIdx, endIdx).map(line => line.line_text)
+
+              // Add markers
+              if (startIdx > 0) {
+                contextLines.unshift('[...]')
+              }
+              if (endIdx < allLines.length) {
+                contextLines.push('[...]')
+              }
+
+              verseText = contextLines.join('\n')
+            } else {
+              // Fallback if word not found
+              verseText = allLines.map(line => line.line_text).join('\n')
+            }
+          } else {
+            verseText = allLines.map(line => line.line_text).join('\n')
+          }
+
+          const hierarchyPath = cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)
+          const location = hierarchyPath
+            ? `${result.work_name_tamil} • ${hierarchyPath} • ${formatVerseAndLine(result, true)}${isPartial ? ' (partial)' : ''}`
+            : `${result.work_name_tamil} • ${formatVerseAndLine(result, true)}${isPartial ? ' (partial)' : ''}`
+
+          verses.push({
+            location,
+            verseText,
+            firstIndex  // Use index from user's selected sort order
+          })
+        } catch (err) {
+          console.error(`Failed to fetch verse ${verseId}:`, err)
+        }
+      }
+
+      // Sort verses by their order in the user's selected sort preference
+      verses.sort((a, b) => a.firstIndex - b.firstIndex)
+
+      // Create CSV content
+      const headers = ['Work & Location', 'Complete Verse']
+      const rows = verses.map(v => [v.location, v.verseText])
+
+      const csvContent = [
+        '"Data Source: tamilconcordence.in"',
+        '"Compiled by: Prof. Dr. P. Pandiyaraja"',
+        '',
+        `"Search Term: ${searchResults.value.search_term || searchQuery.value.trim()}"`,
+        `"Found Word: ${wordText}"`,
+        `"Total Works: ${workCounts.length}"`,
+        `"Total Verses: ${verseCount}"`,
+        `"Total Usage: ${usageCount}"`,
+        `"Works: ${worksList}"`,
+        '',
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamizh_verses_${wordText}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    // Method: Export complete verses for a specific word to TXT
+    const exportVersesToTXT = async (wordText) => {
+      const occurrences = getWordOccurrences(wordText)
+      if (occurrences.length === 0) return
+
+      // Get word details
+      const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+      const usageCount = wordInfo?.count || occurrences.length
+      const verseCount = wordInfo?.verse_count || 0
+
+      // Get work breakdown in user's selected sort order
+      const workCounts = getWorkCounts(wordText)
+      // Extract unique works in the order they appear in sorted occurrences
+      const workOrderMap = new Map()
+      occurrences.forEach((result, index) => {
+        if (!workOrderMap.has(result.work_name)) {
+          workOrderMap.set(result.work_name, index)
+        }
+      })
+      // Sort workCounts by the order they appear in occurrences
+      const sortedWorkCounts = [...workCounts].sort((a, b) => {
+        const indexA = workOrderMap.get(a.work_name) ?? Infinity
+        const indexB = workOrderMap.get(b.work_name) ?? Infinity
+        return indexA - indexB
+      })
+      const worksList = sortedWorkCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+
+      // Get unique verses - preserve order from user's selected sort preference
+      const uniqueVerses = new Map()
+      occurrences.forEach((result, index) => {
+        if (!uniqueVerses.has(result.verse_id)) {
+          uniqueVerses.set(result.verse_id, { result, firstIndex: index })
+        }
+      })
+
+      // Fetch complete verse data for each unique verse
+      const verses = []
+      for (const [verseId, { result, firstIndex }] of uniqueVerses) {
+        try {
+          const response = await api.getVerse(verseId)
+          const verseData = response.data
+
+          // Combine all lines into complete verse text (or partial if > 10 lines)
+          const allLines = verseData.lines.sort((a, b) => a.line_number - b.line_number)
+          let verseLines
+          let isPartial = false
+
+          if (allLines.length > 10) {
+            // Find line containing the word
+            const matchIndex = allLines.findIndex(line => line.line_text.includes(wordText))
+
+            if (matchIndex !== -1) {
+              isPartial = true
+              const startIdx = Math.max(0, matchIndex - 3)
+              const endIdx = Math.min(allLines.length, matchIndex + 4)
+
+              verseLines = allLines.slice(startIdx, endIdx).map(line => line.line_text)
+
+              // Add markers
+              if (startIdx > 0) {
+                verseLines.unshift('[...]')
+              }
+              if (endIdx < allLines.length) {
+                verseLines.push('[...]')
+              }
+            } else {
+              // Fallback if word not found
+              verseLines = allLines.map(line => line.line_text)
+            }
+          } else {
+            verseLines = allLines.map(line => line.line_text)
+          }
+
+          const hierarchyPath = cleanHierarchyPath(result.hierarchy_path_tamil || result.hierarchy_path)
+          const location = hierarchyPath
+            ? `${result.work_name_tamil} • ${hierarchyPath} • ${formatVerseAndLine(result, true)}${isPartial ? ' (partial)' : ''}`
+            : `${result.work_name_tamil} • ${formatVerseAndLine(result, true)}${isPartial ? ' (partial)' : ''}`
+
+          verses.push({
+            location,
+            verseLines,
+            firstIndex  // Use index from user's selected sort order
+          })
+        } catch (err) {
+          console.error(`Failed to fetch verse ${verseId}:`, err)
+        }
+      }
+
+      // Sort verses by their order in the user's selected sort preference
+      verses.sort((a, b) => a.firstIndex - b.firstIndex)
+
+      // Create TXT content
+      let content = 'Data Source: tamilconcordence.in\n'
+      content += 'Compiled by: Prof. Dr. P. Pandiyaraja\n\n'
+      content += `Search Term: ${searchResults.value.search_term || searchQuery.value.trim()}\n`
+      content += `Found Word: ${wordText}\n`
+      content += `Total Works: ${workCounts.length}\n`
+      content += `Total Verses: ${verseCount}\n`
+      content += `Total Usage: ${usageCount}\n`
+      content += `Works: ${worksList}\n\n`
+      content += '---\n\n'
+
+      verses.forEach((verse, index) => {
+        content += `${index + 1}. ${verse.location}\n`
+        verse.verseLines.forEach(line => {
+          content += `   ${line}\n`
+        })
+        content += '\n'
+      })
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `tamizh_verses_${wordText}_${new Date().toISOString().split('T')[0]}.txt`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
@@ -1757,6 +2068,9 @@ export default {
       showWordsExportMenu,
       currentExportWordText,
       showLinesExportMenu,
+      currentExportVersesWordText,
+      showVersesExportMenu,
+      exportWordVerses,
       tryExampleSearch,
       getWorkById,
       getWorkChronologyTooltip
