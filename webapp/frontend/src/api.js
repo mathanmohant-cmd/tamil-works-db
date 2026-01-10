@@ -160,5 +160,39 @@ export default {
     return api.patch(`/admin/collections/${collectionId}/works/${workId}/position`, null, {
       params: { position }
     })
+  },
+
+  // =========================================================================
+  // Works Browser APIs
+  // =========================================================================
+
+  /**
+   * Get detailed information about a specific work
+   */
+  getWorkDetail(workId) {
+    return api.get(`/works/${workId}`)
+  },
+
+  /**
+   * Get hierarchical section structure for a work
+   */
+  getWorkSections(workId) {
+    return api.get(`/works/${workId}/sections`)
+  },
+
+  /**
+   * Get paginated verses in a section
+   */
+  getSectionVerses(sectionId, limit = 100, offset = 0) {
+    return api.get(`/sections/${sectionId}/verses`, {
+      params: { limit, offset }
+    })
+  },
+
+  /**
+   * Get previous and next verse IDs for navigation
+   */
+  getVerseNavigation(verseId) {
+    return api.get(`/verses/${verseId}/navigation`)
   }
 }

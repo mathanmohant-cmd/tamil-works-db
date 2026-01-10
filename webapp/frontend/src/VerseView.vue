@@ -1,7 +1,9 @@
 <template>
   <div class="verse-view-container">
     <div class="verse-view-header">
-      <button @click="goBack" class="back-button">← Back to Search Results</button>
+      <button @click="goBack" class="back-button">
+        {{ backButtonText }}
+      </button>
     </div>
 
     <div v-if="loading" class="loading">Loading verse...</div>
@@ -29,9 +31,30 @@
             </template>
           </h2>
         </div>
-        <button @click="toggleExportMenu" class="export-verse-button">
-          📥 Export
-        </button>
+        <div class="verse-actions">
+          <!-- Navigation buttons (only shown when NOT from search and navigation is available) -->
+          <div v-if="navigation && !fromSearch" class="verse-navigation">
+            <button
+              @click="navigateToPrevVerse"
+              :disabled="!navigation.prev_verse_id"
+              class="nav-button"
+              title="Previous verse"
+            >
+              ← Prev
+            </button>
+            <button
+              @click="navigateToNextVerse"
+              :disabled="!navigation.next_verse_id"
+              class="nav-button"
+              title="Next verse"
+            >
+              Next →
+            </button>
+          </div>
+          <button @click="toggleExportMenu" class="export-verse-button">
+            📥 Export
+          </button>
+        </div>
       </div>
 
       <!-- Export Menu -->
@@ -63,15 +86,20 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import api from './api.js'
 
 export default {
   name: 'VerseView',
   props: {
     verseId: {
-      type: Number,
+      type: [Number, String],
       required: true
+    },
+    workId: {
+      type: [Number, String],
+      default: null
     },
     searchWord: {
       type: String,
@@ -80,10 +108,28 @@ export default {
   },
   emits: ['close'],
   setup(props, { emit }) {
+    const router = useRouter()
+    const route = useRoute()
+
     const verse = ref(null)
+    const navigation = ref(null)
     const loading = ref(true)
     const error = ref(null)
     const showExportMenu = ref(false)
+
+    // Get search word from query params or props
+    const searchWord = computed(() => route.query.word || props.searchWord || '')
+
+    // Detect navigation source
+    const fromSearch = computed(() => route.query.from === 'search')
+
+    // Dynamic back button text
+    const backButtonText = computed(() => {
+      if (fromSearch.value) {
+        return '← Back to Search Results'
+      }
+      return '← Back'
+    })
 
     const loadVerse = async () => {
       loading.value = true
@@ -92,6 +138,11 @@ export default {
       try {
         const response = await api.getVerse(props.verseId)
         verse.value = response.data
+
+        // Load navigation if in router context (workId is available)
+        if (props.workId || route.params.workId) {
+          await loadNavigation()
+        }
       } catch (err) {
         error.value = 'Failed to load verse: ' + err.message
       } finally {
@@ -99,8 +150,60 @@ export default {
       }
     }
 
+    const loadNavigation = async () => {
+      try {
+        const response = await api.getVerseNavigation(props.verseId)
+        navigation.value = response.data
+      } catch (err) {
+        console.error('Failed to load navigation:', err)
+        // Don't set error - navigation is optional
+      }
+    }
+
+    const navigateToPrevVerse = () => {
+      if (navigation.value?.prev_verse_id) {
+        const workId = props.workId || route.params.workId
+        // Use replace instead of push to avoid cluttering browser history
+        router.replace({
+          name: 'VerseView',
+          params: {
+            workId: workId,
+            verseId: navigation.value.prev_verse_id
+          }
+        })
+      }
+    }
+
+    const navigateToNextVerse = () => {
+      if (navigation.value?.next_verse_id) {
+        const workId = props.workId || route.params.workId
+        // Use replace instead of push to avoid cluttering browser history
+        router.replace({
+          name: 'VerseView',
+          params: {
+            workId: workId,
+            verseId: navigation.value.next_verse_id
+          }
+        })
+      }
+    }
+
     const goBack = () => {
-      emit('close')
+      // Check if we're in router mode by checking for workId param
+      const isRouterMode = props.workId || route.params.workId
+
+      if (!isRouterMode) {
+        // Modal mode: use emit to close the overlay
+        emit('close')
+        return
+      }
+
+      // Router mode: smart back navigation
+      if (fromSearch.value) {
+        router.push({ name: 'Search' })
+      } else {
+        router.back()
+      }
     }
 
     const cleanHierarchyPath = (path) => {
@@ -130,7 +233,8 @@ export default {
     }
 
     const highlightSearchWord = (lineText) => {
-      if (!props.searchWord || !lineText) return lineText
+      const wordToHighlight = searchWord.value
+      if (!wordToHighlight || !lineText) return lineText
 
       const escapeHtml = (text) => {
         const div = document.createElement('div')
@@ -139,7 +243,7 @@ export default {
       }
 
       const escapedLineText = escapeHtml(lineText)
-      const regex = new RegExp(`(${props.searchWord})`, 'g')
+      const regex = new RegExp(`(${wordToHighlight})`, 'g')
       return escapedLineText.replace(regex, '<span class="word-highlight">$1</span>')
     }
 
@@ -247,12 +351,23 @@ export default {
       document.addEventListener('click', handleClickOutside)
     })
 
+    // Watch for route changes to reload verse
+    watch(() => props.verseId, () => {
+      loadVerse()
+    })
+
     return {
       verse,
+      navigation,
       loading,
       error,
       showExportMenu,
+      searchWord,
+      fromSearch,
+      backButtonText,
       goBack,
+      navigateToPrevVerse,
+      navigateToNextVerse,
       cleanHierarchyPath,
       highlightSearchWord,
       shouldShowLineNumber,
@@ -354,6 +469,40 @@ export default {
   font-weight: 400;
   color: var(--text-secondary);
   font-size: 1rem;
+}
+
+.verse-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.verse-navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-button {
+  padding: 0.5rem 1rem;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover:not(:disabled) {
+  background: #1565c0;
+  transform: translateY(-1px);
+}
+
+.nav-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .export-verse-button {
@@ -486,6 +635,22 @@ export default {
 
   .verse-header {
     padding: 0.75rem 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .verse-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .verse-navigation {
+    flex: 1;
+  }
+
+  .nav-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
   }
 
   .verse-header h2 {

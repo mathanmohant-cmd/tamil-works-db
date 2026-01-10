@@ -635,9 +635,10 @@ body {
 .word-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 2px !important;
   flex: 1;
   min-width: 0;
+  padding-left: 0.5rem !important;
 }
 
 .word-number {
@@ -728,34 +729,32 @@ body {
   justify-content: center;
 }
 
-/* CSS Triangle Chevron Icons */
+/* CSS Angle Chevron Icons - Simple lines forming > v ^ */
 .chevron-icon {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-style: solid;
-  border-color: currentColor;
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
   transition: transform 0.2s ease;
 }
 
 .chevron-right {
-  border-width: 2px 2px 0 0;
-  transform: rotate(45deg);
+  transform: rotate(-45deg);
 }
 
 .chevron-down {
-  border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
 .chevron-up {
-  border-width: 2px 0 0 2px;
-  transform: rotate(45deg);
+  transform: rotate(-135deg);
 }
 
 /* Expanded Content */
 .word-expanded-content {
-  background: #f9f9f9;
+  background: transparent;
   border-top: 1px solid var(--border-color);
   padding: 0.5rem 0;
   animation: slideDown 0.3s ease-out;
@@ -1737,7 +1736,7 @@ body {
   }
 
   .word-info {
-    gap: 0.35rem;
+    gap: 2px;
   }
 
   .word-text {
@@ -1810,6 +1809,10 @@ body {
     padding: 1rem;
     width: 100%;
     max-width: 100%;
+  }
+
+  .results-layout {
+    padding: 1rem;
   }
 
   .result-item {
@@ -1917,6 +1920,17 @@ body {
   .autocomplete-wrapper,
   .search-input {
     max-width: 100%;
+  }
+}
+
+/* Extra small screens - even less padding */
+@media (max-width: 480px) {
+  .main-container {
+    padding: 0.5rem;
+  }
+
+  .results-layout {
+    padding: 0.5rem;
   }
 }
 
