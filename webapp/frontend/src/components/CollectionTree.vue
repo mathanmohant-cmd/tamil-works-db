@@ -343,10 +343,7 @@ onMounted(async () => {
 
 <style scoped>
 .collection-tree {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 1rem;
+  /* No separate box - blend into parent container */
   margin-bottom: 1rem;
 }
 
@@ -433,7 +430,6 @@ onMounted(async () => {
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .collection-tree {
-    padding: 0.75rem; /* Reduced padding */
     margin-bottom: 1rem;
     overflow-x: hidden; /* Prevent horizontal scroll */
   }
