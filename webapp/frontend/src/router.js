@@ -99,24 +99,14 @@ const router = createRouter({
   routes
 })
 
-// Check if Works Browser should be accessible
-function isWorksBrowserAllowed() {
-  const hostname = window.location.hostname
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '192.168.1.198'
-}
-
-// Dynamic page titles and route guards
+// Dynamic page titles
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title
     ? `${to.meta.title} | Thamizh Word Explorer`
     : 'Thamizh Word Explorer'
 
-  // Block access to Works Browser routes if not on allowed hostname
-  if (to.path.startsWith('/works') && !isWorksBrowserAllowed()) {
-    next('/search')
-    return
-  }
-
+  // Note: Works Browser routes are always accessible (for verse links from search)
+  // Only the navigation tab is hidden in production
   next()
 })
 
