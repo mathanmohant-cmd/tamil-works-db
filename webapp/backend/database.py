@@ -34,9 +34,9 @@ class Database:
                 dsn=self.connection_string
             )
             if self.connection_pool:
-                print("✓ Connection pool created successfully")
+                print("[OK] Connection pool created successfully")
         except (Exception, psycopg2.DatabaseError) as error:
-            print(f"✗ Error creating connection pool: {error}")
+            print(f"[ERROR] Error creating connection pool: {error}")
             raise
 
     @contextmanager
@@ -67,7 +67,8 @@ class Database:
         return pattern.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
 
     def _build_search_filters(self, search_term: str, match_type: str, word_position: str,
-                              work_ids: Optional[List[int]] = None, word_root: Optional[str] = None) -> tuple:
+                              work_ids: Optional[List[int]] = None, word_root: Optional[str] = None,
+                              word_text: Optional[str] = None) -> tuple:
         """
         Build WHERE clause and parameters for search queries
 
@@ -77,6 +78,7 @@ class Database:
             word_position: "beginning", "end", or "anywhere"
             work_ids: Optional list of work IDs to filter by
             word_root: Optional word root to filter by
+            word_text: Optional specific word text to filter by (overrides search_term matching)
 
         Returns:
             Tuple of (where_clause, params)
@@ -84,21 +86,26 @@ class Database:
         where_clauses = []
         params = []
 
-        # Add search term filter
-        if match_type == "exact":
+        # If word_text is provided, filter by exact word only (overrides search_term pattern matching)
+        if word_text:
             where_clauses.append("word_text = %s")
-            params.append(search_term)
-        else:  # partial - apply word_position with escaped pattern
-            escaped_term = self._escape_like_pattern(search_term)
-            if word_position == "beginning":
-                where_clauses.append("word_text LIKE %s ESCAPE '\\'")
-                params.append(f"{escaped_term}%")
-            elif word_position == "end":
-                where_clauses.append("word_text LIKE %s ESCAPE '\\'")
-                params.append(f"%{escaped_term}")
-            else:  # anywhere
-                where_clauses.append("word_text LIKE %s ESCAPE '\\'")
-                params.append(f"%{escaped_term}%")
+            params.append(word_text)
+        else:
+            # Add search term filter
+            if match_type == "exact":
+                where_clauses.append("word_text = %s")
+                params.append(search_term)
+            else:  # partial - apply word_position with escaped pattern
+                escaped_term = self._escape_like_pattern(search_term)
+                if word_position == "beginning":
+                    where_clauses.append("word_text LIKE %s ESCAPE '\\'")
+                    params.append(f"{escaped_term}%")
+                elif word_position == "end":
+                    where_clauses.append("word_text LIKE %s ESCAPE '\\'")
+                    params.append(f"%{escaped_term}")
+                else:  # anywhere
+                    where_clauses.append("word_text LIKE %s ESCAPE '\\'")
+                    params.append(f"%{escaped_term}%")
 
         # Add work filter
         if work_ids:
@@ -167,6 +174,7 @@ class Database:
         word_position: str = "beginning",  # "beginning", "end", or "anywhere"
         work_ids: Optional[List[int]] = None,
         word_root: Optional[str] = None,
+        word_text: Optional[str] = None,  # Filter by specific word text (from unique_words list)
         limit: int = 100,
         offset: int = 0,
         sort_by: str = "alphabetical",  # "alphabetical", "canonical", "chronological", or "collection"
@@ -310,7 +318,7 @@ class Database:
 
                 # Add search filters using helper method
                 filter_where, filter_params = self._build_search_filters(
-                    search_term, match_type, word_position, work_ids, word_root
+                    search_term, match_type, word_position, work_ids, word_root, word_text
                 )
                 query += f" AND {filter_where}"
                 params.extend(filter_params)
@@ -994,4 +1002,202 @@ class Database:
                         INSERT INTO admin_users (username, password_hash)
                         VALUES ('admin', %s)
                     """, [password_hash])
+
+    # =========================================================================
+    # Works Browser Methods
+    # =========================================================================
+
+    def get_work_by_id(self, work_id: int) -> Optional[Dict]:
+        """
+        Get detailed information about a specific work including verse count
+
+        Args:
+            work_id: The work ID
+
+        Returns:
+            Work details dict or None if not found
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        w.work_id,
+                        w.work_name,
+                        w.work_name_tamil,
+                        w.author,
+                        w.author_tamil,
+                        w.period,
+                        w.description,
+                        w.chronology_start_year,
+                        w.chronology_end_year,
+                        w.chronology_confidence,
+                        w.chronology_notes,
+                        w.canonical_order,
+                        w.metadata,
+                        COUNT(DISTINCT v.verse_id) as verse_count,
+                        COUNT(DISTINCT s.section_id) as section_count
+                    FROM works w
+                    LEFT JOIN verses v ON w.work_id = v.work_id
+                    LEFT JOIN sections s ON w.work_id = s.work_id
+                    WHERE w.work_id = %s
+                    GROUP BY w.work_id
+                """, [work_id])
+                result = cur.fetchone()
+                return dict(result) if result else None
+
+    def get_work_sections(self, work_id: int) -> List[Dict]:
+        """
+        Get hierarchical section structure for a work
+
+        Returns sections organized by parent-child relationships
+        Frontend can build the tree structure from this flat list
+
+        Args:
+            work_id: The work ID
+
+        Returns:
+            List of sections with parent_section_id for hierarchy
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT
+                        s.section_id,
+                        s.work_id,
+                        s.parent_section_id,
+                        s.level_type,
+                        s.level_type_tamil,
+                        s.section_number,
+                        s.section_name,
+                        s.section_name_tamil,
+                        s.description,
+                        s.sort_order,
+                        COUNT(v.verse_id) as verse_count
+                    FROM sections s
+                    LEFT JOIN verses v ON s.section_id = v.section_id
+                    WHERE s.work_id = %s
+                    GROUP BY s.section_id
+                    ORDER BY s.sort_order, s.section_number
+                """, [work_id])
+                return [dict(row) for row in cur.fetchall()]
+
+    def get_section_verses(self, section_id: int, limit: int = 100, offset: int = 0) -> Dict:
+        """
+        Get paginated list of verses in a section
+
+        Args:
+            section_id: The section ID
+            limit: Maximum verses to return
+            offset: Pagination offset
+
+        Returns:
+            Dict with verses list, total count, and section info
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Get section info
+                cur.execute("""
+                    SELECT
+                        s.section_id,
+                        s.work_id,
+                        s.section_name,
+                        s.section_name_tamil,
+                        s.level_type,
+                        s.level_type_tamil,
+                        w.work_name,
+                        w.work_name_tamil
+                    FROM sections s
+                    JOIN works w ON s.work_id = w.work_id
+                    WHERE s.section_id = %s
+                """, [section_id])
+                section_info = cur.fetchone()
+
+                if not section_info:
+                    return None
+
+                # Get total verse count
+                cur.execute("""
+                    SELECT COUNT(*) as total
+                    FROM verses
+                    WHERE section_id = %s
+                """, [section_id])
+                total_count = cur.fetchone()['total']
+
+                # Get paginated verses with lines
+                cur.execute("""
+                    SELECT
+                        v.verse_id,
+                        v.verse_number,
+                        v.verse_type,
+                        v.verse_type_tamil,
+                        v.total_lines,
+                        v.sort_order,
+                        array_agg(l.line_text ORDER BY l.line_number) as lines
+                    FROM verses v
+                    LEFT JOIN lines l ON v.verse_id = l.verse_id
+                    WHERE v.section_id = %s
+                    GROUP BY v.verse_id
+                    ORDER BY v.sort_order, v.verse_number
+                    LIMIT %s OFFSET %s
+                """, [section_id, limit, offset])
+
+                verses = [dict(row) for row in cur.fetchall()]
+
+                return {
+                    'section': dict(section_info),
+                    'verses': verses,
+                    'total_count': total_count,
+                    'limit': limit,
+                    'offset': offset
+                }
+
+    def get_verse_navigation(self, verse_id: int) -> Dict:
+        """
+        Get previous and next verse IDs for navigation
+
+        Args:
+            verse_id: The current verse ID
+
+        Returns:
+            Dict with prev_verse_id and next_verse_id (None if at boundaries)
+        """
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Get current verse's section and sort_order
+                cur.execute("""
+                    SELECT section_id, sort_order
+                    FROM verses
+                    WHERE verse_id = %s
+                """, [verse_id])
+                current = cur.fetchone()
+
+                if not current:
+                    return {'prev_verse_id': None, 'next_verse_id': None}
+
+                # Get previous verse in same section
+                cur.execute("""
+                    SELECT verse_id
+                    FROM verses
+                    WHERE section_id = %s AND sort_order < %s
+                    ORDER BY sort_order DESC
+                    LIMIT 1
+                """, [current['section_id'], current['sort_order']])
+                prev_result = cur.fetchone()
+                prev_verse_id = prev_result['verse_id'] if prev_result else None
+
+                # Get next verse in same section
+                cur.execute("""
+                    SELECT verse_id
+                    FROM verses
+                    WHERE section_id = %s AND sort_order > %s
+                    ORDER BY sort_order ASC
+                    LIMIT 1
+                """, [current['section_id'], current['sort_order']])
+                next_result = cur.fetchone()
+                next_verse_id = next_result['verse_id'] if next_result else None
+
+                return {
+                    'prev_verse_id': prev_verse_id,
+                    'next_verse_id': next_verse_id
+                }
 

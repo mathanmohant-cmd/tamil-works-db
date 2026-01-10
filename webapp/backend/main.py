@@ -153,6 +153,7 @@ def search_words(
     word_position: str = Query("beginning", pattern="^(beginning|end|anywhere)$", description="Word position: beginning, end, or anywhere"),
     work_ids: Optional[str] = Query(None, description="Comma-separated work IDs to filter"),
     word_root: Optional[str] = Query(None, description="Filter by word root"),
+    word_text: Optional[str] = Query(None, description="Filter by specific word text (from unique_words list)"),
     limit: int = Query(100, ge=0, le=500, description="Maximum results per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     sort_by: str = Query("alphabetical", pattern="^(alphabetical|canonical|chronological|collection)$", description="Sort order: alphabetical, canonical (traditional order 1-22), chronological, or collection"),
@@ -166,6 +167,7 @@ def search_words(
     - **word_position**: "beginning" for words starting with search term, "end" for words ending with it, "anywhere" for substring match
     - **work_ids**: Filter by specific works (comma-separated IDs)
     - **word_root**: Filter by word root
+    - **word_text**: Filter by specific word text (overrides q/match_type/word_position)
     - **limit**: Maximum number of results (1-500)
     - **offset**: Pagination offset
     - **sort_by**: Sort order - "alphabetical" (default), "canonical" (traditional 1-22 order), "chronological", or "collection"
@@ -188,6 +190,7 @@ def search_words(
             word_position=word_position,
             work_ids=work_id_list,
             word_root=word_root,
+            word_text=word_text,
             limit=limit,
             offset=offset,
             sort_by=sort_by,
@@ -244,6 +247,87 @@ def get_word_roots(
     """
     try:
         return db.get_word_roots(search_term=q)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================================
+# Works Browser Endpoints
+# =========================================================================
+
+@app.get("/works/{work_id}")
+def get_work_detail(work_id: int):
+    """
+    Get detailed information about a specific work including verse count
+
+    - **work_id**: ID of the work to retrieve
+    """
+    try:
+        work = db.get_work_by_id(work_id)
+        if not work:
+            raise HTTPException(status_code=404, detail="Work not found")
+        return work
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/works/{work_id}/sections")
+def get_work_sections_endpoint(work_id: int):
+    """
+    Get hierarchical section structure for a work
+
+    Returns flat list of sections with parent_section_id for building tree structure
+
+    - **work_id**: ID of the work
+    """
+    try:
+        sections = db.get_work_sections(work_id)
+        return {
+            "work_id": work_id,
+            "sections": sections
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/sections/{section_id}/verses")
+def get_section_verses_endpoint(
+    section_id: int,
+    limit: int = Query(100, ge=1, le=500, description="Maximum verses per page"),
+    offset: int = Query(0, ge=0, description="Pagination offset")
+):
+    """
+    Get paginated list of verses in a section
+
+    - **section_id**: ID of the section
+    - **limit**: Maximum verses to return (1-500)
+    - **offset**: Pagination offset
+    """
+    try:
+        result = db.get_section_verses(section_id, limit, offset)
+        if not result:
+            raise HTTPException(status_code=404, detail="Section not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/verses/{verse_id}/navigation")
+def get_verse_navigation_endpoint(verse_id: int):
+    """
+    Get previous and next verse IDs for navigation buttons
+
+    Returns prev_verse_id and next_verse_id (null if at boundaries)
+
+    - **verse_id**: ID of the current verse
+    """
+    try:
+        navigation = db.get_verse_navigation(verse_id)
+        return navigation
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

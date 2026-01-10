@@ -286,18 +286,66 @@ Located in `webapp/backend/`:
 Located in `webapp/frontend/`:
 
 **Tech Stack:**
-- Vue 3 (Composition API)
+- Vue 3 (Composition API with Composition API pattern)
+- Vue Router (for navigation between features)
 - Vite (build tool and dev server)
 - Axios (HTTP client)
 
-**Key Files:**
-- `src/MainApp.vue` - Main search interface component
-- `src/components/CollectionTree.vue` - Hierarchical collection filter component
-- `src/components/TreeNode.vue` - Recursive tree node for collections/works
-- `src/components/Admin.vue` - Admin UI for managing collections and works
-- `src/style.css` - Global styles
-- `index.html` - Entry HTML
-- `vite.config.js` - Vite configuration
+**Architecture Pattern (2026-01-09):**
+- **Router-based navigation** with nested routes
+- **Composables** for shared state (useSearchState, useFilterState)
+- **Layout components** for consistent UI structure
+- **Modular feature components** organized by feature (search/, works/)
+
+**Key Application Structure:**
+- `src/App.vue` - Root component with route transitions
+- `src/router.js` - Route definitions with nested routes
+- `src/layouts/AppLayout.vue` - Main layout wrapper (header + navigation + content)
+- `src/components/AppHeader.vue` - Application header with search integration
+- `src/components/AppNavigation.vue` - Dropdown navigation menu
+
+**Pages (Route-level components):**
+- `src/pages/SearchPage.vue` - Word search interface (default route)
+- `src/pages/WorksBrowser.vue` - Works exploration container
+- `src/Home.vue` - Acknowledgment page
+- `src/AboutConcordance.vue` - About & Help (with QA and Principles tabs)
+- `src/OurJourney.vue` - Project story
+- `src/AdminPage.vue` - Collection management
+
+**Search Feature Components:**
+- `src/components/search/SearchControls.vue` - Search filters and options
+- `src/components/search/SearchResults.vue` - Results display with expandable words
+- `src/composables/useSearchState.js` - Shared search state management
+- `src/composables/useFilterState.js` - Work filter persistence
+
+**Works Browser Feature Components (NEW 2026-01-09):**
+- `src/components/works/WorksList.vue` - Grid view of all literary works
+- `src/components/works/WorkDetail.vue` - Work details with hierarchical sections tree
+- `src/components/works/SectionTreeNode.vue` - Recursive tree node for sections
+- `src/components/works/SectionView.vue` - Paginated verse listing for a section
+- `src/VerseView.vue` - Full verse display with prev/next navigation
+
+**Router Structure:**
+```
+/ → AppLayout (header + nav)
+  ├── /search (SearchPage) - Default route
+  ├── /works → WorksBrowser
+  │   ├── /works (WorksList) - Grid of all works
+  │   ├── /works/:workId (WorkDetail) - Work info + sections tree
+  │   ├── /works/:workId/section/:sectionId (SectionView) - Verses in section
+  │   └── /works/:workId/verse/:verseId (VerseView) - Full verse with navigation
+  ├── /about (AboutConcordance)
+  ├── /journey (OurJourney)
+  └── /home (Home)
+/admin (AdminPage) - Separate layout
+```
+
+**Cross-Feature Navigation (2026-01-09):**
+- **Search → Works Browser**: Clicking verse in search results navigates to Works Browser VerseView
+- **Context Preservation**: Query params preserve search context (`?word=அறம்&from=search`)
+- **Smart Back Button**: VerseView detects navigation source and shows appropriate back button
+- **Word Highlighting**: Search words are highlighted when navigating from search
+- **Route Transitions**: Smooth fade transitions between pages (0.2s opacity)
 
 **Collection Filter UI:**
 - Uses `CollectionTree.vue` component (replaced AccordionFilter in 2025-12)
