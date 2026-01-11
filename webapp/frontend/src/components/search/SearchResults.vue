@@ -22,11 +22,11 @@
       </label>
       <label>
         <input type="radio" v-model="wordListSortBy" value="count_high_to_low" />
-        Count &#8593;
+        Count &#9660;
       </label>
       <label>
         <input type="radio" v-model="wordListSortBy" value="count_low_to_high" />
-        Count &#8595;
+        Count &#9650;
       </label>
     </div>
 
@@ -100,7 +100,7 @@
 
           <!-- Sort Lines Options -->
           <div class="lines-sort-options">
-            <span class="filter-label">Sort works:</span>
+            <span class="filter-label">Sort by:</span>
             <label>
               <input type="radio" v-model="sortBy" value="canonical" />
               Canonical
@@ -703,7 +703,7 @@ const exportWordVerses = async (format, wordText) => {
 
 .export-button-combined {
   padding: 0.5rem 1rem;
-  background-color: #218838;
+  background-color: #d89a5f;
   color: white;
   border: none;
   border-radius: 4px;
@@ -715,7 +715,7 @@ const exportWordVerses = async (format, wordText) => {
 }
 
 .export-button-combined:hover {
-  background-color: #1e7e34;
+  background-color: #c17a3a;
 }
 
 /* Word List Sort Options */
@@ -723,7 +723,7 @@ const exportWordVerses = async (format, wordText) => {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.75 rem 1rem;
+  padding: 0.75rem .25rem;
   background: #f8f9fa;
   border-radius: 6px;
   margin-bottom: 1rem;
@@ -788,12 +788,13 @@ const exportWordVerses = async (format, wordText) => {
   gap: 2px;
   flex: 1;
   padding-left: 0.5rem;
+  padding-right: 0.0rem;
 }
 
 .word-number {
   color: #6c757d;
   font-size: 0.9rem;
-  min-width: 30px;
+  min-width: 5px;
 }
 
 .word-text {
@@ -898,7 +899,7 @@ const exportWordVerses = async (format, wordText) => {
 .summary-counts {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.25rem;
   font-size: 0.95rem;
   color: #495057;
   flex-wrap: wrap;
@@ -916,8 +917,8 @@ const exportWordVerses = async (format, wordText) => {
 .lines-sort-options {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
+  gap: .25rem;
+  padding: 0.25rem .5rem;
   background: white;
   border-radius: 6px;
   margin-bottom: 1rem;
@@ -971,7 +972,7 @@ const exportWordVerses = async (format, wordText) => {
 }
 
 .occurrence-number {
-  min-width: 30px;
+  min-width: 5px;
 }
 
 .work-name {
@@ -1156,7 +1157,7 @@ const exportWordVerses = async (format, wordText) => {
   .lines-sort-options {
     /* Keep radio buttons in one line on mobile */
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.2rem;
   }
 
   .word-list-sort-options label,

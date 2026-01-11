@@ -240,7 +240,7 @@ watch(() => route.path, () => {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #4a5f8c 0%, #2d4168 100%);
+  background: #1a3a5a; /* linear-gradient(135deg, #4a5f8c 0%, #2d4168 100%); */
   border-bottom: 3px solid #1a2942;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 0;
@@ -333,7 +333,7 @@ watch(() => route.path, () => {
 }
 
 .search-icon-button:disabled {
-  opacity: 0.3;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -349,7 +349,7 @@ watch(() => route.path, () => {
 }
 
 .clear-icon-button:disabled {
-  opacity: 0.3;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -359,9 +359,9 @@ watch(() => route.path, () => {
   flex-direction: column;
   gap: 0rem;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
   font-weight: 400;
   margin: 0.25rem 0;
+  background: #1a3a5a;
 }
 
 .database-summary span {
@@ -370,7 +370,6 @@ watch(() => route.path, () => {
 
 .data-source-note {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
 }
 
@@ -399,7 +398,7 @@ watch(() => route.path, () => {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0.5rem 2rem;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -564,7 +563,7 @@ watch(() => route.path, () => {
   }
 
   .database-summary {
-    font-size: 0.7rem;
+    font-size: 0.1rem;
     margin: 0.5rem 0;
   }
 
@@ -639,11 +638,11 @@ watch(() => route.path, () => {
   }
 
   .database-summary {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
   }
 
   .data-source-note {
-    font-size: 0.6rem;
+    font-size: 0.75rem;
   }
 
   .header-nav-tabs {
