@@ -15,18 +15,18 @@
 
     <!-- Word List Sort Options -->
     <div class="word-list-sort-options">
-      <span class="filter-label">Sort words by:</span>
+      <span class="filter-label">Sort by:</span>
       <label>
         <input type="radio" v-model="wordListSortBy" value="alphabetical" />
-        Alphabetical
+        அ - ன 
       </label>
       <label>
         <input type="radio" v-model="wordListSortBy" value="count_high_to_low" />
-        Count (High to Low)
+        Count &#8593;
       </label>
       <label>
         <input type="radio" v-model="wordListSortBy" value="count_low_to_high" />
-        Count (Low to High)
+        Count &#8595;
       </label>
     </div>
 
@@ -116,8 +116,8 @@
           </div>
 
           <!-- Loading State -->
-          <div v-if="loadingWord === word.word_text" class="loading-occurrences">
-            Loading occurrences...
+          <div v-if="loadingWord === word.word_text || sortingWord === word.word_text" class="loading-occurrences">
+            {{ sortingWord === word.word_text ? 'Sorting...' : 'Loading occurrences...' }}
           </div>
 
           <!-- Occurrences List -->
@@ -153,9 +153,9 @@
               <button
                 @click="loadMoreOccurrences(word.word_text)"
                 class="load-more-button"
-                :disabled="loadingWord === word.word_text"
+                :disabled="loadingWord === word.word_text || sortingWord === word.word_text"
               >
-                {{ loadingWord === word.word_text ? 'Loading...' : 'Load More' }}
+                {{ sortingWord === word.word_text ? 'Sorting...' : (loadingWord === word.word_text ? 'Loading...' : 'Load More') }}
               </button>
             </div>
           </div>
@@ -243,6 +243,7 @@ const {
   searchResults,
   expandedWords,
   loadingWord,
+  sortingWord,
   loadedOccurrences,
   wordListSortBy,
   showWordsExportMenu,
@@ -660,11 +661,11 @@ const exportWordVerses = async (format, wordText) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: .25rem;
   background: #f8f9fa;
   border-radius: 6px;
-  margin-bottom: 1rem;
-  gap: 1rem;
+  margin-bottom: .25rem;
+  gap: 0rem;
   flex-wrap: wrap;
 }
 
@@ -721,8 +722,8 @@ const exportWordVerses = async (format, wordText) => {
 .word-list-sort-options {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
+  gap: 0.25rem;
+  padding: 0.75 rem 1rem;
   background: #f8f9fa;
   border-radius: 6px;
   margin-bottom: 1rem;
@@ -730,9 +731,9 @@ const exportWordVerses = async (format, wordText) => {
 }
 
 .word-list-sort-options label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   cursor: pointer;
   font-size: 0.95rem;
   color: #495057;
@@ -749,6 +750,8 @@ const exportWordVerses = async (format, wordText) => {
   display: flex;
   flex-direction: column;
   gap: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .word-item-expandable {
@@ -1151,12 +1154,23 @@ const exportWordVerses = async (format, wordText) => {
 
   .word-list-sort-options,
   .lines-sort-options {
-    flex-direction: column;
-    align-items: stretch;
+    /* Keep radio buttons in one line on mobile */
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .word-list-sort-options label,
+  .lines-sort-options label {
+    font-size: 0.85rem;
+  }
+
+  .word-list-sort-options .filter-label,
+  .lines-sort-options .filter-label {
+    font-size: 0.85rem;
   }
 
   .word-header-row {
-    padding: 0.6rem 0.75rem;
+    padding: 0.25rem 0.25rem;
   }
 
   .word-text {

@@ -11,6 +11,7 @@ const loading = ref(false)
 const error = ref(null)
 const expandedWords = ref(new Set())
 const loadingWord = ref(null)
+const sortingWord = ref(null) // Track word being re-sorted (vs loaded more)
 const loadedOccurrences = ref({}) // Track loaded occurrences per word with offset
 const wordListSortBy = ref('alphabetical')
 
@@ -191,6 +192,7 @@ export function useSearchState() {
     error,
     expandedWords,
     loadingWord,
+    sortingWord,
     loadedOccurrences,
     wordListSortBy,
     autocompleteResults,

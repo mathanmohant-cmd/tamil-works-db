@@ -368,12 +368,14 @@ onUnmounted(() => {
 /* Mobile Responsive */
 @media (max-width: 968px) {
   .match-type-options {
-    flex-direction: column;
-    align-items: stretch;
+    /* Keep radio buttons in one line on mobile */
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
   .filter-group-inline {
-    width: 100%;
+    /* Allow wrapping but don't force full width */
+    flex-shrink: 0;
   }
 }
 

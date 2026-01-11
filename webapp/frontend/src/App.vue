@@ -1,9 +1,5 @@
 <template>
-  <router-view v-slot="{ Component, route }">
-    <transition name="fade" mode="out-in">
-      <component :is="Component" :key="route.path" />
-    </transition>
-  </router-view>
+  <router-view />
 </template>
 
 <script>
@@ -13,14 +9,5 @@ export default {
 </script>
 
 <style>
-/* Route transition animations */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+/* Global styles can go here if needed */
 </style>

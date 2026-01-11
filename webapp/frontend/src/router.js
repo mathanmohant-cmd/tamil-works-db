@@ -96,7 +96,21 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  // Prevent page from scrolling when changing tabs
+  scrollBehavior(to, from, savedPosition) {
+    // If user clicked back/forward, restore scroll position
+    if (savedPosition) {
+      return savedPosition
+    }
+    // If navigating to same route with different params (like verse navigation)
+    if (to.path.startsWith('/works/') && from.path.startsWith('/works/')) {
+      // Scroll to top for verse navigation
+      return { top: 0 }
+    }
+    // For tab navigation, maintain current scroll position
+    return false
+  }
 })
 
 // Dynamic page titles

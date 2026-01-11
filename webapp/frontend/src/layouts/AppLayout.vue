@@ -1,10 +1,14 @@
 <template>
   <div class="app-layout">
+    <!-- Header persists across navigation - outside transition -->
     <AppHeader />
     <main class="app-content">
       <router-view v-slot="{ Component }">
+        <!-- Transition only wraps content, not header -->
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <KeepAlive :max="3">
+            <component :is="Component" :key="$route.path" />
+          </KeepAlive>
         </transition>
       </router-view>
     </main>
@@ -12,6 +16,7 @@
 </template>
 
 <script setup>
+import { KeepAlive } from 'vue'
 import AppHeader from '../components/AppHeader.vue'
 </script>
 
@@ -20,7 +25,8 @@ import AppHeader from '../components/AppHeader.vue'
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: hidden; /* Prevent layout scroll (content scrolls instead) */
 }
 
 
@@ -29,6 +35,7 @@ import AppHeader from '../components/AppHeader.vue'
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1rem 2rem 2rem 2rem;
+  position: relative; /* Establish stacking context for scrolling */
 }
 
 .app-content > * {
@@ -37,6 +44,7 @@ import AppHeader from '../components/AppHeader.vue'
   width: 100%;
 }
 
+/* Transition for content area only */
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.2s ease;
 }

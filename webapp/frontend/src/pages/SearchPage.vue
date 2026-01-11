@@ -84,6 +84,7 @@ const {
   error,
   expandedWords,
   loadedOccurrences,
+  sortingWord,
   showVerseView,
   selectedVerseId,
   verseViewSearchWord,
@@ -154,6 +155,9 @@ watch(sortBy, async () => {
   if (wordsToReload.length > 0) {
     // Clear loaded occurrences and reload with new sort order
     for (const wordText of wordsToReload) {
+      // Mark as sorting (not loading more)
+      sortingWord.value = wordText
+
       // Clear existing occurrences for this word
       if (searchResults.value && searchResults.value.results) {
         searchResults.value.results = searchResults.value.results.filter(
@@ -166,6 +170,9 @@ watch(sortBy, async () => {
 
       // Reload with new sort order
       await loadWordOccurrences(wordText)
+
+      // Clear sorting state
+      sortingWord.value = null
     }
   }
 })
