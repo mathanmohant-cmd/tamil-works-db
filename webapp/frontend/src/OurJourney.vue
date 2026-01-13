@@ -153,7 +153,6 @@
       </section>
       <p class="closing-reflection">
           <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility.
-          <>
           <br>These tools are meant to support deeper engagement with the texts, not to reduce them to data points in service of predetermined conclusions.
       </p>
 
@@ -161,7 +160,7 @@
       <section class="invite" aria-labelledby="share">
         <h2><em>கற்றது கைமண் அளவு; கல்லாதது உலகளவு</em></h2>
         <h2 id="share">
-          <a href="mailto:thamizh.words@gmail.com?subject=Thamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Share your ideas and feedback</a>
+          <a href="mailto:thamizh.words@gmail.com?subject=Thamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Please share your ideas and feedback</a>
         </h2>
         
       </section>

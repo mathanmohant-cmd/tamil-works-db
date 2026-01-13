@@ -268,8 +268,8 @@ const loadWordOccurrences = async (wordText) => {
 // Try example search
 const tryExampleSearch = (word) => {
   // Reset search filters to defaults
-  matchType.value = 'partial'
-  wordPosition.value = 'anywhere'
+  matchType.value = 'exact'
+  wordPosition.value = 'beginning'
 
   // Clear work filters
   filterMode.value = 'all'

@@ -4,7 +4,7 @@
       <header class="tribute-header">
         <h1>Thamizh Concordance</h1>
         <h2>a treasure from</h2>
-        <h2>Prof P. Pandiyaraja</h2>
+        <h2><a href="http://tamilconcordance.in/ennaippaRRi.html" class="concordance">Prof P. Pandiyaraja</a></h2>
         <p class="lead">An acknowledgement honoring the scholar whose concordance has shaped this project.</p>
       </header>
 
@@ -55,7 +55,7 @@ export default {
 .tribute-header h1 {
   margin: 0;
   font-size: 26px;
-  color: #07203a;
+  color: #1a3a5a;
   font-weight: 700;
   text-align:  center;
 }
@@ -63,9 +63,10 @@ export default {
 .tribute-header h2 {
   margin: 0;
   font-size: 20px;
-  color: #07203a;
+  color: #1a3a5a;
   font-weight: 700;
   text-align:  center;
+  font-style: italic;
 }
 
 
@@ -121,12 +122,13 @@ export default {
 
   .tribute-header h1 {
     font-size: 20px;
+    color: #1a3a5a;
     text-align:  center;
   }
   .tribute-header h2 {
   margin: 0;
   font-size: 16px;
-  color: #07203a;
+  color: #1a3a5a;
   font-weight: 700;
   text-align:  center;
 }
