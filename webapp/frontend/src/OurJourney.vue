@@ -386,7 +386,7 @@ h2 {
 
 .invite {
   background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border: 2px solid var(--life-pulse);
+  /*border: 2px solid var(--life-pulse);*/
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 3rem;

@@ -1039,7 +1039,7 @@ export default {
 
 .about-container {
   background: var(--surface);
-  border: 2px solid var(--border-color);
+  /*border: 2px solid var(--border-color);*/
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -1153,12 +1153,12 @@ export default {
 }
 
 .accordion-header.expanded {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #c62828 100%);
+  background: flinear-gradient(135deg, #fdf3ea 0%, #f5e6d3 100%);
   border-left: 3px solid var(--primary-color);
 }
 
 .accordion-header.expanded h2 {
-  color: white;
+  /*color: white;*/
 }
 
 .accordion-header h2 {
@@ -1187,7 +1187,7 @@ export default {
 }
 
 .accordion-header.expanded .accordion-icon .chevron-icon {
-  border-color: white;
+ /* border-color: white;*/
 }
 
 .accordion-content {

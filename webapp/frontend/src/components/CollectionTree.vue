@@ -417,7 +417,7 @@ onMounted(async () => {
 }
 
 .tree-action-btn:hover {
-  background: var(--secondary-color);
+  background: linear-gradient(135deg, #1a3a5a 0%, #1e2a5a 100%);
 }
 
 .tree-action-btn .chevron-icon {
@@ -491,8 +491,9 @@ onMounted(async () => {
   }
 
   .tree-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
+    justify-content: space-between;
     gap: 0.5rem;
     margin-bottom: 0.75rem;
   }
@@ -508,9 +509,11 @@ onMounted(async () => {
   }
 
   .tree-action-btn {
-    flex: 1;
+    
     padding: 0.4rem 0.5rem; /* Slightly smaller buttons */
     font-size: 0.85rem;
+    width: 32px;
+    height: 32px;
   }
 
   .tree-content {

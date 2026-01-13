@@ -782,19 +782,19 @@ const exportWordVerses = async (format, wordText) => {
 }
 
 .word-item-expandable.expanded .word-header-row {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #c62828 100%);
-  border-left: 3px solid var(--primary-color);
+  background: #faf5f5; /* linear-gradient(135deg, var(--primary-color) 0%, #c62828 100%); */
+  /* border-left: 3px solid var(--primary-color);*/
   padding: 0.75rem 0.5rem;
 }
 
 .word-item-expandable.expanded .word-header-row .word-text,
 .word-item-expandable.expanded .word-header-row .word-number,
 .word-item-expandable.expanded .word-header-row .word-count-badge {
-  color: white;
+  color: #495057;
 }
 
 .word-item-expandable.expanded .word-actions .expand-collapse-button .chevron-icon {
-  border-color: white;
+  border-color: #495057;
 }
 
 .word-info {

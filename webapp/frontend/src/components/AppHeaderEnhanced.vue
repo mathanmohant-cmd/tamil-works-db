@@ -912,7 +912,7 @@ watch(searchFocused, (newValue) => {
 
 .done-btn-inline {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #1a3a5a 0%, #1e3a8a 100%);
+  background: var(--primary-color); /*linear-gradient(135deg, #1a3a5a 0%, #1e3a8a 100%);*/
   color: white;
   border: none;
   border-radius: 6px;
