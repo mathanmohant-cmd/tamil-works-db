@@ -54,10 +54,10 @@
           <div class="mentor-text">
             <h3>Prof. P. Pandiyaraja</h3>
             <p>
-              Creator of the <strong>Thamizh Concordance</strong>, whose mathematical clarity and systematic approach to cataloging Sangam literature provided the foundation for this search tool. Over more than five decades, he has built a priceless repository of Thamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Thamizh.
+              Creator of the <strong>Thamizh Concordance</strong>, whose mathematical precision and systematic approach to cataloging Sangam literature provided the foundation for this search tool. Over more than five decades, he has built a priceless repository of Thamizh words drawn from Sangam and post-Sangam literature, blending rigorous mathematical thinking and early computational methods with an unwavering love for Thamizh.
             </p>
             <p>
-              His work revealed that Thamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering patterns and relationships that span texts and time. (See full tribute on the Acknowledgment page)
+              His work revealed that Thamizh literature is not only aesthetically powerful but also profoundly systematic—uncovering <a href="https://sangampedia.net/%e0%ae%aa%e0%ae%bf%e0%ae%b1-%e0%ae%95%e0%ae%9f%e0%af%8d%e0%ae%9f%e0%af%81%e0%ae%b0%e0%af%88%e0%ae%95%e0%ae%b3%e0%af%8d/17-euclid-and-tolkappiyar/" class="articles"> patterns</a> and <a href="https://sangampedia.net/%e0%ae%8e%e0%ae%a9%e0%af%8d%e0%ae%a9%e0%af%87-%e0%ae%a4%e0%ae%ae%e0%ae%bf%e0%ae%b4%e0%ae%bf%e0%ae%a9%e0%af%8d-%e0%ae%87%e0%ae%b3%e0%ae%ae%e0%af%88/" class="articles">connections</a> that span texts and time. 
             </p>
             <div class="resources">
               <h4>Follow his work</h4>
@@ -151,17 +151,19 @@
         <p>Prof. P. Pandiaraja's <a href="http://tamilconcordance.in/">Thamizh Concordance</a> helped me get closer to Sangam Literature. My attempt is to bring it one more step forward. I hope others will take it further.
         </p>
       </section>
+      <p class="closing-reflection">
+          <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility.
+          <>
+          <br>These tools are meant to support deeper engagement with the texts, not to reduce them to data points in service of predetermined conclusions.
+      </p>
+
       <!-- Call to Action -->
       <section class="invite" aria-labelledby="share">
         <h2><em>கற்றது கைமண் அளவு; கல்லாதது உலகளவு</em></h2>
-        <p class="closing-reflection">
-          
-          <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility. Selective patterns drawn from searches cannot substitute for close reading, historical context, and the patient work of interpretation. Claims about 'what Thamizh literature is' based on word frequencies or isolated examples will always be incomplete—and often misleading.
-          <br>These tools are meant to support deeper engagement with the texts, not to reduce them to data points in service of predetermined conclusions.
-        </p>
         <h2 id="share">
           <a href="mailto:thamizh.words@gmail.com?subject=Thamizh%20Literature%20Search%20—%20Ideas%20and%20Feedback" class="journey-link">Share your ideas and feedback</a>
         </h2>
+        
       </section>
 
     </div>
@@ -176,7 +178,7 @@ export default {
 
 <style scoped>
 .journey-page {
-  padding: 2rem 1rem;
+  padding: 0rem .25rem;
   background-color: #fafafa;
 }
 
@@ -211,7 +213,7 @@ h2 {
 }
 
 .intro-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .intro {
@@ -222,7 +224,7 @@ h2 {
 }
 
 .teachers-section {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .mentor-block {
@@ -259,9 +261,10 @@ h2 {
 }
 
 .mentor-text h3 {
-  margin: 0 0 10px 0;
-  font-size: 1.4rem;
+  margin: 0 0 5px 0;
+  font-size: 1.3rem;
   color: #222;
+  text-align: center
 }
 
 .mentor-text p {
@@ -269,10 +272,11 @@ h2 {
   font-size: 16px;
   line-height: 1.8;
   color: #333;
+  text-align: left
 }
 
 .mentor-text p:last-of-type {
-  margin-bottom: 0;
+  margin-bottom: 1;
 }
 
 .mentor-text em {
@@ -285,9 +289,22 @@ h2 {
   color: #6b2c91;
 }
 
+.articles {
+  color: #0f4c81;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--life-pulse);
+  font-weight: 600;
+}
+
+.articles:hover {
+  border-bottom: 1px solid var(--life-pulse);
+}
+
+
 .closing-reflection {
-  margin: 2.5rem 0;
-  padding: 2rem 2.5rem;
+  margin-top: 2rem;
+  margin: 1.5rem 2;
+  padding: 0rem 1.0rem;
   font-size: 17px;
   line-height: 1.9;
   color: #2d2d2d;
@@ -301,10 +318,10 @@ h2 {
 }
 
 .tool-section {
-  margin-top: 3rem;
-  padding: 2rem;
+  margin-top: 2rem;
+  padding: 1rem;
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
@@ -332,6 +349,7 @@ h2 {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #e0e0e0;
+  
 }
 
 .resources h4 {
@@ -339,6 +357,7 @@ h2 {
   margin: 0 0 10px 0;
   color: #6b2c91;
   font-weight: 600;
+  
 }
 
 .resources ul {
@@ -358,13 +377,12 @@ h2 {
   text-decoration: none;
   font-weight: 600;
   font-family: var(--tamil-font), var(--english-font);
-  border-bottom: 2px solid transparent;
-  transition: all 0.3s ease;
+  border-bottom: 1px dotted var(--life-pulse);
 }
 
 .resources a:hover {
-  color: var(--life-pulse);
-  border-bottom: 2px solid var(--life-pulse);
+  
+  border-bottom: 2px dotted var(--life-pulse);
 }
 
 .invite {

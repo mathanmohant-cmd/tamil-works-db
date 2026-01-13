@@ -20,7 +20,7 @@
               @keyup.enter="handleSearch"
               @keydown.esc="closeSearchPanel"
               type="search"
-              placeholder="தமித்து"
+              placeholder="இலக்கிய சொல் தேடல்"
               class="search-input"
               autocomplete="off"
             />
@@ -98,7 +98,7 @@
                 @keyup.enter="handleSearchAndClose"
                 @keydown.esc="closeSearchPanel"
                 type="search"
-                placeholder="தமித்து"
+                placeholder="இலக்கிய சொல் தேடல்"
                 class="search-input"
                 autocomplete="off"
               />

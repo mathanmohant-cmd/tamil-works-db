@@ -6,9 +6,7 @@
       <router-view v-slot="{ Component }">
         <!-- Transition only wraps content, not header -->
         <transition name="fade" mode="out-in">
-          <KeepAlive :max="3">
-            <component :is="Component" :key="$route.path" />
-          </KeepAlive>
+          <component :is="Component" :key="$route.path" />
         </transition>
       </router-view>
     </main>
@@ -16,7 +14,6 @@
 </template>
 
 <script setup>
-import { KeepAlive } from 'vue'
 // import AppHeader from '../components/AppHeader.vue' // OLD
 import AppHeader from '../components/AppHeaderEnhanced.vue' // NEW Enhanced Header
 </script>

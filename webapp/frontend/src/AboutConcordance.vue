@@ -29,7 +29,7 @@
           <div class="accordion-header" @click="toggleSection('qa-4')" :class="{ expanded: expandedSections.has('qa-4') }" data-section="qa-4">
             <h2>How Does This Tool Search Across Literary Works?</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-4') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-4') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-4')" class="accordion-content">
@@ -48,7 +48,7 @@
                   <li><strong>Sections</strong> of each work are faithfully captured</li>
                   <li><strong>Verses</strong> within each section are clearly marked</li>
                   <li>Each verse is broken into constituent <strong>lines</strong></li>
-                  <li>Each line is segmented into individual <strong>words</strong> following word Segmentation Principles</li>
+                  <li>Each line is segmented into <strong>words</strong> following his concordance</li>
                   <li>Every word's <strong>position and context</strong> is stored in the database</li>
                   <li>Works are gropued in to <strong>collections</strong> for targeted search</li>
                 </ul>
@@ -103,7 +103,7 @@
           <div class="accordion-header" @click="toggleSection('qa-1')" :class="{ expanded: expandedSections.has('qa-1') }" data-section="qa-1">
             <h2>What is a Concordance?</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-1') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-1') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-1')" class="accordion-content">
@@ -134,7 +134,7 @@
           <div class="accordion-header" @click="toggleSection('qa-2')" :class="{ expanded: expandedSections.has('qa-2') }" data-section="qa-2">
             <h2>How is Concordance Different from a Dictionary?</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-2') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-2') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-2')" class="accordion-content">
@@ -198,7 +198,7 @@
           <div class="accordion-header" @click="toggleSection('qa-3')" :class="{ expanded: expandedSections.has('qa-3') }" data-section="qa-3">
             <h2>Why is Concordance Important?</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-3') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-3') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-3')" class="accordion-content">
@@ -248,7 +248,7 @@
           <div class="accordion-header" @click="toggleSection('qa-5')" :class="{ expanded: expandedSections.has('qa-5') }" data-section="qa-5">
             <h2>How to Use This Tool?</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-5') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-5') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-5')" class="accordion-content">
@@ -293,7 +293,7 @@
           <div class="accordion-header" @click="toggleSection('qa-6')" :class="{ expanded: expandedSections.has('qa-6') }" data-section="qa-6">
             <h2>What other Features are possible?</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-6') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-6') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-6')" class="accordion-content">
@@ -395,7 +395,7 @@
           <div class="accordion-header" @click="toggleSection('qa-7')" :class="{ expanded: expandedSections.has('qa-7') }" data-section="qa-7">
             <h2>Final Thoughts</h2>
             <span class="accordion-icon">
-              <span class="chevron-icon" :class="expandedSections.has('qa-7') ? 'chevron-down' : 'chevron-up'"></span>
+              <span class="chevron-icon" :class="expandedSections.has('qa-7') ? 'chevron-down' : 'chevron-right'"></span>
             </span>
           </div>
           <div v-if="expandedSections.has('qa-7')" class="accordion-content">
@@ -429,7 +429,7 @@
             <div class="accordion-header" @click="toggleSection('principles-intro')" :class="{ expanded: expandedSections.has('principles-intro') }" data-section="principles-intro">
               <h2>சொற்பிரிப்பு நெறிகள்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('principles-intro') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('principles-intro') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('principles-intro')" class="accordion-content">
@@ -461,7 +461,7 @@
             <div class="accordion-header" @click="toggleSection('neri-1')" :class="{ expanded: expandedSections.has('neri-1') }" data-section="neri-1">
               <h2>நெறி 1 - புணர்ச்சி விதிகளைக் களைதல்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-1') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-1') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-1')" class="accordion-content">
@@ -501,7 +501,7 @@
             <div class="accordion-header" @click="toggleSection('neri-2')" :class="{ expanded: expandedSections.has('neri-2') }" data-section="neri-2">
               <h2>நெறி 2 - வேற்றுமை உருபுகள்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-2') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-2') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-2')" class="accordion-content">
@@ -524,7 +524,7 @@
             <div class="accordion-header" @click="toggleSection('neri-3')" :class="{ expanded: expandedSections.has('neri-3') }" data-section="neri-3">
               <h2>நெறி 3 - கூட்டுச்சொற்கள் (Compound words)</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-3') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-3') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-3')" class="accordion-content">
@@ -636,7 +636,7 @@
             <div class="accordion-header" @click="toggleSection('neri-4')" :class="{ expanded: expandedSections.has('neri-4') }" data-section="neri-4">
               <h2>நெறி 4 - துணைவினைகள் (Auxiliary verbs)</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-4') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-4') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-4')" class="accordion-content">
@@ -715,7 +715,7 @@
             <div class="accordion-header" @click="toggleSection('neri-5')" :class="{ expanded: expandedSections.has('neri-5') }" data-section="neri-5">
               <h2>நெறி 5 - 'அன்ன' என்ற உவம உருபு</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-5') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-5') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-5')" class="accordion-content">
@@ -745,7 +745,7 @@
             <div class="accordion-header" @click="toggleSection('neri-6')" :class="{ expanded: expandedSections.has('neri-6') }" data-section="neri-6">
               <h2>நெறி 6 - 'தொறு/தொறும், தோறு/தோறும்' என்ற கட்டுருபன்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-6') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-6') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-6')" class="accordion-content">
@@ -771,7 +771,7 @@
             <div class="accordion-header" @click="toggleSection('neri-7')" :class="{ expanded: expandedSections.has('neri-7') }" data-section="neri-7">
               <h2>நெறி 7 - அசைச்சொற்கள்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-7') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-7') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-7')" class="accordion-content">
@@ -795,7 +795,7 @@
             <div class="accordion-header" @click="toggleSection('neri-8')" :class="{ expanded: expandedSections.has('neri-8') }" data-section="neri-8">
               <h2>நெறி 8 - 'என்', 'என' என்னும் சொற்கள்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-8') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-8') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-8')" class="accordion-content">
@@ -827,7 +827,7 @@
             <div class="accordion-header" @click="toggleSection('neri-9')" :class="{ expanded: expandedSections.has('neri-9') }" data-section="neri-9">
               <h2>நெறி 9 - 'உழி' என்னும் சொல்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-9') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-9') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-9')" class="accordion-content">
@@ -850,7 +850,7 @@
             <div class="accordion-header" @click="toggleSection('neri-10')" :class="{ expanded: expandedSections.has('neri-10') }" data-section="neri-10">
               <h2>நெறி 10 - அடுக்குத்தொடர் அல்லது சொல் இரட்டிப்பு (Repetitions)</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-10') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-10') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-10')" class="accordion-content">
@@ -883,7 +883,7 @@
             <div class="accordion-header" @click="toggleSection('neri-11')" :class="{ expanded: expandedSections.has('neri-11') }" data-section="neri-11">
               <h2>நெறி 11 - 'ஆங்கு' எனும் சொல்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('neri-11') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('neri-11') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('neri-11')" class="accordion-content">
@@ -916,7 +916,7 @@
             <div class="accordion-header" @click="toggleSection('notation')" :class="{ expanded: expandedSections.has('notation') }" data-section="notation">
               <h2>சொற்குறியீட்டு முறை</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('notation') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('notation') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('notation')" class="accordion-content">
@@ -948,7 +948,7 @@
             <div class="accordion-header" @click="toggleSection('references')" :class="{ expanded: expandedSections.has('references') }" data-section="references">
               <h2>பார்வை நூல்கள்</h2>
               <span class="accordion-icon">
-                <span class="chevron-icon" :class="expandedSections.has('references') ? 'chevron-down' : 'chevron-up'"></span>
+                <span class="chevron-icon" :class="expandedSections.has('references') ? 'chevron-down' : 'chevron-right'"></span>
               </span>
             </div>
             <div v-if="expandedSections.has('references')" class="accordion-content">
@@ -974,7 +974,7 @@
 </template>
 
 <script>
-import { ref, nextTick, watch, onMounted } from 'vue'
+import { ref, nextTick, watch } from 'vue'
 
 export default {
   name: 'AboutConcordance',
@@ -1009,14 +1009,16 @@ export default {
       }
     }
 
-    // Scroll to top when component mounts
-    onMounted(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    })
-
-    // Scroll to top when tab changes
+    // Scroll to top when tab changes (internal tab switching within About page)
+    // Note: Route navigation scroll is handled by router's scrollBehavior
     watch(activeTab, () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      nextTick(() => {
+        // Scroll the app-content container (not window)
+        const appContent = document.querySelector('.app-content')
+        if (appContent) {
+          appContent.scrollTop = 0
+        }
+      })
     })
 
     return {

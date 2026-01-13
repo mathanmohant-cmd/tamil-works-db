@@ -2,7 +2,9 @@
   <div class="home-page">
     <article class="tribute-content">
       <header class="tribute-header">
-        <h1>Thamizh Concordance: A Treasure by Prof. P. Pandiyaraja</h1>
+        <h1>Thamizh Concordance</h1>
+        <h2>a treasure from</h2>
+        <h2>Prof P. Pandiyaraja</h2>
         <p class="lead">An acknowledgement honoring the scholar whose concordance has shaped this project.</p>
       </header>
 
@@ -55,7 +57,17 @@ export default {
   font-size: 26px;
   color: #07203a;
   font-weight: 700;
+  text-align:  center;
 }
+
+.tribute-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #07203a;
+  font-weight: 700;
+  text-align:  center;
+}
+
 
 .lead {
   margin: 6px 0 0;
@@ -109,6 +121,14 @@ export default {
 
   .tribute-header h1 {
     font-size: 20px;
+    text-align:  center;
   }
+  .tribute-header h2 {
+  margin: 0;
+  font-size: 16px;
+  color: #07203a;
+  font-weight: 700;
+  text-align:  center;
+}
 }
 </style>

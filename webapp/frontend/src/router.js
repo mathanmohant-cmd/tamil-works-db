@@ -97,19 +97,25 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  // Prevent page from scrolling when changing tabs
+  // Scroll to top on route change
   scrollBehavior(to, from, savedPosition) {
-    // If user clicked back/forward, restore scroll position
-    if (savedPosition) {
-      return savedPosition
-    }
-    // If navigating to same route with different params (like verse navigation)
-    if (to.path.startsWith('/works/') && from.path.startsWith('/works/')) {
-      // Scroll to top for verse navigation
-      return { top: 0 }
-    }
-    // For tab navigation, maintain current scroll position
-    return false
+    // The app uses a custom scroll container (.app-content), not window scrolling
+    // So we need to handle scrolling manually
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const appContent = document.querySelector('.app-content')
+        if (appContent) {
+          if (savedPosition) {
+            // Restore saved position for back/forward navigation
+            appContent.scrollTop = savedPosition.top || 0
+          } else {
+            // Scroll to top for new navigation
+            appContent.scrollTop = 0
+          }
+        }
+        resolve({ top: 0 })
+      }, 0)
+    })
   }
 })
 

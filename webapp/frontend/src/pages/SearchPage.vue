@@ -15,15 +15,15 @@
     <div v-if="!showVerseView" class="main-container">
       <!-- Welcome Message -->
       <div v-if="!loading && !searchResults && showWelcome" class="welcome">
-        <h2>Explore Thamizh Literature...</h2>
-        <p class="welcome-subtitle">...one word at time</p>
+        <h2>Search words across Thamizh literature</h2>
+        <p class="welcome-subtitle"><router-link class="acknowledgement" :to="{ name: 'Home' }">Thanks to Prof P. Pandiyaraja</router-link></p>
         <div class="try-examples">
-          <h3>Click These Words</h3>
+          <h3>Try Searching: Click These Words</h3>
           <div class="example-buttons">
             <button @click="tryExampleSearch('அறம்')" class="example-btn">அறம்</button>
             <button @click="tryExampleSearch('தமிழ்நாடு')" class="example-btn">தமிழ்நாடு</button>
             <button @click="tryExampleSearch('எஃகு')" class="example-btn">எஃகு</button>
-            <button @click="tryExampleSearch('இம்மென்')" class="example-btn">இம்மென்</button>
+            <button @click="tryExampleSearch('தமித்து')" class="example-btn">தமித்து</button>
             <button @click="tryExampleSearch('ஈனில்')" class="example-btn">ஈனில்</button>
           </div>
         </div>
@@ -37,9 +37,7 @@
             <li><strong>Filter by works</strong> (optional) to search specific texts</li>
           </ul>
           <p>Understanding what a concordance is and the <strong>word segmentation principles</strong> will help you use this tool more effectively.</p>
-          <p class="learn-more">
-            <router-link :to="{ name: 'About', query: { tab: 'qa' } }" class="principles-link">Learn more about this tool →</router-link>
-          </p>
+          <p class="learn-more"><router-link class="acknowledgement" :to="{ name: 'About' }">Learn more about this tool</router-link></p>
         </div>
       </div>
 
@@ -298,7 +296,7 @@ const tryExampleSearch = (word) => {
 /* Welcome Message */
 .welcome {
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 1rem auto;
   padding: 2rem;
   background: white;
   border-radius: 8px;
@@ -316,7 +314,7 @@ const tryExampleSearch = (word) => {
   text-align: center;
   font-size: 1.1rem;
   color: #6c757d;
-  margin-bottom: 2rem;
+  margin-bottom: .5rem;
   font-style: italic;
 }
 
@@ -430,6 +428,17 @@ const tryExampleSearch = (word) => {
   background: #5a161c;
 }
 
+.acknowledgement {
+  color: #0f4c81;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--life-pulse);
+  font-weight: 400;
+}
+
+.acknowledgement:hover {
+  border-bottom: 1px dotted var(--life-pulse);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .main-container {
@@ -437,12 +446,13 @@ const tryExampleSearch = (word) => {
   }
 
   .welcome {
-    padding: .75rem;
-    margin: 0rem;
+    padding: .25rem;
+    margin: 0 0rem;
   }
 
   .welcome h2 {
     font-size: 1.0rem;
+    margin: 0 0rem;
   }
 
   .welcome-subtitle {
