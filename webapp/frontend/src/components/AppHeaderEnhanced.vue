@@ -60,12 +60,12 @@
       <!-- Database Summary Below Search Box -->
       <div class="database-summary">
         <!-- Row 1: Labels -->
-        <div class="summary-label label-left">Works</div>
-        <div class="summary-label label-center">Source:</div>
-        <div class="summary-label label-right">Words</div>
+        <div class="summary-label label-center">படைப்புகள்</div>
+        <div class="summary-label label-center">தகவல்</div>
+        <div class="summary-label label-center">சொற்கள்</div>
 
         <!-- Row 2: Values -->
-        <div class="summary-value value-left">
+        <div class="summary-value value-center">
           <span v-if="stats">{{ stats.total_works }}</span>
           <span v-else>-</span>
         </div>
@@ -74,7 +74,7 @@
             http://tamilconcordance.in
           </a>
         </div>
-        <div class="summary-value value-right">
+        <div class="summary-value value-center">
           <span v-if="stats">{{ stats.distinct_words }}</span>
           <span v-else>-</span>
         </div>
