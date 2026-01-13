@@ -865,6 +865,7 @@ const exportWordVerses = async (format, wordText) => {
   border: none;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
+  color: var(--primary-color);
   transition: transform 0.2s ease;
 }
 

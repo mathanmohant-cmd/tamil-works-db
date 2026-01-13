@@ -61,7 +61,7 @@
       <div class="database-summary">
         <!-- Row 1: Labels -->
         <div class="summary-label label-center">படைப்புகள்</div>
-        <div class="summary-label label-center">தகவல்</div>
+        <div class="summary-label label-center">தரவுகள்</div>
         <div class="summary-label label-center">சொற்கள்</div>
 
         <!-- Row 2: Values -->
