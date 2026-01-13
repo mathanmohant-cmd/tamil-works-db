@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Minor Literary Works (சிற்றிலக்கியங்கள்) Bulk Import
+File Minor Epics (ஐஞ்சிறுகாப்பியங்கள்) Bulk Import
 Fast 2-phase import using PostgreSQL COPY
 
 Phase 1: Parse text → Build data structures in memory
 Phase 2: Bulk COPY into database (1000x faster than INSERT)
 
-Collection ID: 324 (சிற்றிலக்கியங்கள் - Minor Literary Works)
+Collection ID: 324 (ஐஞ்சிறுகாப்பியங்கள் - File Minor Epics)
 
 Works (5 Jain minor epics):
 1. உதயணகுமார காவியம் (Udayana Kumara Kaviyam) - Kandiyar, 3rd century CE
@@ -139,7 +139,7 @@ class SitrIlakkiyangalBulkImporter:
         existing = self.cursor.fetchone()
 
         if not existing:
-            print(f"  Creating சிற்றிலக்கியங்கள் collection (ID: {self.collection_id})...")
+            print(f"  Creating ஐஞ்சிறுகாப்பியங்கள் collection (ID: {self.collection_id})...")
             self.cursor.execute("""
                 INSERT INTO collections (
                     collection_id, collection_name, collection_name_tamil,
@@ -148,8 +148,8 @@ class SitrIlakkiyangalBulkImporter:
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.collection_id,
-                'Minor Literary Works',
-                'சிற்றிலக்கியங்கள்',
+                'File Minor Epics',
+                'ஐஞ்சிறுகாப்பியங்கள்',
                 'period',
                 'Five Jain minor epics from the Sangam and post-Sangam period (3rd-10th century CE)',
                 1,  # Parent: தமிழ் இலக்கியம் (designated filter collection)
@@ -157,7 +157,7 @@ class SitrIlakkiyangalBulkImporter:
             ))
             print(f"  [OK] Collection created (will commit with bulk data)")
         else:
-            print(f"  Found existing சிற்றிலக்கியங்கள் collection (ID: {self.collection_id})")
+            print(f"  Found existing ஐஞ்சிறுகாப்பியங்கள் collection (ID: {self.collection_id})")
 
     def _create_work(self, work_num: int) -> int:
         """Create work entry from WORK_METADATA and return work_id"""
@@ -492,7 +492,7 @@ class SitrIlakkiyangalBulkImporter:
 def print_header():
     """Print banner"""
     print("=" * 70)
-    print("சிற்றிலக்கியங்கள் (Minor Literary Works) - Bulk Import")
+    print("ஐஞ்சிறுகாப்பியங்கள் (File Minor Epics) - Bulk Import")
     print("Collection 324: Five Jain Minor Epics (3rd-10th century CE)")
     print("=" * 70)
 
@@ -529,12 +529,12 @@ def main():
     print_header()
 
     # Base directory for source files
-    base_dir = Path(__file__).parent.parent / 'Tamil-Source-TamilConcordence' / '8_சிற்றிலக்கியங்கள்'
+    base_dir = Path(__file__).parent.parent / 'Tamil-Source-TamilConcordence' / '9_ஐஞ்சிறுகாப்பியங்கள்'
 
     # Check if directory exists
     if not base_dir.exists():
         print(f"\n✗ Error: Source directory not found: {base_dir}")
-        print("  Please ensure Tamil-Source-TamilConcordence/8_சிற்றிலக்கியங்கள்/ exists")
+        print("  Please ensure Tamil-Source-TamilConcordence/9_ஐஞ்சிறுகாப்பியங்கள்/ exists")
         sys.exit(1)
 
     try:
@@ -576,7 +576,7 @@ def main():
 
     except FileNotFoundError as e:
         print(f"\n✗ File error: {e}")
-        print("  Check Tamil-Source-TamilConcordence/8_சிற்றிலக்கியங்கள்/ directory")
+        print("  Check Tamil-Source-TamilConcordence/9_ஐஞ்சிறுகாப்பியங்கள்/ directory")
         sys.exit(1)
 
     except Exception as e:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Delete all 5 Jain minor epics (சிற்றிலக்கியங்கள்) and collection 324
+Delete all 5 Jain minor epics (ஐஞ்சிறுகாப்பியங்கள்) and collection 324
 
 Works deleted:
 1. உதயணகுமார காவியம் (Udayana Kumara Kaviyam)
@@ -11,10 +11,10 @@ Works deleted:
 5. நீலகேசி (Nilakesi)
 
 Usage:
-    python delete_sitrilakkiyangal.py [database_url]
+    python delete_five_minor_epics.py [database_url]
 
 Examples:
-    python delete_sitrilakkiyangal.py
+    python delete_five_minor_epics.py
     python delete_sitrilakkiyangal.py postgresql://postgres:postgres@localhost/tamil_literature
 """
 
@@ -133,7 +133,7 @@ def delete_single_work(cursor, work_name: str):
 def main():
     """Main execution"""
     print("=" * 70)
-    print("Delete சிற்றிலக்கியங்கள் (Minor Literary Works)")
+    print("Delete ஐஞ்சிறுகாப்பியங்கள் (Five Minor Epics)")
     print("Collection 324: Five Jain Minor Epics")
     print("=" * 70)
 
