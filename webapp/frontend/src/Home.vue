@@ -32,7 +32,7 @@ export default {
 <style scoped>
 .home-page {
   padding: 2rem 1rem;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 

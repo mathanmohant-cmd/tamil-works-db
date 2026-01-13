@@ -17,7 +17,8 @@
 
 <script setup>
 import { KeepAlive } from 'vue'
-import AppHeader from '../components/AppHeader.vue'
+// import AppHeader from '../components/AppHeader.vue' // OLD
+import AppHeader from '../components/AppHeaderEnhanced.vue' // NEW Enhanced Header
 </script>
 
 <style scoped>

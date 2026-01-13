@@ -3,7 +3,7 @@
     <div class="section-header" @click="navigateToSection">
       <div class="section-info">
         <span v-if="section.children && section.children.length > 0" class="toggle-icon" @click.stop="toggleExpanded">
-          {{ isExpanded ? '▼' : '▶' }}
+          <span class="chevron-icon" :class="isExpanded ? 'chevron-down' : 'chevron-up'"></span>
         </span>
         <span class="section-level-type">
           {{ section.level_type_tamil || section.level_type }}
@@ -97,16 +97,34 @@ const navigateToSection = () => {
 }
 
 .toggle-icon {
-  font-size: 0.8rem;
-  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
-  text-align: center;
   cursor: pointer;
   user-select: none;
 }
 
-.toggle-icon:hover {
-  color: #1976d2;
+.chevron-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-right: 2px solid #666;
+  border-bottom: 2px solid #666;
+  transition: transform 0.2s ease;
+}
+
+.chevron-up {
+  transform: rotate(-135deg); /* Points up ▲ */
+}
+
+.chevron-down {
+  transform: rotate(45deg);   /* Points down ▼ */
+}
+
+.toggle-icon:hover .chevron-icon {
+  border-color: #1976d2;
 }
 
 .section-level-type {

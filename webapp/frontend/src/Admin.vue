@@ -60,7 +60,10 @@
               :class="{ selected: collection.collection_id === selectedCollection?.collection_id }"
               @click="selectCollection(collection)"
             >
-              <span class="tree-icon">{{ collection.children?.length ? '▶' : '•' }}</span>
+              <span class="tree-icon">
+                <span v-if="collection.children?.length" class="chevron-icon chevron-down"></span>
+                <span v-else class="bullet-icon">•</span>
+              </span>
               <span class="tree-name">{{ collection.collection_name }}</span>
               <span class="tree-count">({{ collection.work_count || 0 }})</span>
             </div>
@@ -713,9 +716,29 @@ export default {
 
 .tree-icon {
   width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.chevron-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: none;
+  border-right: 2px solid #666;
+  border-bottom: 2px solid #666;
+  transition: transform 0.2s ease;
+}
+
+.chevron-down {
+  transform: rotate(45deg);   /* Points down ▼ */
+}
+
+.bullet-icon {
   font-size: 10px;
   color: #666;
-  margin-right: 8px;
 }
 
 .tree-name {

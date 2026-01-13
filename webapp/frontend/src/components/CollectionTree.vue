@@ -1,15 +1,10 @@
 <template>
   <div class="collection-tree">
     <div class="tree-header">
-      <h3>Collection for Search Filter</h3>
-      <div class="tree-actions">
-        <button @click="expandAll" class="tree-action-btn" title="Expand all collections">
-          Expand All
-        </button>
-        <button @click="collapseAll" class="tree-action-btn" title="Collapse all collections">
-          Collapse All
-        </button>
-      </div>
+      <h3>Search in collection</h3>
+      <button @click="toggleExpandCollapse" class="tree-action-btn" :title="allExpanded ? 'Collapse All' : 'Expand All'">
+        <span class="chevron-icon" :class="allExpanded ? 'chevron-up' : 'chevron-down'"></span>
+      </button>
     </div>
 
     <div v-if="loading" class="tree-loading">Loading collections...</div>
@@ -61,6 +56,7 @@ const selectedCollections = ref(new Set())
 const loading = ref(false)
 const error = ref(null)
 const collectionWorksCache = ref({})
+const allExpanded = ref(true)  // Start expanded (per existing onMounted behavior)
 
 // Load collection tree
 const loadCollectionTree = async () => {
@@ -129,6 +125,17 @@ const expandAll = async () => {
 // Collapse all nodes
 const collapseAll = () => {
   expandedNodes.value.clear()
+}
+
+// Toggle expand/collapse all
+const toggleExpandCollapse = async () => {
+  if (allExpanded.value) {
+    collapseAll()
+    allExpanded.value = false
+  } else {
+    await expandAll()
+    allExpanded.value = true
+  }
 }
 
 // Find collection by ID in the tree
@@ -214,6 +221,13 @@ const handleToggleSelection = async ({ collectionId, isChecked }) => {
   const collection = findCollection(collectionTree.value, collectionId)
   if (!collection) return
 
+  console.log('[CollectionTree] Toggle selection:', {
+    collectionId,
+    collectionName: collection.collection_name_tamil,
+    isChecked,
+    workCount: collection.work_count
+  })
+
   // Get all descendant collection IDs to mark them as selected/unselected
   const descendantCollectionIds = getAllDescendantCollectionIds(collection)
 
@@ -229,13 +243,21 @@ const handleToggleSelection = async ({ collectionId, isChecked }) => {
   const workIds = await getAllWorkIdsFromCollection(collection)
   const workIdsArray = Array.from(workIds)
 
+  console.log('[CollectionTree] Work IDs loaded:', {
+    count: workIdsArray.length,
+    workIds: workIdsArray
+  })
+
   if (isChecked) {
     // Add these work IDs to selected works (union)
     const updatedSelection = new Set([...props.selectedWorks, ...workIdsArray])
-    emit('update:selectedWorks', Array.from(updatedSelection))
+    const finalArray = Array.from(updatedSelection)
+    console.log('[CollectionTree] Emitting selected works:', finalArray)
+    emit('update:selectedWorks', finalArray)
   } else {
     // Remove these work IDs from selected works
     const updatedSelection = props.selectedWorks.filter(id => !workIds.has(id))
+    console.log('[CollectionTree] Emitting deselected works:', updatedSelection)
     emit('update:selectedWorks', updatedSelection)
   }
 }
@@ -244,27 +266,44 @@ const handleToggleSelection = async ({ collectionId, isChecked }) => {
 // Clear all selections (called from parent)
 const clearSelections = () => {
   selectedCollections.value.clear()
+  emit('update:selectedWorks', [])
 }
 
 // Select all collections (called from parent when switching to "All works")
-const selectAll = () => {
-  const addAllCollectionIds = (collections) => {
-    collections.forEach(coll => {
+const selectAll = async () => {
+  const allWorkIds = new Set()
+
+  const addAllCollectionIdsAndWorks = async (collections) => {
+    for (const coll of collections) {
       if (coll.work_count > 0 || (coll.children && coll.children.length > 0)) {
         selectedCollections.value.add(coll.collection_id)
+
+        // Load works for this collection
+        if (coll.work_count > 0) {
+          const works = await loadCollectionWorksData(coll.collection_id)
+          works.forEach(w => allWorkIds.add(w.work_id))
+        }
       }
+
       if (coll.children && coll.children.length > 0) {
-        addAllCollectionIds(coll.children)
+        await addAllCollectionIdsAndWorks(coll.children)
       }
-    })
+    }
   }
-  addAllCollectionIds(collectionTree.value)
+
+  await addAllCollectionIdsAndWorks(collectionTree.value)
+
+  // Emit all collected work IDs
+  emit('update:selectedWorks', Array.from(allWorkIds))
+  console.log('[CollectionTree] Select All - emitted work IDs:', Array.from(allWorkIds))
 }
 
 // Expose methods to parent component
 defineExpose({
   clearSelections,
-  selectAll
+  selectAll,
+  expandAll,
+  collapseAll
 })
 
 // Find all collections that contain any of the selected works
@@ -362,24 +401,41 @@ onMounted(async () => {
   color: #333;
 }
 
-.tree-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
 .tree-action-btn {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.85rem;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  width: 32px;
+  height: 32px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s ease;
 }
 
 .tree-action-btn:hover {
-  background: #e9ecef;
-  border-color: #999;
+  background: var(--secondary-color);
+}
+
+.tree-action-btn .chevron-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transition: transform 0.2s ease;
+}
+
+.chevron-up {
+  transform: rotate(-135deg); /* Points up ▲ */
+}
+
+.chevron-down {
+  transform: rotate(45deg);   /* Points down ▼ */
 }
 
 .tree-loading,
@@ -403,7 +459,7 @@ onMounted(async () => {
 }
 
 .tree-content {
-  max-height: 500px;
+  max-height: 400px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   padding-right: 0.5rem;
@@ -458,7 +514,7 @@ onMounted(async () => {
   }
 
   .tree-content {
-    max-height: 400px;
+    max-height: 250px;
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scroll */
     padding-right: 0.25rem; /* Reduced padding */

@@ -62,7 +62,7 @@
               :title="expandedWords.has(word.word_text) ? 'Collapse' : 'Expand'"
             >
               <span class="expand-icon">
-                <span class="chevron-icon" :class="expandedWords.has(word.word_text) ? 'chevron-down' : 'chevron-right'"></span>
+                <span class="chevron-icon" :class="expandedWords.has(word.word_text) ? 'chevron-down' : 'chevron-up'"></span>
               </span>
             </button>
           </div>
@@ -764,22 +764,37 @@ const exportWordVerses = async (format, wordText) => {
 }
 
 .word-item-expandable.expanded {
-  border-bottom-color: #c17a3a;
+  border-bottom-color: transparent;
   box-shadow: none;
-  background-color: #f8f9fa; /* Light gray background for entire expanded section */
 }
 
 .word-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
 }
 
 .word-header-row:hover {
   background-color: #f8f9fa;
+}
+
+.word-item-expandable.expanded .word-header-row {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #c62828 100%);
+  border-left: 3px solid var(--primary-color);
+  padding: 0.75rem 0.5rem;
+}
+
+.word-item-expandable.expanded .word-header-row .word-text,
+.word-item-expandable.expanded .word-header-row .word-number,
+.word-item-expandable.expanded .word-header-row .word-count-badge {
+  color: white;
+}
+
+.word-item-expandable.expanded .word-actions .expand-collapse-button .chevron-icon {
+  border-color: white;
 }
 
 .word-info {

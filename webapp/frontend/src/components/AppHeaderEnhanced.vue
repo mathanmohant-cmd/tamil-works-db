@@ -4,9 +4,9 @@
     <header class="app-header">
       <div class="header-container">
         <!-- Logo (Placeholder - can be replaced with actual logo) -->
-        <div class="header-logo">
+        <div class="header-logo" @click="goToSearch">
           <span class="logo-icon">📚</span>
-          <span class="logo-text">Tamil Lit</span>
+          <span class="logo-text"></span>
         </div>
 
         <!-- Enhanced Search Box -->
@@ -20,7 +20,7 @@
               @keyup.enter="handleSearch"
               @keydown.esc="closeSearchPanel"
               type="search"
-              placeholder="தேடல் (Search Tamil words...)"
+              placeholder="தமித்து"
               class="search-input"
               autocomplete="off"
             />
@@ -47,6 +47,7 @@
 
         <!-- Menu Button -->
         <button
+          ref="menuBtn"
           @click="toggleMenu"
           class="menu-btn"
           :class="{ active: menuExpanded }"
@@ -54,6 +55,29 @@
         >
           ☰
         </button>
+      </div>
+
+      <!-- Database Summary Below Search Box -->
+      <div class="database-summary">
+        <!-- Row 1: Labels -->
+        <div class="summary-label label-left">Works</div>
+        <div class="summary-label label-center">Source:</div>
+        <div class="summary-label label-right">Words</div>
+
+        <!-- Row 2: Values -->
+        <div class="summary-value value-left">
+          <span v-if="stats">{{ stats.total_works }}</span>
+          <span v-else>-</span>
+        </div>
+        <div class="summary-value value-center">
+          <a href="http://tamilconcordance.in" target="_blank" rel="noopener noreferrer" class="concordance-link">
+            http://tamilconcordance.in
+          </a>
+        </div>
+        <div class="summary-value value-right">
+          <span v-if="stats">{{ stats.distinct_words }}</span>
+          <span v-else>-</span>
+        </div>
       </div>
     </header>
 
@@ -74,7 +98,7 @@
                 @keyup.enter="handleSearchAndClose"
                 @keydown.esc="closeSearchPanel"
                 type="search"
-                placeholder="தேடல் (Search Tamil words...)"
+                placeholder="தமித்து"
                 class="search-input"
                 autocomplete="off"
               />
@@ -172,16 +196,6 @@
                   <button @click="handleSearchAndClose" class="done-btn-inline">
                     Done
                   </button>
-
-                  <button
-                    @click="toggleExpandCollapse"
-                    class="chevron-btn"
-                    :title="isTreeExpanded ? 'Collapse all' : 'Expand all'"
-                  >
-                    <span class="chevron" :class="{ rotated: isTreeExpanded }">
-                      ▼
-                    </span>
-                  </button>
                 </div>
               </div>
 
@@ -230,7 +244,11 @@
 
     <!-- Menu Dropdown (Existing) -->
     <div v-if="menuExpanded" class="menu-backdrop" @click="closeMenu"></div>
-    <div v-if="menuExpanded" class="menu-dropdown">
+    <div
+      v-if="menuExpanded"
+      class="menu-dropdown"
+      :style="{ top: menuPosition.top, right: menuPosition.right }"
+    >
       <router-link :to="{ name: 'Home' }" class="menu-item" @click="closeMenu">
         Acknowledgment
       </router-link>
@@ -260,6 +278,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSearchState } from '../composables/useSearchState.js'
 import { useFilterState } from '../composables/useFilterState.js'
+import { useStats } from '../composables/useStats.js'
 import CollectionTree from './CollectionTree.vue'
 
 const router = useRouter()
@@ -273,6 +292,8 @@ const searchFocused = ref(false)
 const collectionsExpanded = ref(true)
 const isTreeExpanded = ref(false)
 const menuExpanded = ref(false)
+const menuBtn = ref(null)
+const menuPosition = ref({ top: '58px', right: '1rem' })
 
 // Mock data - replace with real data
 const suggestions = ref([])
@@ -286,6 +307,13 @@ const exampleWords = ref(['அறம்', 'காதல்', 'நீதி', '�
 
 const { clearSearch, matchType, wordPosition } = useSearchState()
 const { selectedWorks, filterMode } = useFilterState()
+
+const { stats, loadStats } = useStats()
+
+// Load stats once per session
+if (!stats.value) {
+  loadStats()
+}
 
 const isMobile = computed(() => {
   if (typeof window === 'undefined') return false
@@ -457,10 +485,23 @@ function toggleExpandCollapse() {
 
 function toggleMenu() {
   menuExpanded.value = !menuExpanded.value
+
+  if (menuExpanded.value && menuBtn.value) {
+    // Calculate position: menu dropdown's top-right should align with button's bottom-right
+    const rect = menuBtn.value.getBoundingClientRect()
+    menuPosition.value = {
+      top: `${rect.bottom + window.scrollY}px`,
+      right: `${window.innerWidth - rect.right}px`
+    }
+  }
 }
 
 function closeMenu() {
   menuExpanded.value = false
+}
+
+function goToSearch() {
+  router.push({ name: 'Search' })
 }
 
 // Close menu on route change
@@ -490,17 +531,90 @@ watch(searchFocused, (newValue) => {
 
 /* Compact Header */
 .app-header {
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  border-bottom: 2px solid #1e3a8a;
+  background: #1a3a5a;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: .5rem;
+}
+
+/* Database Summary (Below Search Box) */
+.database-summary {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0 1rem;
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1;
+  background: #1a3a5a;
+}
+
+/* Labels (Row 1) */
+.summary-label {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.8;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.label-left {
+  text-align: left;
+}
+
+.label-center {
+  text-align: center;
+}
+
+.label-right {
+  text-align: right;
+}
+
+/* Values (Row 2) */
+.summary-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.value-left {
+  text-align: left;
+}
+
+.value-center {
+  text-align: center;
+}
+
+.value-right {
+  text-align: right;
+}
+
+.concordance-link {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.concordance-link:hover {
+  color: white;
+  border-bottom-color: white;
 }
 
 .header-container {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  max-width: 1400px;
+  gap: 0.5rem;
+  padding: 0.5rem 2rem;
+  max-width: 900px;
   margin: 0 auto;
   height: 50px; /* Compact height */
 }
@@ -673,7 +787,7 @@ watch(searchFocused, (newValue) => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  background: linear-gradient(135deg, #1a3a5a 0%, #1e3a8a 100%);
   border-bottom: 2px solid #1e3a8a;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
@@ -798,7 +912,7 @@ watch(searchFocused, (newValue) => {
 
 .done-btn-inline {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  background: linear-gradient(135deg, #1a3a5a 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -811,7 +925,7 @@ watch(searchFocused, (newValue) => {
 }
 
 .done-btn-inline:hover {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1e2a5a 100%);
+  background: linear-gradient(135deg, #1a3a5a 0%, #1e2a5a 100%);
   box-shadow: 0 4px 8px rgba(30, 64, 175, 0.3);
   transform: translateY(-1px);
 }
@@ -1140,8 +1254,7 @@ watch(searchFocused, (newValue) => {
 
 .menu-dropdown {
   position: fixed;
-  top: 58px;
-  right: 1rem;
+  /* top and right set dynamically via :style */
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -1233,7 +1346,7 @@ watch(searchFocused, (newValue) => {
 /* Mobile Adjustments */
 @media (max-width: 767px) {
   .header-container {
-    padding: 0.4rem 0.75rem;
+    padding: .4rem 0.5rem;
     gap: 0.5rem;
     height: 44px; /* Even more compact on mobile */
   }
@@ -1258,6 +1371,25 @@ watch(searchFocused, (newValue) => {
     width: 36px;
     height: 36px;
     font-size: 1.2rem;
+  }
+
+  /* Database Summary on Mobile - Keep same layout, just adjust sizing */
+  .database-summary {
+    padding: 0.25rem 0;
+    gap: 0 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .summary-label {
+    font-size: 0.7rem;
+  }
+
+  .summary-value {
+    font-size: 0.8rem;
+  }
+
+  .concordance-link {
+    font-size: 0.7rem;
   }
 
   /* Panel Header on Mobile */

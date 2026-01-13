@@ -15,8 +15,19 @@
     <div v-if="!showVerseView" class="main-container">
       <!-- Welcome Message -->
       <div v-if="!loading && !searchResults && showWelcome" class="welcome">
-        <h2>Find Words, Step Into Literature</h2>
-        <p class="welcome-subtitle">Trace the journey of words across centuries</p>
+        <h2>Explore Thamizh Literature...</h2>
+        <p class="welcome-subtitle">...one word at time</p>
+        <div class="try-examples">
+          <h3>Click These Words</h3>
+          <div class="example-buttons">
+            <button @click="tryExampleSearch('அறம்')" class="example-btn">அறம்</button>
+            <button @click="tryExampleSearch('தமிழ்நாடு')" class="example-btn">தமிழ்நாடு</button>
+            <button @click="tryExampleSearch('எஃகு')" class="example-btn">எஃகு</button>
+            <button @click="tryExampleSearch('இம்மென்')" class="example-btn">இம்மென்</button>
+            <button @click="tryExampleSearch('ஈனில்')" class="example-btn">ஈனில்</button>
+          </div>
+        </div>
+
         <div class="quick-start">
           <h3>🚀 Quick Start</h3>
           <ul class="tips-list">
@@ -29,17 +40,6 @@
           <p class="learn-more">
             <router-link :to="{ name: 'About', query: { tab: 'qa' } }" class="principles-link">Learn more about this tool →</router-link>
           </p>
-        </div>
-
-        <div class="try-examples">
-          <h3>Try These Examples</h3>
-          <div class="example-buttons">
-            <button @click="tryExampleSearch('அறம்')" class="example-btn">அறம்</button>
-            <button @click="tryExampleSearch('தமிழ்நாடு')" class="example-btn">தமிழ்நாடு</button>
-            <button @click="tryExampleSearch('எஃகு')" class="example-btn">எஃகு</button>
-            <button @click="tryExampleSearch('இம்மென்')" class="example-btn">இம்மென்</button>
-            <button @click="tryExampleSearch('ஈனில்')" class="example-btn">ஈனில்</button>
-          </div>
         </div>
       </div>
 
@@ -117,11 +117,11 @@ onMounted(async () => {
 })
 
 // Watch route query and perform search when it changes
-watch(() => route.query.q, async (newQuery) => {
+watch(() => route.query, async (newQuery) => {
   if (!initialized.value) return // Wait for initialization
 
-  if (newQuery && newQuery.trim()) {
-    searchQuery.value = newQuery.trim()
+  if (newQuery.q && newQuery.q.trim()) {
+    searchQuery.value = newQuery.q.trim()
     showWelcome.value = false
     await performSearch()
   } else if (route.name === 'Search') {
@@ -129,7 +129,7 @@ watch(() => route.query.q, async (newQuery) => {
     searchResults.value = null
     showWelcome.value = true
   }
-})
+}, { deep: true })
 
 // Watch match type changes and trigger new search
 watch(matchType, async () => {
@@ -269,6 +269,15 @@ const loadWordOccurrences = async (wordText) => {
 
 // Try example search
 const tryExampleSearch = (word) => {
+  // Reset search filters to defaults
+  matchType.value = 'partial'
+  wordPosition.value = 'anywhere'
+
+  // Clear work filters
+  filterMode.value = 'all'
+  selectedWorks.value = []
+
+  // Navigate to search with query
   router.push({
     name: 'Search',
     query: { q: word }
@@ -298,7 +307,7 @@ const tryExampleSearch = (word) => {
 
 .welcome h2 {
   margin: 0 0 0.5rem 0;
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   color: #2c3e50;
   text-align: center;
 }
@@ -315,7 +324,6 @@ const tryExampleSearch = (word) => {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 6px;
-  margin-bottom: 2rem;
 }
 
 .quick-start h3 {
@@ -353,11 +361,12 @@ const tryExampleSearch = (word) => {
 
 .try-examples {
   text-align: center;
+  margin-bottom: 2rem;
 }
 
 .try-examples h3 {
   margin: 0 0 1rem 0;
-  font-size: 1.2rem;
+  font-size: .9rem;
   color: #2c3e50;
 }
 
@@ -423,13 +432,17 @@ const tryExampleSearch = (word) => {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .main-container {
+  margin: 0 auto;
+  }
+
   .welcome {
-    padding: 1.5rem;
-    margin: 1rem;
+    padding: .75rem;
+    margin: 0rem;
   }
 
   .welcome h2 {
-    font-size: 1.4rem;
+    font-size: 1.0rem;
   }
 
   .welcome-subtitle {
@@ -437,11 +450,11 @@ const tryExampleSearch = (word) => {
   }
 
   .quick-start {
-    padding: 1rem;
+    padding: .5rem;
   }
 
   .quick-start h3 {
-    font-size: 1.1rem;
+    font-size: .9rem;
   }
 
   .tips-list {
@@ -460,5 +473,9 @@ const tryExampleSearch = (word) => {
     padding: 0.5rem 1rem;
     font-size: 1rem;
   }
+
+  .try-examples {
+  padding: .5rem;
+}
 }
 </style>
