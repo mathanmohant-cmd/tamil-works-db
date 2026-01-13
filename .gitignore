@@ -62,3 +62,6 @@ works-text/
 
 # Experimental grammar tools (future projects, keep local)
 tamil-grammar-tools/
+
+# Playwright MCP server generated files
+.playwright-mcp/
