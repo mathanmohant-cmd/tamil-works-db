@@ -190,6 +190,9 @@
                   <button @click="clearAllCollections" class="action-btn-inline">
                     Clear
                   </button>
+                  <span v-if="isCollectionTreeLoading" class="loading-indicator-inline">
+                    Loading...
+                  </span>
                 </div>
 
                 <div class="action-buttons-right">
@@ -305,8 +308,8 @@ const quickCategories = ref([
 ])
 const exampleWords = ref(['அறம்', 'காதல்', 'நீதி', 'இன்பம்'])
 
-const { clearSearch, matchType, wordPosition } = useSearchState()
-const { selectedWorks, filterMode } = useFilterState()
+const { clearSearch, matchType, wordPosition, sortBy } = useSearchState()
+const { selectedWorks, filterMode, hasFiltersChanged } = useFilterState()
 
 const { stats, loadStats } = useStats()
 
@@ -323,6 +326,10 @@ const isMobile = computed(() => {
 const isWorksBrowserVisible = computed(() => {
   const hostname = window.location.hostname
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '192.168.1.198'
+})
+
+const isCollectionTreeLoading = computed(() => {
+  return collectionTreeRef.value?.loading || false
 })
 
 // Sync with URL
@@ -365,9 +372,23 @@ function closeSearchPanel() {
 function handleSearch() {
   if (searchQuery.value.trim()) {
     closeSearchPanel()
+
+    // Set filter mode based on selection
+    if (selectedWorks.value.length > 0) {
+      filterMode.value = 'select'
+    } else {
+      filterMode.value = 'all'
+    }
+
+    // Navigate to search results with filter params
     router.push({
-      name: 'Search',
-      query: { q: searchQuery.value.trim() }
+      name: 'SearchResults',
+      query: {
+        q: searchQuery.value.trim(),
+        type: matchType.value,
+        pos: wordPosition.value,
+        sort: sortBy.value
+      }
     })
   }
 }
@@ -384,13 +405,23 @@ function handleSearchAndClose() {
       filterMode.value = 'all'
     }
 
-    // Force re-search by adding a timestamp to ensure SearchPage triggers performSearch
+    // Build query params
+    const queryParams = {
+      q: searchQuery.value.trim(),
+      type: matchType.value,
+      pos: wordPosition.value,
+      sort: sortBy.value
+    }
+
+    // If on SearchResults page and filters changed, add timestamp to force refresh
+    if (route.name === 'SearchResults' && hasFiltersChanged.value) {
+      queryParams._t = Date.now()
+    }
+
+    // Navigate to search results with filter params
     router.push({
-      name: 'Search',
-      query: {
-        q: searchQuery.value.trim(),
-        t: Date.now() // Timestamp to force re-search
-      }
+      name: 'SearchResults',
+      query: queryParams
     })
   } else {
     // If no search query, just close the panel
@@ -908,6 +939,19 @@ watch(searchFocused, (newValue) => {
   padding: 1rem;
   background: white;
   border-bottom: 2px solid #e5e7eb;
+}
+
+.loading-indicator-inline {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  margin-left: 0.5rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .done-btn-inline {

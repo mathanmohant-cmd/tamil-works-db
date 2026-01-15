@@ -298,12 +298,13 @@ const selectAll = async () => {
   console.log('[CollectionTree] Select All - emitted work IDs:', Array.from(allWorkIds))
 }
 
-// Expose methods to parent component
+// Expose methods and state to parent component
 defineExpose({
   clearSelections,
   selectAll,
   expandAll,
-  collapseAll
+  collapseAll,
+  loading
 })
 
 // Find all collections that contain any of the selected works

@@ -101,12 +101,16 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useSearchState } from '../../composables/useSearchState.js'
 import { useFilterState } from '../../composables/useFilterState.js'
 import CollectionTree from '../CollectionTree.vue'
 
+const router = useRouter()
+const route = useRoute()
+
 // Use composables
-const { matchType, wordPosition } = useSearchState()
+const { matchType, wordPosition, searchQuery } = useSearchState()
 const {
   filterMode,
   selectedWorks,
@@ -115,11 +119,12 @@ const {
   designatedCollectionId,
   worksFilterButtonText,
   sortedSelectedWorks,
+  hasFiltersChanged,
   getWorkName,
   getWorkById,
   getWorkChronologyTooltip,
   toggleFilters,
-  closeFilters,
+  closeFilters: closeFiltersOriginal,
   clearFilters,
   removeWork,
   handleFilterModeChange,
@@ -128,6 +133,23 @@ const {
 
 // Local visibility state controlled by header toggle (default to closed)
 const localVisible = ref(false)
+
+// Override closeFilters to trigger search if filters changed
+const closeFilters = () => {
+  // Check if we're on SearchResults page and filters have changed
+  if (hasFiltersChanged.value && route.name === 'SearchResults' && searchQuery.value) {
+    // Trigger search with timestamp to force route change
+    router.push({
+      name: 'SearchResults',
+      query: {
+        ...route.query,
+        _t: Date.now() // Timestamp forces route change even if other params same
+      }
+    })
+  }
+  // Close the filters panel
+  closeFiltersOriginal()
+}
 
 // Listen for toggle event from header
 const handleToggleEvent = (event) => {

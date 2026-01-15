@@ -9,6 +9,12 @@ const filtersExpanded = ref(false)
 const designatedCollectionId = ref(null)
 const showWelcome = ref(true)
 
+// Track last searched filters to detect changes
+const lastSearchedFilters = ref({
+  mode: 'all',
+  works: []
+})
+
 export function useFilterState() {
   // Restore filter state from session storage
   const restoreFilters = async () => {
@@ -73,6 +79,21 @@ export function useFilterState() {
       const posB = positionMap.get(b) || 999
       return posA - posB
     })
+  })
+
+  // Computed: Check if filters have changed since last search
+  const hasFiltersChanged = computed(() => {
+    if (filterMode.value !== lastSearchedFilters.value.mode) return true
+
+    // Compare selected works arrays
+    if (selectedWorks.value.length !== lastSearchedFilters.value.works.length) return true
+
+    const currentSet = new Set(selectedWorks.value)
+    const lastSet = new Set(lastSearchedFilters.value.works)
+    for (const id of currentSet) {
+      if (!lastSet.has(id)) return true
+    }
+    return false
   })
 
   // Get work name by ID
@@ -153,6 +174,14 @@ export function useFilterState() {
     showWelcome.value = false
   }
 
+  // Mark current filters as "searched" (snapshot for change detection)
+  const markFiltersAsSearched = () => {
+    lastSearchedFilters.value = {
+      mode: filterMode.value,
+      works: [...selectedWorks.value]
+    }
+  }
+
   return {
     // State
     filterMode,
@@ -165,6 +194,7 @@ export function useFilterState() {
     // Computed
     worksFilterButtonText,
     sortedSelectedWorks,
+    hasFiltersChanged,
 
     // Methods
     restoreFilters,
@@ -177,6 +207,7 @@ export function useFilterState() {
     clearFilters,
     removeWork,
     handleFilterModeChange,
-    handleCollectionSelection
+    handleCollectionSelection,
+    markFiltersAsSearched
   }
 }

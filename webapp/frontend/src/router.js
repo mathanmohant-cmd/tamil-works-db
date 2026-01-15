@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from './layouts/AppLayout.vue'
 import Home from './Home.vue'
 import SearchPage from './pages/SearchPage.vue'
+import SearchResultsPage from './pages/SearchResultsPage.vue'
 import WorksBrowser from './pages/WorksBrowser.vue'
 import WorksList from './components/works/WorksList.vue'
 import WorkDetail from './components/works/WorkDetail.vue'
@@ -31,6 +32,12 @@ const routes = [
         name: 'Search',
         component: SearchPage,
         meta: { title: 'Search' }
+      },
+      {
+        path: 'search/results',
+        name: 'SearchResults',
+        component: SearchResultsPage,
+        meta: { title: 'Search Results' }
       },
       {
         path: 'works',

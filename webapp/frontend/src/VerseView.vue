@@ -74,9 +74,9 @@
       </div>
 
       <!-- Lines displayed in two columns -->
-      <div class="verse-lines-table">
+      <div class="verse-lines-table" @dblclick="handleWordDoubleClick">
         <div v-for="(line, index) in verse.lines" :key="line.line_id" class="line-row">
-          <span class="line-text" v-html="highlightSearchWord(line.line_text)"></span>
+          <span class="line-text" v-html="parseLineIntoWords(line.line_text)"></span>
           <span v-if="(index + 1) % 5 === 0" class="line-number">{{ index + 1 }}</span>
         </div>
       </div>
@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from './api.js'
 
@@ -232,19 +232,39 @@ export default {
       return cleanedLevels.join(' • ')
     }
 
-    const highlightSearchWord = (lineText) => {
-      const wordToHighlight = searchWord.value
-      if (!wordToHighlight || !lineText) return lineText
+    const parseLineIntoWords = (lineText) => {
+      if (!lineText) return ''
 
-      const escapeHtml = (text) => {
-        const div = document.createElement('div')
-        div.textContent = text
-        return div.innerHTML
+      // Escape HTML first
+      const escaped = lineText
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+
+      // Find Tamil words and wrap in clickable spans
+      const parsed = escaped.replace(/[\u0B80-\u0BFF]+/g, (word) => {
+        // Check if this word matches search word (for highlighting)
+        const wordToHighlight = searchWord.value
+        const isHighlighted = wordToHighlight && word.includes(wordToHighlight)
+        const classes = isHighlighted
+          ? 'word-clickable word-highlight'
+          : 'word-clickable'
+
+        return `<span class="${classes}" data-word="${word}">${word}</span>`
+      })
+
+      return parsed
+    }
+
+    const handleWordDoubleClick = (event) => {
+      const target = event.target
+      if (target.classList.contains('word-clickable')) {
+        const word = target.getAttribute('data-word')
+        if (word) {
+          const url = `https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(word)}&searchhws=yes&matchtype=default`
+          window.open(url, '_blank')
+        }
       }
-
-      const escapedLineText = escapeHtml(lineText)
-      const regex = new RegExp(`(${wordToHighlight})`, 'g')
-      return escapedLineText.replace(regex, '<span class="word-highlight">$1</span>')
     }
 
     const shouldShowLineNumber = (lineNumber) => {
@@ -369,7 +389,8 @@ export default {
       navigateToPrevVerse,
       navigateToNextVerse,
       cleanHierarchyPath,
-      highlightSearchWord,
+      parseLineIntoWords,
+      handleWordDoubleClick,
       shouldShowLineNumber,
       toggleExportMenu,
       exportVerse
@@ -708,5 +729,22 @@ export default {
   border-radius: 3px;
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(255, 193, 7, 0.3);
+}
+
+/* Clickable word styling */
+.word-clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.word-clickable:hover {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Highlighted words keep their existing styling */
+.word-clickable.word-highlight:hover {
+  text-decoration-color: rgba(255, 193, 7, 0.8);
 }
 </style>
