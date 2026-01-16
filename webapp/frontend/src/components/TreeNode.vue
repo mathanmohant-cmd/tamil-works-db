@@ -6,6 +6,7 @@
         v-if="hasWorksInTree"
         type="checkbox"
         :checked="isSelected"
+        :disabled="readOnly"
         @change="handleCheckboxChange"
         class="collection-checkbox"
         @click.stop
@@ -38,6 +39,7 @@
         :expanded-nodes="expandedNodes"
         :selected-works="selectedWorks"
         :selected-collections="selectedCollections"
+        :read-only="readOnly"
         @toggle-node="$emit('toggle-node', $event)"
         @load-works="$emit('load-works', $event)"
         @toggle-selection="$emit('toggle-selection', $event)"
@@ -58,6 +60,7 @@
           <input
             type="checkbox"
             :checked="isWorkSelected(work.work_id)"
+            :disabled="readOnly"
             @change="handleWorkToggle(work.work_id, $event)"
             class="work-checkbox"
             @click.stop
@@ -89,6 +92,10 @@ const props = defineProps({
   selectedCollections: {
     type: Set,
     required: true
+  },
+  readOnly: {
+    type: Boolean,
+    default: false
   }
 })
 

@@ -20,6 +20,7 @@
         :expanded-nodes="expandedNodes"
         :selected-works="selectedWorks"
         :selected-collections="selectedCollections"
+        :read-only="readOnly"
         @toggle-node="toggleNode"
         @load-works="loadCollectionWorks"
         @toggle-selection="handleToggleSelection"
@@ -45,6 +46,10 @@ const props = defineProps({
   rootCollectionId: {
     type: Number,
     default: null  // If null, show all top-level collections
+  },
+  readOnly: {
+    type: Boolean,
+    default: false  // If true, tree is read-only (no checkboxes clickable)
   }
 })
 

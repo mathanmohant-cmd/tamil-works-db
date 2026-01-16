@@ -55,7 +55,7 @@
           <div style="flex: 1;"></div>
           <div class="filter-header-actions">
             <button @click="clearFilters" class="clear-filter-button" title="Uncheck all works">
-              Clear Filter
+              Deselect All
             </button>
             <button @click="closeFilters" class="done-button">Done</button>
           </div>
@@ -75,7 +75,7 @@
             <div class="selected-works-header">
               <strong>Selected Works: {{ selectedWorks.length }}</strong>
               <button v-if="selectedWorks.length > 0" @click="clearFilters" class="clear-selection-btn">
-                Clear All
+                Deselect All
               </button>
             </div>
             <div v-if="selectedWorks.length > 0" class="selected-works-preview">

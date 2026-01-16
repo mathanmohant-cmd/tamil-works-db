@@ -125,16 +125,17 @@ const isWorksBrowserVisible = computed(() => {
 })
 
 // Use shallow refs for values that change with route to minimize reactivity
-const isSearchPage = shallowRef(route.name === 'Search')
+const isSearchPage = shallowRef(route.name === 'Search' || route.name === 'SearchResults')
 const currentTabName = shallowRef('Search')
 
 // Update these values only when route changes (manual control)
 const updateRouteState = () => {
-  isSearchPage.value = route.name === 'Search'
+  isSearchPage.value = route.name === 'Search' || route.name === 'SearchResults'
 
   const tabNames = {
     'Home': 'Acknowledgment',
     'Search': 'Search',
+    'SearchResults': 'Search',
     'WorksList': 'Browse Works',
     'WorkDetail': 'Browse Works',
     'SectionView': 'Browse Works',
@@ -147,6 +148,11 @@ const updateRouteState = () => {
 
 // Initialize on mount
 updateRouteState()
+
+// Watch route name changes and update state
+watch(() => route.name, () => {
+  updateRouteState()
+})
 
 // Sync search box with URL query param (only watch, don't trigger on mount)
 watch(() => route.query.q, (newQuery) => {

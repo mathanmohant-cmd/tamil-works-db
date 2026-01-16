@@ -2,15 +2,18 @@
   <div class="search-page">
     <!-- Welcome Message & QuickStart Guide -->
     <div class="welcome">
-      <h2>A tool to search words across...</h2>
-      <h2>...Thamizh literature</h2>
-
+      <h2>Welcome to search!</h2>
+      <h3>Search across multiple Thamizh texts with ease.</h3>
+      <h3>&nbsp;</h3>
+      <div class="quick-start">
       <p class="welcome-subtitle">
+        Data sourced from the <a href="http://tamilconcordance.in" class="acknowledgement">www.tamilconcordance.in</a>, meticulously developed by
         <router-link class="acknowledgement" :to="{ name: 'Home' }">
-          Thanks to Prof P. Pandiyaraja
+          Prof P. Pandiyaraja
         </router-link>
+        encompassing over 2000 years of classical Tamil literature.
       </p>
-
+      </div>
       <!-- Try Examples Section -->
       <div class="try-examples">
         <h3>Try Searching: Click These Words</h3>
@@ -32,10 +35,10 @@
           <li><strong>Set position:</strong> Beginning, End, or Anywhere in the word</li>
           <li><strong>Filter by works</strong> (optional) to search specific texts</li>
         </ul>
-        <p>Understanding what a concordance is and the <strong>word segmentation principles</strong> will help you use this tool more effectively.</p>
+        <p>Understanding what a <strong>Tamil Conordance</strong> and <strong>word segmentation principles is</strong> will help you use this tool more effectively.</p>
         <p class="learn-more">
           <router-link class="acknowledgement" :to="{ name: 'About' }">
-            Learn more about this tool
+            Learn more...
           </router-link>
         </p>
       </div>
@@ -85,7 +88,7 @@ const tryExampleSearch = (word) => {
 .welcome {
   max-width: 800px;
   margin: 1rem auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -93,7 +96,14 @@ const tryExampleSearch = (word) => {
 
 .welcome h2 {
   margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
+  font-size: 1.4 rem;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.welcome h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9 rem;
   color: #2c3e50;
   text-align: center;
 }
@@ -189,9 +199,15 @@ const tryExampleSearch = (word) => {
   }
 
   .welcome h2 {
-    font-size: 1.0rem;
+    font-size: 1.2rem;
     margin: 0 0rem;
   }
+  
+  .welcome h3 {
+    font-size: .9rem;
+    margin: 0 0rem;
+  }
+  
 
   .welcome-subtitle {
     font-size: 1rem;

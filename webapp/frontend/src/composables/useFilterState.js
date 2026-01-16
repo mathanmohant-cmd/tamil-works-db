@@ -55,6 +55,35 @@ export function useFilterState() {
     sessionStorage.setItem('selectedWorks', JSON.stringify(selectedWorks.value))
   }, { deep: true })
 
+  // Auto-sync: When switching to 'all' mode, select all works in tree
+  watch(filterMode, (newMode, oldMode) => {
+    if (newMode === 'all' && oldMode === 'select') {
+      // User switched from 'select' to 'all' - populate selectedWorks with all work IDs
+      selectedWorks.value = works.value.map(w => w.work_id)
+    } else if (newMode === 'select' && oldMode === 'all') {
+      // User switched from 'all' to 'select' - keep all works selected
+      // (they'll manually deselect what they don't want)
+      if (selectedWorks.value.length === 0) {
+        selectedWorks.value = works.value.map(w => w.work_id)
+      }
+    }
+  })
+
+  // Smart detection: If all works are manually selected, auto-switch to 'all' mode
+  watch(selectedWorks, (newSelection) => {
+    if (filterMode.value === 'select' && works.value.length > 0) {
+      if (newSelection.length === works.value.length) {
+        // All works are now selected - switch to 'all' mode
+        filterMode.value = 'all'
+      }
+    } else if (filterMode.value === 'all' && works.value.length > 0) {
+      if (newSelection.length < works.value.length && newSelection.length > 0) {
+        // User unchecked some works while in 'all' mode - switch to 'select' mode
+        filterMode.value = 'select'
+      }
+    }
+  }, { deep: true })
+
   // Computed: Works filter button text
   const worksFilterButtonText = computed(() => {
     const total = works.value.length

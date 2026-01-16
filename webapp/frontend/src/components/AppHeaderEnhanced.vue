@@ -58,25 +58,29 @@
       </div>
 
       <!-- Database Summary Below Search Box -->
+
       <div class="database-summary">
         <!-- Row 1: Labels -->
-        <div class="summary-label label-center">படைப்புகள்</div>
-        <div class="summary-label label-center">தரவுகள்</div>
-        <div class="summary-label label-center">சொற்கள்</div>
-
-        <!-- Row 2: Values -->
-        <div class="summary-value value-center">
+        <div class="summary-value label-left">
+        </div>
+        <div class="summary-value label-center">
           <span v-if="stats">{{ stats.total_works }}</span>
+          <span v-else>-</span> தமிழ் இலக்கிய படைப்புகள்
+        </div>
+        <div class="summary-value label-right">
+        </div>
+      </div>
+        <!-- Row 2: Values -->
+      <div class="database-summary">
+        <div class="summary-value value-left">
+          <span v-if="stats">{{ stats.total_verses }} செய்யுள்கள்</span>
           <span v-else>-</span>
         </div>
-        <div class="summary-value value-center">
-          <a href="http://tamilconcordance.in" target="_blank" rel="noopener noreferrer" class="concordance-link">
-            http://tamilconcordance.in
-          </a>
+        <div class="summary-label label-center">
         </div>
-        <div class="summary-value value-center">
-          <span v-if="stats">{{ stats.distinct_words }}</span>
-          <span v-else>-</span>
+        <div class="summary-value value-right">
+          <span v-if="stats">{{ stats.distinct_words }} சொற்கள்</span>
+          <span v-else>-</span> 
         </div>
       </div>
     </header>
@@ -188,7 +192,7 @@
                     Select All
                   </button>
                   <button @click="clearAllCollections" class="action-btn-inline">
-                    Clear
+                    Deselect All
                   </button>
                   <span v-if="isCollectionTreeLoading" class="loading-indicator-inline">
                     Loading...
@@ -548,6 +552,11 @@ watch(searchFocused, (newValue) => {
       panelSearchInput.value?.focus()
     }, 100)
   }
+})
+
+// Listen for event to open search panel from other components
+window.addEventListener('open-search-panel', () => {
+  searchFocused.value = true
 })
 </script>
 

@@ -82,6 +82,13 @@ export default {
     return api.get('/collections')
   },
 
+  /**
+   * Get designated filter collection setting
+   */
+  getDesignatedFilterCollection() {
+    return api.get('/settings/designated_filter_collection')
+  },
+
   // =========================================================================
   // Admin Authentication
   // =========================================================================

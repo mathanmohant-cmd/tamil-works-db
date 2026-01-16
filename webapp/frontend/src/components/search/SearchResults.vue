@@ -3,9 +3,22 @@
     <!-- Results Header with Summary -->
     <div class="results-header">
       <div class="search-summary-panel">
-        <div class="searched-word-display">Searched word: <strong>{{ searchResults.search_term }}</strong></div>
+        <div class="searched-word-display">
+          Searched for: <strong>{{ searchResults.search_term }}</strong>
+          <span class="separator">;</span>
+          in:
+          <span
+            v-if="isSelectMode"
+            @click="openSearchFilterPanel"
+            class="search-context-link"
+            title="Click to open filter panel"
+          >
+            {{ searchContextText }}
+          </span>
+          <span v-else class="search-context-text">{{ searchContextText }}</span>
+        </div>
         <div class="summary-with-export">
-          <span>{{ searchSummary }}</span>
+          <span>Found in {{ searchSummary }}</span>
           <button @click="showWordsExportMenu = true" class="export-button-combined" title="Export list of found words">
             📥 Export Words
           </button>
@@ -227,6 +240,7 @@
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSearchState } from '../../composables/useSearchState.js'
 import { useFilterState } from '../../composables/useFilterState.js'
@@ -257,7 +271,22 @@ const {
   getWorkCounts
 } = useSearchState()
 
-const { works, getWorkById, filterMode, selectedWorks } = useFilterState()
+const { works, getWorkById, filterMode, selectedWorks, toggleFilters, filtersExpanded } = useFilterState()
+
+// Computed: Search context text
+const searchContextText = computed(() => {
+  return filterMode.value === 'select' ? 'Selected Works' : 'All Works'
+})
+
+// Computed: Is select mode
+const isSelectMode = computed(() => {
+  return filterMode.value === 'select'
+})
+
+// Open search filter panel
+const openSearchFilterPanel = () => {
+  window.dispatchEvent(new Event('open-search-panel'))
+}
 
 // Override openVerseView to use router navigation instead of modal
 const openVerseView = (verseId, searchWord = '', wordId = null, workId = null) => {
@@ -678,6 +707,28 @@ const exportWordVerses = async (format, wordText) => {
   font-size: 0.95rem;
   color: #495057;
   margin-bottom: 0.25rem;
+}
+
+.separator {
+  color: #dee2e6;
+  font-weight: 600;
+}
+
+.search-context-link {
+  color: #4a90e2;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.search-context-link:hover {
+  color: #357abd;
+}
+
+.search-context-text {
+  color: #495057;
+  font-weight: 600;
 }
 
 .summary-with-export {
