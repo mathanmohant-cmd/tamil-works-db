@@ -4,7 +4,7 @@
     <header class="app-header">
       <div class="header-container">
         <!-- Logo (Placeholder - can be replaced with actual logo) -->
-        <div class="header-logo" @click="goToSearch">
+        <div class="header-logo" @click="goToHome">
           <span class="logo-icon">📚</span>
           <span class="logo-text"></span>
         </div>
@@ -45,11 +45,11 @@
           </div>
         </div>
 
-        <!-- Menu Button -->
+        <!-- Menu Button (Mobile Only) -->
         <button
           ref="menuBtn"
           @click="toggleMenu"
-          class="menu-btn"
+          class="menu-btn mobile-only"
           :class="{ active: menuExpanded }"
           title="Menu"
         >
@@ -57,10 +57,18 @@
         </button>
       </div>
 
-      <!-- Database Summary Below Search Box -->
+      <!-- Horizontal Navigation Tabs (Desktop Only) -->
+      <nav class="desktop-nav-tabs">
+        <router-link :to="{ name: 'Home' }" class="nav-tab">Home</router-link>
+        <router-link v-if="isWorksBrowserVisible" :to="{ name: 'WorksList' }" class="nav-tab">Browse Works</router-link>
+        <router-link :to="{ name: 'Acknowledgment' }" class="nav-tab">Acknowledgment</router-link>
+        <router-link :to="{ name: 'Help' }" class="nav-tab">Help and Docs</router-link>
+        <router-link :to="{ name: 'Journey' }" class="nav-tab">The Story Behind</router-link>
+      </nav>
 
+      <!-- Database Summary Below Search Box (Hidden) -->
+      <!--
       <div class="database-summary">
-        <!-- Row 1: Labels -->
         <div class="summary-value label-left">
         </div>
         <div class="summary-value label-center">
@@ -70,7 +78,6 @@
         <div class="summary-value label-right">
         </div>
       </div>
-        <!-- Row 2: Values -->
       <div class="database-summary">
         <div class="summary-value value-left">
           <span v-if="stats">{{ stats.total_verses }} செய்யுள்கள்</span>
@@ -80,9 +87,10 @@
         </div>
         <div class="summary-value value-right">
           <span v-if="stats">{{ stats.distinct_words }} சொற்கள்</span>
-          <span v-else>-</span> 
+          <span v-else>-</span>
         </div>
       </div>
+      -->
     </header>
 
     <!-- Full-Screen Search Panel -->
@@ -185,33 +193,13 @@
 
             <!-- Collections Tree with Controls -->
             <section class="collections-section">
-              <!-- Control Bar: Select All | Clear | [space] | Done | Chevron -->
-              <div class="tree-controls">
-                <div class="action-buttons-left">
-                  <button @click="selectAllCollections" class="action-btn-inline">
-                    Select All
-                  </button>
-                  <button @click="clearAllCollections" class="action-btn-inline">
-                    Deselect All
-                  </button>
-                  <span v-if="isCollectionTreeLoading" class="loading-indicator-inline">
-                    Loading...
-                  </span>
-                </div>
-
-                <div class="action-buttons-right">
-                  <button @click="handleSearchAndClose" class="done-btn-inline">
-                    Done
-                  </button>
-                </div>
-              </div>
-
-              <!-- CollectionTree -->
+              <!-- CollectionTree handles its own controls -->
               <Transition name="expand">
                 <div v-if="collectionsExpanded" class="section-content">
                   <CollectionTree
                     ref="collectionTreeRef"
                     v-model:selected-works="selectedWorks"
+                    @applyFilter="handleSearchAndClose"
                   />
                 </div>
               </Transition>
@@ -249,7 +237,7 @@
       </Transition>
     </Teleport>
 
-    <!-- Menu Dropdown (Existing) -->
+    <!-- Menu Dropdown (Mobile) -->
     <div v-if="menuExpanded" class="menu-backdrop" @click="closeMenu"></div>
     <div
       v-if="menuExpanded"
@@ -257,10 +245,7 @@
       :style="{ top: menuPosition.top, right: menuPosition.right }"
     >
       <router-link :to="{ name: 'Home' }" class="menu-item" @click="closeMenu">
-        Acknowledgment
-      </router-link>
-      <router-link :to="{ name: 'Search' }" class="menu-item" @click="closeMenu">
-        Search
+        Home
       </router-link>
       <router-link
         v-if="isWorksBrowserVisible"
@@ -270,9 +255,29 @@
       >
         Browse Works
       </router-link>
-      <router-link :to="{ name: 'About' }" class="menu-item" @click="closeMenu">
-        About & Help
+      <router-link :to="{ name: 'Acknowledgment' }" class="menu-item" @click="closeMenu">
+        Acknowledgment
       </router-link>
+
+      <!-- Help Menu Group -->
+      <div class="menu-item-group">
+        <div class="menu-group-label" @click="toggleHelpSubmenu">
+          <span>Help and Docs</span>
+          <span class="submenu-arrow">{{ helpSubmenuExpanded ? '▼' : '▶' }}</span>
+        </div>
+        <div v-if="helpSubmenuExpanded" class="submenu-items">
+          <router-link :to="{ name: 'QuickStart' }" class="menu-subitem" @click="closeMenu">
+            Quick Start
+          </router-link>
+          <router-link :to="{ name: 'UnderstandingThisTool' }" class="menu-subitem" @click="closeMenu">
+            Understanding This Tool
+          </router-link>
+          <router-link :to="{ name: 'WordSegmentation' }" class="menu-subitem" @click="closeMenu">
+            Word Segmentation
+          </router-link>
+        </div>
+      </div>
+
       <router-link :to="{ name: 'Journey' }" class="menu-item" @click="closeMenu">
         The Story Behind
       </router-link>
@@ -299,6 +304,7 @@ const searchFocused = ref(false)
 const collectionsExpanded = ref(true)
 const isTreeExpanded = ref(false)
 const menuExpanded = ref(false)
+const helpSubmenuExpanded = ref(false)
 const menuBtn = ref(null)
 const menuPosition = ref({ top: '58px', right: '1rem' })
 
@@ -340,7 +346,7 @@ const isCollectionTreeLoading = computed(() => {
 watch(() => route.query.q, (newQuery) => {
   if (newQuery) {
     searchQuery.value = newQuery
-  } else if (route.name !== 'Search') {
+  } else if (route.name !== 'QuickStart') {
     searchQuery.value = ''
   }
 })
@@ -436,7 +442,7 @@ function handleSearchAndClose() {
 function clearSearchInput() {
   searchQuery.value = ''
   clearSearch()
-  router.push({ name: 'Search' })
+  router.push({ name: 'QuickStart' })
 }
 
 async function selectCategory(category) {
@@ -489,21 +495,6 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function clearAllCollections() {
-  selectedWorks.value = []
-  // Also clear the internal state of CollectionTree
-  if (collectionTreeRef.value) {
-    collectionTreeRef.value.clearSelections()
-  }
-}
-
-function selectAllCollections() {
-  // Call the CollectionTree's selectAll method
-  if (collectionTreeRef.value) {
-    collectionTreeRef.value.selectAll()
-  }
-}
-
 function toggleExpandCollapse() {
   if (!collectionTreeRef.value) return
 
@@ -533,15 +524,21 @@ function toggleMenu() {
 
 function closeMenu() {
   menuExpanded.value = false
+  helpSubmenuExpanded.value = false
 }
 
-function goToSearch() {
-  router.push({ name: 'Search' })
+function toggleHelpSubmenu() {
+  helpSubmenuExpanded.value = !helpSubmenuExpanded.value
+}
+
+function goToHome() {
+  router.push({ name: 'Home' })
 }
 
 // Close menu on route change
 watch(() => route.path, () => {
   menuExpanded.value = false
+  helpSubmenuExpanded.value = false
 })
 
 // Focus panel search input when panel opens
@@ -794,6 +791,67 @@ window.addEventListener('open-search-panel', () => {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Desktop Navigation Tabs */
+.desktop-nav-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0.5rem 2rem;
+  background: #1a3a5a;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-tab {
+  padding: 0.75rem 1.25rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-tab:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-tab.router-link-exact-active {
+  color: white;
+  border-bottom-color: #60a5fa;
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+}
+
+/* Show/Hide based on screen size */
+.mobile-only {
+  display: none;
+}
+
+.desktop-nav-tabs {
+  display: flex;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+  .desktop-nav-tabs {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex;
+  }
+  .desktop-nav-tabs {
+    display: none;
+  }
+}
+
 /* Full-Screen Search Panel */
 .search-panel-fullscreen {
   position: fixed;
@@ -948,102 +1006,6 @@ window.addEventListener('open-search-panel', () => {
   padding: 1rem;
   background: white;
   border-bottom: 2px solid #e5e7eb;
-}
-
-.loading-indicator-inline {
-  font-size: 0.85rem;
-  color: #666;
-  font-style: italic;
-  margin-left: 0.5rem;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.done-btn-inline {
-  padding: 0.5rem 1rem;
-  background: var(--primary-color); /*linear-gradient(135deg, #1a3a5a 0%, #1e3a8a 100%);*/
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 200ms ease;
-  box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);
-  white-space: nowrap;
-}
-
-.done-btn-inline:hover {
-  background: linear-gradient(135deg, #1a3a5a 0%, #1e2a5a 100%);
-  box-shadow: 0 4px 8px rgba(30, 64, 175, 0.3);
-  transform: translateY(-1px);
-}
-
-.done-btn-inline:active {
-  transform: translateY(0);
-}
-
-.chevron-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 150ms ease;
-  flex-shrink: 0;
-}
-
-.chevron-btn:hover {
-  background: #e5e7eb;
-  border-color: #9ca3af;
-}
-
-.chevron-btn .chevron {
-  font-size: 0.9rem;
-  color: #6b7280;
-  transition: transform 150ms ease;
-}
-
-.chevron-btn .chevron.rotated {
-  transform: rotate(-180deg);
-}
-
-.action-buttons-left {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.action-buttons-right {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
-}
-
-.action-btn-inline {
-  padding: 0.5rem 0.75rem;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 150ms ease;
-  white-space: nowrap;
-}
-
-.action-btn-inline:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
 }
 
 /* Section Styling */
@@ -1336,7 +1298,65 @@ window.addEventListener('open-search-panel', () => {
   background: #f9fafb;
 }
 
-.menu-item.router-link-active {
+.menu-item.router-link-exact-active {
+  background: #eff6ff;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+/* Menu Item Group (with submenu) */
+.menu-item-group {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.menu-group-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background 150ms ease;
+  user-select: none;
+}
+
+.menu-group-label:hover {
+  background: #f3f4f6;
+}
+
+.submenu-arrow {
+  font-size: 0.7rem;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+
+.submenu-items {
+  animation: slideDown 0.2s ease-out;
+}
+
+.menu-subitem {
+  display: block;
+  padding: 0.7rem 1rem 0.7rem 2rem;
+  color: #374151;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 150ms ease;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.menu-subitem:last-child {
+  border-bottom: none;
+}
+
+.menu-subitem:hover {
+  background: #f3f4f6;
+}
+
+.menu-subitem.router-link-exact-active {
   background: #eff6ff;
   color: #1e40af;
   font-weight: 600;

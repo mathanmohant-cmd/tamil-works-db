@@ -55,24 +55,23 @@
         <div class="word-header-row">
           <div class="word-info">
             <span class="word-number">{{ index + 1 }}.</span>
-            <span class="word-text">{{ word.word_text }}</span>
-            <span class="word-count-badge">({{ word.count }})</span>
-          </div>
-          <div class="word-actions">
             <a
               :href="`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(word.word_text)}&searchhws=yes&matchtype=default`"
               target="_blank"
-              class="action-icon dictionary-icon"
+              class="word-text word-link"
               @click.stop
-              title="Look up in Thamizh Lexicon"
+              title="Link to UChicago Combined Thamizh Dictionary"
             >
-              📖
+              {{ word.word_text }}
             </a>
+            <span class="word-count-badge">({{ word.count }})</span>
+          </div>
+          <div class="word-actions">
             <button
               @click="toggleWordExpansion(word.word_text)"
               class="expand-collapse-button"
               :class="{ expanded: expandedWords.has(word.word_text) }"
-              :title="expandedWords.has(word.word_text) ? 'Collapse' : 'Expand'"
+              :title="expandedWords.has(word.word_text) ? 'Collapse' : 'Expand to see the lines'"
             >
               <span class="expand-icon">
                 <span class="chevron-icon" :class="expandedWords.has(word.word_text) ? 'chevron-down' : 'chevron-up'"></span>
@@ -241,12 +240,13 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useSearchState } from '../../composables/useSearchState.js'
 import { useFilterState } from '../../composables/useFilterState.js'
 import api from '../../api.js'
 
 const router = useRouter()
+const route = useRoute()
 
 // Use composables
 const {
@@ -275,7 +275,17 @@ const { works, getWorkById, filterMode, selectedWorks, toggleFilters, filtersExp
 
 // Computed: Search context text
 const searchContextText = computed(() => {
-  return filterMode.value === 'select' ? 'Selected Works' : 'All Works'
+  if (filterMode.value === 'all') {
+    return 'All Works'
+  } else {
+    const total = works.value.length
+    const selected = selectedWorks.value.length
+    if (selected === total) {
+      return 'All Works'
+    } else {
+      return `Selected Works (${selected}/${total})`
+    }
+  }
 })
 
 // Computed: Is select mode
@@ -303,6 +313,7 @@ const openVerseView = (verseId, searchWord = '', wordId = null, workId = null) =
   }
 
   // Navigate to Works Browser VerseView with search context
+  // Preserve current search query params so we can navigate back
   router.push({
     name: 'VerseView',
     params: {
@@ -311,7 +322,12 @@ const openVerseView = (verseId, searchWord = '', wordId = null, workId = null) =
     },
     query: {
       word: searchWord,
-      from: 'search'
+      from: 'search',
+      // Preserve search params for back navigation
+      q: route.query.q,
+      type: route.query.type,
+      pos: route.query.pos,
+      sort: route.query.sort
     }
   })
 }
@@ -675,12 +691,210 @@ const exportWordLinesToTXT = (wordText) => {
   document.body.removeChild(link)
 }
 
-// Export word verses (placeholder - needs API implementation)
+// Export word verses
 const exportWordVerses = async (format, wordText) => {
   currentExportVersesWordText.value = null
-  // TODO: Implement verse export when API endpoint is available
-  console.log('Export verses:', format, wordText)
-  alert('Verse export functionality will be implemented in a future update.')
+
+  try {
+    // Get all occurrences for this word
+    const occurrences = getWordOccurrences(wordText)
+    if (occurrences.length === 0) {
+      alert('No occurrences found for this word.')
+      return
+    }
+
+    // Get unique verse IDs
+    const uniqueVerseIds = [...new Set(occurrences.map(occ => occ.verse_id))]
+
+    // Fetch complete verses with context extraction
+    const verses = []
+    for (const verseId of uniqueVerseIds) {
+      try {
+        const response = await api.getVerse(verseId)
+        // Find all occurrences for this verse to get matching line numbers
+        const verseOccurrences = occurrences.filter(occ => occ.verse_id === verseId)
+        const matchingLineNumbers = [...new Set(verseOccurrences.map(occ => occ.line_number))]
+
+        // Get work/section context from first occurrence
+        const occurrence = verseOccurrences[0]
+
+        const fullVerse = {
+          ...response.data,
+          work_name: occurrence.work_name,
+          work_name_tamil: occurrence.work_name_tamil,
+          hierarchy_path: occurrence.hierarchy_path,
+          hierarchy_path_tamil: occurrence.hierarchy_path_tamil
+        }
+
+        // Extract context lines if verse is longer than 10 lines
+        if (fullVerse.lines.length > 10) {
+          // Use the first matching line number to determine context
+          const matchLineNumber = Math.min(...matchingLineNumbers)
+
+          // Calculate range: 5 before, the match line, 4 after (total 10 lines)
+          const startLine = Math.max(1, matchLineNumber - 5)
+          const endLine = Math.min(fullVerse.lines.length, matchLineNumber + 4)
+
+          // Extract subset of lines
+          const extractedLines = fullVerse.lines.filter(
+            line => line.line_number >= startLine && line.line_number <= endLine
+          )
+
+          verses.push({
+            ...fullVerse,
+            lines: extractedLines,
+            isExtract: true,
+            extractStartLine: startLine,
+            extractEndLine: endLine,
+            totalLines: fullVerse.lines.length
+          })
+        } else {
+          // Include full verse if 10 lines or fewer
+          verses.push({
+            ...fullVerse,
+            isExtract: false
+          })
+        }
+      } catch (err) {
+        console.error(`Failed to fetch verse ${verseId}:`, err)
+      }
+    }
+
+    if (verses.length === 0) {
+      alert('Failed to fetch verses.')
+      return
+    }
+
+    // Export based on format
+    if (format === 'csv') {
+      exportVersesToCSV(wordText, verses)
+    } else if (format === 'txt') {
+      exportVersesToTXT(wordText, verses)
+    }
+  } catch (err) {
+    console.error('Failed to export verses:', err)
+    alert('Failed to export verses. Please try again.')
+  }
+}
+
+// Export verses to CSV
+const exportVersesToCSV = (wordText, verses) => {
+  const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+  const verseCount = verses.length
+  const workCounts = getWorkCounts(wordText)
+
+  const workOrderMap = new Map()
+  works.value.forEach((work, index) => {
+    workOrderMap.set(work.work_name, index)
+  })
+
+  const sortedWorkCounts = [...workCounts].sort((a, b) => {
+    const indexA = workOrderMap.get(a.work_name) ?? Infinity
+    const indexB = workOrderMap.get(b.work_name) ?? Infinity
+    return indexA - indexB
+  })
+
+  const worksList = sortedWorkCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+
+  const headers = ['Work & Location', 'Verse Text']
+  const rows = verses.map(verse => {
+    const hierarchyPath = cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path)
+    let location = hierarchyPath
+      ? `${verse.work_name_tamil}: ${hierarchyPath} | ${verse.verse_type_tamil || 'பாடல்'} ${verse.verse_number}`
+      : `${verse.work_name_tamil}: ${verse.verse_type_tamil || 'பாடல்'} ${verse.verse_number}`
+
+    // Add line range info for extracts
+    if (verse.isExtract) {
+      location += ` [Lines ${verse.extractStartLine}-${verse.extractEndLine} of ${verse.totalLines}]`
+    }
+
+    // Combine all lines into complete verse text
+    const verseText = verse.lines.map(line => line.line_text).join('\n')
+
+    return [location, verseText]
+  })
+
+  const csvContent = [
+    '"Data Source: tamilconcordence.in"',
+    '"Compiled by: Prof. Dr. P. Pandiyaraja"',
+    '',
+    `"Word: ${wordText}"`,
+    `"Works: ${worksList}"`,
+    `"Total Verses: ${verseCount}"`,
+    `"Note: For verses longer than 10 lines, only context lines (5 before + 4 after) around the search word are included"`,
+    '',
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+  ].join('\n')
+
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+  link.setAttribute('href', url)
+  link.setAttribute('download', `tamizh_verses_${wordText}_${new Date().toISOString().split('T')[0]}.csv`)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+// Export verses to TXT
+const exportVersesToTXT = (wordText, verses) => {
+  const wordInfo = searchResults.value.unique_words?.find(w => w.word_text === wordText)
+  const verseCount = verses.length
+  const workCounts = getWorkCounts(wordText)
+
+  const workOrderMap = new Map()
+  works.value.forEach((work, index) => {
+    workOrderMap.set(work.work_name, index)
+  })
+
+  const sortedWorkCounts = [...workCounts].sort((a, b) => {
+    const indexA = workOrderMap.get(a.work_name) ?? Infinity
+    const indexB = workOrderMap.get(b.work_name) ?? Infinity
+    return indexA - indexB
+  })
+
+  const worksList = sortedWorkCounts.map(w => `${w.work_name_tamil} (${w.count})`).join(', ')
+
+  const content = [
+    'Data Source: tamilconcordence.in',
+    'Compiled by: Prof. Dr. P. Pandiyaraja',
+    '',
+    `Word: ${wordText}`,
+    `Works: ${worksList}`,
+    `Total Verses: ${verseCount}`,
+    'Note: For verses longer than 10 lines, only context lines (5 before + 4 after) around the search word are included',
+    '',
+    'Verses:',
+    '═'.repeat(80),
+    ...verses.map((verse, i) => {
+      const hierarchyPath = cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path)
+      let location = hierarchyPath
+        ? `${verse.work_name_tamil}: ${hierarchyPath} | ${verse.verse_type_tamil || 'பாடல்'} ${verse.verse_number}`
+        : `${verse.work_name_tamil}: ${verse.verse_type_tamil || 'பாடல்'} ${verse.verse_number}`
+
+      // Add line range info for extracts
+      if (verse.isExtract) {
+        location += ` [Lines ${verse.extractStartLine}-${verse.extractEndLine} of ${verse.totalLines}]`
+      }
+
+      // Combine all lines into verse text with indentation
+      const verseText = verse.lines.map(line => `   ${line.line_text}`).join('\n')
+
+      return `${i + 1}. ${location}\n${verseText}\n`
+    })
+  ].join('\n')
+
+  const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+  link.setAttribute('href', url)
+  link.setAttribute('download', `tamizh_verses_${wordText}_${new Date().toISOString().split('T')[0]}.txt`)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 </script>
 
@@ -867,6 +1081,16 @@ const exportWordVerses = async (format, wordText) => {
   font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
+}
+
+.word-link {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.word-link:hover {
+  color: #4a90e2;
+  text-decoration: underline;
 }
 
 .word-count-badge {

@@ -81,7 +81,7 @@ const initialized = ref(false)
 onMounted(async () => {
   // Redirect to /search if no query parameter exists
   if (!route.query.q || !route.query.q.trim()) {
-    router.replace({ name: 'Search' })
+    router.replace({ name: 'QuickStart' })
     return
   }
 
@@ -94,8 +94,20 @@ onMounted(async () => {
   initialized.value = true
 
   // Perform search with URL query
-  searchQuery.value = route.query.q.trim()
-  await performSearch()
+  const newSearchQuery = route.query.q.trim()
+
+  // Check if we already have cached results for this exact query
+  const needsSearch = !searchResults.value ||
+    searchResults.value.search_term !== newSearchQuery ||
+    matchType.value !== route.query.type ||
+    wordPosition.value !== route.query.pos
+
+  searchQuery.value = newSearchQuery
+
+  // Only search if we don't have cached results
+  if (needsSearch) {
+    await performSearch()
+  }
 })
 
 // Sync filter state from URL query params
@@ -117,7 +129,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
 
   // Redirect to /search if no query
   if (!newQuery.q || !newQuery.q.trim()) {
-    router.replace({ name: 'Search' })
+    router.replace({ name: 'QuickStart' })
     return
   }
 
@@ -212,7 +224,7 @@ watch(sortBy, async (newSort) => {
 const performSearch = async () => {
   const trimmedQuery = searchQuery.value.trim()
   if (!trimmedQuery) {
-    router.replace({ name: 'Search' })
+    router.replace({ name: 'QuickStart' })
     return
   }
 

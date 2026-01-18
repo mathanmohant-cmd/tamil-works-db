@@ -1,10 +1,18 @@
 <template>
   <div class="collection-tree">
     <div class="tree-header">
-      <h3>Search in collection</h3>
-      <button @click="toggleExpandCollapse" class="tree-action-btn" :title="allExpanded ? 'Collapse All' : 'Expand All'">
-        <span class="chevron-icon" :class="allExpanded ? 'chevron-up' : 'chevron-down'"></span>
-      </button>
+      <h3>Choose collection/works to search</h3>
+    </div>
+
+    <!-- Control Buttons -->
+    <div v-if="!loading && !error && collectionTree.length > 0" class="tree-controls">
+      <div class="control-buttons-left">
+        <button @click="handleSelectAll" class="control-btn">Select All</button>
+        <button @click="handleDeselectAll" class="control-btn">Deselect All</button>
+      </div>
+      <div class="control-buttons-right">
+        <button @click="handleApplyFilter" class="apply-filter-btn">Apply Filter</button>
+      </div>
     </div>
 
     <div v-if="loading" class="tree-loading">Loading collections...</div>
@@ -12,28 +20,86 @@
     <div v-else-if="collectionTree.length === 0" class="tree-empty">
       No collections available. Search will work with all works.
     </div>
-    <div v-else class="tree-content">
-      <TreeNode
-        v-for="collection in collectionTree"
-        :key="collection.collection_id"
-        :collection="collection"
-        :expanded-nodes="expandedNodes"
-        :selected-works="selectedWorks"
-        :selected-collections="selectedCollections"
-        :read-only="readOnly"
-        @toggle-node="toggleNode"
-        @load-works="loadCollectionWorks"
-        @toggle-selection="handleToggleSelection"
-        @toggle-work="handleWorkToggle"
-      />
-    </div>
+    <section
+      v-else
+      v-for="collection in collectionTree"
+      :key="collection.collection_id"
+      class="accordion-section"
+    >
+      <div
+        class="accordion-header"
+        @click="toggleCollection(collection.collection_id)"
+        :class="{ expanded: expandedNodes.has(collection.collection_id) }"
+      >
+        <input
+          type="checkbox"
+          class="collection-checkbox"
+          :checked="isCollectionSelected(collection)"
+          :disabled="readOnly"
+          @change="handleCollectionCheckbox(collection, $event)"
+          @click.stop
+        />
+        <span class="collection-name">
+          {{ collection.collection_name_tamil || collection.collection_name }}
+          <span v-if="getTotalWorkCount(collection) > 0" class="work-count">
+            ({{ getSelectedWorkCount(collection) }}/{{ getTotalWorkCount(collection) }})
+          </span>
+        </span>
+        <span class="accordion-icon">
+          <span
+            class="chevron-icon"
+            :class="expandedNodes.has(collection.collection_id) ? 'chevron-up' : 'chevron-down'"
+          ></span>
+        </span>
+      </div>
+
+      <div
+        v-if="expandedNodes.has(collection.collection_id)"
+        class="accordion-content"
+      >
+        <!-- Nested collections -->
+        <NestedCollectionItem
+          v-for="child in collection.children"
+          :key="child.collection_id"
+          :collection="child"
+          :expanded-nodes="expandedNodes"
+          :selected-works="selectedWorks"
+          :selected-collections="selectedCollections"
+          :collection-works="collectionWorksCache"
+          :read-only="readOnly"
+          @toggle-node="toggleNode"
+          @toggle-selection="handleToggleSelection"
+          @toggle-work="handleWorkToggle"
+          @load-works="loadCollectionWorks"
+        />
+
+        <!-- Works list -->
+        <div v-if="collectionWorksCache[collection.collection_id]?.length > 0" class="works-list">
+          <div
+            v-for="work in collectionWorksCache[collection.collection_id]"
+            :key="work.work_id"
+            class="work-item"
+          >
+            <input
+              type="checkbox"
+              class="work-checkbox"
+              :checked="selectedWorks.includes(work.work_id)"
+              :disabled="readOnly"
+              @change="handleWorkCheckbox(work.work_id, $event)"
+              @click.stop
+            />
+            <span class="work-name">{{ work.work_name_tamil || work.work_name }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, defineEmits, defineProps } from 'vue'
 import axios from 'axios'
-import TreeNode from './TreeNode.vue'
+import NestedCollectionItem from './NestedCollectionItem.vue'
 import api from '../api.js'
 
 const API_BASE_URL = api.getBaseURL()
@@ -53,7 +119,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:selectedWorks'])
+const emit = defineEmits(['update:selectedWorks', 'applyFilter'])
 
 const collectionTree = ref([])
 const expandedNodes = ref(new Set())
@@ -97,23 +163,23 @@ const loadCollectionWorks = async (collectionId) => {
 
 // Toggle node expansion
 const toggleNode = (collectionId) => {
-  if (expandedNodes.value.has(collectionId)) {
-    expandedNodes.value.delete(collectionId)
+  const newSet = new Set(expandedNodes.value)
+  if (newSet.has(collectionId)) {
+    newSet.delete(collectionId)
   } else {
-    expandedNodes.value.add(collectionId)
+    newSet.add(collectionId)
   }
+  expandedNodes.value = newSet
 }
 
 // Expand all nodes and load all works
 const expandAll = async () => {
   console.log('[EXPAND ALL] Starting expand all operation...')
+  const newSet = new Set()
   const addAllIds = async (collections) => {
     for (const coll of collections) {
       console.log('[EXPAND ALL] Expanding:', coll.collection_name_tamil, 'work_count:', coll.work_count)
-      expandedNodes.value.add(coll.collection_id)
-
-      // Give Vue time to process reactivity and trigger watches
-      await new Promise(resolve => setTimeout(resolve, 10))
+      newSet.add(coll.collection_id)
 
       // Recursively expand children
       if (coll.children && coll.children.length > 0) {
@@ -122,6 +188,7 @@ const expandAll = async () => {
     }
   }
   await addAllIds(collectionTree.value)
+  expandedNodes.value = newSet
   console.log('[EXPAND ALL] Finished. Total expanded:', expandedNodes.value.size)
   console.log('[EXPAND ALL] Selected works count:', props.selectedWorks.length)
   console.log('[EXPAND ALL] Selected collections:', selectedCollections.value.size)
@@ -129,7 +196,7 @@ const expandAll = async () => {
 
 // Collapse all nodes
 const collapseAll = () => {
-  expandedNodes.value.clear()
+  expandedNodes.value = new Set()
 }
 
 // Toggle expand/collapse all
@@ -236,13 +303,19 @@ const handleToggleSelection = async ({ collectionId, isChecked }) => {
   // Get all descendant collection IDs to mark them as selected/unselected
   const descendantCollectionIds = getAllDescendantCollectionIds(collection)
 
+  // Create new Set for reactivity
+  const newSelectedCollections = new Set(selectedCollections.value)
+
   if (isChecked) {
     // Mark this collection and all descendants as selected
-    descendantCollectionIds.forEach(id => selectedCollections.value.add(id))
+    descendantCollectionIds.forEach(id => newSelectedCollections.add(id))
   } else {
     // Unmark this collection and all descendants
-    descendantCollectionIds.forEach(id => selectedCollections.value.delete(id))
+    descendantCollectionIds.forEach(id => newSelectedCollections.delete(id))
   }
+
+  // Update selectedCollections with new Set
+  selectedCollections.value = newSelectedCollections
 
   // Get all work IDs from this collection and descendants
   const workIds = await getAllWorkIdsFromCollection(collection)
@@ -267,21 +340,108 @@ const handleToggleSelection = async ({ collectionId, isChecked }) => {
   }
 }
 
+// Toggle accordion + load works if needed
+const toggleCollection = (collectionId) => {
+  toggleNode(collectionId)
+  if (expandedNodes.value.has(collectionId)) {
+    loadCollectionWorksIfNeeded(collectionId)
+  }
+}
+
+// Load works if not already cached
+const loadCollectionWorksIfNeeded = async (collectionId) => {
+  if (!collectionWorksCache.value[collectionId]) {
+    await loadCollectionWorksData(collectionId)
+  }
+}
+
+// Collection checkbox handler
+const handleCollectionCheckbox = async (collection, event) => {
+  event.stopPropagation()
+  const isChecked = event.target.checked
+  await handleToggleSelection({
+    collectionId: collection.collection_id,
+    isChecked
+  })
+}
+
+// Work checkbox handler
+const handleWorkCheckbox = (workId, event) => {
+  event.stopPropagation()
+  const isChecked = event.target.checked
+  handleWorkToggle({ workId, isChecked })
+}
+
+// Calculate total work count recursively
+const getTotalWorkCount = (collection) => {
+  let count = collection.work_count || 0
+  if (collection.children) {
+    collection.children.forEach(child => {
+      count += getTotalWorkCount(child)
+    })
+  }
+  return count
+}
+
+// Calculate selected work count for a collection and its descendants
+const getSelectedWorkCount = (collection) => {
+  let count = 0
+
+  // Count selected works directly in this collection
+  const works = collectionWorksCache.value[collection.collection_id] || []
+  works.forEach(work => {
+    if (props.selectedWorks.includes(work.work_id)) {
+      count++
+    }
+  })
+
+  // Recursively count in children
+  if (collection.children) {
+    collection.children.forEach(child => {
+      count += getSelectedWorkCount(child)
+    })
+  }
+
+  return count
+}
+
+// Check if collection is selected
+const isCollectionSelected = (collection) => {
+  return selectedCollections.value.has(collection.collection_id)
+}
+
+// Handle Select All button - expand all and select all
+const handleSelectAll = async () => {
+  await expandAll()
+  await selectAll()
+}
+
+// Handle Deselect All button - deselect all and collapse all
+const handleDeselectAll = () => {
+  clearSelections()
+  collapseAll()
+}
+
+// Handle Apply Filter button - emit event for parent
+const handleApplyFilter = () => {
+  emit('applyFilter')
+}
 
 // Clear all selections (called from parent)
 const clearSelections = () => {
-  selectedCollections.value.clear()
+  selectedCollections.value = new Set()
   emit('update:selectedWorks', [])
 }
 
 // Select all collections (called from parent when switching to "All works")
 const selectAll = async () => {
   const allWorkIds = new Set()
+  const allCollectionIds = new Set()
 
   const addAllCollectionIdsAndWorks = async (collections) => {
     for (const coll of collections) {
       if (coll.work_count > 0 || (coll.children && coll.children.length > 0)) {
-        selectedCollections.value.add(coll.collection_id)
+        allCollectionIds.add(coll.collection_id)
 
         // Load works for this collection
         if (coll.work_count > 0) {
@@ -297,6 +457,9 @@ const selectAll = async () => {
   }
 
   await addAllCollectionIdsAndWorks(collectionTree.value)
+
+  // Update selected collections with new Set
+  selectedCollections.value = allCollectionIds
 
   // Emit all collected work IDs
   emit('update:selectedWorks', Array.from(allWorkIds))
@@ -363,11 +526,15 @@ watch(() => props.selectedWorks, async (newSelectedWorks) => {
 
   const { collectionsToExpand, collectionsToSelect } = await findCollectionsWithWorks(newSelectedWorks)
 
-  // Expand collections
-  collectionsToExpand.forEach(id => expandedNodes.value.add(id))
+  // Expand collections - create new Set for reactivity
+  const newExpandedSet = new Set(expandedNodes.value)
+  collectionsToExpand.forEach(id => newExpandedSet.add(id))
+  expandedNodes.value = newExpandedSet
 
-  // Update selected collections
-  collectionsToSelect.forEach(id => selectedCollections.value.add(id))
+  // Update selected collections - create new Set for reactivity
+  const newSelectedSet = new Set(selectedCollections.value)
+  collectionsToSelect.forEach(id => newSelectedSet.add(id))
+  selectedCollections.value = newSelectedSet
 }, { deep: true })
 
 onMounted(async () => {
@@ -377,12 +544,12 @@ onMounted(async () => {
   if (props.selectedWorks && props.selectedWorks.length > 0) {
     // Expand only collections containing selected works
     const { collectionsToExpand, collectionsToSelect } = await findCollectionsWithWorks(props.selectedWorks)
-    collectionsToExpand.forEach(id => expandedNodes.value.add(id))
-    collectionsToSelect.forEach(id => selectedCollections.value.add(id))
-  } else {
-    // No selected works - expand all to help user browse
-    await expandAll()
+
+    // Create new Sets for reactivity
+    expandedNodes.value = new Set(collectionsToExpand)
+    selectedCollections.value = new Set(collectionsToSelect)
   }
+  // If no selected works, start with everything collapsed for cleaner UX
 })
 </script>
 
@@ -405,6 +572,57 @@ onMounted(async () => {
   margin: 0;
   font-size: 1.1rem;
   color: #333;
+}
+
+.tree-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.control-buttons-left {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.control-buttons-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.control-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.apply-filter-btn {
+  padding: 0.5rem 1.25rem;
+  background: #218838;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.apply-filter-btn:hover {
+  background: #1e7e34;
 }
 
 .tree-action-btn {
@@ -464,29 +682,110 @@ onMounted(async () => {
   font-style: italic;
 }
 
-.tree-content {
-  max-height: 400px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  padding-right: 0.5rem;
+/* Accordion styles */
+.accordion-section {
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
-.tree-content::-webkit-scrollbar {
-  width: 8px;
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  user-select: none;
 }
 
-.tree-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+.accordion-header:hover {
+  background: transparent;
+  border-left: 3px solid transparent;
 }
 
-.tree-content::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+.accordion-header.expanded {
+  background: transparent;
+  border-left: 3px solid transparent;
 }
 
-.tree-content::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.collection-checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.collection-name {
+  flex: 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.work-count {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #666;
+}
+
+.accordion-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.accordion-content {
+  padding: 0.5rem 0 0.5rem 1rem;
+  background: white;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.works-list {
+  margin-top: 0.5rem;
+}
+
+.work-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
+  gap: 0.75rem;
+  transition: background 0.2s ease;
+}
+
+.work-item:hover {
+  background: #f9f9f9;
+}
+
+.work-name {
+  flex: 1;
+  font-size: 1rem;
+}
+
+.work-checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 /* Mobile optimizations */
@@ -515,28 +814,28 @@ onMounted(async () => {
   }
 
   .tree-action-btn {
-    
+
     padding: 0.4rem 0.5rem; /* Slightly smaller buttons */
     font-size: 0.85rem;
     width: 32px;
     height: 32px;
   }
 
-  .tree-content {
-    max-height: 250px;
-    overflow-y: auto;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-    padding-right: 0.25rem; /* Reduced padding */
+  .accordion-header {
+    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
   }
 
-  /* Hide scrollbar on mobile for cleaner look */
-  .tree-content::-webkit-scrollbar {
-    width: 4px; /* Thinner scrollbar */
+  .collection-name {
+    font-size: 1rem;
   }
 
-  .tree-content::-webkit-scrollbar-thumb {
-    background: #aaa;
-    border-radius: 2px;
+  .accordion-content {
+    padding-left: 0.5rem;
+  }
+
+  .work-item {
+    padding: 0.5rem;
   }
 }
 </style>

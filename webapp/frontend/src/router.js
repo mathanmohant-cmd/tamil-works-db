@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from './layouts/AppLayout.vue'
+import WelcomePage from './pages/WelcomePage.vue'
+import HelpPage from './pages/HelpPage.vue'
 import Home from './Home.vue'
 import SearchPage from './pages/SearchPage.vue'
 import SearchResultsPage from './pages/SearchResultsPage.vue'
@@ -8,7 +10,8 @@ import WorksList from './components/works/WorksList.vue'
 import WorkDetail from './components/works/WorkDetail.vue'
 import SectionView from './components/works/SectionView.vue'
 import VerseView from './VerseView.vue'
-import AboutConcordance from './AboutConcordance.vue'
+import UnderstandingThisToolPage from './pages/UnderstandingThisToolPage.vue'
+import WordSegmentationPage from './pages/WordSegmentationPage.vue'
 import OurJourney from './OurJourney.vue'
 import AdminPage from './AdminPage.vue'
 
@@ -19,25 +22,45 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/search'
+        name: 'Home',
+        component: WelcomePage,
+        meta: { title: 'Home' }
       },
       {
-        path: 'home',
-        name: 'Home',
+        path: 'acknowledgment',
+        name: 'Acknowledgment',
         component: Home,
         meta: { title: 'Acknowledgment' }
       },
       {
-        path: 'search',
-        name: 'Search',
-        component: SearchPage,
-        meta: { title: 'Search' }
+        path: 'help',
+        name: 'Help',
+        component: HelpPage,
+        meta: { title: 'Help' }
       },
       {
-        path: 'search/results',
+        path: 'help/quick-start',
+        name: 'QuickStart',
+        component: SearchPage,
+        meta: { title: 'Quick Start' }
+      },
+      {
+        path: 'help/quick-start/results',
         name: 'SearchResults',
         component: SearchResultsPage,
         meta: { title: 'Search Results' }
+      },
+      {
+        path: 'help/understanding-this-tool',
+        name: 'UnderstandingThisTool',
+        component: UnderstandingThisToolPage,
+        meta: { title: 'Understanding This Tool' }
+      },
+      {
+        path: 'help/word-segmentation',
+        name: 'WordSegmentation',
+        component: WordSegmentationPage,
+        meta: { title: 'Word Segmentation Principles' }
       },
       {
         path: 'works',
@@ -73,15 +96,6 @@ const routes = [
         ]
       },
       {
-        path: 'about',
-        name: 'About',
-        component: AboutConcordance,
-        meta: { title: 'About & Help' },
-        props: route => ({
-          initialTab: route.query.tab || 'qa'
-        })
-      },
-      {
         path: 'journey',
         name: 'Journey',
         component: OurJourney,
@@ -97,7 +111,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/search'
+    redirect: '/'
   }
 ]
 

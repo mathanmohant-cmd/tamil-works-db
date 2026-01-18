@@ -198,12 +198,9 @@ export default {
         return
       }
 
-      // Router mode: smart back navigation
-      if (fromSearch.value) {
-        router.push({ name: 'Search' })
-      } else {
-        router.back()
-      }
+      // Router mode: Use browser history navigation
+      // This restores the previous page state without triggering a new search
+      router.back()
     }
 
     const cleanHierarchyPath = (path) => {

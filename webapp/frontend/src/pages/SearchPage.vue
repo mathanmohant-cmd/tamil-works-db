@@ -2,21 +2,17 @@
   <div class="search-page">
     <!-- Welcome Message & QuickStart Guide -->
     <div class="welcome">
-      <h2>Welcome to search!</h2>
-      <h3>Search across multiple Thamizh texts with ease.</h3>
-      <h3>&nbsp;</h3>
-      <div class="quick-start">
-      <p class="welcome-subtitle">
-        Data sourced from the <a href="http://tamilconcordance.in" class="acknowledgement">www.tamilconcordance.in</a>, meticulously developed by
-        <router-link class="acknowledgement" :to="{ name: 'Home' }">
-          Prof P. Pandiyaraja
-        </router-link>
-        encompassing over 2000 years of classical Tamil literature.
-      </p>
-      </div>
+        <nav class="breadcrumb">
+      <router-link :to="{ name: 'Help' }">Help</router-link>
+      <span class="separator">›</span>
+      <span>Quick Start</span>
+    </nav>
+    <header class="page-header">
+      <h1>Quick Start</h1>
+    </header>
       <!-- Try Examples Section -->
       <div class="try-examples">
-        <h3>Try Searching: Click These Words</h3>
+        <h3>Quick Try: Click These Words</h3>
         <div class="example-buttons">
           <button @click="tryExampleSearch('அறம்')" class="example-btn">அறம்</button>
           <button @click="tryExampleSearch('தமிழ்நாடு')" class="example-btn">தமிழ்நாடு</button>
@@ -28,19 +24,13 @@
 
       <!-- Quick Start Guide -->
       <div class="quick-start">
-        <h3>🚀 Quick Start</h3>
+        <h3>To explore more</h3>
         <ul class="tips-list">
           <li><strong>Type a Thamizh word</strong> in the search box above</li>
           <li><strong>Choose match type:</strong> Partial (finds similar words) or Exact (precise match)</li>
           <li><strong>Set position:</strong> Beginning, End, or Anywhere in the word</li>
           <li><strong>Filter by works</strong> (optional) to search specific texts</li>
         </ul>
-        <p>Understanding what a <strong>Tamil Conordance</strong> and <strong>word segmentation principles is</strong> will help you use this tool more effectively.</p>
-        <p class="learn-more">
-          <router-link class="acknowledgement" :to="{ name: 'About' }">
-            Learn more...
-          </router-link>
-        </p>
       </div>
     </div>
   </div>
@@ -60,8 +50,8 @@ const { filterMode, selectedWorks } = useFilterState()
 // Try example search
 const tryExampleSearch = (word) => {
   // Reset search filters to defaults
-  matchType.value = 'exact'
-  wordPosition.value = 'beginning'
+  matchType.value = 'partial'
+  wordPosition.value = 'anywhere'
 
   // Clear work filters
   filterMode.value = 'all'
@@ -72,8 +62,8 @@ const tryExampleSearch = (word) => {
     name: 'SearchResults',
     query: {
       q: word,
-      type: 'exact',
-      pos: 'beginning'
+      type: 'partial',
+      pos: 'anywhere'
     }
   })
 }
@@ -189,6 +179,45 @@ const tryExampleSearch = (word) => {
 
 .acknowledgement:hover {
   border-bottom: 1px dotted var(--life-pulse);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.breadcrumb a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.breadcrumb .separator {
+  color: var(--text-secondary);
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color);
+  font-weight: 700;
 }
 
 /* Mobile Responsive */

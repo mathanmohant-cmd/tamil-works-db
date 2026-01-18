@@ -51,16 +51,6 @@
     <!-- Collapsible Filters Panel -->
     <div class="filters-panel" v-show="filtersExpanded">
       <div class="filter-group" v-if="works.length">
-        <div class="filter-header">
-          <div style="flex: 1;"></div>
-          <div class="filter-header-actions">
-            <button @click="clearFilters" class="clear-filter-button" title="Uncheck all works">
-              Deselect All
-            </button>
-            <button @click="closeFilters" class="done-button">Done</button>
-          </div>
-        </div>
-
         <!-- Collection Tree Filter -->
         <div class="filter-content-wrapper">
           <CollectionTree
@@ -68,6 +58,7 @@
             :selected-works="selectedWorks"
             :root-collection-id="designatedCollectionId"
             @update:selectedWorks="handleCollectionSelection"
+            @applyFilter="closeFilters"
           />
 
           <!-- Selected Works Summary -->
@@ -252,50 +243,6 @@ onUnmounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #dee2e6;
-  background: #f8f9fa;
-  border-radius: 6px 6px 0 0;
-}
-
-.filter-header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.clear-filter-button,
-.done-button {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.clear-filter-button {
-  background-color: #218838;
-  color: white;
-}
-
-.clear-filter-button:hover {
-  background-color: #1e7e34;
-}
-
-.done-button {
-  background-color: #218838;
-  color: white;
-}
-
-.done-button:hover {
-  background-color: #1e7e34;
 }
 
 .filter-content-wrapper {
