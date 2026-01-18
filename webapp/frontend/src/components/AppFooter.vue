@@ -23,9 +23,9 @@
 .app-footer {
   background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
   color: white;
-  padding: 2rem 1rem;
+  padding: 1rem 0.5rem;
   margin-top: auto;
-  border-top: 3px solid var(--primary-color);
+  border-top: 2px solid var(--primary-color);
 }
 
 .footer-content {
@@ -38,8 +38,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -47,9 +47,9 @@
   color: white;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 4px;
 }
 
@@ -62,12 +62,13 @@
 .separator {
   color: rgba(255, 255, 255, 0.5);
   font-weight: 300;
+  font-size: 0.85rem;
 }
 
 .footer-copyright {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  margin-top: 1rem;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .footer-copyright p {
@@ -77,12 +78,12 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .app-footer {
-    padding: 1.5rem 1rem;
+    padding: 0.75rem 0.5rem;
   }
 
   .footer-links {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   .separator {
@@ -90,13 +91,14 @@
   }
 
   .footer-link {
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     width: 100%;
     max-width: 300px;
+    font-size: 0.8rem;
   }
 
   .footer-copyright {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
   }
 }
 </style>
