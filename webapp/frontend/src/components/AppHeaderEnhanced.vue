@@ -309,9 +309,9 @@
           <router-link :to="{ name: 'WordSegmentation' }" class="menu-subitem" @click="closeMenu">
             Word Segmentation
           </router-link>
-          <a href="/tamil_letters_table.html" target="_blank" class="menu-subitem" @click="closeMenu">
+          <router-link :to="{ name: 'TransliterationGuide' }" class="menu-subitem" @click="closeMenu">
             Transliteration Guide
-          </a>
+          </router-link>
         </div>
       </div>
 

@@ -23,11 +23,11 @@
           <p>Understand how Tamil words are segmented for accurate search</p>
         </router-link>
 
-        <a href="/tamil_letters_table.html" target="_blank" class="help-card">
+        <router-link :to="{ name: 'TransliterationGuide' }" class="help-card">
           <div class="card-icon">⌨️</div>
           <h2>Transliteration Guide</h2>
           <p>Learn how to type Tamil letters using English keyboard (A→அ)</p>
-        </a>
+        </router-link>
       </div>
     </div>
   </div>

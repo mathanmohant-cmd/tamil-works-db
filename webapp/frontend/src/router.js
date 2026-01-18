@@ -12,6 +12,7 @@ import SectionView from './components/works/SectionView.vue'
 import VerseView from './VerseView.vue'
 import UnderstandingThisToolPage from './pages/UnderstandingThisToolPage.vue'
 import WordSegmentationPage from './pages/WordSegmentationPage.vue'
+import TransliterationGuidePage from './pages/TransliterationGuidePage.vue'
 import AboutUsPage from './pages/AboutUsPage.vue'
 import ContactUsPage from './pages/ContactUsPage.vue'
 import DisclaimerPage from './pages/DisclaimerPage.vue'
@@ -64,6 +65,12 @@ const routes = [
         name: 'WordSegmentation',
         component: WordSegmentationPage,
         meta: { title: 'Word Segmentation Principles' }
+      },
+      {
+        path: 'help/transliteration-guide',
+        name: 'TransliterationGuide',
+        component: TransliterationGuidePage,
+        meta: { title: 'Transliteration Guide' }
       },
       {
         path: 'works',
