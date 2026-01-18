@@ -25,16 +25,13 @@ import AppFooter from '../components/AppFooter.vue'
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   overflow-x: hidden; /* Prevent horizontal scroll */
-  overflow-y: hidden; /* Prevent layout scroll (content scrolls instead) */
 }
 
 
 .app-content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding: 1rem 2rem 2rem 2rem;
   position: relative; /* Establish stacking context for scrolling */
 }
