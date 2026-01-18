@@ -1,0 +1,141 @@
+{
+  "_description": "English to Tamil transliteration rules (ITRANS scheme)",
+  "_source": "Extracted from @indic-transliteration/sanscript library",
+  "_usage": "Type English phonetic text to get Tamil script. Example: 'thirukkural' → 'திருக்குறள்'",
+
+  "vowels": {
+    "a": "அ",
+    "aa": "ஆ",
+    "A": "ஆ",
+    "i": "இ",
+    "ii": "ஈ",
+    "ee": "ஈ",
+    "I": "ஈ",
+    "u": "உ",
+    "uu": "ஊ",
+    "oo": "ஊ",
+    "U": "ஊ",
+    "e": "ஏ",
+    "ai": "ஐ",
+    "o": "ஓ",
+    "au": "ஔ",
+    "è": "எ",
+    "ò": "ஒ"
+  },
+
+  "consonants": {
+    "k": "க",
+    "g": "க",
+    "~N": "ங",
+    "N^": "ங",
+    "ch": "ச",
+    "c": "ச",
+    "j": "ஜ",
+    "~n": "ஞ",
+    "JN": "ஞ",
+    "T": "ட",
+    "D": "ட",
+    "N": "ண",
+    "t": "த",
+    "d": "த",
+    "n": "ந",
+    "p": "ப",
+    "b": "ப",
+    "m": "ம",
+    "y": "ய",
+    "r": "ர",
+    "l": "ல",
+    "v": "வ",
+    "w": "வ",
+    "zh": "ழ",
+    "L": "ள",
+    "R": "ற",
+    "n_": "ன",
+    "s": "ஸ",
+    "sh": "ஶ",
+    "Sh": "ஷ",
+    "S": "ஷ",
+    "h": "ஹ"
+  },
+
+  "special_marks": {
+    "M": "ம்",
+    "H": "ஃ",
+    "்": "்"
+  },
+
+  "numbers": {
+    "0": "௦",
+    "1": "௧",
+    "2": "௨",
+    "3": "௩",
+    "4": "௪",
+    "5": "௫",
+    "6": "௬",
+    "7": "௭",
+    "8": "௮",
+    "9": "௯"
+  },
+
+  "compound_consonants": {
+    "ksh": "க்ஷ",
+    "gn": "ஜ்ஞ"
+  },
+
+  "_alternates_info": "The following alternates are supported for easier typing:",
+  "alternates": {
+    "A": ["aa"],
+    "I": ["ii", "ee"],
+    "U": ["uu", "oo"],
+    "v": ["w"],
+    "ch": ["c"],
+    "Sh": ["S"],
+    "zh": ["ழ"]
+  },
+
+  "_common_examples": {
+    "aram": "அரம்",
+    "thirukkural": "திருக்குறள்",
+    "naalaayira": "நாலாயிர",
+    "azhagu": "அழகு",
+    "sa~Ngam": "சங்கம்",
+    "~naanam": "ஞானம்",
+    "mathan2": "மதன்",
+    "thirumuRai": "திருமுறை",
+    "kambaramayanam": "கம்பராமாயணம்",
+    "tolkappiyam": "தொல்காப்பியம்",
+    "silappathikaram": "சிலப்பதிகாரம்",
+    "manimegalai": "மணிமேகலை"
+  },
+
+  "_notes": [
+    "Use 'zh' for ழ (e.g., 'azhagu' → 'அழகு')",
+    "Use '~N' or 'N^' for ங (e.g., 'sa~Ngam' → 'சங்கம்')",
+    "Use '~n' or 'JN' for ஞ (e.g., '~naanam' → 'ஞானம்')",
+    "Use 'R' for ற (e.g., 'aRam' → 'அறம்')",
+    "Use 'n2' for ன (e.g., 'mathan2' → 'மதன்')",
+    "Capital 'T', 'D', 'N' for retroflex letters (ட, ட, ண)",
+    "Small 't', 'd', 'n' for dental letters (த, த, ந)",
+    "Double vowels or capitals for long vowels (aa/A → ஆ, ii/I → ஈ, uu/U → ஊ)"
+  ],
+
+  "_quick_reference": {
+    "vowels_short": "a(அ) i(இ) u(உ) e(எ) o(ஒ)",
+    "vowels_long": "aa/A(ஆ) ii/I(ஈ) uu/U(ஊ) E(ஏ) ai(ஐ) O(ஓ) au(ஔ)",
+    "special_tamil_letters": "zh(ழ) R(ற) n2(ன) L(ள) ~N(ங) ~n(ஞ) N(ண)",
+    "common_consonants": "k(க) ch/c(ச) t(த) p(ப) m(ம) y(ய) r(ர) l(ல) v/w(வ) n(ந)",
+    "retroflex": "T(ட) N(ண)",
+    "grantha": "j(ஜ) s(ஸ) sh(ஶ) Sh/S(ஷ) h(ஹ)"
+  },
+
+  "_special_keys_info": {
+    "tilde": "Type Shift + ` (backtick, top-left of keyboard)",
+    "caret": "Type Shift + 6",
+    "examples": {
+      "~N": "Shift+` then Shift+N → ங",
+      "~n": "Shift+` then n → ஞ",
+      "N^": "Shift+N then Shift+6 → ங",
+      "n2": "n then 2 → ன"
+    }
+  }
+}

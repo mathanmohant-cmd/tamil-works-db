@@ -13,13 +13,14 @@ export function useTransliteration() {
 
   /**
    * Transliterate English text to Tamil
-   * Uses ITRANS scheme which is phonetic and intuitive
+   * Uses ITRANS Dravidian scheme for full Tamil support
    * Examples:
    * - "aram" → "அரம்"
    * - "thirukkural" → "திருக்குறள்"
    * - "naalaayira" → "நாலாயிர"
    * - "azhagu" → "அழகு" (zh → ழ்)
    * - "sangam" → "சங்கம்" (ng → ங்)
+   * - "mathan2" → "மதன்" (n2 → ன்)
    *
    * @param {string} text - English text to transliterate
    * @returns {string} - Tamil text
@@ -30,8 +31,8 @@ export function useTransliteration() {
     }
 
     try {
-      // Use ITRANS scheme for phonetic transliteration
-      const tamilText = Sanscript.t(text, 'itrans', 'tamil')
+      // Use ITRANS Dravidian scheme for full Tamil support (includes n2 → ன்)
+      const tamilText = Sanscript.t(text, 'itrans_dravidian', 'tamil')
       return tamilText
     } catch (error) {
       console.error('Transliteration error:', error)
