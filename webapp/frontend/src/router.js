@@ -12,6 +12,9 @@ import SectionView from './components/works/SectionView.vue'
 import VerseView from './VerseView.vue'
 import UnderstandingThisToolPage from './pages/UnderstandingThisToolPage.vue'
 import WordSegmentationPage from './pages/WordSegmentationPage.vue'
+import AboutUsPage from './pages/AboutUsPage.vue'
+import ContactUsPage from './pages/ContactUsPage.vue'
+import DisclaimerPage from './pages/DisclaimerPage.vue'
 import OurJourney from './OurJourney.vue'
 import AdminPage from './AdminPage.vue'
 
@@ -100,6 +103,24 @@ const routes = [
         name: 'Journey',
         component: OurJourney,
         meta: { title: 'The Story Behind' }
+      },
+      {
+        path: 'about-us',
+        name: 'AboutUs',
+        component: AboutUsPage,
+        meta: { title: 'About Us' }
+      },
+      {
+        path: 'contact-us',
+        name: 'ContactUs',
+        component: ContactUsPage,
+        meta: { title: 'Contact Us' }
+      },
+      {
+        path: 'disclaimer',
+        name: 'Disclaimer',
+        component: DisclaimerPage,
+        meta: { title: 'Disclaimer' }
       }
     ]
   },

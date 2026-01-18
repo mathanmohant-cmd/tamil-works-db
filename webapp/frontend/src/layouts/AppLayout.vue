@@ -10,12 +10,15 @@
         </transition>
       </router-view>
     </main>
+    <!-- Footer persists across navigation - outside transition -->
+    <AppFooter />
   </div>
 </template>
 
 <script setup>
 // import AppHeader from '../components/AppHeader.vue' // OLD
 import AppHeader from '../components/AppHeaderEnhanced.vue' // NEW Enhanced Header
+import AppFooter from '../components/AppFooter.vue'
 </script>
 
 <style scoped>
