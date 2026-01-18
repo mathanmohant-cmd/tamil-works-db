@@ -42,9 +42,13 @@
               @click="toggleTransliteration"
               class="transliteration-toggle-btn"
               :class="{ active: transliterationEnabled }"
-              :title="transliterationEnabled ? 'Transliteration ON (தமிழ்)' : 'Transliteration OFF'"
+              :title="transliterationEnabled ? 'Transliteration ON (A→அ)' : 'Transliteration OFF'"
             >
-              {{ transliterationEnabled ? 'தமிழ்' : 'A' }}
+              <span class="transliteration-icon">
+                <span class="en-letter">A</span>
+                <span class="divider">/</span>
+                <span class="ta-letter">அ</span>
+              </span>
             </button>
 
             <button
@@ -145,9 +149,13 @@
                 @click="toggleTransliteration"
                 class="transliteration-toggle-btn"
                 :class="{ active: transliterationEnabled }"
-                :title="transliterationEnabled ? 'Transliteration ON (தமிழ்)' : 'Transliteration OFF'"
+                :title="transliterationEnabled ? 'Transliteration ON (A→அ)' : 'Transliteration OFF'"
               >
-                {{ transliterationEnabled ? 'தமிழ்' : 'A' }}
+                <span class="transliteration-icon">
+                  <span class="en-letter">A</span>
+                  <span class="divider">/</span>
+                  <span class="ta-letter">அ</span>
+                </span>
               </button>
 
               <button
@@ -837,31 +845,63 @@ window.addEventListener('open-search-panel', () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   background: #f3f4f6;
   border: 2px solid #d1d5db;
   border-radius: 50%;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #6b7280;
   cursor: pointer;
   transition: all 150ms ease;
   flex-shrink: 0;
 }
 
+.transliteration-icon {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.en-letter {
+  color: #9ca3af;
+  transition: all 150ms ease;
+}
+
+.divider {
+  color: #d1d5db;
+  font-size: 0.7rem;
+}
+
+.ta-letter {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  transition: all 150ms ease;
+}
+
 .transliteration-toggle-btn:hover {
   background: #e5e7eb;
   border-color: #9ca3af;
-  color: #374151;
   transform: scale(1.1);
 }
 
 .transliteration-toggle-btn.active {
   background: #dbeafe;
   border-color: #60a5fa;
+}
+
+.transliteration-toggle-btn.active .en-letter {
   color: #1e40af;
+}
+
+.transliteration-toggle-btn.active .divider {
+  color: #60a5fa;
+}
+
+.transliteration-toggle-btn.active .ta-letter {
+  color: #1e40af;
+  font-weight: 800;
 }
 
 /* Menu Button */
@@ -1101,15 +1141,12 @@ window.addEventListener('open-search-panel', () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   background: #f3f4f6;
   border: 2px solid #d1d5db;
   border-radius: 50%;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #6b7280;
   cursor: pointer;
   transition: all 150ms ease;
   flex-shrink: 0;
@@ -1118,14 +1155,25 @@ window.addEventListener('open-search-panel', () => {
 .panel-search-box .transliteration-toggle-btn:hover {
   background: #e5e7eb;
   border-color: #9ca3af;
-  color: #374151;
   transform: scale(1.1);
 }
 
 .panel-search-box .transliteration-toggle-btn.active {
   background: #dbeafe;
   border-color: #60a5fa;
+}
+
+.panel-search-box .transliteration-toggle-btn.active .en-letter {
   color: #1e40af;
+}
+
+.panel-search-box .transliteration-toggle-btn.active .divider {
+  color: #60a5fa;
+}
+
+.panel-search-box .transliteration-toggle-btn.active .ta-letter {
+  color: #1e40af;
+  font-weight: 800;
 }
 
 /* Content Area - No scroll, let sections handle their own scrolling */
@@ -1586,9 +1634,16 @@ window.addEventListener('open-search-panel', () => {
   }
 
   .transliteration-toggle-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+    width: 36px;
+    height: 36px;
+  }
+
+  .transliteration-icon {
+    font-size: 0.7rem;
+  }
+
+  .ta-letter {
+    font-size: 0.85rem;
   }
 
   .menu-btn {
@@ -1641,9 +1696,8 @@ window.addEventListener('open-search-panel', () => {
   }
 
   .panel-search-box .transliteration-toggle-btn {
-    width: 26px;
-    height: 26px;
-    font-size: 0.75rem;
+    width: 32px;
+    height: 32px;
   }
 
   .category-cards {
