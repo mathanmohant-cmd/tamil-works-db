@@ -14,16 +14,20 @@
           <div class="search-box" :class="{ focused: searchFocused }">
             <input
               ref="searchInput"
-              v-model="searchQuery"
+              v-model="englishInput"
               @focus="handleSearchFocus"
               @blur="handleSearchBlur"
               @keyup.enter="handleSearch"
               @keydown.esc="closeSearchPanel"
               type="search"
-              placeholder="இலக்கிய சொல் தேடல்"
+              :placeholder="transliterationEnabled ? 'Type in English... (e.g., aram)' : 'இலக்கிய சொல் தேடல்'"
               class="search-input"
               autocomplete="off"
             />
+
+            <div v-if="transliterationEnabled && searchQuery" class="tamil-preview">
+              {{ searchQuery }}
+            </div>
 
             <button
               v-if="searchQuery"
@@ -32,6 +36,15 @@
               title="Clear"
             >
               ×
+            </button>
+
+            <button
+              @click="toggleTransliteration"
+              class="transliteration-toggle-btn"
+              :class="{ active: transliterationEnabled }"
+              :title="transliterationEnabled ? 'Transliteration ON (தமிழ்)' : 'Transliteration OFF'"
+            >
+              {{ transliterationEnabled ? 'தமிழ்' : 'A' }}
             </button>
 
             <button
@@ -106,14 +119,18 @@
             <div class="panel-search-box">
               <input
                 ref="panelSearchInput"
-                v-model="searchQuery"
+                v-model="englishInput"
                 @keyup.enter="handleSearchAndClose"
                 @keydown.esc="closeSearchPanel"
                 type="search"
-                placeholder="இலக்கிய சொல் தேடல்"
+                :placeholder="transliterationEnabled ? 'Type in English... (e.g., aram)' : 'இலக்கிய சொல் தேடல்'"
                 class="search-input"
                 autocomplete="off"
               />
+
+              <div v-if="transliterationEnabled && searchQuery" class="tamil-preview">
+                {{ searchQuery }}
+              </div>
 
               <button
                 v-if="searchQuery"
@@ -122,6 +139,15 @@
                 title="Clear"
               >
                 ×
+              </button>
+
+              <button
+                @click="toggleTransliteration"
+                class="transliteration-toggle-btn"
+                :class="{ active: transliterationEnabled }"
+                :title="transliterationEnabled ? 'Transliteration ON (தமிழ்)' : 'Transliteration OFF'"
+              >
+                {{ transliterationEnabled ? 'தமிழ்' : 'A' }}
               </button>
 
               <button
@@ -291,6 +317,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useSearchState } from '../composables/useSearchState.js'
 import { useFilterState } from '../composables/useFilterState.js'
 import { useStats } from '../composables/useStats.js'
+import { useTransliteration } from '../composables/useTransliteration.js'
 import CollectionTree from './CollectionTree.vue'
 
 const router = useRouter()
@@ -300,6 +327,7 @@ const panelSearchInput = ref(null)
 const searchContainer = ref(null)
 const collectionTreeRef = ref(null)
 const searchQuery = ref('')
+const englishInput = ref('') // For transliteration
 const searchFocused = ref(false)
 const collectionsExpanded = ref(true)
 const isTreeExpanded = ref(false)
@@ -307,6 +335,9 @@ const menuExpanded = ref(false)
 const helpSubmenuExpanded = ref(false)
 const menuBtn = ref(null)
 const menuPosition = ref({ top: '58px', right: '1rem' })
+
+// Transliteration
+const { transliterationEnabled, transliterate, toggleTransliteration } = useTransliteration()
 
 // Mock data - replace with real data
 const suggestions = ref([])
@@ -346,15 +377,37 @@ const isCollectionTreeLoading = computed(() => {
 watch(() => route.query.q, (newQuery) => {
   if (newQuery) {
     searchQuery.value = newQuery
+    englishInput.value = newQuery
   } else if (route.name !== 'QuickStart') {
     searchQuery.value = ''
+    englishInput.value = ''
   }
 })
 
 // Initialize from URL
 if (route.query.q) {
   searchQuery.value = route.query.q
+  englishInput.value = route.query.q
 }
+
+// Watch englishInput and transliterate to Tamil
+watch(englishInput, (newValue) => {
+  if (transliterationEnabled.value && newValue) {
+    searchQuery.value = transliterate(newValue)
+  } else if (!transliterationEnabled.value) {
+    // When disabled, sync englishInput to searchQuery
+    searchQuery.value = newValue
+  }
+})
+
+// When transliteration is toggled, update the search query
+watch(transliterationEnabled, (enabled) => {
+  if (enabled && englishInput.value) {
+    searchQuery.value = transliterate(englishInput.value)
+  } else if (!enabled && englishInput.value) {
+    searchQuery.value = englishInput.value
+  }
+})
 
 function handleSearchFocus() {
   searchFocused.value = true
@@ -441,6 +494,7 @@ function handleSearchAndClose() {
 
 function clearSearchInput() {
   searchQuery.value = ''
+  englishInput.value = ''
   clearSearch()
   router.push({ name: 'QuickStart' })
 }
@@ -692,11 +746,23 @@ window.addEventListener('open-search-panel', () => {
   border-radius: 24px;
   padding: 0.25rem 0.5rem 0.25rem 0.75rem;
   transition: all 150ms ease;
+  position: relative;
 }
 
 .search-box.focused {
   border-color: #60a5fa;
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.tamil-preview {
+  position: absolute;
+  right: 120px;
+  font-size: 1rem;
+  color: #1e40af;
+  font-weight: 600;
+  pointer-events: none;
+  background: white;
+  padding: 0 0.5rem;
 }
 
 .search-icon-btn {
@@ -765,6 +831,37 @@ window.addEventListener('open-search-panel', () => {
   background: #e5e7eb;
   color: #374151;
   transform: scale(1.1);
+}
+
+.transliteration-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.transliteration-toggle-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #374151;
+  transform: scale(1.1);
+}
+
+.transliteration-toggle-btn.active {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #1e40af;
 }
 
 /* Menu Button */
@@ -927,6 +1024,18 @@ window.addEventListener('open-search-panel', () => {
   border-radius: 20px;
   padding: 0.2rem 0.4rem 0.2rem 0.6rem;
   transition: all 150ms ease;
+  position: relative;
+}
+
+.panel-search-box .tamil-preview {
+  position: absolute;
+  right: 100px;
+  font-size: 0.95rem;
+  color: #1e40af;
+  font-weight: 600;
+  pointer-events: none;
+  background: white;
+  padding: 0 0.5rem;
 }
 
 .panel-search-box .search-icon-btn {
@@ -986,6 +1095,37 @@ window.addEventListener('open-search-panel', () => {
   background: #e5e7eb;
   color: #374151;
   transform: scale(1.1);
+}
+
+.panel-search-box .transliteration-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.panel-search-box .transliteration-toggle-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #374151;
+  transform: scale(1.1);
+}
+
+.panel-search-box .transliteration-toggle-btn.active {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #1e40af;
 }
 
 /* Content Area - No scroll, let sections handle their own scrolling */
@@ -1440,6 +1580,17 @@ window.addEventListener('open-search-panel', () => {
     font-size: 16px; /* Prevent iOS zoom */
   }
 
+  .tamil-preview {
+    font-size: 0.9rem;
+    right: 100px;
+  }
+
+  .transliteration-toggle-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
   .menu-btn {
     width: 36px;
     height: 36px;
@@ -1482,6 +1633,17 @@ window.addEventListener('open-search-panel', () => {
 
   .panel-search-box .search-input {
     font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  .panel-search-box .tamil-preview {
+    font-size: 0.85rem;
+    right: 85px;
+  }
+
+  .panel-search-box .transliteration-toggle-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
   }
 
   .category-cards {
