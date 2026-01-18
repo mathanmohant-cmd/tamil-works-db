@@ -78,23 +78,27 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .app-footer {
-    padding: 0.75rem 0.5rem;
+    padding: 0.250rem 0.25rem;
   }
 
-  .footer-links {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+.footer-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  flex-wrap: nowrap;
+}
 
   .separator {
     display: none;
   }
 
   .footer-link {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem .25rem;
     width: 100%;
     max-width: 300px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
 
   .footer-copyright {
