@@ -46,8 +46,8 @@
             </div>
             <div class="quick-ref-item">
               <span class="tamil-char">ன்</span>
-              <span class="english-trans">n2</span>
-              <span>→ மதன் (mathan2)</span>
+              <span class="english-trans">nn, n2</span>
+              <span>→ மதன் (mathann)</span>
             </div>
             <div class="quick-ref-item">
               <span class="tamil-char">ங்</span>
@@ -204,9 +204,9 @@
                   <td class="example">மலர் (malar)</td>
                 </tr>
                 <tr class="unique-row">
-                  <td><span class="tamil-char">ன்</span> <span class="english-trans">n2</span></td>
+                  <td><span class="tamil-char">ன்</span> <span class="english-trans">nn, n2</span></td>
                   <td>Nasal ⭐</td>
-                  <td class="example">மதன் (mathan2)</td>
+                  <td class="example">மதன் (mathann)</td>
                 </tr>
                 <tr>
                   <td><span class="tamil-char">ய்</span> <span class="english-trans">y</span></td>
@@ -244,7 +244,7 @@
 
           <div class="example-block">
             <p><strong>⭐ Unique Tamil Letters</strong></p>
-            <p>Green-highlighted rows are unique to Tamil: <code>zh</code> (ழ), <code>R</code> (ற), <code>n2</code> (ன)</p>
+            <p>Green-highlighted rows are unique to Tamil: <code>zh</code> (ழ), <code>R</code> (ற), <code>nn</code> or <code>n2</code> (ன)</p>
           </div>
         </section>
 
@@ -347,10 +347,10 @@
           <div class="example-block">
             <ul>
               <li><strong>Case matters!</strong> Small (t, n, l) vs Capital (T, N, L, R)</li>
-              <li><strong>Unique Tamil:</strong> <code>zh</code> = ழ, <code>R</code> = ற, <code>n2</code> = ன</li>
+              <li><strong>Unique Tamil:</strong> <code>zh</code> = ழ, <code>R</code> = ற, <code>nn</code> or <code>n2</code> = ன</li>
               <li><strong>Long vowels:</strong> <code>aa</code> or <code>A</code> → ஆ</li>
-              <li><strong>Three N sounds:</strong> <code>n</code> (ந), <code>N</code> (ண), <code>n2</code> (ன)</li>
-              <li><strong>Examples:</strong> thirukkural → திருக்குறள், azhagu → அழகு</li>
+              <li><strong>Three N sounds:</strong> <code>n</code> (ந), <code>N</code> (ண), <code>nn</code> or <code>n2</code> (ன)</li>
+              <li><strong>Examples:</strong> thirukkural → திருக்குறள், azhagu → அழகு, mathann → மதன்</li>
             </ul>
           </div>
         </section>

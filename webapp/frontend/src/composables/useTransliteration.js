@@ -21,6 +21,7 @@ export function useTransliteration() {
    * - "azhagu" → "அழகு" (zh → ழ்)
    * - "sangam" → "சங்கம்" (ng → ங்)
    * - "mathan2" → "மதன்" (n2 → ன்)
+   * - "mathann" → "மதன்" (nn → ன், alternative)
    *
    * @param {string} text - English text to transliterate
    * @returns {string} - Tamil text
@@ -31,8 +32,19 @@ export function useTransliteration() {
     }
 
     try {
-      // Use ITRANS Dravidian scheme for full Tamil support (includes n2 → ன்)
-      const tamilText = Sanscript.t(text, 'itrans_dravidian', 'tamil')
+      // Preprocess: Convert 'nn' to 'n2' for alveolar ன்
+      // This allows both 'nn' and 'n2' to produce ன்
+      // Use word boundary awareness to avoid converting unintended double-n
+      let preprocessedText = text
+
+      // Replace 'nn' with 'n2' when:
+      // 1. At end of word (followed by space or end of string)
+      // 2. Before a consonant (not followed by a vowel)
+      // This prevents false matches like "inn" → "in2" when user wants "இன்ன்"
+      preprocessedText = preprocessedText.replace(/nn(?=[^aeiouAEIOU]|$)/g, 'n2')
+
+      // Use ITRANS Dravidian scheme for full Tamil support
+      const tamilText = Sanscript.t(preprocessedText, 'itrans_dravidian', 'tamil')
       return tamilText
     } catch (error) {
       console.error('Transliteration error:', error)

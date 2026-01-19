@@ -51,6 +51,8 @@
     "L": "ள",
     "R": "ற",
     "n_": "ன",
+    "nn": "ன",
+    "n2": "ன",
     "s": "ஸ",
     "sh": "ஶ",
     "Sh": "ஷ",
@@ -90,7 +92,8 @@
     "v": ["w"],
     "ch": ["c"],
     "Sh": ["S"],
-    "zh": ["ழ"]
+    "zh": ["ழ"],
+    "nn": ["n2"]
   },
 
   "_common_examples": {
@@ -101,6 +104,7 @@
     "sa~Ngam": "சங்கம்",
     "~naanam": "ஞானம்",
     "mathan2": "மதன்",
+    "mathann": "மதன்",
     "thirumuRai": "திருமுறை",
     "kambaramayanam": "கம்பராமாயணம்",
     "tolkappiyam": "தொல்காப்பியம்",
@@ -113,7 +117,7 @@
     "Use '~N' or 'N^' for ங (e.g., 'sa~Ngam' → 'சங்கம்')",
     "Use '~n' or 'JN' for ஞ (e.g., '~naanam' → 'ஞானம்')",
     "Use 'R' for ற (e.g., 'aRam' → 'அறம்')",
-    "Use 'n2' for ன (e.g., 'mathan2' → 'மதன்')",
+    "Use 'nn' or 'n2' for ன (e.g., 'mathann' or 'mathan2' → 'மதன்')",
     "Capital 'T', 'D', 'N' for retroflex letters (ட, ட, ண)",
     "Small 't', 'd', 'n' for dental letters (த, த, ந)",
     "Double vowels or capitals for long vowels (aa/A → ஆ, ii/I → ஈ, uu/U → ஊ)"
@@ -122,7 +126,7 @@
   "_quick_reference": {
     "vowels_short": "a(அ) i(இ) u(உ) e(எ) o(ஒ)",
     "vowels_long": "aa/A(ஆ) ii/I(ஈ) uu/U(ஊ) E(ஏ) ai(ஐ) O(ஓ) au(ஔ)",
-    "special_tamil_letters": "zh(ழ) R(ற) n2(ன) L(ள) ~N(ங) ~n(ஞ) N(ண)",
+    "special_tamil_letters": "zh(ழ) R(ற) nn/n2(ன) L(ள) ~N(ங) ~n(ஞ) N(ண)",
     "common_consonants": "k(க) ch/c(ச) t(த) p(ப) m(ம) y(ய) r(ர) l(ல) v/w(வ) n(ந)",
     "retroflex": "T(ட) N(ண)",
     "grantha": "j(ஜ) s(ஸ) sh(ஶ) Sh/S(ஷ) h(ஹ)"
@@ -135,7 +139,8 @@
       "~N": "Shift+` then Shift+N → ங",
       "~n": "Shift+` then n → ஞ",
       "N^": "Shift+N then Shift+6 → ங",
-      "n2": "n then 2 → ன"
+      "n2": "n then 2 → ன (traditional)",
+      "nn": "n then n → ன (alternative, easier)"
     }
   }
 }
