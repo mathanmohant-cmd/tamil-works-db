@@ -758,3 +758,4 @@ When searching with `limit=0`:
 
 **Note:** The `work_breakdown` array contains one entry per verse (not per work), so the frontend must aggregate by `work_name` to get unique work counts and total usage per work.
 - read the tables first before writing parser
+- when adding new contents, match the style of reset of the contents in the website

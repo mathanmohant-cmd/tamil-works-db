@@ -85,7 +85,9 @@
       "Bash(timeout /t 2)",
       "Bash(netstat:*)",
       "Bash(cmd /c:*)",
-      "mcp__playwright__browser_press_key"
+      "mcp__playwright__browser_press_key",
+      "Bash(npm install:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
