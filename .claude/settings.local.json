@@ -88,7 +88,8 @@
       "mcp__playwright__browser_press_key",
       "Bash(npm install:*)",
       "Bash(dir:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
