@@ -53,9 +53,11 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
+import { useUserRole } from '../composables/useUserRole.js'
 
 const menuOpen = ref(false)
 const expandedSubmenus = reactive({})
+const { canBrowseWorks } = useUserRole()
 
 // Watch menuOpen and collapse all submenus when menu closes or opens
 watch(menuOpen, (isOpen) => {
@@ -65,12 +67,6 @@ watch(menuOpen, (isOpen) => {
       expandedSubmenus[key] = false
     })
   }
-})
-
-// Check if Works Browser should be visible (only for localhost or 192.168.1.198)
-const isWorksBrowserVisible = computed(() => {
-  const hostname = window.location.hostname
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '192.168.1.198'
 })
 
 const menuItems = computed(() => {
@@ -108,8 +104,8 @@ const menuItems = computed(() => {
     }
   ]
 
-  // Insert Works Browser after Search if visible
-  if (isWorksBrowserVisible.value) {
+  // Insert Works Browser after Search if user has browse works permission
+  if (canBrowseWorks.value) {
     items.splice(2, 0, {
       name: 'Works',
       label: 'Browse Works',

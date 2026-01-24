@@ -449,7 +449,10 @@
 </template>
 
 <script setup>
-// No state needed - this is a static content page
+import { useAnchorScroll } from '../composables/useAnchorScroll'
+
+// Enable smooth scrolling for anchor links
+useAnchorScroll()
 </script>
 
 <style scoped>

@@ -8,8 +8,8 @@ import Sanscript from '@indic-transliteration/sanscript'
  * @returns {Object} - transliteration state and methods
  */
 export function useTransliteration() {
-  // Transliteration enabled by default
-  const transliterationEnabled = ref(true)
+  // Transliteration disabled by default (can be enabled via toggle button)
+  const transliterationEnabled = ref(false)
 
   /**
    * Transliterate English text to Tamil

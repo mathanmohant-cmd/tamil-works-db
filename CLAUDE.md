@@ -31,6 +31,13 @@ This is a Tamil literature database and search application that stores and analy
    - Thirukkural commentary (Thirukkural Kumaresa Venpa - 1,331 verses)
    - Modern works by Bharathiyar (Pudhiya Aathichudi)
 
+5. **Siddhar Padalgal (சித்தர் பாடல்கள்) - Collection 327:**
+   - 36 mystical and spiritual poetry works by Tamil Siddhars
+   - Songs of enlightened yogis from 7th-19th century CE
+   - Covers ஞானம் (spiritual wisdom), யோக நிலை (yogic states), பூஜாவிதி (worship methods)
+   - Prominent authors: Agathiyar, Sivavaakiyar, Thirumoolar, Pattinatthu Siddhar, Karuvurar
+   - **Special Feature**: Stores metadata in JSONB columns (section types, verse-section cross-references)
+
 **Note:** Experimental grammar analysis tools (morphology analyzer, pronunciation evaluator) are located in `tamil-grammar-tools/` directory. These are separate side projects for future exploration and not part of the main search application.
 
 ## Common Commands
@@ -172,6 +179,15 @@ python thiruppugazh_bulk_import.py [database_url]
 python thembavani_bulk_import.py [database_url]
 python seerapuranam_bulk_import.py [database_url]
 
+# ===== MINOR LITERARY WORKS (சிற்றிலக்கியங்கள்) =====
+# Import all 20 minor literary works (Collection 326)
+python sitrilakkiyangal_bulk_import.py [database_url]
+# Includes: 20 works spanning கலம்பகம், பரணி, தூது, கோவை, குறவஞ்சி, and other genres
+# Total: 20 works, 7,385 verses from 12th-19th centuries CE
+
+# Delete சிற்றிலக்கியங்கள் collection and all 20 works
+python delete_sitrilakkiyangal.py [database_url]
+
 # ===== ETHICAL LITERATURE (நீதிநூல்கள்) =====
 # Import all 21 ethical literature works (Collection 325)
 python neethinoolkal_bulk_import.py [database_url]
@@ -181,6 +197,17 @@ python neethinoolkal_bulk_import.py [database_url]
 
 # Delete நீதிநூல்கள் collection and all 21 works
 python delete_neethinoolkal.py [database_url]
+
+# ===== SIDDHAR MYSTICAL POETRY (சித்தர் பாடல்கள்) =====
+# Import all 36 Siddhar Padalgal works (Collection 327)
+python siddhar_padalgal_bulk_import.py [database_url]
+# Includes: Songs by Agathiyar, Sivavaakiyar, Thirumoolar, Pattinatthu Siddhar,
+#           Karuvurar, and 31 other Siddhars
+# Total: 36 works, 2,886 verses, 9,731 lines, 55,922 words spanning 7th-19th centuries CE
+# Special: Stores metadata in JSONB columns (section types, verse-section cross-references)
+
+# Delete சித்தர் பாடல்கள் collection and all 36 works
+python delete_siddhar_padalgal.py [database_url]
 
 # All parsers support:
 # - DATABASE_URL environment variable
@@ -332,16 +359,32 @@ Located in `webapp/frontend/`:
   ├── /works → WorksBrowser
   │   ├── /works (WorksList) - Grid of all works
   │   ├── /works/:workId (WorkDetail) - Work info + sections tree
-  │   ├── /works/:workId/section/:sectionId (SectionView) - Verses in section
-  │   └── /works/:workId/verse/:verseId (VerseView) - Full verse with navigation
+  │   └── /works/:workId/section/:sectionId (SectionView) - Verses in section
+  ├── /verse/:workId/:verseId (VerseView) - Independent verse viewer (works from search & works browser)
   ├── /about (AboutConcordance)
   ├── /journey (OurJourney)
   └── /home (Home)
 /admin (AdminPage) - Separate layout
 ```
 
-**Cross-Feature Navigation (2026-01-09):**
-- **Search → Works Browser**: Clicking verse in search results navigates to Works Browser VerseView
+**User Role System (2026-01-24):**
+- **Two roles**: Guest (default), Admin (authenticated)
+- **Role selector on first visit**: Modal prompts users to "Continue as Guest" or "Admin Login"
+- **Backend authentication**: Uses existing `admin_users` table with bcrypt password hashing
+  - Admin login endpoint: `POST /admin/login` (returns user_id, username)
+  - Default admin user created on first run (check backend for default password)
+- **Session persistence**: Stored in sessionStorage (cleared on browser close)
+- **Route guards**: Browse Works and Admin routes require admin role
+- **UI visibility**: Browse Works menu only shown to authenticated admins
+- **My Profile menu**: Dropdown in AppHeader showing username, role badge, and logout button
+  - Click username to open profile dropdown
+  - Shows "Administrator" role badge
+  - Logout button redirects to home and clears session
+
+**Cross-Feature Navigation (2026-01-24):**
+- **VerseView is independent**: Not nested under WorksBrowser, accessible from anywhere
+- **Search → VerseView**: Clicking verse in search results navigates directly to VerseView
+- **Works Browser → VerseView**: Section listings also navigate to the same independent VerseView
 - **Context Preservation**: Query params preserve search context (`?word=அறம்&from=search`)
 - **Smart Back Button**: VerseView detects navigation source and shows appropriate back button
 - **Word Highlighting**: Search words are highlighted when navigating from search

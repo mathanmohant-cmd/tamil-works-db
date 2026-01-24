@@ -10,7 +10,7 @@
 // - /works (WorksList)
 // - /works/:workId (WorkDetail)
 // - /works/:workId/section/:sectionId (SectionView)
-// - /works/:workId/verse/:verseId (VerseView)
+// Note: VerseView is now independent at /verse/:workId/:verseId (not nested here)
 </script>
 
 <style scoped>

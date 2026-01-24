@@ -19,6 +19,12 @@ import os
 import sys
 import psycopg2
 
+# Fix Windows Unicode encoding issues
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 def get_connection_string():
     """Get database connection string"""
     # Check if old-style args (positional): delete_work.py "Work Name" "db_url"
@@ -33,7 +39,7 @@ def get_connection_string():
     # Default local connection
     return "postgresql://postgres:postgres@localhost/tamil_literature"
 
-def delete_work(work_name: str, connection_string: str):
+def delete_work(work_name: str, connection_string: str, skip_confirmation: bool = False):
     """Delete a work and all its related data"""
     print(f"\nDeleting work: {work_name}")
 
@@ -103,10 +109,14 @@ def delete_work(work_name: str, connection_string: str):
         print(f"    Section-level: {section_coll_count}")
         print(f"    Verse-level: {verse_coll_count}")
 
-        response = input("\nAre you sure you want to delete this work? (yes/no): ").strip().lower()
-        if response not in ['yes', 'y']:
-            print("Deletion cancelled.")
-            return False
+        if not skip_confirmation:
+            response = input("\nAre you sure you want to delete this work? (yes/no): ").strip().lower()
+            if response not in ['yes', 'y']:
+                print("Deletion cancelled.")
+                return False
+        else:
+            print("\n⚠️  Skipping confirmation (--yes flag)")
+
 
         # Delete in order of dependencies (CASCADE will handle it, but being explicit)
         print("\nDeleting data...")
@@ -216,7 +226,7 @@ def get_works_in_collection(cursor, collection_id):
 
     return results
 
-def delete_collection_and_works(collection_id, connection_string):
+def delete_collection_and_works(collection_id, connection_string, skip_confirmation: bool = False):
     """Delete a collection and all its works"""
     print(f"\nDeleting collection: {collection_id}")
 
@@ -249,10 +259,13 @@ def delete_collection_and_works(collection_id, connection_string):
 
         if not works:
             print(f"\n⚠️  No works found in collection {collection_id}")
-            response = input("Delete empty collection? (yes/no): ").strip().lower()
-            if response not in ['yes', 'y']:
-                print("Deletion cancelled.")
-                return False
+            if not skip_confirmation:
+                response = input("Delete empty collection? (yes/no): ").strip().lower()
+                if response not in ['yes', 'y']:
+                    print("Deletion cancelled.")
+                    return False
+            else:
+                print("⚠️  Skipping confirmation (--yes flag)")
         else:
             print(f"\nWorks in collection ({len(works)}):")
             for work_id, work_name, work_name_tamil in works:
@@ -262,10 +275,13 @@ def delete_collection_and_works(collection_id, connection_string):
             print(f"  - {len(works)} work(s) and all their data (sections, verses, lines, words)")
             print(f"  - The collection '{coll_name_tamil}'")
 
-            response = input("\nAre you sure? (yes/no): ").strip().lower()
-            if response not in ['yes', 'y']:
-                print("Deletion cancelled.")
-                return False
+            if not skip_confirmation:
+                response = input("\nAre you sure? (yes/no): ").strip().lower()
+                if response not in ['yes', 'y']:
+                    print("Deletion cancelled.")
+                    return False
+            else:
+                print("\n⚠️  Skipping confirmation (--yes flag)")
 
             # Delete all works
             print(f"\nDeleting {len(works)} work(s)...")
@@ -343,15 +359,19 @@ def main():
     # Parse arguments
     if len(sys.argv) < 2:
         print("\nUsage:")
-        print('  python delete_work.py "Work Name" [database_url]')
-        print('  python delete_work.py --collection-id <id>')
-        print('  python delete_work.py --work-id <id>')
+        print('  python delete_work.py "Work Name" [database_url] [--yes]')
+        print('  python delete_work.py --collection-id <id> [--yes]')
+        print('  python delete_work.py --work-id <id> [--yes]')
         print("\nExamples:")
         print('  python delete_work.py "Tolkappiyam"')
+        print('  python delete_work.py "Thirukkural" --yes   # Skip confirmation')
         print('  python delete_work.py --collection-id 3211   # Delete all Devaram works')
         print('  python delete_work.py --collection-id 51     # Delete all 18 Sangam works')
         print('  python delete_work.py --work-id 42')
         sys.exit(1)
+
+    # Check for --yes flag
+    skip_confirmation = '--yes' in sys.argv or '-y' in sys.argv
 
     connection_string = get_connection_string()
 
@@ -366,7 +386,7 @@ def main():
             sys.exit(1)
 
         collection_id = int(sys.argv[2])
-        if delete_collection_and_works(collection_id, connection_string):
+        if delete_collection_and_works(collection_id, connection_string, skip_confirmation):
             print("\n✓ Collection and works deleted successfully")
         else:
             print("\n✗ Deletion failed")
@@ -396,10 +416,13 @@ def main():
             work_name, work_name_tamil = result
             print(f"\nDeleting work: [{work_id}] {work_name_tamil or work_name}")
 
-            response = input("Are you sure? (yes/no): ").strip().lower()
-            if response not in ['yes', 'y']:
-                print("Deletion cancelled.")
-                sys.exit(0)
+            if not skip_confirmation:
+                response = input("Are you sure? (yes/no): ").strip().lower()
+                if response not in ['yes', 'y']:
+                    print("Deletion cancelled.")
+                    sys.exit(0)
+            else:
+                print("⚠️  Skipping confirmation (--yes flag)")
 
             if delete_work_by_id(cursor, work_id):
                 conn.commit()
@@ -415,7 +438,7 @@ def main():
     # Handle work name (original behavior)
     else:
         work_name = sys.argv[1]
-        if delete_work(work_name, connection_string):
+        if delete_work(work_name, connection_string, skip_confirmation):
             print("\n✓ Work deleted successfully")
             print("\nYou can now re-run the import script to re-import this work.")
         else:

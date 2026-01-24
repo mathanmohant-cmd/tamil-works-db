@@ -5,16 +5,16 @@
 
       <section class="content-section">
         <h2>Our Mission</h2>
-        <p>Thamizh Word Explorer is dedicated to making classical Tamil literature accessible and searchable for everyone—from students and researchers to lovers of Tamil language and culture.</p>
+        <p>Thamizh Word Explorer is dedicated to making classical Thamizh literature accessible and searchable for everyone—from students and researchers to lovers of Thamizh language and culture.</p>
 
-        <p>We believe that Tamil literary heritage should be easy to explore and understand. This tool brings together thousands of years of literature into one searchable database, allowing you to discover how words and ideas have evolved across centuries.</p>
+        <p>We believe that Thamizh literary heritage should be easy to explore and understand. This tool brings together thousands of years of literature into one searchable database, allowing you to discover how words and ideas have evolved across centuries.</p>
       </section>
 
       <section class="content-section">
         <h2>What We Do</h2>
         <p>Our platform provides:</p>
         <ul>
-          <li><strong>Comprehensive Word Search:</strong> Find every occurrence of any Tamil word across classical literature</li>
+          <li><strong>Comprehensive Word Search:</strong> Find every occurrence of any Thamizh word across classical literature</li>
           <li><strong>Contextual Understanding:</strong> See complete verses and contexts, not just definitions</li>
           <li><strong>Historical Perspective:</strong> Track how words and concepts evolved across different periods and works</li>
           <li><strong>Scholarly Research Tools:</strong> Export results, filter by works, and analyze usage patterns</li>
@@ -23,25 +23,25 @@
 
       <section class="content-section">
         <h2>Acknowledgments</h2>
-        <p>This project is built upon the comprehensive concordance work of <strong>Prof. Dr. P. Pandiyaraja</strong>, available at <a href="http://tamilconcordance.in" target="_blank" rel="noopener noreferrer">tamilconcordance.in</a>. His meticulous compilation and word segmentation principles form the foundation of our database.</p>
+        <p>This project is built upon the comprehensive concordance work of <strong>Prof. P. Pandiyaraja</strong>, available at <a href="http://tamilconcordance.in" target="_blank" rel="noopener noreferrer">tamilconcordance.in</a>. His meticulous compilation and word segmentation principles form the foundation of our database.</p>
 
-        <p>We are grateful for his dedication to preserving and making Tamil literature accessible to the world.</p>
+        <p>We are grateful for his dedication to preserving and making Thamizh literature accessible to the world.</p>
       </section>
 
       <section class="content-section">
         <h2>Our Vision</h2>
         <p>We envision a future where:</p>
         <ul>
-          <li>Tamil literary heritage is easily accessible to learners worldwide</li>
-          <li>Researchers can conduct sophisticated analysis across the entire Tamil canon</li>
-          <li>New generations discover the beauty and depth of classical Tamil literature</li>
+          <li>Thamizh literary heritage is easily accessible to learners worldwide</li>
+          <li>Researchers can conduct sophisticated analysis across the entire Thamizh canon</li>
+          <li>New generations discover the beauty and depth of classical Thamizh literature</li>
           <li>Technology serves to preserve and promote cultural and linguistic heritage</li>
         </ul>
       </section>
 
       <section class="content-section">
         <h2>Join Our Journey</h2>
-        <p>This is an evolving project. We're continuously adding more works, improving search capabilities, and developing new features to better serve the Tamil literary community.</p>
+        <p>This is an evolving project. We're continuously adding more works, improving search capabilities, and developing new features to better serve the Thamizh literary community.</p>
 
         <p>If you have suggestions, corrections, or would like to contribute, we'd love to hear from you. Visit our <router-link :to="{ name: 'ContactUs' }">Contact Us</router-link> page to get in touch.</p>
       </section>
@@ -104,6 +104,7 @@ h1 {
 }
 
 .content-section li {
+  font-size: 1.0rem;
   margin: 0.75rem 0;
   line-height: 1.6;
   color: var(--text-primary);

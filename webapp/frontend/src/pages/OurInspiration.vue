@@ -17,10 +17,10 @@
           <div class="mentor-text">
             <h3>Mrs. Vaidehi Herbert</h3>
             <p>
-              A defining moment was the <em>Introduction to Sangam Literature</em> course she conducted. For many Thamizhs educated primarily in English, approaching classical Thamizh texts—and even their traditional commentaries—can feel daunting.
+              For many Thamizhs educated primarily in English, approaching classical Thamizh texts—and even their traditional commentaries—can feel daunting.
             </p>
             <p>
-              Her twelve-week course opened an accessible doorway into Sangam poetry, revealing the richness of the Thamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery. Her enthusiasm and unwavering commitment have made Sangam texts accessible to younger readers and non-Thamizh speakers as well.
+              Her twelve-week <em>Introduction to Sangam Literature</em> course opened an accessible doorway into Sangam poetry, revealing the richness of the Thamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery. Her enthusiasm and unwavering commitment have made Sangam texts accessible to younger readers and non-Thamizh speakers as well.
             </p>
             <div class="resources">
               <h4>Follow her work</h4>

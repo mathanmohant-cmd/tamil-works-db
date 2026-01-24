@@ -18,7 +18,7 @@
           <span v-else class="search-context-text">{{ searchContextText }}</span>
         </div>
         <div class="summary-with-export">
-          <span>Found in {{ searchSummary }}</span>
+          <span>Found: {{ searchSummary }}. Expand for details</span>
           <button @click="showWordsExportMenu = true" class="export-button-combined" title="Export list of found words">
             📥 Export Words
           </button>

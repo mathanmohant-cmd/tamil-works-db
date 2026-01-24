@@ -1095,8 +1095,37 @@ class Database:
         """
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                # Get section info
+                # Get section info with parent hierarchy
                 cur.execute("""
+                    WITH RECURSIVE section_hierarchy AS (
+                        -- Start with the current section
+                        SELECT
+                            section_id,
+                            parent_section_id,
+                            level_type,
+                            level_type_tamil,
+                            section_name,
+                            section_name_tamil,
+                            1 as depth,
+                            (COALESCE(level_type_tamil, level_type) || ':' || COALESCE(section_name_tamil, section_name)) as path_segment
+                        FROM sections
+                        WHERE section_id = %s
+
+                        UNION ALL
+
+                        -- Recursively get parent sections
+                        SELECT
+                            s.section_id,
+                            s.parent_section_id,
+                            s.level_type,
+                            s.level_type_tamil,
+                            s.section_name,
+                            s.section_name_tamil,
+                            sh.depth + 1,
+                            (COALESCE(s.level_type_tamil, s.level_type) || ':' || COALESCE(s.section_name_tamil, s.section_name))
+                        FROM sections s
+                        JOIN section_hierarchy sh ON s.section_id = sh.parent_section_id
+                    )
                     SELECT
                         s.section_id,
                         s.work_id,
@@ -1105,11 +1134,16 @@ class Database:
                         s.level_type,
                         s.level_type_tamil,
                         w.work_name,
-                        w.work_name_tamil
+                        w.work_name_tamil,
+                        (
+                            SELECT string_agg(path_segment, ' > ' ORDER BY depth DESC)
+                            FROM section_hierarchy
+                            WHERE depth > 1  -- Exclude current section (depth=1)
+                        ) as parent_hierarchy_path
                     FROM sections s
                     JOIN works w ON s.work_id = w.work_id
                     WHERE s.section_id = %s
-                """, [section_id])
+                """, [section_id, section_id])
                 section_info = cur.fetchone()
 
                 if not section_info:
@@ -1132,6 +1166,7 @@ class Database:
                         v.verse_type_tamil,
                         v.total_lines,
                         v.sort_order,
+                        v.metadata,
                         array_agg(l.line_text ORDER BY l.line_number) as lines
                     FROM verses v
                     LEFT JOIN lines l ON v.verse_id = l.verse_id

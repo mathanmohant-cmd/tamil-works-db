@@ -17,7 +17,10 @@ import AboutUsPage from './pages/AboutUsPage.vue'
 import ContactUsPage from './pages/ContactUsPage.vue'
 import DisclaimerPage from './pages/DisclaimerPage.vue'
 import OurJourney from './OurJourney.vue'
+import OurInspiration from './pages/OurInspiration.vue'
+import TheStoryBehind from './pages/TheStoryBehind.vue'
 import AdminPage from './AdminPage.vue'
+import { useUserRole } from './composables/useUserRole.js'
 
 const routes = [
   {
@@ -80,36 +83,49 @@ const routes = [
             path: '',
             name: 'WorksList',
             component: WorksList,
-            meta: { title: 'Browse Works' }
+            meta: { title: 'Browse Works', requiresBrowse: true }
           },
           {
             path: ':workId',
             name: 'WorkDetail',
             component: WorkDetail,
             props: true,
-            meta: { title: 'Work Details' }
+            meta: { title: 'Work Details', requiresBrowse: true }
           },
           {
             path: ':workId/section/:sectionId',
             name: 'SectionView',
             component: SectionView,
             props: true,
-            meta: { title: 'Section' }
-          },
-          {
-            path: ':workId/verse/:verseId',
-            name: 'VerseView',
-            component: VerseView,
-            props: true,
-            meta: { title: 'Verse' }
+            meta: { title: 'Section', requiresBrowse: true }
           }
         ]
       },
       {
-        path: 'journey',
+        path: 'verse/:workId/:verseId',
+        name: 'VerseView',
+        component: VerseView,
+        props: true,
+        meta: { title: 'Verse' }
+        // Note: VerseView is publicly accessible (no requiresBrowse flag)
+      },
+      {
+        path: 'story',
+        name: 'TheStoryBehind',
+        component: TheStoryBehind,
+        meta: { title: 'The Story Behind' }
+      },
+      {
+        path: 'story/journey',
         name: 'Journey',
         component: OurJourney,
-        meta: { title: 'The Story Behind' }
+        meta: { title: 'Our Journey' }
+      },
+      {
+        path: 'story/inspiration',
+        name: 'Inspiration',
+        component: OurInspiration,
+        meta: { title: 'Our Inspiration' }
       },
       {
         path: 'about-us',
@@ -135,7 +151,7 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminPage,
-    meta: { title: 'Admin Panel' }
+    meta: { title: 'Admin Panel', requiresAdmin: true }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -146,7 +162,7 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  // Scroll to top on route change
+  // Scroll to top on route change, or to hash anchor if present
   scrollBehavior(to, from, savedPosition) {
     // The app uses a custom scroll container (.app-content), not window scrolling
     // So we need to handle scrolling manually
@@ -157,25 +173,62 @@ const router = createRouter({
           if (savedPosition) {
             // Restore saved position for back/forward navigation
             appContent.scrollTop = savedPosition.top || 0
+          } else if (to.hash) {
+            // Handle anchor links (e.g., #section-id)
+            try {
+              const targetElement = document.querySelector(to.hash)
+              if (targetElement) {
+                // Get the element's position relative to the scroll container
+                const elementTop = targetElement.offsetTop
+                // Scroll the container to the element (with 20px offset for better visibility)
+                appContent.scrollTop = elementTop - 20
+              } else {
+                // Element not found, scroll to top
+                appContent.scrollTop = 0
+              }
+            } catch (e) {
+              // Invalid selector, scroll to top
+              console.warn('Invalid hash selector:', to.hash, e)
+              appContent.scrollTop = 0
+            }
           } else {
             // Scroll to top for new navigation
             appContent.scrollTop = 0
           }
         }
         resolve({ top: 0 })
-      }, 0)
+      }, 100) // Increased timeout to 100ms to ensure DOM is ready
     })
   }
 })
 
-// Dynamic page titles
+// Dynamic page titles and route guards
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title
     ? `${to.meta.title} | Thamizh Word Explorer`
     : 'Thamizh Word Explorer'
 
-  // Note: Works Browser routes are always accessible (for verse links from search)
-  // Only the navigation tab is hidden in production
+  // Check if route requires browse works permission
+  if (to.meta.requiresBrowse) {
+    const { canBrowseWorks } = useUserRole()
+    if (!canBrowseWorks.value) {
+      // Redirect to home if user doesn't have browse works permission
+      console.warn('Access denied: Browse Works requires user or admin role')
+      next({ name: 'Home' })
+      return
+    }
+  }
+
+  // Check if route requires admin permission
+  if (to.meta.requiresAdmin) {
+    const { canAccessAdmin } = useUserRole()
+    if (!canAccessAdmin.value) {
+      console.warn('Access denied: Admin access required')
+      next({ name: 'Home' })
+      return
+    }
+  }
+
   next()
 })
 

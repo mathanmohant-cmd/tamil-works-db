@@ -1,5 +1,24 @@
 <template>
   <div class="verse-view-container">
+    <!-- Breadcrumb navigation -->
+    <div v-if="breadcrumbs.length > 0" class="breadcrumb">
+      <span
+        v-for="(crumb, index) in breadcrumbs"
+        :key="crumb.id || index"
+        class="breadcrumb-item"
+      >
+        <span v-if="index > 0" class="separator">›</span>
+        <button
+          @click="navigateToBreadcrumb(crumb)"
+          class="breadcrumb-link"
+          :class="{ 'breadcrumb-current': crumb.isCurrent }"
+          :disabled="crumb.isCurrent"
+        >
+          {{ crumb.name }}
+        </button>
+      </span>
+    </div>
+
     <div class="verse-view-header">
       <button @click="goBack" class="back-button">
         {{ backButtonText }}
@@ -89,6 +108,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from './api.js'
+import { useCollectionState } from './composables/useCollectionState.js'
 
 export default {
   name: 'VerseView',
@@ -110,6 +130,7 @@ export default {
   setup(props, { emit }) {
     const router = useRouter()
     const route = useRoute()
+    const { currentCollectionPath } = useCollectionState()
 
     const verse = ref(null)
     const navigation = ref(null)
@@ -130,6 +151,65 @@ export default {
       }
       return '← Back'
     })
+
+    // Compute breadcrumbs from collection state and verse data
+    const breadcrumbs = computed(() => {
+      if (!verse.value) return []
+
+      const crumbs = []
+
+      // Add collection breadcrumbs from shared state
+      if (currentCollectionPath.value.length > 0) {
+        currentCollectionPath.value.forEach(collection => {
+          crumbs.push({
+            type: 'collection',
+            id: collection.collection_id,
+            name: collection.collection_name_tamil || collection.collection_name,
+            routePath: '/works'
+          })
+        })
+      }
+
+      // Add work breadcrumb
+      if (verse.value.work_name_tamil) {
+        crumbs.push({
+          type: 'work',
+          id: verse.value.work_id,
+          name: verse.value.work_name_tamil,
+          routePath: `/works/${verse.value.work_id}`
+        })
+      }
+
+      // Parse section from hierarchy_path_tamil
+      if (verse.value.hierarchy_path_tamil) {
+        const parts = verse.value.hierarchy_path_tamil.split(' › ')
+        if (parts.length > 1) {
+          // Second-to-last item is typically the section
+          const sectionName = parts[parts.length - 2]
+          crumbs.push({
+            type: 'section',
+            name: sectionName,
+            routePath: `/works/${verse.value.work_id}/section/${verse.value.section_id}`
+          })
+        }
+      }
+
+      // Add current verse
+      crumbs.push({
+        type: 'verse',
+        id: verse.value.verse_id,
+        name: `பாடல் ${verse.value.verse_number}`,
+        routePath: `/verse/${verse.value.work_id}/${verse.value.verse_id}`,
+        isCurrent: true
+      })
+
+      return crumbs
+    })
+
+    // Navigate to breadcrumb
+    const navigateToBreadcrumb = (crumb) => {
+      router.push(crumb.routePath)
+    }
 
     const loadVerse = async () => {
       loading.value = true
@@ -382,9 +462,11 @@ export default {
       searchWord,
       fromSearch,
       backButtonText,
+      breadcrumbs,
       goBack,
       navigateToPrevVerse,
       navigateToNextVerse,
+      navigateToBreadcrumb,
       cleanHierarchyPath,
       parseLineIntoWords,
       handleWordDoubleClick,
@@ -401,6 +483,51 @@ export default {
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.breadcrumb-link {
+  color: #1976d2;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+  background: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-link.breadcrumb-current {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.separator {
+  color: #999;
+  margin: 0 0.25rem;
 }
 
 .verse-view-header {

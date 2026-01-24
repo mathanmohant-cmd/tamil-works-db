@@ -77,7 +77,7 @@ export function useSearchState() {
       versesCount += (word.verse_count || 0)
     })
 
-    return `${worksCount} Work${worksCount !== 1 ? 's' : ''} | ${versesCount} Verse${versesCount !== 1 ? 's' : ''} | ${distinctWords} Distinct Word${distinctWords !== 1 ? 's' : ''} | ${totalUsage} Usage`
+    return `${distinctWords} Distinct Word${distinctWords !== 1 ? 's' : ''} | ${totalUsage} Usage | ${worksCount} Work${worksCount !== 1 ? 's' : ''} | ${versesCount} Verse${versesCount !== 1 ? 's' : ''}`
   })
 
   // Clear search

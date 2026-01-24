@@ -110,7 +110,7 @@ class ThirukkuralBulkImporter:
             self.conn.commit()
             print(f"  ✓ Work created. Use collection management utility to assign to collections.")
 
-    def _get_or_create_section_id(self, parent_id, level_type, section_number, section_name, section_name_tamil):
+    def _get_or_create_section_id(self, parent_id, level_type, level_type_tamil, section_number, section_name, section_name_tamil):
         """Get or create section, return section_id"""
         cache_key = (parent_id, level_type, section_number)
 
@@ -129,7 +129,7 @@ class ThirukkuralBulkImporter:
             'work_id': self.work_id,
             'parent_section_id': parent_id,
             'level_type': level_type,
-            'level_type_tamil': level_type + '_tamil',
+            'level_type_tamil': level_type_tamil,
             'section_number': section_number,
             'section_name': section_name,
             'section_name_tamil': section_name_tamil,
@@ -176,21 +176,21 @@ class ThirukkuralBulkImporter:
 
                     # Create hierarchy
                     paal_id = self._get_or_create_section_id(
-                        None, 'Paal',
+                        None, 'Paal', 'பால்',
                         hierarchy['paal']['paal_id'],
                         hierarchy['paal']['paal_name'],
                         hierarchy['paal']['paal_name_tamil']
                     )
 
                     iyal_id = self._get_or_create_section_id(
-                        paal_id, 'Iyal',
+                        paal_id, 'Iyal', 'இயல்',
                         hierarchy['iyal']['iyal_id'],
                         hierarchy['iyal']['iyal_name'],
                         hierarchy['iyal']['iyal_name_tamil']
                     )
 
                     current_adhikaram_section_id = self._get_or_create_section_id(
-                        iyal_id, 'Adhikaram',
+                        iyal_id, 'Adhikaram', 'அதிகாரம்',
                         adhikaram_num,
                         hierarchy['adhikaram']['name'],
                         hierarchy['adhikaram']['tamil']

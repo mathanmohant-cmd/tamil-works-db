@@ -19,18 +19,19 @@
       <nav class="table-of-contents">
         <h3>Contents</h3>
         <ul>
-          <li><a href="#quick-ref">⚡ Most Important for Tamil</a></li>
+          <li><a href="#tips">💡 Quick Tips</a></li>
+          <!--<li><a href="#quick-ref">⚡ Most Important for Tamil</a></li>-->
           <li><a href="#vowels">📝 Vowels (உயிர் - 12)</a></li>
           <li><a href="#consonants">🔠 Tamil Consonants (மெய் - 18)</a></li>
           <li><a href="#grantha">🌟 Grantha Letters (6)</a></li>
           <li><a href="#special">⚡ Special & Numbers</a></li>
-          <li><a href="#tips">💡 Quick Tips</a></li>
+
         </ul>
       </nav>
 
       <!-- Main Content -->
       <main class="help-content">
-        <!-- Quick Reference -->
+        <!-- Quick Reference
         <section id="quick-ref" class="content-section">
           <h2>⚡ Most Important for Tamil</h2>
           <div class="quick-ref-grid">
@@ -54,6 +55,21 @@
               <span class="english-trans">~N</span>
               <span>→ சங்கம் (sa~Ngam)</span>
             </div>
+          </div>
+        </section>
+         -->
+        
+        <!-- Usage Tips -->
+        <section id="tips" class="content-section">
+          <h2>💡 Quick Tips</h2>
+          <div class="example-block">
+            <ul>
+              <li><strong>Case matters!</strong> Small (t, n, l) vs Capital (T, N, L, R)</li>
+              <li><strong>Unique Tamil:</strong> <code>zh</code> = ழ, <code>R</code> = ற, <code>nn</code> or <code>n2</code> = ன</li>
+              <li><strong>Long vowels:</strong> <code>aa</code> or <code>A</code> → ஆ</li>
+              <li><strong>Three N sounds:</strong> <code>n</code> (ந), <code>N</code> (ண), <code>nn</code> or <code>n2</code> (ன)</li>
+              <li><strong>Examples:</strong> thirukkural → திருக்குறள், azhagu → அழகு, mathann → மதன்</li>
+            </ul>
           </div>
         </section>
 
@@ -340,20 +356,6 @@
             <div class="word-item">௯</div>
           </div>
         </section>
-
-        <!-- Usage Tips -->
-        <section id="tips" class="content-section">
-          <h2>💡 Quick Tips</h2>
-          <div class="example-block">
-            <ul>
-              <li><strong>Case matters!</strong> Small (t, n, l) vs Capital (T, N, L, R)</li>
-              <li><strong>Unique Tamil:</strong> <code>zh</code> = ழ, <code>R</code> = ற, <code>nn</code> or <code>n2</code> = ன</li>
-              <li><strong>Long vowels:</strong> <code>aa</code> or <code>A</code> → ஆ</li>
-              <li><strong>Three N sounds:</strong> <code>n</code> (ந), <code>N</code> (ண), <code>nn</code> or <code>n2</code> (ன)</li>
-              <li><strong>Examples:</strong> thirukkural → திருக்குறள், azhagu → அழகு, mathann → மதன்</li>
-            </ul>
-          </div>
-        </section>
       </main>
 
       <!-- Footer -->
@@ -365,7 +367,10 @@
 </template>
 
 <script setup>
-// No state needed - this is a static content page
+import { useAnchorScroll } from '../composables/useAnchorScroll'
+
+// Enable smooth scrolling for anchor links
+useAnchorScroll()
 </script>
 
 <style scoped>

@@ -2,17 +2,17 @@
   <div class="welcome-page">
     <div class="container">
 
-      <h1>Tamil Literary Concordance Search</h1>
-      <p class="tagline"><em>Explore how Tamil words live across 2,000+ years of literature</em></p>
+      <h1>Thamizh Literary Concordance Search</h1>
+      <p class="tagline"><em>Explore how Thamizh words live across 2,000+ years of literature</em></p>
 
       <div class="metrics">
-        <span v-if="stats">{{ stats.total_works }} Tamil literary works · {{ stats.total_verses.toLocaleString() }} verses · {{ stats.distinct_words.toLocaleString() }} words</span>
+        <span v-if="stats">{{ stats.total_works }} Thamizh literary works · {{ stats.total_verses.toLocaleString() }} verses · {{ stats.distinct_words.toLocaleString() }} words</span>
         <span v-else>Loading statistics...</span>
       </div>
 
       <router-link :to="{ name: 'QuickStart' }" class="button">👉 Start searching a word</router-link>
 
-      <p>This tool shows every place a Tamil word appears across classical literature — with the full verse and context. It helps you understand how words are actually used, not just what they mean.</p>
+      <p>This tool shows every place a Thamizh word appears across classical literature — with the full verse and context. It helps you understand how words are actually used, not just what they mean.</p>
 
       <h2>How it works</h2>
       <ul>
@@ -22,7 +22,7 @@
         <li>Results show verses, authors, and context</li>
       </ul>
 
-      <p class="note">Built using trusted concordance data from Prof. Dr. P. Pandiyaraja (<a href="http://tamilconcordance.in" target="_blank" rel="noopener noreferrer">tamilconcordance.in</a>)</p>
+      <p class="note">Built using trusted concordance data from Prof. P. Pandiyaraja (<a href="http://tamilconcordance.in" target="_blank" rel="noopener noreferrer">tamilconcordance.in</a>)</p>
 
       <h2>Example</h2>
       <p>Search <strong>"காதல்"</strong> and discover:</p>
@@ -31,7 +31,7 @@
         <li>How Sangam poets used it</li>
         <li>How devotional poets reimagined it</li>
       </ul>
-      <p><em>You're not just learning a word — you're seeing Tamil thought evolve.</em></p>
+      <p><em>You're not just learning a word — you're seeing Thamizh thought evolve.</em></p>
 
       <h2>Powerful search features</h2>
       <ul>
@@ -43,20 +43,20 @@
 
       <h2>Why this matters</h2>
       <p>A dictionary explains words. A concordance reveals meaning through use.</p>
-      <p>This tool is your gateway to Tamil literary heritage.</p>
+      <p>This tool is your gateway to Thamizh literary heritage.</p>
 
       <h2>Who is this for?</h2>
       <div class="who-grid">
         <div class="who-item">🎓 <strong>Students</strong><br>Learn words in real sentences.</div>
         <div class="who-item">📚 <strong>Researchers</strong><br>Analyze usage across texts.</div>
-        <div class="who-item">❤️ <strong>Tamil lovers</strong><br>Discover hidden verses.</div>
+        <div class="who-item">❤️ <strong>Thamizh lovers</strong><br>Discover hidden verses.</div>
         <div class="who-item">✍️ <strong>Writers & teachers</strong><br>Explore authentic usage.</div>
       </div>
       <!--
       <h2>🚀 What's coming next</h2>
       <ul class="future-list">
         <li>Word root & grammar analysis</li>
-        <li>Tamil–English translations</li>
+        <li>Thamizh–English translations</li>
         <li>Thematic search (love, rain, virtue…)</li>
         <li>Author comparisons</li>
         <li>Audio pronunciation</li>

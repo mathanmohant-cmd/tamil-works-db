@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-File Minor Epics (ஐஞ்சிறுகாப்பியங்கள்) Bulk Import
+Five Minor Epics (ஐஞ்சிறுகாப்பியங்கள்) Bulk Import
 Fast 2-phase import using PostgreSQL COPY
 
 Phase 1: Parse text → Build data structures in memory
 Phase 2: Bulk COPY into database (1000x faster than INSERT)
 
-Collection ID: 324 (ஐஞ்சிறுகாப்பியங்கள் - File Minor Epics)
+Collection ID: 324 (ஐஞ்சிறுகாப்பியங்கள் - Five Minor Epics)
 
 Works (5 Jain minor epics):
 1. உதயணகுமார காவியம் (Udayana Kumara Kaviyam) - Kandiyar, 3rd century CE
@@ -16,12 +16,14 @@ Works (5 Jain minor epics):
 4. சூளாமணி (Choolamani) - Tholamozhithevar, before 10th century CE
 5. நீலகேசி (Nilakesi) - Unknown, 10th century CE
 
-Structure:
-- &N Work identifier (N=1-5)
+File Structure:
 - @N. Kandam/Sarrukkam (Level 1 sections)
 - ** Topic/Subsection headings (Level 2 sections)
 - #N Verse markers
 - 4 lines per verse (typical)
+
+Note: Files do NOT contain &N work markers. Works are created based on
+filename matching in WORK_METADATA dictionary.
 """
 
 import re
@@ -43,7 +45,7 @@ WORK_METADATA = {
         'period': '3rd century CE',
         'canonical_order': 324001,
         'position_in_collection': 1,
-        'file': '1. உதயணகுமார காவியம்.txt'
+        'file': 'உதயணகுமார காவியம்.txt'
     },
     2: {
         'work_name': 'Nagakumara Kaviyam',
@@ -53,7 +55,7 @@ WORK_METADATA = {
         'period': '5th-10th century CE',
         'canonical_order': 324002,
         'position_in_collection': 2,
-        'file': '2. நாககுமார காவியம்.txt'
+        'file': 'நாககுமார காவியம்.txt'
     },
     3: {
         'work_name': 'Yasodara Kaviyam',
@@ -63,7 +65,7 @@ WORK_METADATA = {
         'period': '5th-10th century CE',
         'canonical_order': 324003,
         'position_in_collection': 3,
-        'file': '3. யசோதர காவியம்.txt'
+        'file': 'யசோதர காவியம்.txt'
     },
     4: {
         'work_name': 'Choolamani',
@@ -73,7 +75,7 @@ WORK_METADATA = {
         'period': 'Before 10th century CE',
         'canonical_order': 324004,
         'position_in_collection': 4,
-        'file': '4. சூளாமணி.txt'
+        'file': 'சூளாமணி.txt'
     },
     5: {
         'work_name': 'Nilakesi',
@@ -83,7 +85,7 @@ WORK_METADATA = {
         'period': '10th century CE',
         'canonical_order': 324005,
         'position_in_collection': 5,
-        'file': '5. நீலகேசி.txt'
+        'file': 'நீலகேசி.txt'
     }
 }
 
@@ -278,7 +280,7 @@ class SitrIlakkiyangalBulkImporter:
         Parse one work file (Phase 1: Parse into memory)
 
         Structure:
-        - &N Work identifier
+        - NO &N marker in files (create work automatically from work_num parameter)
         - @N. Level 1 section (Kandam)
         - ** Level 2 section (Topic) under current Level 1
         - #N Verse marker
@@ -289,8 +291,13 @@ class SitrIlakkiyangalBulkImporter:
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
+        # Create work FIRST (files don't have &N markers)
+        current_work_id = self._create_work(work_num)
+        if current_work_id is None:
+            print(f"  [ERROR] Could not create work {work_num}, skipping file")
+            return
+
         # State tracking
-        current_work_id = None
         current_level1_section = None
         current_level2_section = None
         current_verse_num = None
@@ -309,29 +316,6 @@ class SitrIlakkiyangalBulkImporter:
                     current_verse_num = None
                     current_verse_lines = []
                 continue
-
-            # &N Work identifier
-            if line.startswith('&'):
-                # Save previous verse
-                if current_verse_num is not None and current_verse_lines:
-                    self._add_verse(current_work_id,
-                                  current_level2_section if current_level2_section else current_level1_section,
-                                  current_verse_num, current_verse_lines)
-
-                # Extract work number from &N pattern (may or may not have dot)
-                match = re.match(r'&(\d+)\.?\s*(.*)', line)
-                if match:
-                    file_work_num = int(match.group(1))
-                    if file_work_num != work_num:
-                        print(f"  [WARNING] File work number {file_work_num} doesn't match expected {work_num}")
-
-                    # Create work
-                    current_work_id = self._create_work(work_num)
-                    current_level1_section = None
-                    current_level2_section = None
-                    current_verse_num = None
-                    current_verse_lines = []
-                    level2_counter = 0
 
             # @N. Level 1 section (Kandam)
             elif line.startswith('@'):

@@ -1,10 +1,27 @@
 <template>
   <div class="work-detail-container">
+    <!-- Back Button -->
+    <button @click="goBack" class="back-button">
+      ← Back
+    </button>
+
     <!-- Breadcrumb navigation -->
-    <div class="breadcrumb">
-      <router-link to="/works">Works</router-link>
-      <span class="separator">›</span>
-      <span>{{ work?.work_name_tamil || 'Loading...' }}</span>
+    <div v-if="breadcrumbs.length > 0" class="breadcrumb">
+      <span
+        v-for="(crumb, index) in breadcrumbs"
+        :key="crumb.id || index"
+        class="breadcrumb-item"
+      >
+        <span v-if="index > 0" class="separator">›</span>
+        <button
+          @click="navigateToBreadcrumb(crumb)"
+          class="breadcrumb-link"
+          :class="{ 'breadcrumb-current': crumb.isCurrent }"
+          :disabled="crumb.isCurrent"
+        >
+          {{ crumb.name }}
+        </button>
+      </span>
     </div>
 
     <!-- Loading state -->
@@ -47,7 +64,9 @@
           </div>
 
           <div class="meta-item">
-            <span class="meta-label">Verses:</span>
+            <span class="meta-label">
+              {{ work.verse_count === 1 ? 'பாடல்:' : 'பாடல்கள்:' }}
+            </span>
             <span class="meta-value">{{ work.verse_count || 0 }}</span>
           </div>
 
@@ -64,7 +83,6 @@
 
       <!-- Hierarchical sections tree -->
       <div class="sections-container">
-        <h3>Structure</h3>
         <div v-if="sectionTree.length === 0" class="no-sections">
           <p>No hierarchical structure available.</p>
         </div>
@@ -83,16 +101,66 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../../api.js'
 import SectionTreeNode from './SectionTreeNode.vue'
+import { useCollectionState } from '../../composables/useCollectionState.js'
 
 const route = useRoute()
+const router = useRouter()
+const { currentCollectionPath } = useCollectionState()
 
 const work = ref(null)
 const sections = ref([])
 const loading = ref(true)
 const error = ref(null)
+
+// Compute breadcrumbs from collection state and current work
+const breadcrumbs = computed(() => {
+  const crumbs = []
+
+  // Add collection breadcrumbs from shared state
+  if (currentCollectionPath.value.length > 0) {
+    currentCollectionPath.value.forEach(collection => {
+      crumbs.push({
+        type: 'collection',
+        id: collection.collection_id,
+        name: collection.collection_name_tamil || collection.collection_name,
+        routePath: '/works' // Will filter by collection
+      })
+    })
+  }
+
+  // Add current work
+  if (work.value) {
+    crumbs.push({
+      type: 'work',
+      id: work.value.work_id,
+      name: work.value.work_name_tamil || work.value.work_name,
+      routePath: `/works/${work.value.work_id}`,
+      isCurrent: true
+    })
+  }
+
+  return crumbs
+})
+
+// Navigate to breadcrumb
+const navigateToBreadcrumb = (crumb) => {
+  if (crumb.type === 'collection') {
+    // Navigate back to WorksList with collection context
+    // The collection filter will be maintained by useCollectionState
+    router.push(crumb.routePath)
+  } else if (crumb.type === 'work') {
+    // Stay on current page (refresh)
+    router.push(crumb.routePath)
+  }
+}
+
+// Go back to previous page
+const goBack = () => {
+  router.back()
+}
 
 // Build hierarchical tree from flat sections list
 const sectionTree = computed(() => {
@@ -180,24 +248,83 @@ watch(() => route.params.workId, () => {
   margin: 0 auto;
 }
 
+.back-button {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+}
+
+.back-button:hover {
+  background: #1565c0;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+}
+
+.back-button:active {
+  transform: translateX(-2px);
+}
+
 .breadcrumb {
-  font-size: 0.9rem;
-  color: #666;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.95rem;
 }
 
-.breadcrumb a {
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.breadcrumb-link {
   color: #1976d2;
-  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
-.breadcrumb a:hover {
+.breadcrumb-link:hover {
+  background: #e3f2fd;
   text-decoration: underline;
 }
 
+.breadcrumb-link.breadcrumb-current {
+  font-weight: 600;
+  color: #2c3e50;
+  cursor: default;
+  pointer-events: none;
+}
+
+.breadcrumb-link:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
 .separator {
-  margin: 0 0.5rem;
   color: #999;
+  margin: 0 0.25rem;
 }
 
 .loading, .error {

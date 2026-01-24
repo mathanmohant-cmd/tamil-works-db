@@ -16,8 +16,11 @@ This document defines the collection IDs used across all devotional literature p
 - **321**: திருமுறை (Thirumurai) - Main collection for all 12 Thirumurai books
 - **322**: நாலாயிரத் திவ்விய பிரபந்தம் (Naalayira Divya Prabandham) - Main Vaishnavite collection
 - **323**: பக்தி இலக்கியம் (Devotional Literature) - Standalone devotional works from various traditions
-- **324**: சிற்றிலக்கியங்கள் (Minor Literary Works) - Five Jain minor epics
+- **324**: ஐஞ்சிறுகாப்பியங்கள் (Five Jain Minor Epics) - Five Buddhist and Jain epics from 3rd-10th century CE
 - **325**: நீதிநூல்கள் (Ethical Literature) - 21 ethical literature works spanning 3rd-20th century CE
+- **326**: சிற்றிலக்கியங்கள் (Minor Literary Works) - 20 works spanning 11 genres from 12th-19th centuries CE
+- **327**: சித்தர் பாடல்கள் (Siddhar Padalgal) - 36 mystical and spiritual poetry works by Tamil Siddhars from 7th-19th century CE
+- **328**: இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம் (Modern Tamil Literature) - 4 thematic groups of Bharathiyar's poetry from 1882-1921 CE
 
 ## Thirumurai Sub-Collections (Files 1-12)
 
@@ -99,8 +102,10 @@ Work 10 (திருப்பல்லாண்டு) is linked to ONE collect
 | `seerapuranam_bulk_import.py` | `delete_seerapuranam.py` | 323 (shared) |
 | `thiruvarutpa_balakrishnapillai_bulk_import.py` | `delete_thiruvarutpa_balakrishnapillai.py` | 323 (shared) |
 | `thiruvarutpa_uran_bulk_import.py` | `delete_thiruvarutpa_uran.py` | 323 (shared) |
-| `sitrilakkiyangal_bulk_import.py` | `delete_sitrilakkiyangal.py` | 324 |
+| `sitrilakkiyangal_bulk_import.py` | `delete_sitrilakkiyangal.py` | 326 |
 | `neethinoolkal_bulk_import.py` | `delete_neethinoolkal.py` | 325 |
+| `siddhar_padalgal_bulk_import.py` | `delete_siddhar_padalgal.py` | 327 |
+| `bharathiyar_bulk_import.py` | `delete_bharathiyar.py` | 328 |
 
 ## Standalone Devotional Literature (Collection 323)
 
@@ -119,6 +124,31 @@ Work 10 (திருப்பல்லாண்டு) is linked to ONE collect
 - **Deletion**: Each delete script checks if collection 323 is empty after work deletion
   - If empty: Collection 323 is automatically deleted
   - If not empty: Collection 323 is retained for remaining works
+
+## Minor Literary Works (Collection 326)
+
+**Collection 326** (சிற்றிலக்கியங்கள் - Minor Literary Works) contains 20 diverse literary works spanning 12th-19th century CE.
+
+### Genre Distribution:
+- **கலம்பகம் (Kalambagam)**: 4 works (காசிக் கலம்பகம், கச்சிக் கலம்பகம், மதுரைக் கலம்பகம், நந்திக் கலம்பகம்)
+- **பரணி (Parani)**: 2 works (கலிங்கத்துப்பரணி, தக்கயாகப்பரணி)
+- **தூது (Messenger poems)**: 2 works (தமிழ்விடு தூது, அழகர் கிள்ளை விடுதூது)
+- **கோவை (Kovai)**: 2 works (தஞ்சைவாணன் கோவை, பாண்டிக்கோவை)
+- **குறவஞ்சி (Kuravanji)**: 2 works (திருக்குற்றாலக் குறவஞ்சி, பெத்லகேம் குறவஞ்சி)
+- **Other genres**: அந்தாதி, சதகம், வெண்பா, சிந்து, பிள்ளைத்தமிழ், பள்ளு, உலா, புராணம்
+
+### Prominent Authors:
+- **குமரகுருபரர் (Kumarakuruparar)**: 3 works (காசிக் கலம்பகம், மதுரை மீனாட்சியம்மை பிள்ளைத் தமிழ், மதுரைக் கலம்பகம்)
+- **ஒட்டக்கூத்தர் (Ottakkuttar)**: 2 works (தக்கயாகப்பரணி, மூவருலா)
+- **11 other identified authors**, 4 anonymous works
+
+### Collection 326 Details:
+- **Total:** 20 works, 7,385 verses, 25,395 lines, 169,192 words
+- **Structure Patterns:**
+  - Simple pattern (5 works): Only #N verse markers
+  - Dual_at pattern (14 works): @N section + #N verse markers
+  - Dual_star pattern (1 work): *N. section + #N verse markers with 2-level hierarchy
+- **Unified Parser:** Single script (`sitrilakkiyangal_bulk_import.py`) handles all 20 works using 2-phase bulk COPY pattern
 
 ## Ethical Literature (Collection 325)
 
@@ -153,12 +183,89 @@ Work 10 (திருப்பல்லாண்டு) is linked to ONE collect
 - **Authors:** Includes works by Auvaiyar, Siva Prakasar, Bharathiyar, Kumaresa Guruparar, and others
 - **Unified Parser:** Single script (`neethinoolkal_bulk_import.py`) handles all 21 works using 2-phase bulk COPY pattern
 
+## Siddhar Padalgal (Collection 327)
+
+**Collection 327** (சித்தர் பாடல்கள் - Siddhar Padalgal) contains 36 mystical and spiritual poetry works by Tamil Siddhars from 7th-19th century CE.
+
+### Overview:
+The Siddhars were enlightened yogis and mystics who composed philosophical and spiritual poetry in Tamil. Their songs cover topics like:
+- **ஞானம் (Gnanam/Knowledge)**: Spiritual wisdom and enlightenment
+- **யோக நிலை (Yoga Nilai)**: States of yogic practice
+- **பூஜாவிதி (Poojaavidhi)**: Methods of worship
+- **கலித்தாழிசை**: Poetic meters and forms
+
+### Prominent Siddhars in Collection:
+- **Agathiyar (அகத்தியர்)**: Legendary Siddhar, 7th-9th century CE (attributed)
+- **Sivavaakiyar (சிவவாக்கியர்)**: Renowned for radical spiritual philosophy, 10th-12th century CE
+- **Thirumoolar (திருமூலர்)**: Author of Thirumanthiram, 8th-9th century CE
+- **Pattinatthu Siddhar (பட்டினத்துச் சித்தர்)**: Also known as Thiruvenkadar, 11th-12th century CE
+- **Karuvurar (கருவூரார்)**: Famous Siddhar, 9th-10th century CE
+- **32 other Siddhars**: Including Paambaatti (Snake-Charmer Siddhar), Kaagapusundar, and others
+
+### Collection 327 Details:
+- **Total:** 36 works, 2,886 verses, 9,731 lines, 55,922 words
+- **Structure Patterns:**
+  - Works with sections: Hierarchical organization (e.g., ஞானம் - 1, ஞானம் - 2)
+  - Works without sections: Simple flat structure with default "Main Text" section
+  - Metadata markers: Some works have `*N-N` verse-section cross-references (49 verses)
+- **Metadata Storage:**
+  - `sections.metadata` JSONB: Section type, category (knowledge/yoga/worship/poetic_form), numbered sections
+  - `verses.metadata` JSONB: Section-verse references (`*1-1`, `*2-3`) for cross-linking
+- **Unified Parser:** Single script (`siddhar_padalgal_bulk_import.py`) handles all 36 works using 2-phase bulk COPY pattern
+
+## Modern Tamil Literature (Collection 328)
+
+**Collection 328** (இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம் - Modern Tamil Literature) contains 4 thematic groups of Subramania Bharathiyar's poetry from 1882-1921 CE.
+
+### Overview:
+Subramania Bharathiyar (சுப்பிரமணிய பாரதியார்) was a pioneering Tamil poet, freedom fighter, and social reformer. His poetry covers:
+- **National Songs (தேசீய கீதங்கள்)**: Patriotic poetry for Indian independence
+- **Social Reform (சமூக சீர்திருத்தம்)**: Women's liberation, education, equality
+- **Devotional Poetry (பக்தி பாடல்கள்)**: Krishna songs, Vedantic hymns
+- **Epic & Narrative (காப்பியம்)**: Panchali's Oath, autobiographical verse
+- **Modern Free Verse (வசன கவிதை)**: Experimental poetry form
+
+### Works in Collection 328:
+1. **National & Social Reform Poetry** (தேசிய மற்றும் சமூகச் சீர்திருத்தக் கவிதைகள்) - Files 1, 4, 5, 11
+   - தேசீய கீதங்கள் (National Songs)
+   - பல்வகைப் பாடல்கள் (Miscellaneous Poems)
+   - தனிப் பாடல்கள் (Individual Poems)
+   - பிற்சேர்க்கை (Appendix - New Poems)
+
+2. **Devotional & Spiritual Poetry** (பக்தி மற்றும் ஆன்மிகக் கவிதைகள்) - Files 2, 3, 7
+   - தோத்திரப் பாடல்கள் (Devotional Songs)
+   - வேதாந்தப் பாடல்கள் - ஞானப் பாடல்கள் (Vedantic Songs)
+   - கண்ணன் பாட்டு (Krishna Songs)
+
+3. **Epic & Narrative Poetry** (காப்பியக் கவிதைகள்) - Files 6, 8, 9
+   - சுயசரிதை (Autobiography)
+   - பாஞ்சாலி சபதம் (Panchali's Oath - Mahabharata epic)
+   - குயில் பாட்டு (Song of the Koel - narrative)
+
+4. **Modern Free Verse Poetry** (நவீன வசனக் கவிதை) - File 10
+   - வசன கவிதை (Free Verse - experimental modern form)
+
+### Collection 328 Details:
+- **Total:** 4 works, ~500-1000 verses (estimated), ~15,000-25,000 words
+- **Structure:** 3-level hierarchy (File → Subsection → Poem → Verses)
+- **Special Features:**
+  - Musical notation: ராகம் (raga), தாளம் (talam) stored in JSONB
+  - Song structure: பல்லவி (pallavi/refrain), சரணங்கள் (charanam/stanzas)
+  - Verse #0: Special pallavi verses (refrain)
+  - Free verse: Variable line counts (not fixed 4-line stanzas)
+- **Metadata Storage:**
+  - `sections.metadata` JSONB: Musical notation (raagam, thaalam), song type, meter, translation notes
+  - `verses.metadata` JSONB: Verse type (pallavi/charanam/anupallavi), special_number for #0
+- **Unified Parser:** Single script (`bharathiyar_bulk_import.py`) handles all 11 source files using 2-phase bulk COPY pattern
+
 ## Notes
 
 - **Collection 3218** (8th Thirumurai) is shared by two works (Thiruvasagam + Thirukovayar), so neither delete script removes the collection
 - **Collection 323** (பக்தி இலக்கியம்) is shared by 5 standalone devotional works; delete scripts remove it only when empty
-- **Collection 324** (சிற்றிலக்கியங்கள்) contains 5 Jain minor epics; delete script removes collection when empty
+- **Collection 324** (சிற்றிலக்கியங்கள்) contains 20 minor literary works spanning 11 genres; delete script removes collection when empty
 - **Collection 325** (நீதிநூல்கள்) contains 21 ethical literature works; delete script removes collection when empty
+- **Collection 327** (சித்தர் பாடல்கள்) contains 36 Siddhar mystical poetry works; delete script removes collection when empty
+- **Collection 328** (இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம்) contains 4 Bharathiyar poetry works; delete script removes collection when empty
 - Devaram has the most complex structure with 3-level collection hierarchy
 - All collection IDs use dynamic queries, not hardcoded values in work metadata or bulk insert methods
 - Standalone devotional works (collection 323) span multiple religious traditions: Shaivite, Christian, Islamic, and Siddha

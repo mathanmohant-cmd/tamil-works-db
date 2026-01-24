@@ -3,8 +3,9 @@
     <!-- Compact One-Line Header -->
     <header class="app-header">
       <div class="header-container">
-        <!-- Logo (Placeholder - can be replaced with actual logo) -->
+        <!-- Logo -->
         <div class="header-logo" @click="goToHome">
+          <!--<img src="/project_icon.png" alt="Tamil Literature Search" class="logo-icon-img" />-->
           <span class="logo-icon">📚</span>
           <span class="logo-text"></span>
         </div>
@@ -46,7 +47,7 @@
             >
               <span class="transliteration-icon">
                 <span class="en-letter">A</span>
-                <span class="divider">/</span>
+                <span class="arrow">→</span>
                 <span class="ta-letter">அ</span>
               </span>
             </button>
@@ -80,7 +81,37 @@
         <router-link v-if="isWorksBrowserVisible" :to="{ name: 'WorksList' }" class="nav-tab">Browse Works</router-link>
         <router-link :to="{ name: 'Acknowledgment' }" class="nav-tab">Acknowledgment</router-link>
         <router-link :to="{ name: 'Help' }" class="nav-tab">Help and Docs</router-link>
-        <router-link :to="{ name: 'Journey' }" class="nav-tab">The Story Behind</router-link>
+        <router-link :to="{ name: 'TheStoryBehind' }" class="nav-tab">The Story Behind</router-link>
+
+        <!-- My Profile Tab (Desktop) -->
+        <div v-if="!isGuest" class="profile-tab-dropdown" ref="profileDropdown">
+          <button
+            @click="toggleProfileMenu"
+            @blur="handleProfileBlur"
+            class="nav-tab profile-tab-button"
+            :class="{ 'profile-active': profileMenuOpen }"
+            title="My Profile"
+          >
+            <span class="profile-icon">👤</span>
+            <span class="profile-name">{{ currentUser }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+
+          <!-- Profile Dropdown Menu -->
+          <div v-if="profileMenuOpen" class="profile-tab-menu">
+            <div class="profile-menu-header">
+              <div class="profile-user-info">
+                <div class="profile-username">{{ currentUser }}</div>
+                <div class="profile-role">Administrator</div>
+              </div>
+            </div>
+            <div class="profile-menu-divider"></div>
+            <button @click="handleLogout" class="profile-menu-item logout-item">
+              <span class="menu-item-icon">🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
       </nav>
 
       <!-- Database Summary Below Search Box (Hidden) -->
@@ -153,7 +184,7 @@
               >
                 <span class="transliteration-icon">
                   <span class="en-letter">A</span>
-                  <span class="divider">/</span>
+                  <span class="arrow">→</span>
                   <span class="ta-letter">அ</span>
                 </span>
               </button>
@@ -315,9 +346,42 @@
         </div>
       </div>
 
-      <router-link :to="{ name: 'Journey' }" class="menu-item" @click="closeMenu">
-        The Story Behind
-      </router-link>
+      <!-- The Story Behind Menu Group -->
+      <div class="menu-item-group">
+        <div class="menu-group-label" @click="toggleStorySubmenu">
+          <span>The Story Behind</span>
+          <span class="submenu-arrow">{{ storySubmenuExpanded ? '▼' : '▶' }}</span>
+        </div>
+        <div v-if="storySubmenuExpanded" class="submenu-items">
+          <router-link :to="{ name: 'Journey' }" class="menu-subitem" @click="closeMenu">
+            Our Journey
+          </router-link>
+          <router-link :to="{ name: 'Inspiration' }" class="menu-subitem" @click="closeMenu">
+            Our Inspiration
+          </router-link>
+        </div>
+      </div>
+
+      <!-- My Profile Menu Group (Mobile) -->
+      <div v-if="!isGuest" class="menu-item-group profile-menu-group">
+        <div class="menu-group-label profile-label" @click="toggleProfileSubmenu">
+          <div class="profile-label-content">
+            <span class="profile-icon">👤</span>
+            <span>{{ currentUser }}</span>
+          </div>
+          <span class="submenu-arrow">{{ profileSubmenuExpanded ? '▼' : '▶' }}</span>
+        </div>
+        <div v-if="profileSubmenuExpanded" class="submenu-items">
+          <div class="profile-info-mobile">
+            <div class="profile-username-mobile">{{ currentUser }}</div>
+            <div class="profile-role-mobile">Administrator</div>
+          </div>
+          <button @click="handleLogout" class="menu-subitem logout-mobile">
+            <span class="menu-item-icon">🚪</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -326,6 +390,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSearchState } from '../composables/useSearchState.js'
+import { useUserRole } from '../composables/useUserRole.js'
 import { useFilterState } from '../composables/useFilterState.js'
 import { useStats } from '../composables/useStats.js'
 import { useTransliteration } from '../composables/useTransliteration.js'
@@ -344,7 +409,11 @@ const collectionsExpanded = ref(true)
 const isTreeExpanded = ref(false)
 const menuExpanded = ref(false)
 const helpSubmenuExpanded = ref(false)
+const storySubmenuExpanded = ref(false)
+const profileSubmenuExpanded = ref(false)
+const profileMenuOpen = ref(false)
 const menuBtn = ref(null)
+const profileDropdown = ref(null)
 const menuPosition = ref({ top: '58px', right: '1rem' })
 
 // Transliteration
@@ -375,10 +444,30 @@ const isMobile = computed(() => {
   return window.innerWidth < 768
 })
 
-const isWorksBrowserVisible = computed(() => {
-  const hostname = window.location.hostname
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '192.168.1.198'
-})
+// User role management
+const { currentUser, isGuest, canBrowseWorks, logout } = useUserRole()
+
+const isWorksBrowserVisible = computed(() => canBrowseWorks.value)
+
+const handleLogout = () => {
+  profileMenuOpen.value = false
+  closeMenu()
+  logout()
+  router.push({ name: 'Home' })
+}
+
+const toggleProfileMenu = () => {
+  profileMenuOpen.value = !profileMenuOpen.value
+}
+
+const handleProfileBlur = (event) => {
+  // Delay closing to allow click events on menu items
+  setTimeout(() => {
+    if (!profileDropdown.value?.contains(document.activeElement)) {
+      profileMenuOpen.value = false
+    }
+  }, 200)
+}
 
 const isCollectionTreeLoading = computed(() => {
   return collectionTreeRef.value?.loading || false
@@ -590,10 +679,20 @@ function toggleMenu() {
 function closeMenu() {
   menuExpanded.value = false
   helpSubmenuExpanded.value = false
+  storySubmenuExpanded.value = false
+  profileSubmenuExpanded.value = false
 }
 
 function toggleHelpSubmenu() {
   helpSubmenuExpanded.value = !helpSubmenuExpanded.value
+}
+
+function toggleStorySubmenu() {
+  storySubmenuExpanded.value = !storySubmenuExpanded.value
+}
+
+function toggleProfileSubmenu() {
+  profileSubmenuExpanded.value = !profileSubmenuExpanded.value
 }
 
 function goToHome() {
@@ -604,6 +703,8 @@ function goToHome() {
 watch(() => route.path, () => {
   menuExpanded.value = false
   helpSubmenuExpanded.value = false
+  storySubmenuExpanded.value = false
+  profileSubmenuExpanded.value = false
 })
 
 // Focus panel search input when panel opens
@@ -736,6 +837,12 @@ window.addEventListener('open-search-panel', () => {
   font-size: 1.5rem;
 }
 
+.logo-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .logo-text {
   font-size: 1rem;
   white-space: nowrap;
@@ -848,12 +955,12 @@ window.addEventListener('open-search-panel', () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
+  width: 48px;
+  height: 32px;
+  padding: 0 6px;
   background: #f3f4f6;
   border: 2px solid #d1d5db;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 150ms ease;
   flex-shrink: 0;
@@ -862,7 +969,7 @@ window.addEventListener('open-search-panel', () => {
 .transliteration-icon {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -872,9 +979,9 @@ window.addEventListener('open-search-panel', () => {
   transition: all 150ms ease;
 }
 
-.divider {
+.arrow {
   color: #d1d5db;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .ta-letter {
@@ -898,7 +1005,7 @@ window.addEventListener('open-search-panel', () => {
   color: #1e40af;
 }
 
-.transliteration-toggle-btn.active .divider {
+.transliteration-toggle-btn.active .arrow {
   color: #60a5fa;
 }
 
@@ -929,6 +1036,162 @@ window.addEventListener('open-search-panel', () => {
 .menu-btn.active {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* My Profile Tab Dropdown (Desktop) */
+.profile-tab-dropdown {
+  position: relative;
+}
+
+.profile-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+
+.profile-tab-button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-tab-button.profile-active {
+  color: white;
+  border-bottom-color: #60a5fa;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-icon {
+  font-size: 1rem;
+}
+
+.profile-name {
+  font-weight: 600;
+}
+
+.dropdown-arrow {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.profile-tab-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease-out;
+}
+
+.profile-menu-header {
+  padding: 1rem;
+}
+
+.profile-user-info {
+  text-align: left;
+}
+
+.profile-username {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.profile-role {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  margin-top: 0.2rem;
+}
+
+.profile-menu-divider {
+  height: 1px;
+  background: #eee;
+  margin: 0;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: none;
+  border: none;
+  color: #495057;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.profile-menu-item:hover {
+  background: #f8f9fa;
+}
+
+.profile-menu-item.logout-item {
+  color: #e74c3c;
+  border-radius: 0 0 8px 8px;
+}
+
+.profile-menu-item.logout-item:hover {
+  background: #fee;
+}
+
+.menu-item-icon {
+  font-size: 1rem;
+}
+
+/* My Profile in Mobile Menu */
+.profile-menu-group {
+  border-top: 1px solid #ddd;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.profile-label {
+  background: #f8f9fa !important;
+  font-weight: 600;
+}
+
+.profile-label-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-info-mobile {
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  margin: 0 0.5rem 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.profile-username-mobile {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.profile-role-mobile {
+  font-size: 0.75rem;
+  color: #7f8c8d;
+  margin-top: 0.2rem;
+}
+
+.logout-mobile {
+  color: #e74c3c !important;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
 }
 
 /* Desktop Navigation Tabs */
@@ -1144,12 +1407,12 @@ window.addEventListener('open-search-panel', () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
+  width: 48px;
+  height: 32px;
+  padding: 0 6px;
   background: #f3f4f6;
   border: 2px solid #d1d5db;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 150ms ease;
   flex-shrink: 0;
@@ -1170,7 +1433,7 @@ window.addEventListener('open-search-panel', () => {
   color: #1e40af;
 }
 
-.panel-search-box .transliteration-toggle-btn.active .divider {
+.panel-search-box .transliteration-toggle-btn.active .arrow {
   color: #60a5fa;
 }
 
@@ -1623,12 +1886,26 @@ window.addEventListener('open-search-panel', () => {
     font-size: 1.3rem;
   }
 
+  .logo-icon-img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-search {
+    flex: 1;
+    max-width: 100%;
+    margin: 0 0.5rem;
+  }
+
   .search-box {
-    padding: 0.2rem 0.4rem 0.2rem 0.6rem;
+    padding: 0.2rem 0.3rem 0.2rem 0.5rem;
+    gap: 0.3rem;
   }
 
   .search-input {
     font-size: 16px; /* Prevent iOS zoom */
+    min-width: 80px;
+    max-width: 180px
   }
 
   .tamil-preview {
@@ -1637,8 +1914,8 @@ window.addEventListener('open-search-panel', () => {
   }
 
   .transliteration-toggle-btn {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 30px;
   }
 
   .transliteration-icon {
@@ -1699,8 +1976,8 @@ window.addEventListener('open-search-panel', () => {
   }
 
   .panel-search-box .transliteration-toggle-btn {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 30px;
   }
 
   .category-cards {

@@ -1,41 +1,12 @@
 <template>
   <div class="admin-page">
-    <!-- Login Modal -->
-    <div v-if="!isAuthenticated" class="login-container">
-      <div class="login-box">
-        <h2>Admin Login</h2>
-        <form @submit.prevent="handleLogin">
-          <div class="form-group">
-            <label>Username</label>
-            <input
-              v-model="loginForm.username"
-              type="text"
-              required
-              autocomplete="username"
-            />
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input
-              v-model="loginForm.password"
-              type="password"
-              required
-              autocomplete="current-password"
-            />
-          </div>
-          <div v-if="loginError" class="login-error">{{ loginError }}</div>
-          <button type="submit" class="btn-primary" :disabled="loginLoading">
-            {{ loginLoading ? 'Logging in...' : 'Login' }}
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Admin Content (only shown when authenticated) -->
-    <template v-else>
+    <!-- Admin Content -->
     <div class="admin-header">
       <h2>Collections Admin</h2>
-      <button @click="logout" class="btn-logout">Logout</button>
+      <div class="admin-header-info">
+        <span class="user-badge">{{ currentUser }}</span>
+        <button @click="logout" class="btn-logout">Logout</button>
+      </div>
     </div>
 
     <div class="admin-layout">
@@ -292,54 +263,25 @@
         </div>
       </div>
     </div>
-    </template>
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserRole } from './composables/useUserRole.js'
 import api from './api.js'
 
 export default {
   name: 'Admin',
   setup() {
-    // Authentication state
-    const isAuthenticated = ref(false)
-    const loginForm = ref({ username: '', password: '' })
-    const loginError = ref(null)
-    const loginLoading = ref(false)
+    const router = useRouter()
+    const { currentUser, logout: roleLogout } = useUserRole()
 
-    // Check if already logged in (session storage)
-    const checkAuth = () => {
-      const auth = sessionStorage.getItem('adminAuth')
-      if (auth) {
-        isAuthenticated.value = true
-      }
-    }
-
-    // Handle login
-    const handleLogin = async () => {
-      loginError.value = null
-      loginLoading.value = true
-      try {
-        const response = await api.adminLogin(loginForm.value.username, loginForm.value.password)
-        if (response.data.success) {
-          isAuthenticated.value = true
-          sessionStorage.setItem('adminAuth', JSON.stringify(response.data.user))
-          loginForm.value = { username: '', password: '' }
-          loadCollections()
-        }
-      } catch (err) {
-        loginError.value = err.response?.data?.detail || 'Login failed'
-      } finally {
-        loginLoading.value = false
-      }
-    }
-
-    // Logout
+    // Logout handler - use role system logout and redirect to home
     const logout = () => {
-      isAuthenticated.value = false
-      sessionStorage.removeItem('adminAuth')
+      roleLogout()
+      router.push({ name: 'Home' })
     }
 
     const loading = ref(false)
@@ -599,19 +541,13 @@ export default {
     }
 
     onMounted(() => {
-      checkAuth()
-      if (isAuthenticated.value) {
-        loadCollections()
-      }
+      // Load collections on mount (user is already authenticated via route guard)
+      loadCollections()
     })
 
     return {
-      // Auth
-      isAuthenticated,
-      loginForm,
-      loginError,
-      loginLoading,
-      handleLogin,
+      // User
+      currentUser,
       logout,
       // Collections
       loading,
@@ -1049,47 +985,6 @@ export default {
   }
 }
 
-/* Login Styles */
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-}
-
-.login-box {
-  background: white;
-  padding: 32px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 360px;
-}
-
-.login-box h2 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.login-box .form-group input {
-  width: 100%;
-  padding: 10px 12px;
-}
-
-.login-box .btn-primary {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-}
-
-.login-error {
-  color: #d32f2f;
-  font-size: 14px;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
 /* Admin Header with Logout */
 .admin-header {
   display: flex;
@@ -1100,6 +995,21 @@ export default {
 
 .admin-header h2 {
   margin: 0;
+}
+
+.admin-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-badge {
+  background: #4a90e2;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .btn-logout {

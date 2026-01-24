@@ -19,7 +19,7 @@ const API_BASE_URL = getApiBaseUrl()
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // 30 seconds for large works like Kambaramayanam (11,579 verses)
   headers: {
     'Content-Type': 'application/json'
   }
@@ -80,6 +80,22 @@ export default {
    */
   getPublicCollections() {
     return api.get('/collections')
+  },
+
+  /**
+   * Get works in a specific collection
+   */
+  getWorksByCollection(collectionId) {
+    return api.get(`/collections/${collectionId}/works`)
+  },
+
+  /**
+   * Get collection tree structure (public endpoint)
+   * @param {number} rootId - Optional root collection ID to get subtree
+   */
+  getCollectionTreePublic(rootId = null) {
+    const params = rootId ? { root: rootId } : {}
+    return api.get('/collections/tree', { params })
   },
 
   /**

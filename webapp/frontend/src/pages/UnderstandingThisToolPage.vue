@@ -351,7 +351,10 @@
 </template>
 
 <script setup>
-// No logic needed for flat page
+import { useAnchorScroll } from '../composables/useAnchorScroll'
+
+// Enable smooth scrolling for anchor links
+useAnchorScroll()
 </script>
 
 <style scoped>
