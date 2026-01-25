@@ -1,7 +1,7 @@
 <template>
   <div class="journey-page">
     <div class="container">
-      <h1>The Story Behind This Platform</h1>
+      <h1>The Paths Opened by a Few Curious Words</h1>
   
       <section class="intro-section">
         <!-- Introduction
@@ -21,20 +21,18 @@
         <p class="intro">
           For example:
         </p>
-        <p class="intro">
-        <ul class="list">
+        <ul class="intro">
           <li><strong>பா, பாய், பாட்டு, பாம்பு</strong> – ideas of spreading and expansion</li>
           <li><strong>கல், கல்வி, கற்பு</strong> – strength, learning, steadiness</li>
           <li><strong>யா, யாமம், யானை, யாணர்</strong> – darkness, the unfamiliar, the new</li>
           <li><strong>எல், எல்லை, எல்லன்</strong> – visibility and boundary</li>
         </ul>
-        </p>
         <p class="intro">
           These are moments of curiosity that many readers encounter while engaging with the texts. Yet following such threads across poems, genres, and commentaries can be difficult without simple ways to search and compare.
         </p>
         <p class="intro">With the help of AI tools and online collaboration, it is now possible to build thoughtful, reader-centered tools that support close engagement with classical literature. Used with care, these technologies can assist—rather than replace—the patient work of reading, comparison, and interpretation.
         </p>
-        <p class="intro">Prof. P. Pandiaraja's <a href="http://tamilconcordance.in/">Thamizh Concordance</a> helped me get closer to Sangam Literature. My attempt is to bring it one more step forward. I hope others will take it further.
+        <p class="intro">Prof. P. Pandiaraja's <a href="http://tamilconcordance.in/">Thamizh Concordance</a> brings Sangam Literature much closer. This attempt is to bring it one more step forward. Hope others will take it further.
         </p>
         <p class="author-name">— T. Mathan Mohan</p>
       <!--
@@ -108,6 +106,15 @@ h2 {
   margin-bottom: 1rem;
   line-height: 1.8;
   color: #333;
+}
+
+ul.intro {
+  padding-left: 2rem;
+  margin-left: 0;
+}
+
+ul.intro li {
+  margin-bottom: 0.5rem;
 }
 
 .teachers-section {
