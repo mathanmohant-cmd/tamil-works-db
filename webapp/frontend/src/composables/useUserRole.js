@@ -7,7 +7,7 @@ const currentUser = ref(null)
 const userId = ref(null)
 
 export function useUserRole() {
-  // Initialize role from sessionStorage on first load
+  // Initialize role from sessionStorage on first load, default to 'guest'
   if (currentRole.value === null) {
     const storedRole = sessionStorage.getItem('userRole')
     const storedUser = sessionStorage.getItem('username')
@@ -16,6 +16,11 @@ export function useUserRole() {
       currentRole.value = storedRole
       currentUser.value = storedUser
       userId.value = storedUserId ? parseInt(storedUserId) : null
+    } else {
+      // Default to guest if no role stored
+      currentRole.value = 'guest'
+      currentUser.value = 'Guest'
+      userId.value = null
     }
   }
 
@@ -61,18 +66,15 @@ export function useUserRole() {
     }
   }
 
-  // Logout
+  // Logout (sets back to guest instead of null)
   const logout = () => {
-    currentRole.value = null
-    currentUser.value = null
+    currentRole.value = 'guest'
+    currentUser.value = 'Guest'
     userId.value = null
-    sessionStorage.removeItem('userRole')
-    sessionStorage.removeItem('username')
+    sessionStorage.setItem('userRole', 'guest')
+    sessionStorage.setItem('username', 'Guest')
     sessionStorage.removeItem('userId')
   }
-
-  // Check if role selection is needed (null = not selected yet)
-  const needsRoleSelection = computed(() => currentRole.value === null)
 
   return {
     currentRole,
@@ -83,7 +85,6 @@ export function useUserRole() {
     isAuthenticated,
     canBrowseWorks,
     canAccessAdmin,
-    needsRoleSelection,
     setGuestRole,
     login,
     logout

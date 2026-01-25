@@ -180,8 +180,8 @@ const router = createRouter({
               if (targetElement) {
                 // Get the element's position relative to the scroll container
                 const elementTop = targetElement.offsetTop
-                // Scroll the container to the element (with 20px offset for better visibility)
-                appContent.scrollTop = elementTop - 20
+                // Scroll the container to the element (with 80px offset for sticky header)
+                appContent.scrollTop = elementTop - 80
               } else {
                 // Element not found, scroll to top
                 appContent.scrollTop = 0
@@ -197,7 +197,7 @@ const router = createRouter({
           }
         }
         resolve({ top: 0 })
-      }, 100) // Increased timeout to 100ms to ensure DOM is ready
+      }, 100) // Timeout to ensure DOM is ready
     })
   }
 })

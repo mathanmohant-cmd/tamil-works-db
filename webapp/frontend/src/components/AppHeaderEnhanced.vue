@@ -80,11 +80,78 @@
         <router-link :to="{ name: 'Home' }" class="nav-tab">Home</router-link>
         <router-link v-if="isWorksBrowserVisible" :to="{ name: 'WorksList' }" class="nav-tab">Browse Works</router-link>
         <router-link :to="{ name: 'Acknowledgment' }" class="nav-tab">Acknowledgment</router-link>
-        <router-link :to="{ name: 'Help' }" class="nav-tab">Help and Docs</router-link>
-        <router-link :to="{ name: 'TheStoryBehind' }" class="nav-tab">The Story Behind</router-link>
 
-        <!-- My Profile Tab (Desktop) -->
-        <div v-if="!isGuest" class="profile-tab-dropdown" ref="profileDropdown">
+        <!-- Help and Docs Dropdown -->
+        <div class="profile-tab-dropdown" ref="helpDropdown">
+          <button
+            @click="toggleHelpMenu"
+            @blur="handleHelpBlur"
+            class="nav-tab profile-tab-button"
+            :class="{ 'profile-active': helpMenuOpen }"
+            title="Help and Docs"
+          >
+            <span>Help and Docs</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+
+          <!-- Help Dropdown Menu -->
+          <div v-if="helpMenuOpen" class="profile-tab-menu">
+            <router-link :to="{ name: 'QuickStart' }" @click="helpMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">📖</span>
+              <span>Quick Start</span>
+            </router-link>
+            <router-link :to="{ name: 'UnderstandingThisTool' }" @click="helpMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">💡</span>
+              <span>Understanding This Tool</span>
+            </router-link>
+            <router-link :to="{ name: 'WordSegmentation' }" @click="helpMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">&#x1F4DD;</span>
+              <span>Word Segmentation</span>
+            </router-link>
+            <router-link :to="{ name: 'TransliterationGuide' }" @click="helpMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">🔤</span>
+              <span>Transliteration Guide</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- The Story Behind Dropdown -->
+        <div class="profile-tab-dropdown" ref="storyDropdown">
+          <button
+            @click="toggleStoryMenu"
+            @blur="handleStoryBlur"
+            class="nav-tab profile-tab-button"
+            :class="{ 'profile-active': storyMenuOpen }"
+            title="The Story Behind"
+          >
+            <span>The Story Behind</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+
+          <!-- Story Dropdown Menu -->
+          <div v-if="storyMenuOpen" class="profile-tab-menu">
+            <router-link :to="{ name: 'Journey' }" @click="storyMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">🚀</span>
+              <span>Our Journey</span>
+            </router-link>
+            <router-link :to="{ name: 'Inspiration' }" @click="storyMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">✨</span>
+              <span>Our Inspiration</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Login Button (Guest) or Profile Dropdown (Admin) -->
+        <div v-if="isGuest" class="profile-tab-dropdown">
+          <button
+            @click="showLoginModal = true"
+            class="nav-tab"
+            title="Login"
+          >
+            <span>Login</span>
+          </button>
+        </div>
+        <div v-else class="profile-tab-dropdown" ref="profileDropdown">
           <button
             @click="toggleProfileMenu"
             @blur="handleProfileBlur"
@@ -362,8 +429,13 @@
         </div>
       </div>
 
-      <!-- My Profile Menu Group (Mobile) -->
-      <div v-if="!isGuest" class="menu-item-group profile-menu-group">
+      <!-- Login Button (Guest) or Profile Menu (Admin) - Mobile -->
+      <div v-if="isGuest" class="menu-item-group">
+        <button @click="handleMobileLogin" class="menu-item">
+          <span>Login</span>
+        </button>
+      </div>
+      <div v-else class="menu-item-group profile-menu-group">
         <div class="menu-group-label profile-label" @click="toggleProfileSubmenu">
           <div class="profile-label-content">
             <span class="profile-icon">👤</span>
@@ -383,6 +455,44 @@
         </div>
       </div>
     </div>
+
+    <!-- Login Modal (Teleport to body) -->
+    <Teleport to="body">
+      <Transition name="modal-fade">
+        <div v-if="showLoginModal" class="login-modal-overlay" @click="closeLoginModal">
+          <div class="login-modal" @click.stop>
+            <button @click="closeLoginModal" class="modal-close-btn" title="Close">×</button>
+            <h2>Admin Login</h2>
+            <p class="login-subtitle">Manage collections and contents</p>
+
+            <form @submit.prevent="handleLogin" class="login-form">
+              <div class="form-group">
+                <input
+                  v-model="loginUsername"
+                  type="text"
+                  placeholder="Username"
+                  required
+                  autocomplete="username"
+                />
+              </div>
+              <div class="form-group">
+                <input
+                  v-model="loginPassword"
+                  type="password"
+                  placeholder="Password"
+                  required
+                  autocomplete="current-password"
+                />
+              </div>
+              <div v-if="loginError" class="error-message">{{ loginError }}</div>
+              <button type="submit" class="btn-login" :disabled="loginLoading">
+                {{ loginLoading ? 'Logging in...' : 'Login' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -412,8 +522,17 @@ const helpSubmenuExpanded = ref(false)
 const storySubmenuExpanded = ref(false)
 const profileSubmenuExpanded = ref(false)
 const profileMenuOpen = ref(false)
+const helpMenuOpen = ref(false)
+const storyMenuOpen = ref(false)
+const showLoginModal = ref(false)
+const loginUsername = ref('')
+const loginPassword = ref('')
+const loginError = ref(null)
+const loginLoading = ref(false)
 const menuBtn = ref(null)
 const profileDropdown = ref(null)
+const helpDropdown = ref(null)
+const storyDropdown = ref(null)
 const menuPosition = ref({ top: '58px', right: '1rem' })
 
 // Transliteration
@@ -458,6 +577,8 @@ const handleLogout = () => {
 
 const toggleProfileMenu = () => {
   profileMenuOpen.value = !profileMenuOpen.value
+  helpMenuOpen.value = false
+  storyMenuOpen.value = false
 }
 
 const handleProfileBlur = (event) => {
@@ -467,6 +588,63 @@ const handleProfileBlur = (event) => {
       profileMenuOpen.value = false
     }
   }, 200)
+}
+
+const toggleHelpMenu = () => {
+  helpMenuOpen.value = !helpMenuOpen.value
+  profileMenuOpen.value = false
+  storyMenuOpen.value = false
+}
+
+const handleHelpBlur = (event) => {
+  setTimeout(() => {
+    if (!helpDropdown.value?.contains(document.activeElement)) {
+      helpMenuOpen.value = false
+    }
+  }, 200)
+}
+
+const toggleStoryMenu = () => {
+  storyMenuOpen.value = !storyMenuOpen.value
+  profileMenuOpen.value = false
+  helpMenuOpen.value = false
+}
+
+const handleStoryBlur = (event) => {
+  setTimeout(() => {
+    if (!storyDropdown.value?.contains(document.activeElement)) {
+      storyMenuOpen.value = false
+    }
+  }, 200)
+}
+
+const closeLoginModal = () => {
+  showLoginModal.value = false
+  loginUsername.value = ''
+  loginPassword.value = ''
+  loginError.value = null
+  loginLoading.value = false
+}
+
+const handleLogin = async () => {
+  loginError.value = null
+  loginLoading.value = true
+
+  const { login } = useUserRole()
+  const result = await login(loginUsername.value, loginPassword.value)
+
+  if (result.success) {
+    closeLoginModal()
+    router.push({ name: 'Home' })
+  } else {
+    loginError.value = result.error
+    loginLoading.value = false
+  }
+}
+
+const handleMobileLogin = () => {
+  closeMenu()
+  showLoginModal.value = true
 }
 
 const isCollectionTreeLoading = computed(() => {
@@ -705,6 +883,9 @@ watch(() => route.path, () => {
   helpSubmenuExpanded.value = false
   storySubmenuExpanded.value = false
   profileSubmenuExpanded.value = false
+  profileMenuOpen.value = false
+  helpMenuOpen.value = false
+  storyMenuOpen.value = false
 })
 
 // Focus panel search input when panel opens
@@ -730,6 +911,7 @@ window.addEventListener('open-search-panel', () => {
   top: 0;
   z-index: 100;
   background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Compact Header */
@@ -1214,6 +1396,10 @@ window.addEventListener('open-search-panel', () => {
   border-bottom: 3px solid transparent;
   transition: all 0.2s ease;
   white-space: nowrap;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
 }
 
 .nav-tab:hover {
@@ -1742,6 +1928,12 @@ window.addEventListener('open-search-panel', () => {
   font-weight: 500;
   transition: background 150ms ease;
   border-bottom: 1px solid #f3f4f6;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
 }
 
 .menu-item:last-child {
@@ -1868,6 +2060,148 @@ window.addEventListener('open-search-panel', () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Login Modal */
+.login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.login-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6c757d;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+.login-modal h2 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.8rem;
+}
+
+.login-subtitle {
+  color: #7f8c8d;
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.5rem;
+  background: #ffe5e5;
+  border-radius: 4px;
+}
+
+.btn-login {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+
+.btn-login:hover:not(:disabled) {
+  background: #357abd;
+}
+
+.btn-login:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Modal Fade Animation */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active .login-modal,
+.modal-fade-leave-active .login-modal {
+  transition: transform 0.3s ease;
+}
+
+.modal-fade-enter-from .login-modal {
+  transform: translateY(-20px);
+}
+
+.modal-fade-leave-to .login-modal {
+  transform: translateY(20px);
 }
 
 /* Mobile Adjustments */

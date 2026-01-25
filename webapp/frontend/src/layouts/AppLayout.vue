@@ -3,15 +3,17 @@
     <!-- Header persists across navigation - outside transition -->
     <AppHeader />
     <main class="app-content">
-      <router-view v-slot="{ Component }">
-        <!-- Transition only wraps content, not header -->
-        <transition name="fade" mode="out-in">
-          <component :is="Component" :key="$route.path" />
-        </transition>
-      </router-view>
+      <div class="content-wrapper">
+        <router-view v-slot="{ Component }">
+          <!-- Transition only wraps content, not header -->
+          <transition name="fade" mode="out-in">
+            <component :is="Component" :key="$route.path" />
+          </transition>
+        </router-view>
+      </div>
+      <!-- Footer scrolls with content, at bottom when content is short -->
+      <AppFooter />
     </main>
-    <!-- Footer persists across navigation - outside transition -->
-    <AppFooter />
   </div>
 </template>
 
@@ -25,18 +27,26 @@ import AppFooter from '../components/AppFooter.vue'
 .app-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
-
 
 .app-content {
   flex: 1;
-  padding: 1rem 2rem 2rem 2rem;
-  position: relative; /* Establish stacking context for scrolling */
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.app-content > * {
+.content-wrapper {
+  flex: 1;
+  padding: 1rem 2rem 2rem 2rem;
+}
+
+.content-wrapper > * {
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
@@ -52,7 +62,7 @@ import AppFooter from '../components/AppFooter.vue'
 }
 
 @media (max-width: 768px) {
-  .app-content {
+  .content-wrapper {
     padding: 0.5rem 1rem 1rem 1rem;
   }
 }

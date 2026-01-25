@@ -19,7 +19,7 @@
         <div class="option-card login-card">
           <div class="card-icon">🔑</div>
           <h3>Admin Login</h3>
-          <p>Access Browse Works and manage collections</p>
+          <p>Manage collections and Contents</p>
 
           <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">

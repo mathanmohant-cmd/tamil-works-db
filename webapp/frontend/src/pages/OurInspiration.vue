@@ -17,10 +17,10 @@
           <div class="mentor-text">
             <h3>Mrs. Vaidehi Herbert</h3>
             <p>
-              For many Thamizhs educated primarily in English, approaching classical Thamizh texts—and even their traditional commentaries—can feel daunting.
+              Mrs. Vaidehi Herbert’s free twelve‑week Introduction to Sangam Literature course offers a clear and welcoming doorway into the world of Sangam poetry. She has translated Sangam literature into English and made it freely available online, including full commentaries and careful word‑by‑word explanations, giving learners a steady path into texts that might otherwise feel distant.
             </p>
             <p>
-              Her twelve-week <em>Introduction to Sangam Literature</em> course opened an accessible doorway into Sangam poetry, revealing the richness of the Thamizh language: its rhythm, imagery, and resonance across centuries. Weekly discussions, shaped by fellow learners and scholars, became a shared space of inquiry and discovery. Her enthusiasm and unwavering commitment have made Sangam texts accessible to younger readers and non-Thamizh speakers as well.
+              Through her dedication and generosity, she has inspired a growing community of Tamil learners — many of whom now guide others in turn — creating a quiet, enduring ripple of learning that continues to widen.
             </p>
             <div class="resources">
               <h4>Follow her work</h4>
