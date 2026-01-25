@@ -34,8 +34,8 @@
         </p>
         <p class="intro">Prof. P. Pandiaraja's <a href="http://tamilconcordance.in/">Thamizh Concordance</a> brings Sangam Literature much closer. This attempt is to bring it one more step forward. Hope others will take it further.
         </p>
-        <p class="author-name">— T. Mathan Mohan</p>
       <!--
+        <p class="author-name">— T. Mathan Mohan</p>
       <p class="closing-reflection">
           <br>Whatever purpose brings you to this platform, I ask that you approach these texts with care and humility.
           <br>These tools are meant to support deeper engagement with the texts, not to reduce them to data points in service of predetermined conclusions.

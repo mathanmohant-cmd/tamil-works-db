@@ -130,12 +130,14 @@ class BharathiyarBulkImporter:
     Hierarchy:
     - Collection 328: இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம்
       - Work 1-4: Thematic groups
-        - Section L1 (File): File-level container
-          - Section L2 (Subsection): &N markers (optional)
-            - Section L3 (Poem): @N markers (with JSONB metadata)
-              - Verses: #N markers (with JSONB metadata for verse types)
-                - Lines: Individual lines
-                  - Words: Word segmentation
+        - Section L1: &N markers (தேசீய கீதங்கள், பல்வகைப் பாடல்கள், etc.)
+          - Section L2 (Poem): @N markers (with JSONB metadata)
+            - Verses: #N markers (with JSONB metadata for verse types)
+              - Lines: Individual lines
+                - Words: Word segmentation
+
+    Note: File-level sections are NOT created because every file starts with a &N marker
+    that duplicates the filename. The &N sections are created directly under the work.
     """
 
     def __init__(self, db_connection_string="postgresql://postgres:postgres@localhost/tamil_literature"):
@@ -377,23 +379,17 @@ class BharathiyarBulkImporter:
                 })
 
     def parse_file(self, file_path: Path, work_id: int, file_num: int):
-        """Parse one Bharathiyar poetry file with state machine"""
+        """Parse one Bharathiyar poetry file with state machine
+
+        Note: File-level sections are NOT created because every file starts with
+        a &N marker that has the same name as the filename (creating redundant duplicates).
+        The &N sections are created directly under the work instead.
+        """
         print(f"\n  Parsing file {file_num}: {file_path.name}")
 
-        # Create Level 1 section (File container)
-        level1_section_id = self._add_section(
-            work_id=work_id,
-            level_type='File',
-            level_type_tamil='கோப்பு',
-            section_number=file_num,
-            section_name=FILE_SECTION_NAMES.get(file_num, f'File {file_num}'),
-            section_name_tamil=FILE_SECTION_NAMES.get(file_num, f'File {file_num}'),
-            parent_section_id=None
-        )
-
         # State variables
-        level2_section_id = None  # &N subsection
-        level3_section_id = None  # @N poem
+        level1_section_id = None  # &N section (directly under work)
+        level2_section_id = None  # @N poem
         current_verse_num = None
         current_verse_lines = []
 
@@ -415,47 +411,47 @@ class BharathiyarBulkImporter:
                 if not line:
                     if in_verse and current_verse_lines:
                         verse_sequential_num += 1
-                        self._add_verse(work_id, level3_section_id, verse_sequential_num,
+                        self._add_verse(work_id, level2_section_id, verse_sequential_num,
                                       current_verse_lines, verse_metadata.copy())
                         current_verse_lines = []
                         verse_metadata = {}  # Reset verse metadata after use
                         in_verse = False
                     continue
 
-                # &N MARKER → Create Level 2 subsection
+                # &N MARKER → Create Level 1 section (directly under work)
                 if line.startswith('&'):
                     # Save any pending verse first
                     if in_verse and current_verse_lines:
                         verse_sequential_num += 1
-                        self._add_verse(work_id, level3_section_id, verse_sequential_num,
+                        self._add_verse(work_id, level2_section_id, verse_sequential_num,
                                       current_verse_lines, verse_metadata.copy())
                         current_verse_lines = []
                         verse_metadata = {}
                         in_verse = False
 
-                    # Extract subsection number and name
+                    # Extract section number and name
                     match = re.match(r'&(\d+)\s+(.*)', line)
                     if match:
-                        subsection_num = int(match.group(1))
-                        subsection_name = match.group(2).strip()
+                        section_num = int(match.group(1))
+                        section_name = match.group(2).strip()
 
-                        level2_section_id = self._add_section(
+                        level1_section_id = self._add_section(
                             work_id=work_id,
-                            level_type='Subsection',
-                            level_type_tamil='துணைப்பிரிவு',
-                            section_number=subsection_num,
-                            section_name=subsection_name,
-                            section_name_tamil=subsection_name,
-                            parent_section_id=level1_section_id
+                            level_type='Section',
+                            level_type_tamil='பிரிவு',
+                            section_number=section_num,
+                            section_name=section_name,
+                            section_name_tamil=section_name,
+                            parent_section_id=None  # Directly under work
                         )
                     continue
 
-                # @N MARKER → Create Level 3 poem
+                # @N MARKER → Create Level 2 poem (under &N section)
                 if line.startswith('@'):
                     # Save any pending verse first
                     if in_verse and current_verse_lines:
                         verse_sequential_num += 1
-                        self._add_verse(work_id, level3_section_id, verse_sequential_num,
+                        self._add_verse(work_id, level2_section_id, verse_sequential_num,
                                       current_verse_lines, verse_metadata.copy())
                         current_verse_lines = []
                         verse_metadata = {}
@@ -468,8 +464,9 @@ class BharathiyarBulkImporter:
                         poem_title = match.group(2).strip()
                         poem_counter += 1
 
-                        # Create Level 3 section (poem) with accumulated metadata
-                        parent = level2_section_id if level2_section_id else level1_section_id
+                        # Create Level 2 section (poem) with accumulated metadata
+                        # Parent is the &N section (level1_section_id), or None if no &N section
+                        parent = level1_section_id
 
                         # Add poem_number to metadata
                         if poem_metadata:
@@ -477,7 +474,7 @@ class BharathiyarBulkImporter:
                         else:
                             poem_metadata = {'poem_number': poem_num}
 
-                        level3_section_id = self._add_section(
+                        level2_section_id = self._add_section(
                             work_id=work_id,
                             level_type='Poem',
                             level_type_tamil='கவிதை',
@@ -504,7 +501,7 @@ class BharathiyarBulkImporter:
                     # Save any pending verse first
                     if in_verse and current_verse_lines:
                         verse_sequential_num += 1
-                        self._add_verse(work_id, level3_section_id, verse_sequential_num,
+                        self._add_verse(work_id, level2_section_id, verse_sequential_num,
                                       current_verse_lines, verse_metadata.copy())
                         current_verse_lines = []
                         # Don't reset verse_metadata here - might still be accumulating
@@ -529,7 +526,7 @@ class BharathiyarBulkImporter:
         # Save final pending verse
         if in_verse and current_verse_lines:
             verse_sequential_num += 1
-            self._add_verse(work_id, level3_section_id, verse_sequential_num,
+            self._add_verse(work_id, level2_section_id, verse_sequential_num,
                           current_verse_lines, verse_metadata.copy())
 
         print(f"    Parsed {poem_counter} poems")

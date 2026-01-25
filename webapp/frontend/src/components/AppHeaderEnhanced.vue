@@ -132,11 +132,11 @@
           <div v-if="storyMenuOpen" class="profile-tab-menu">
             <router-link :to="{ name: 'Journey' }" @click="storyMenuOpen = false" class="profile-menu-item">
               <span class="menu-item-icon">🚀</span>
-              <span>Our Journey</span>
+              <span>The Journey</span>
             </router-link>
             <router-link :to="{ name: 'Inspiration' }" @click="storyMenuOpen = false" class="profile-menu-item">
               <span class="menu-item-icon">✨</span>
-              <span>Our Inspiration</span>
+              <span>Guiding Exemplars</span>
             </router-link>
           </div>
         </div>
@@ -421,10 +421,10 @@
         </div>
         <div v-if="storySubmenuExpanded" class="submenu-items">
           <router-link :to="{ name: 'Journey' }" class="menu-subitem" @click="closeMenu">
-            Our Journey
+            The Journey
           </router-link>
           <router-link :to="{ name: 'Inspiration' }" class="menu-subitem" @click="closeMenu">
-            Our Inspiration
+            Guiding Exemplars
           </router-link>
         </div>
       </div>
