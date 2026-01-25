@@ -61,7 +61,7 @@ html {
 
   /* Fonts */
   --tamil-font: 'Noto Sans Tamil', 'Tamil Sangam MN', sans-serif;
-  --english-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --english-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,Segoe UI Emoji;
 }
 
 body {

@@ -85,11 +85,11 @@
           <!-- Selected Word Summary: Works, Verses, Usage -->
           <div class="expanded-summary">
             <div class="summary-counts">
+              <span class="summary-item">{{ word.count }} Usage</span>
+              <span class="summary-divider">|</span>
               <span class="summary-item">{{ getWorkCounts(word.word_text).length }} Work{{ getWorkCounts(word.word_text).length !== 1 ? 's' : '' }}</span>
               <span class="summary-divider">|</span>
               <span class="summary-item">{{ word.verse_count || 0 }} Verse{{ (word.verse_count || 0) !== 1 ? 's' : '' }}</span>
-              <span class="summary-divider">|</span>
-              <span class="summary-item">{{ word.count }} Usage</span>
             </div>
             <div class="export-buttons-group">
               <span class="export-label">Export</span>
@@ -172,7 +172,7 @@
             </div>
           </div>
 
-          <!-- Collapse Footer -->
+          <!-- Collapse Footer 
           <div class="collapse-footer">
             <button
               @click="toggleWordExpansion(word.word_text)"
@@ -184,6 +184,7 @@
               </span>
             </button>
           </div>
+          -->
         </div>
       </div>
     </div>
@@ -1069,6 +1070,7 @@ const exportVersesToTXT = (wordText, verses) => {
   flex: 1;
   padding-left: 0.5rem;
   padding-right: 0.0rem;
+  word-break: break-word;
 }
 
 .word-number {

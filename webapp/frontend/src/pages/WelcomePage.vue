@@ -1,9 +1,10 @@
 <template>
   <div class="welcome-page">
     <div class="container">
-
-      <h1>Thamizh Literary Concordance Search</h1>
-      <p class="tagline"><em>Explore how Thamizh words live across 2,000+ years of literature</em></p>
+     <h3>&#x1F6E0;Beta Release</h3>
+      <h1>Search Words in Tamil Literature</h1>
+ 
+      <p class="tagline"><em>Explore how words used across 2,000+ years of Tamil literary tradition</em></p>
 
       <div class="metrics">
         <span v-if="stats">{{ stats.total_works }} Thamizh literary works · {{ stats.total_verses.toLocaleString() }} verses · {{ stats.distinct_words.toLocaleString() }} words</span>
