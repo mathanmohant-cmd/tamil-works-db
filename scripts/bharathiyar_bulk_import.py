@@ -128,7 +128,7 @@ class BharathiyarBulkImporter:
     Imports Bharathiyar poetry using 2-phase bulk COPY pattern with JSONB metadata.
 
     Hierarchy:
-    - Collection 328: இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம்
+    - Collection 328: பாரதியார் படைப்புகள்
       - Work 1-4: Thematic groups
         - Section L1: &N markers (தேசீய கீதங்கள், பல்வகைப் பாடல்கள், etc.)
           - Section L2 (Poem): @N markers (with JSONB metadata)
@@ -194,8 +194,8 @@ class BharathiyarBulkImporter:
             print(f"\nCreating Collection 328 (இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம் - Modern Tamil Literature)")
             self.collections_to_create.append((
                 328,
-                'Modern Tamil Literature',
-                'இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம்',
+                'Bharathiyar Works',
+                'பாரதியார் படைப்புகள்',
                 'period',
                 'Poetry of Subramania Bharathiyar (1882-1921 CE) - National, devotional, and social reform poetry',
                 1,  # Parent: தமிழ் இலக்கியம் (designated filter collection)

@@ -24,7 +24,7 @@
         </template>
         <template v-else>
           <span class="section-name">
-            {{ section.verse_count === 1 ? 'செய்யுள்' : 'பாடல்கள்' }}
+            {{ section.verse_count === 1 ? 'பாடல்' : 'தொகுப்பு' }}
           </span>
         </template>
       </div>
