@@ -835,6 +835,52 @@ class Database:
                 """, [position, collection_id, work_id])
                 return cur.rowcount > 0
 
+    def reorder_collection_works(self, collection_id: int, positions: List[Dict[str, int]]) -> None:
+        """
+        Batch update work positions using two-phase commit to avoid constraint violations.
+
+        Args:
+            collection_id: ID of the collection
+            positions: List of dicts with 'work_id' and 'position' keys
+
+        Strategy:
+            Phase 1: Update all positions to negative values (-1, -2, -3, ...)
+            Phase 2: Update to final positive values (1, 2, 3, ...)
+        """
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                try:
+                    # Start transaction
+                    conn.autocommit = False
+
+                    # Phase 1: Set all positions to temporary negative values
+                    for i, item in enumerate(positions):
+                        temp_position = -(i + 1)  # -1, -2, -3, ...
+                        cur.execute("""
+                            UPDATE work_collections
+                            SET position_in_collection = %s
+                            WHERE collection_id = %s AND work_id = %s
+                        """, [temp_position, collection_id, item['work_id']])
+
+                    # Phase 2: Set final positive positions
+                    for item in positions:
+                        cur.execute("""
+                            UPDATE work_collections
+                            SET position_in_collection = %s
+                            WHERE collection_id = %s AND work_id = %s
+                        """, [item['position'], collection_id, item['work_id']])
+
+                    # Commit transaction
+                    conn.commit()
+
+                except Exception as e:
+                    # Rollback on error
+                    conn.rollback()
+                    raise e
+                finally:
+                    # Restore autocommit
+                    conn.autocommit = True
+
     def get_collection_tree(self, root_collection_id: int = None) -> List[Dict]:
         """
         Get collections as a nested tree structure

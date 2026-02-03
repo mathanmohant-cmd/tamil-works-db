@@ -185,6 +185,13 @@ export default {
     })
   },
 
+  /**
+   * Batch reorder works in a collection
+   */
+  reorderCollectionWorks(collectionId, positions) {
+    return api.post(`/admin/collections/${collectionId}/works/reorder`, positions)
+  },
+
   // =========================================================================
   // Works Browser APIs
   // =========================================================================

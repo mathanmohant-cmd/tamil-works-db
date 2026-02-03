@@ -35,7 +35,8 @@
                 <span v-if="collection.children?.length" class="chevron-icon chevron-down"></span>
                 <span v-else class="bullet-icon">•</span>
               </span>
-              <span class="tree-name">{{ collection.collection_name }}</span>
+              <span class="tree-sort-order" v-if="collection.sort_order">{{ collection.sort_order }}.</span>
+              <span class="tree-name">{{ collection.collection_name_tamil || collection.collection_name }}</span>
               <span class="tree-count">({{ collection.work_count || 0 }})</span>
             </div>
             <!-- Nested children (one level deep for now) -->
@@ -52,7 +53,8 @@
                   @click="selectCollection(child)"
                 >
                   <span class="tree-icon">•</span>
-                  <span class="tree-name">{{ child.collection_name }}</span>
+                  <span class="tree-sort-order" v-if="child.sort_order">{{ child.sort_order }}.</span>
+                  <span class="tree-name">{{ child.collection_name_tamil || child.collection_name }}</span>
                   <span class="tree-count">({{ child.work_count || 0 }})</span>
                 </div>
               </div>
@@ -102,7 +104,7 @@
                 :value="coll.collection_id"
                 :disabled="editingCollection && coll.collection_id === editingCollection.collection_id"
               >
-                {{ coll.indent }}{{ coll.collection_name }}
+                {{ coll.indent }}{{ coll.collection_name_tamil || coll.collection_name }}
               </option>
             </select>
           </div>
@@ -140,6 +142,9 @@
               <strong>Thamizh:</strong> {{ selectedCollection.collection_name_tamil }}
             </p>
             <p><strong>Type:</strong> {{ selectedCollection.collection_type }}</p>
+            <p v-if="selectedCollection.sort_order">
+              <strong>Sort Order:</strong> {{ selectedCollection.sort_order }}
+            </p>
             <p v-if="selectedCollection.parent_name">
               <strong>Parent:</strong> {{ selectedCollection.parent_name }}
             </p>
@@ -188,8 +193,9 @@
             <h4>Child Collections</h4>
             <ul>
               <li v-for="child in selectedCollection.children" :key="child.collection_id">
+                <span v-if="child.sort_order" class="child-sort-order">{{ child.sort_order }}.</span>
                 <a href="#" @click.prevent="selectCollectionById(child.collection_id)">
-                  {{ child.collection_name }}
+                  {{ child.collection_name_tamil || child.collection_name }}
                 </a>
               </li>
             </ul>
@@ -417,29 +423,30 @@ export default {
         return
       }
 
-      // Reorder the works array
+      // Reorder the works array in memory
       const works = [...sortedWorks.value]
       const [draggedItem] = works.splice(dragIndex, 1)
       works.splice(dropIndex, 0, draggedItem)
 
-      // Update positions on backend
+      // Build positions array for batch update
+      const positions = works.map((work, index) => ({
+        work_id: work.work_id,
+        position: index + 1  // Sequential: 1, 2, 3, 4...
+      }))
+
       try {
-        for (let i = 0; i < works.length; i++) {
-          const newPosition = i + 1
-          if (works[i].position_in_collection !== newPosition) {
-            await api.updateWorkPosition(
-              selectedCollection.value.collection_id,
-              works[i].work_id,
-              newPosition
-            )
-          }
-        }
+        // Single batch API call instead of individual calls
+        await api.reorderCollectionWorks(
+          selectedCollection.value.collection_id,
+          positions
+        )
 
         // Reload collection to get updated data
         await selectCollection(selectedCollection.value)
       } catch (err) {
         error.value = 'Failed to reorder works: ' + (err.response?.data?.detail || err.message)
       } finally {
+        // Clear drag state
         draggedIndex.value = null
         dragOverIndex.value = null
       }
@@ -675,6 +682,14 @@ export default {
 .bullet-icon {
   font-size: 10px;
   color: #666;
+}
+
+.tree-sort-order {
+  color: #999;
+  font-size: 11px;
+  margin-right: 6px;
+  font-weight: 500;
+  min-width: 20px;
 }
 
 .tree-name {
@@ -963,6 +978,13 @@ export default {
 
 .children-section li {
   padding: 4px 0;
+}
+
+.child-sort-order {
+  color: #999;
+  font-size: 11px;
+  margin-right: 6px;
+  font-weight: 500;
 }
 
 .children-section a {

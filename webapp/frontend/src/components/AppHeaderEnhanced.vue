@@ -173,6 +173,10 @@
               </div>
             </div>
             <div class="profile-menu-divider"></div>
+            <router-link v-if="currentUser === 'admin'" :to="{ name: 'Admin' }" @click="profileMenuOpen = false" class="profile-menu-item">
+              <span class="menu-item-icon">⚙️</span>
+              <span>Admin</span>
+            </router-link>
             <button @click="handleLogout" class="profile-menu-item logout-item">
               <span class="menu-item-icon">🚪</span>
               <span>Logout</span>
@@ -448,6 +452,10 @@
             <div class="profile-username-mobile">{{ currentUser }}</div>
             <div class="profile-role-mobile">Administrator</div>
           </div>
+          <router-link v-if="currentUser === 'admin'" :to="{ name: 'Admin' }" @click="closeMenu" class="menu-subitem">
+            <span class="menu-item-icon">⚙️</span>
+            <span>Admin</span>
+          </router-link>
           <button @click="handleLogout" class="menu-subitem logout-mobile">
             <span class="menu-item-icon">🚪</span>
             <span>Logout</span>

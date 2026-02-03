@@ -128,6 +128,11 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class WorkPositionUpdate(BaseModel):
+    work_id: int
+    position: int
+
+
 # API Endpoints
 
 @app.get("/")
@@ -627,6 +632,23 @@ def update_work_position(collection_id: int, work_id: int, position: int = Query
         return {"message": "Position updated"}
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/admin/collections/{collection_id}/works/reorder")
+def reorder_collection_works(collection_id: int, positions: List[WorkPositionUpdate]):
+    """
+    Batch update work positions within a collection using two-phase commit.
+
+    Request body: Array of {work_id, position} objects in desired order
+    Example: [{"work_id": 123, "position": 1}, {"work_id": 456, "position": 2}, ...]
+    """
+    try:
+        # Convert Pydantic models to dictionaries for database method
+        positions_dicts = [pos.model_dump() for pos in positions]
+        db.reorder_collection_works(collection_id, positions_dicts)
+        return {"message": f"Reordered {len(positions)} works in collection {collection_id}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
