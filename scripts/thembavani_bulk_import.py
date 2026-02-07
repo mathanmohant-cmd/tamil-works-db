@@ -248,18 +248,23 @@ class ThembavaniBulkImporter:
 
     def create_line_and_words(self, line_text: str, line_number: int, verse_id: int):
         """Create a line and segment it into words"""
+        # Clean embedded marker references (e.g., "#ஃ31" -> "ஃ31" or remove entirely)
+        cleaned_line = re.sub(r'[#@&]\d+', '', line_text).strip()
+        # Also remove standalone # followed by non-digit characters like #ஃ
+        cleaned_line = re.sub(r'#', '', cleaned_line).strip()
+
         line_dict = {
             'line_id': self.line_id,
             'verse_id': verse_id,
             'line_number': line_number,
-            'line_text': line_text
+            'line_text': cleaned_line
         }
         self.lines.append(line_dict)
         current_line_id = self.line_id
         self.line_id += 1
 
-        # Segment into words
-        words = self.segment_line(line_text)
+        # Segment into words (use cleaned line)
+        words = self.segment_line(cleaned_line)
         for word_position, word_text in enumerate(words, 1):
             word_dict = {
                 'word_id': self.word_id,

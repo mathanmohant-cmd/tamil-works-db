@@ -224,5 +224,26 @@ export default {
    */
   getVerseNavigation(verseId) {
     return api.get(`/verses/${verseId}/navigation`)
+  },
+
+  // =========================================================================
+  // Phoneme Pattern Search APIs (Insights Feature)
+  // =========================================================================
+
+  /**
+   * Get list of available phoneme patterns
+   */
+  getPhonemePatterns() {
+    return api.get('/search/phoneme-patterns')
+  },
+
+  /**
+   * Search for words matching a phoneme pattern
+   *
+   * @param {string} patternId - Pattern identifier (e.g., "plural", "vocative")
+   * @param {object} params - Query parameters (work_ids, collection_id, limit, offset, expand)
+   */
+  searchPhonemePattern(patternId, params = {}) {
+    return api.get(`/search/phoneme-pattern/${patternId}`, { params })
   }
 }

@@ -63,6 +63,7 @@ class SaivaPrabandhaMalaiBulkImporter:
         # Track current parsing state
         self.current_work_id = None
         self.current_work_num = 0
+        self.pending_verse_metadata = {}  # For ** verse metadata
 
     def ensure_collection_exists(self):
         """Ensure the 11th Thirumurai collection exists"""
@@ -180,8 +181,17 @@ class SaivaPrabandhaMalaiBulkImporter:
                 self._update_section_metadata(current_section_id, pan_name)
                 continue
 
-            # Skip other ** lines
-            if line.startswith('**'):
+            # Check for verse-level ** metadata (NOT பண்)
+            # Examples: ** யாப்பு வகை - பழமொழி, ** வெண்பா, etc.
+            verse_metadata_match = re.match(r'^\*\*\s+(.+)', line)
+            if verse_metadata_match and current_work_id:
+                metadata_text = verse_metadata_match.group(1).strip()
+                # Store for next verse (will be added in _add_verse)
+                if not hasattr(self, 'pending_verse_metadata'):
+                    self.pending_verse_metadata = {}
+                if verse_count not in self.pending_verse_metadata:
+                    self.pending_verse_metadata[verse_count] = []
+                self.pending_verse_metadata[verse_count].append(metadata_text)
                 continue
 
             # Check for verse marker: #N
@@ -206,7 +216,8 @@ class SaivaPrabandhaMalaiBulkImporter:
 
             # Regular verse line
             if verse_count > 0 and current_section_id and current_work_id:
-                cleaned = line.replace('…', '').strip()
+                # Clean ellipsis and * markers
+                cleaned = line.replace('…', '').replace('*', '').strip()
                 if cleaned:
                     current_verse_lines.append(cleaned)
 
@@ -287,6 +298,12 @@ class SaivaPrabandhaMalaiBulkImporter:
         if pan_metadata:
             metadata['pan'] = pan_metadata
 
+        # Add pending verse metadata if any (from ** lines)
+        if hasattr(self, 'pending_verse_metadata') and verse_num in self.pending_verse_metadata:
+            metadata['notes'] = '; '.join(self.pending_verse_metadata[verse_num])
+            # Clear after using
+            del self.pending_verse_metadata[verse_num]
+
         self.verses.append({
             'verse_id': verse_id,
             'work_id': work_id,
@@ -304,8 +321,8 @@ class SaivaPrabandhaMalaiBulkImporter:
             line_id = self.line_id
             self.line_id += 1
 
-            # Clean line text: remove tabs, newlines, line numbers, normalize whitespace
-            cleaned_line = line_text.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
+            # Clean line text: remove tabs, newlines, *, line numbers, normalize whitespace
+            cleaned_line = line_text.replace('\t', ' ').replace('\n', ' ').replace('\r', '').replace('*', '')
             # Remove trailing numbers (line numbers in some works)
             cleaned_line = re.sub(r'\s+\d+\s*$', '', cleaned_line)
             cleaned_line = re.sub(r'\s+', ' ', cleaned_line).strip()

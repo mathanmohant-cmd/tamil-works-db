@@ -397,7 +397,7 @@ def main():
         if len(sys.argv) < 3:
             print("✗ Error: --work-id requires a work ID")
             sys.exit(1)
-
+        connection_string=sys.argv[3]
         work_id = int(sys.argv[2])
         conn = psycopg2.connect(connection_string)
         conn.autocommit = False

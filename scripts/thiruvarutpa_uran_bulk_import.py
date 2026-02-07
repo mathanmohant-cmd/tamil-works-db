@@ -23,6 +23,7 @@ import io
 import json
 import psycopg2
 from typing import List, Dict, Optional
+from word_cleaning import split_and_clean_words
 
 class ThiruvarutpaImporter:
     def __init__(self, db_connection_string: str):
@@ -204,8 +205,8 @@ class ThiruvarutpaImporter:
             if line.startswith('வள்ளலார் ^') or line.startswith('*'):
                 continue
 
-            # Thirumurai marker: &number name
-            thirumurai_match = re.match(r'^&(\d+)\s+(.+)', line)
+            # Thirumurai marker: &number name (allow optional space after number)
+            thirumurai_match = re.match(r'^&(\d+)\.?\s*(.+)', line)
             if thirumurai_match:
                 # Save previous verse if any
                 if current_verse_lines and current_subsection:
@@ -236,8 +237,8 @@ class ThiruvarutpaImporter:
                 in_verse = False
                 continue
 
-            # Subsection marker: @number name or @number. name
-            subsection_match = re.match(r'^@(\d+)\.?\s+(.+)', line)
+            # Subsection marker: @number name or @number. name (allow optional space after number)
+            subsection_match = re.match(r'^@(\d+)\.?\s*(.+)', line)
             if subsection_match:
                 # Save previous verse if any
                 if current_verse_lines and current_subsection:
@@ -302,7 +303,19 @@ class ThiruvarutpaImporter:
 
             # Verse content lines
             if in_verse and current_subsection:
-                current_verse_lines.append(line)
+                # Skip lines that look like section/verse markers (formatting artifacts that weren't caught by regexes above)
+                # This includes lines like "@22.name", "#1", etc. that somehow slipped through
+                if re.match(r'^[@#&]\d+', line):
+                    # Line starts with marker pattern - skip it, don't add to verse content
+                    continue
+
+                # Clean embedded marker references (e.g., "களிறு#1" -> "களிறு")
+                # Remove #number, @number, &number patterns embedded in text
+                cleaned_line = re.sub(r'[#@&]\d+', '', line).strip()
+
+                # Only add non-empty lines
+                if cleaned_line:
+                    current_verse_lines.append(cleaned_line)
 
         # Handle last verse
         if current_verse_lines:
@@ -359,8 +372,8 @@ class ThiruvarutpaImporter:
         current_line_id = self.line_id
         self.line_id += 1
 
-        # Segment into words
-        words = self.segment_line(line_text)
+        # Segment into words using word_cleaning module
+        words = split_and_clean_words(line_text)
         for word_position, word_text in enumerate(words, 1):
             word_dict = {
                 'word_id': self.word_id,

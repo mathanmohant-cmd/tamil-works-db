@@ -1,0 +1,874 @@
+<template>
+  <div class="verse-view-container">
+    <!-- Breadcrumb navigation -->
+    <div v-if="breadcrumbs.length > 0" class="breadcrumb">
+      <span
+        v-for="(crumb, index) in breadcrumbs"
+        :key="crumb.id || index"
+        class="breadcrumb-item"
+      >
+        <span v-if="index > 0" class="separator">›</span>
+        <button
+          @click="navigateToBreadcrumb(crumb)"
+          class="breadcrumb-link"
+          :class="{ 'breadcrumb-current': crumb.isCurrent }"
+          :disabled="crumb.isCurrent"
+        >
+          {{ crumb.name }}
+        </button>
+      </span>
+    </div>
+
+    <div class="verse-view-header">
+      <button @click="goBack" class="back-button">
+        {{ backButtonText }}
+      </button>
+    </div>
+
+    <div v-if="loading" class="loading">Loading verse...</div>
+
+    <div v-else-if="error" class="error">
+      <p>{{ error }}</p>
+      <button @click="goBack">Go Back</button>
+    </div>
+
+    <div v-else-if="verse" class="verse-content">
+      <!-- Verse Header with Full Hierarchy and Export Button -->
+      <div class="verse-header">
+        <div class="verse-title-line">
+          <h2>
+            <span class="work-title">{{ verse.work_name_tamil }}</span>
+            <template v-if="cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path)">
+              <span class="separator"> • </span>
+              <span class="hierarchy">{{ cleanHierarchyPath(verse.hierarchy_path_tamil || verse.hierarchy_path) }}</span>
+            </template>
+            <!-- Only show verse number for works with multiple verses (collections) -->
+            <!-- Hide for Manimegalai and Silapathikaram (1 verse per section) -->
+            <template v-if="verse.work_verse_count && verse.work_verse_count > 1 && verse.work_name !== 'Manimegalai' && verse.work_name !== 'Silapathikaram'">
+              <span class="separator"> • </span>
+              <span class="verse-info">{{ verse.verse_type_tamil || verse.verse_type || 'பாடல்' }} {{ verse.verse_number }}</span>
+            </template>
+          </h2>
+        </div>
+        <div class="verse-actions">
+          <!-- Navigation buttons (only shown when NOT from search and navigation is available) -->
+          <div v-if="navigation && !fromSearch" class="verse-navigation">
+            <button
+              @click="navigateToPrevVerse"
+              :disabled="!navigation.prev_verse_id"
+              class="nav-button"
+              title="Previous verse"
+            >
+              ← Prev
+            </button>
+            <button
+              @click="navigateToNextVerse"
+              :disabled="!navigation.next_verse_id"
+              class="nav-button"
+              title="Next verse"
+            >
+              Next →
+            </button>
+          </div>
+          <button @click="toggleExportMenu" class="export-verse-button">
+            📥 Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Export Menu -->
+      <div v-if="showExportMenu" class="export-menu" @click.stop>
+        <div class="export-menu-content">
+          <h3>Export Verse</h3>
+          <button @click="exportVerse('csv')" class="export-option">
+            📊 Export as CSV
+          </button>
+          <button @click="exportVerse('txt')" class="export-option">
+            📄 Export as TXT
+          </button>
+          <button @click="showExportMenu = false" class="export-modal-cancel">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Lines displayed in two columns -->
+      <div class="verse-lines-table" @dblclick="handleWordDoubleClick">
+        <div v-for="(line, index) in verse.lines" :key="line.line_id" class="line-row">
+          <span class="line-text" v-html="parseLineIntoWords(line.line_text)"></span>
+          <span v-if="(index + 1) % 5 === 0" class="line-number">{{ index + 1 }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import api from '../../../api.js'
+import { useCollectionState } from '../../../composables/useCollectionState.js'
+
+export default {
+  name: 'VerseView',
+  props: {
+    verseId: {
+      type: [Number, String],
+      required: true
+    },
+    workId: {
+      type: [Number, String],
+      default: null
+    },
+    searchWord: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['close'],
+  setup(props, { emit }) {
+    const router = useRouter()
+    const route = useRoute()
+    const { currentCollectionPath } = useCollectionState()
+
+    const verse = ref(null)
+    const navigation = ref(null)
+    const loading = ref(true)
+    const error = ref(null)
+    const showExportMenu = ref(false)
+
+    // Get search word from query params or props
+    const searchWord = computed(() => route.query.word || props.searchWord || '')
+
+    // Detect navigation source
+    const fromSearch = computed(() => route.query.from === 'search')
+
+    // Dynamic back button text
+    const backButtonText = computed(() => {
+      if (fromSearch.value) {
+        return '← Back to Search Results'
+      }
+      return '← Back'
+    })
+
+    // Compute breadcrumbs from collection state and verse data
+    const breadcrumbs = computed(() => {
+      if (!verse.value) return []
+
+      const crumbs = []
+
+      // Add collection breadcrumbs from shared state
+      if (currentCollectionPath.value.length > 0) {
+        currentCollectionPath.value.forEach(collection => {
+          crumbs.push({
+            type: 'collection',
+            id: collection.collection_id,
+            name: collection.collection_name_tamil || collection.collection_name,
+            routePath: '/works'
+          })
+        })
+      }
+
+      // Add work breadcrumb
+      if (verse.value.work_name_tamil) {
+        crumbs.push({
+          type: 'work',
+          id: verse.value.work_id,
+          name: verse.value.work_name_tamil,
+          routePath: `/works/${verse.value.work_id}`
+        })
+      }
+
+      // Parse section from hierarchy_path_tamil
+      if (verse.value.hierarchy_path_tamil) {
+        const parts = verse.value.hierarchy_path_tamil.split(' › ')
+        if (parts.length > 1) {
+          // Second-to-last item is typically the section
+          const sectionName = parts[parts.length - 2]
+          crumbs.push({
+            type: 'section',
+            name: sectionName,
+            routePath: `/works/${verse.value.work_id}/section/${verse.value.section_id}`
+          })
+        }
+      }
+
+      // Add current verse
+      crumbs.push({
+        type: 'verse',
+        id: verse.value.verse_id,
+        name: `பாடல் ${verse.value.verse_number}`,
+        routePath: `/verse/${verse.value.work_id}/${verse.value.verse_id}`,
+        isCurrent: true
+      })
+
+      return crumbs
+    })
+
+    // Navigate to breadcrumb
+    const navigateToBreadcrumb = (crumb) => {
+      router.push(crumb.routePath)
+    }
+
+    const loadVerse = async () => {
+      loading.value = true
+      error.value = null
+
+      try {
+        const response = await api.getVerse(props.verseId)
+        verse.value = response.data
+
+        // Load navigation if in router context (workId is available)
+        if (props.workId || route.params.workId) {
+          await loadNavigation()
+        }
+      } catch (err) {
+        error.value = 'Failed to load verse: ' + err.message
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const loadNavigation = async () => {
+      try {
+        const response = await api.getVerseNavigation(props.verseId)
+        navigation.value = response.data
+      } catch (err) {
+        console.error('Failed to load navigation:', err)
+        // Don't set error - navigation is optional
+      }
+    }
+
+    const navigateToPrevVerse = () => {
+      if (navigation.value?.prev_verse_id) {
+        const workId = props.workId || route.params.workId
+        // Use replace instead of push to avoid cluttering browser history
+        router.replace({
+          name: 'VerseView',
+          params: {
+            workId: workId,
+            verseId: navigation.value.prev_verse_id
+          }
+        })
+      }
+    }
+
+    const navigateToNextVerse = () => {
+      if (navigation.value?.next_verse_id) {
+        const workId = props.workId || route.params.workId
+        // Use replace instead of push to avoid cluttering browser history
+        router.replace({
+          name: 'VerseView',
+          params: {
+            workId: workId,
+            verseId: navigation.value.next_verse_id
+          }
+        })
+      }
+    }
+
+    const goBack = () => {
+      // Check if we're in router mode by checking for workId param
+      const isRouterMode = props.workId || route.params.workId
+
+      if (!isRouterMode) {
+        // Modal mode: use emit to close the overlay
+        emit('close')
+        return
+      }
+
+      // Router mode: Use browser history navigation
+      // This restores the previous page state without triggering a new search
+      router.back()
+    }
+
+    const cleanHierarchyPath = (path) => {
+      if (!path) return ''
+
+      // Split by ' > ' to get each level
+      const levels = path.split(' > ')
+
+      // Clean each level - remove the "type:" prefix and keep only the name
+      const cleanedLevels = levels.map(level => {
+        // Split by ':' to separate level_type and section_name
+        const parts = level.split(':')
+        if (parts.length === 2) {
+          const sectionName = parts[1].trim()
+          // Hide generic section labels like "முக்கிய தொகுப்பு"
+          if (sectionName === 'முக்கிய தொகுப்பு' || sectionName === 'Main Collection') {
+            return null
+          }
+          // Return only the section name (part after the colon)
+          return sectionName
+        }
+        // If no colon, return as-is
+        return level.trim()
+      }).filter(level => level !== null)  // Remove nulls
+
+      return cleanedLevels.join(' • ')
+    }
+
+    const parseLineIntoWords = (lineText) => {
+      if (!lineText) return ''
+
+      // Escape HTML first
+      const escaped = lineText
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+
+      // Find Tamil words and wrap in clickable spans
+      const parsed = escaped.replace(/[\u0B80-\u0BFF]+/g, (word) => {
+        // Check if this word matches search word (for highlighting)
+        const wordToHighlight = searchWord.value
+        const isHighlighted = wordToHighlight && word.includes(wordToHighlight)
+        const classes = isHighlighted
+          ? 'word-clickable word-highlight'
+          : 'word-clickable'
+
+        return `<span class="${classes}" data-word="${word}">${word}</span>`
+      })
+
+      return parsed
+    }
+
+    const handleWordDoubleClick = (event) => {
+      const target = event.target
+      if (target.classList.contains('word-clickable')) {
+        const word = target.getAttribute('data-word')
+        if (word) {
+          const url = `https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(word)}&searchhws=yes&matchtype=default`
+          window.open(url, '_blank')
+        }
+      }
+    }
+
+    const shouldShowLineNumber = (lineNumber) => {
+      // Show line number every 5th line
+      return lineNumber % 5 === 0
+    }
+
+    const toggleExportMenu = () => {
+      showExportMenu.value = !showExportMenu.value
+    }
+
+    const exportVerse = (format) => {
+      showExportMenu.value = false
+      if (format === 'csv') {
+        exportVerseToCSV()
+      } else if (format === 'txt') {
+        exportVerseToTXT()
+      }
+    }
+
+    const exportVerseToCSV = () => {
+      if (!verse.value) return
+
+      const headers = ['Line Text']
+      const rows = verse.value.lines.map((line) => [
+        line.line_text
+      ])
+
+      const csvLines = [
+        '"Data Source: tamilconcordence.in"',
+        '"Compiled by: Prof. Dr. P. Pandiyaraja"',
+        '',
+        `"Work: ${verse.value.work_name_tamil}"`
+      ]
+
+      // Add section if present
+      if (cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)) {
+        csvLines.push(`"Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}"`)
+      }
+
+      // Add verse number only for multi-verse works (except Manimegalai and Silapathikaram)
+      if (verse.value.work_verse_count && verse.value.work_verse_count > 1 &&
+          verse.value.work_name !== 'Manimegalai' && verse.value.work_name !== 'Silapathikaram') {
+        csvLines.push(`"${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}"`)
+      }
+
+      csvLines.push('', headers.join(','))
+      rows.forEach(row => csvLines.push(row.map(cell => `"${cell}"`).join(',')))
+
+      const csvContent = csvLines.join('\n')
+
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `verse_${verse.value.verse_id}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    const exportVerseToTXT = () => {
+      if (!verse.value) return
+
+      let content = 'Data Source: tamilconcordence.in\n'
+      content += 'Compiled by: Prof. Dr. P. Pandiyaraja\n\n'
+
+      content += `Work: ${verse.value.work_name_tamil}\n`
+      if (cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)) {
+        content += `Section: ${cleanHierarchyPath(verse.value.hierarchy_path_tamil || verse.value.hierarchy_path)}\n`
+      }
+      // Add verse number only for multi-verse works (except Manimegalai and Silapathikaram)
+      if (verse.value.work_verse_count && verse.value.work_verse_count > 1 &&
+          verse.value.work_name !== 'Manimegalai' && verse.value.work_name !== 'Silapathikaram') {
+        content += `${verse.value.verse_type_tamil || 'பாடல்'}: ${verse.value.verse_number}\n`
+      }
+      content += '\n---\n\n'
+
+      verse.value.lines.forEach((line) => {
+        content += `${line.line_text}\n`
+      })
+
+      const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `verse_${verse.value.verse_id}_${new Date().toISOString().split('T')[0]}.txt`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    // Close export menu when clicking outside
+    const handleClickOutside = (event) => {
+      if (showExportMenu.value && !event.target.closest('.export-menu') && !event.target.closest('.export-verse-button')) {
+        showExportMenu.value = false
+      }
+    }
+
+    onMounted(() => {
+      loadVerse()
+      document.addEventListener('click', handleClickOutside)
+    })
+
+    // Watch for route changes to reload verse
+    watch(() => props.verseId, () => {
+      loadVerse()
+    })
+
+    return {
+      verse,
+      navigation,
+      loading,
+      error,
+      showExportMenu,
+      searchWord,
+      fromSearch,
+      backButtonText,
+      breadcrumbs,
+      goBack,
+      navigateToPrevVerse,
+      navigateToNextVerse,
+      navigateToBreadcrumb,
+      cleanHierarchyPath,
+      parseLineIntoWords,
+      handleWordDoubleClick,
+      shouldShowLineNumber,
+      toggleExportMenu,
+      exportVerse
+    }
+  }
+}
+</script>
+
+<style scoped>
+.verse-view-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.breadcrumb-link {
+  color: #1976d2;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+  background: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-link.breadcrumb-current {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.separator {
+  color: #999;
+  margin: 0 0.25rem;
+}
+
+.verse-view-header {
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--english-font);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+}
+
+.back-button:hover {
+  background: #1565c0;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+}
+
+.back-button:active {
+  transform: translateX(-2px);
+}
+
+.verse-header {
+  background: white;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.verse-title-line {
+  flex: 1;
+  min-width: 0;
+}
+
+.verse-header h2 {
+  font-size: 0.95rem;
+  font-family: var(--tamil-font), var(--english-font);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 400;
+}
+
+.work-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.separator {
+  color: var(--text-secondary);
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.hierarchy {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.verse-info {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.verse-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.verse-navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-button {
+  padding: 0.5rem 1rem;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover:not(:disabled) {
+  background: #1565c0;
+  transform: translateY(-1px);
+}
+
+.nav-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.export-verse-button {
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--kurinji-primary);
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.export-verse-button:hover {
+  color: #1e4a66;
+  transform: translateY(-1px);
+}
+
+.export-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.export-menu-content {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 280px;
+}
+
+.export-option {
+  padding: 1rem 1.5rem;
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-primary);
+}
+
+.export-option:hover {
+  border-color: var(--primary-color);
+  background: #fff5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15);
+}
+
+.verse-lines-table {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.line-row {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.25rem 0;
+  align-items: baseline;
+  line-height: 1.3;
+  border-bottom: 1px solid #d0d0d0;  /* More visible separator line */
+}
+
+.line-row:last-child {
+  border-bottom: none;
+}
+
+.line-number {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  margin-left: 0.5rem;
+}
+
+.line-text {
+  font-size: 1.1rem;
+  font-family: var(--tamil-font), var(--english-font);
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .line-row {
+    gap: 0.35rem;
+    padding: 0.2rem 0;
+  }
+
+  .line-number {
+    font-size: 0.65rem;
+  }
+
+  .line-text {
+    font-size: 1rem;
+  }
+
+  .verse-lines-table {
+    padding: 0.75rem 0;
+  }
+
+  .verse-header {
+    padding: 0.75rem 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .verse-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .verse-navigation {
+    flex: 1;
+  }
+
+  .nav-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .verse-header h2 {
+    font-size: 0.85rem;
+  }
+
+  .work-title {
+    font-size: 0.9rem;
+  }
+
+  .separator,
+  .hierarchy,
+  .verse-info {
+    font-size: 0.9rem;
+  }
+}
+
+.verse-metadata {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.verse-metadata p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.1rem;
+}
+
+.error {
+  color: var(--error);
+}
+
+.error button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.word-highlight {
+  background: linear-gradient(120deg, #ffd54f 0%, #ffeb3b 100%);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(255, 193, 7, 0.3);
+}
+
+/* Clickable word styling */
+.word-clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.word-clickable:hover {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Highlighted words keep their existing styling */
+.word-clickable.word-highlight:hover {
+  text-decoration-color: rgba(255, 193, 7, 0.8);
+}
+</style>

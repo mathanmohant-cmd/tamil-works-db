@@ -312,59 +312,64 @@ Located in `webapp/backend/`:
 
 Located in `webapp/frontend/`:
 
+**IMPORTANT:** See `webapp/frontend/FRONTEND_STRUCTURE.md` for complete frontend structure documentation, import path rules, and best practices. **Always consult this guide before making frontend changes.**
+
 **Tech Stack:**
-- Vue 3 (Composition API with Composition API pattern)
+- Vue 3 (Composition API)
 - Vue Router (for navigation between features)
 - Vite (build tool and dev server)
 - Axios (HTTP client)
 
-**Architecture Pattern (2026-01-09):**
-- **Router-based navigation** with nested routes
-- **Composables** for shared state (useSearchState, useFilterState)
-- **Layout components** for consistent UI structure
-- **Modular feature components** organized by feature (search/, works/)
+**Architecture Pattern (2026-02-07 - Major Reorganization):**
+- **Feature-based organization** with `/features` folder (search, works, help, about, admin, insights)
+- **Shared components** in `/shared` folder (AppHeader, AppFooter, CollectionTree)
+- **Composables** for shared state in `/composables` (useSearchState, useFilterState, useUserRole)
+- **Clear import path patterns** - all imports use explicit relative paths (see FRONTEND_STRUCTURE.md)
 
-**Key Application Structure:**
+**Key Application Structure (Post-2026-02-07 Reorganization):**
 - `src/App.vue` - Root component with route transitions
 - `src/router.js` - Route definitions with nested routes
-- `src/layouts/AppLayout.vue` - Main layout wrapper (header + navigation + content)
-- `src/components/AppHeader.vue` - Application header with search integration
-- `src/components/AppNavigation.vue` - Dropdown navigation menu
+- `src/layouts/AppLayout.vue` - Main layout wrapper (header + content + footer)
+- `src/shared/AppHeaderEnhanced.vue` - Enhanced header with search + user menu
+- `src/shared/AppFooter.vue` - Footer component
+- `src/shared/CollectionTree.vue` - Hierarchical collection filter UI
 
-**Pages (Route-level components):**
-- `src/pages/SearchPage.vue` - Word search interface (default route)
-- `src/pages/WorksBrowser.vue` - Works exploration container
-- `src/Home.vue` - Acknowledgment page
-- `src/AboutConcordance.vue` - About & Help (with QA and Principles tabs)
-- `src/OurJourney.vue` - Project story
-- `src/AdminPage.vue` - Collection management
+**Feature Organization:**
+- `src/features/search/` - Word search feature (pages + components)
+- `src/features/works/` - Works browser feature (pages + components)
+- `src/features/help/` - Help & documentation pages
+- `src/features/about/` - About & story pages
+- `src/features/admin/` - Admin panel
+- `src/features/insights/` - Data insights page
 
-**Search Feature Components:**
-- `src/components/search/SearchControls.vue` - Search filters and options
-- `src/components/search/SearchResults.vue` - Results display with expandable words
-- `src/composables/useSearchState.js` - Shared search state management
-- `src/composables/useFilterState.js` - Work filter persistence
+**Search Feature (src/features/search/):**
+- `pages/SearchPage.vue` - Quick start search interface
+- `pages/SearchResultsPage.vue` - Detailed search results
+- `components/SearchControls.vue` - Search filters and options
+- `components/SearchResults.vue` - Results display with expandable words
 
-**Works Browser Feature Components (NEW 2026-01-09):**
-- `src/components/works/WorksList.vue` - Grid view of all literary works
-- `src/components/works/WorkDetail.vue` - Work details with hierarchical sections tree
-- `src/components/works/SectionTreeNode.vue` - Recursive tree node for sections
-- `src/components/works/SectionView.vue` - Paginated verse listing for a section
-- `src/VerseView.vue` - Full verse display with prev/next navigation
+**Works Browser Feature (src/features/works/):**
+- `pages/WorksBrowser.vue` - Works exploration container
+- `pages/VerseView.vue` - Full verse display with prev/next navigation
+- `components/WorksList.vue` - Grid view of all literary works
+- `components/WorkDetail.vue` - Work details with hierarchical sections tree
+- `components/SectionTreeNode.vue` - Recursive tree node for sections
+- `components/SectionView.vue` - Paginated verse listing for a section
 
 **Router Structure:**
 ```
-/ → AppLayout (header + nav)
-  ├── /search (SearchPage) - Default route
+/ → AppLayout (header + nav + footer)
+  ├── / (WelcomePage) - Home/landing page
+  ├── /help/* - Help & documentation pages
   ├── /works → WorksBrowser
   │   ├── /works (WorksList) - Grid of all works
   │   ├── /works/:workId (WorkDetail) - Work info + sections tree
   │   └── /works/:workId/section/:sectionId (SectionView) - Verses in section
-  ├── /verse/:workId/:verseId (VerseView) - Independent verse viewer (works from search & works browser)
-  ├── /about (AboutConcordance)
-  ├── /journey (OurJourney)
-  └── /home (Home)
-/admin (AdminPage) - Separate layout
+  ├── /verse/:workId/:verseId (VerseView) - Independent verse viewer
+  ├── /story/* - About & story pages (OurJourney, OurInspiration, etc.)
+  ├── /insights (InsightsPage)
+  └── /acknowledgment (Home)
+/admin (AdminPage) - Separate layout, requires admin role
 ```
 
 **User Role System (2026-01-24):**
@@ -624,6 +629,7 @@ npm run dev -- --host
 - `NEON_SETUP_GUIDE.md` - Cloud database hosting guide
 - `tamil_literature_database_guide.md` - Comprehensive DB documentation
 - `scripts/WORD_SEGMENTATION_PRINCIPLES.md` - Word parsing guidelines
+- `webapp/frontend/FRONTEND_STRUCTURE.md` - **Frontend structure guide (READ BEFORE MAKING FRONTEND CHANGES)**
 - `DESIGNATED_COLLECTION_PATTERN.md` - Designated collection pattern (2025-12-29)
 - `PLAN_DECISIONS_2025-12-29.md` - Design decisions for designated collection
 - `MOBILE_TESTING.md` - Mobile device testing setup guide (2025-12-29)
@@ -648,6 +654,33 @@ npm run dev -- --host
 ### Data Files
 - `*conc_full.txt` - Concordance files for each work
 - `scripts/thirukkural_structure.json` - Thirukkural hierarchy metadata
+
+### Scripts Directory Structure
+- `scripts/` - Core import, delete, and setup scripts
+  - `setup_railway_db.py` - Database setup script
+  - `populate_phoneme_column.py` - Phoneme column migration utility
+  - `*_bulk_import.py` - 40+ bulk import scripts for literary works
+  - `delete_*.py` - 20+ deletion scripts for works and collections
+  - `import_devotional_literature.py` - Master import script for devotional works
+- `scripts/shared/` - Shared utilities and base classes for import scripts
+  - `base_importer.py` - Base class for all import scripts
+  - `utils.py` - Common utility functions
+- `scripts/utilities/` - General utility scripts
+  - `force_reset_railway.py` - Railway database reset tool
+  - `tamil_phoneme_converter.py` - Tamil phoneme conversion utility
+- `scripts/metadata_examples/` - Metadata reference examples
+  - `thirumurai_metadata_example.py` - Thirumurai metadata structure
+  - `naalayira_divya_prabandham_metadata_example.py` - NDP metadata structure
+  - `siddhar_padalgal_work_metadata.py` - Siddhar works metadata
+- `scripts/verification/` - Verification and QA scripts
+  - `qa_verify_thirumurai_file11.py` - Thirumurai data verification
+  - `verify_kambaramayanam_migai.py` - Kambaramayanam verification
+- `scripts/tests/` - Test scripts
+  - `test_hyphen_placeholder_fix.py` - Hyphen handling test
+- `scripts/migrations/` - Database migration scripts
+  - `run_migration_005.py` - Migration runner for verse_tag column
+- `scripts/temp_analysis/` - Temporary analysis and debugging scripts
+- `scripts/eighteen_lesser_texts/` - Generator scripts for lesser texts
 
 ## Development Workflow
 
@@ -802,3 +835,7 @@ When searching with `limit=0`:
 **Note:** The `work_breakdown` array contains one entry per verse (not per work), so the frontend must aggregate by `work_name` to get unique work counts and total usage per work.
 - read the tables first before writing parser
 - when adding new contents, match the style of reset of the contents in the website
+- remeber to pass password for psql query
+- remeber to pass password for psql query
+- check COLLECTION_ID_MAP.md when creating import or delete scripts for works
+- use scripts/temp_analysis for temp scripts

@@ -1,25 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from './layouts/AppLayout.vue'
-import WelcomePage from './pages/WelcomePage.vue'
-import HelpPage from './pages/HelpPage.vue'
-import Home from './Home.vue'
-import SearchPage from './pages/SearchPage.vue'
-import SearchResultsPage from './pages/SearchResultsPage.vue'
-import WorksBrowser from './pages/WorksBrowser.vue'
-import WorksList from './components/works/WorksList.vue'
-import WorkDetail from './components/works/WorkDetail.vue'
-import SectionView from './components/works/SectionView.vue'
-import VerseView from './VerseView.vue'
-import UnderstandingThisToolPage from './pages/UnderstandingThisToolPage.vue'
-import WordSegmentationPage from './pages/WordSegmentationPage.vue'
-import TransliterationGuidePage from './pages/TransliterationGuidePage.vue'
-import AboutUsPage from './pages/AboutUsPage.vue'
-import ContactUsPage from './pages/ContactUsPage.vue'
-import DisclaimerPage from './pages/DisclaimerPage.vue'
-import OurJourney from './OurJourney.vue'
-import OurInspiration from './pages/OurInspiration.vue'
-import TheStoryBehind from './pages/TheStoryBehind.vue'
-import AdminPage from './AdminPage.vue'
+import Home from './features/home/pages/Home.vue'
+import HelpPageMenu from './features/help/pages/HelpPageMenu.vue'
+import Acknowledgment from './features/home/pages/Acknowledgment.vue'
+import QuickStart from './features/help/pages/QuickStart.vue'
+import SearchResultsPage from './features/search/pages/SearchResultsPage.vue'
+import WorksBrowser from './features/works/pages/WorksBrowser.vue'
+import WorksList from './features/works/components/WorksList.vue'
+import WorkDetail from './features/works/components/WorkDetail.vue'
+import SectionView from './features/works/components/SectionView.vue'
+import VerseView from './features/works/pages/VerseView.vue'
+import UnderstandingThisToolPage from './features/help/pages/UnderstandingThisToolPage.vue'
+import WordSegmentationPage from './features/help/pages/WordSegmentationPage.vue'
+import TransliterationGuidePage from './features/help/pages/TransliterationGuidePage.vue'
+import AboutUsPage from './features/home/pages/AboutUsPage.vue'
+import ContactUsPage from './features/home/pages/ContactUsPage.vue'
+import DisclaimerPage from './features/home/pages/DisclaimerPage.vue'
+import OurJourney from './features/about/pages/OurJourney.vue'
+import OurInspiration from './features/about/pages/OurInspiration.vue'
+import AboutUsMenu from './features/about/pages/AboutUsMenu.vue'
+import AdminPage from './features/admin/pages/AdminPage.vue'
+import InsightsPage from './features/insights/pages/InsightsPage.vue'
 import { useUserRole } from './composables/useUserRole.js'
 
 const routes = [
@@ -30,25 +31,25 @@ const routes = [
       {
         path: '',
         name: 'Home',
-        component: WelcomePage,
+        component: Home,
         meta: { title: 'Home' }
       },
       {
         path: 'acknowledgment',
         name: 'Acknowledgment',
-        component: Home,
+        component: Acknowledgment,
         meta: { title: 'Acknowledgment' }
       },
       {
         path: 'help',
         name: 'Help',
-        component: HelpPage,
+        component: HelpPageMenu,
         meta: { title: 'Help' }
       },
       {
         path: 'help/quick-start',
         name: 'QuickStart',
-        component: SearchPage,
+        component: QuickStart,
         meta: { title: 'Quick Start' }
       },
       {
@@ -112,7 +113,7 @@ const routes = [
       {
         path: 'story',
         name: 'TheStoryBehind',
-        component: TheStoryBehind,
+        component: AboutUsMenu,
         meta: { title: 'The Story Behind' }
       },
       {
@@ -138,6 +139,12 @@ const routes = [
         name: 'ContactUs',
         component: ContactUsPage,
         meta: { title: 'Contact Us' }
+      },
+      {
+        path: 'insights',
+        name: 'Insights',
+        component: InsightsPage,
+        meta: { title: 'Insights' }
       },
       {
         path: 'disclaimer',

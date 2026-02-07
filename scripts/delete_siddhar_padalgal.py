@@ -57,7 +57,7 @@ WORK_NAMES = [
     'Punnaakku Siddhar Paadal',
     'Machaendhira Nathar (Nondi Siddhar) Paadal',
     'Vagulinathar (Mauna Siddhar) Paadal',
-    'Valmiki'
+    'Valmiki Soothiram'
 ]
 
 COLLECTION_ID = 327

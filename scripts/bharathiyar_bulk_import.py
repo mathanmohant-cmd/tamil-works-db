@@ -26,6 +26,7 @@ Structure:
 - ** Metadata markers (ராகம், தாளம், பல்லவி, சரணங்கள், song type, notes)
 - #N Verse markers (can start from #0 for pallavi)
 - Verse lines (variable length, separated by blank lines)
+- * Standalone asterisk (file terminator - FILTERED OUT)
 
 IMPORTANT: This parser stores metadata in JSONB columns:
 - sections.metadata: Musical notation (ராகம், தாளம்), song type, meter, translation notes
@@ -33,14 +34,15 @@ IMPORTANT: This parser stores metadata in JSONB columns:
 """
 
 import re
-import psycopg2
 from pathlib import Path
-import csv
-import io
 import sys
 import os
 import json
-from word_cleaning import split_and_clean_words
+
+# Import shared utilities
+sys.path.insert(0, str(Path(__file__).parent))  # Add scripts/ to path
+from shared.base_importer import BaseWorkImporter
+from shared.utils import split_and_clean_words, clean_line_text
 
 # Work metadata for all 4 thematic groups
 WORK_METADATA = {
@@ -123,7 +125,7 @@ FILE_SECTION_NAMES = {
 }
 
 
-class BharathiyarBulkImporter:
+class BharathiyarBulkImporter(BaseWorkImporter):
     """
     Imports Bharathiyar poetry using 2-phase bulk COPY pattern with JSONB metadata.
 
@@ -141,112 +143,46 @@ class BharathiyarBulkImporter:
     """
 
     def __init__(self, db_connection_string="postgresql://postgres:postgres@localhost/tamil_literature"):
-        """Initialize with database connection and query MAX IDs"""
-        self.conn = psycopg2.connect(db_connection_string)
-        self.cursor = self.conn.cursor()
+        """Initialize with database connection using BaseWorkImporter"""
+        # Call parent constructor with collection ID
+        super().__init__(db_connection_string, collection_id=328)
 
-        # Query MAX IDs from ALL tables ONCE (critical pattern from CLAUDE.md)
-        # NEVER query inside loops - causes duplicate IDs!
-
-        self.cursor.execute("SELECT COALESCE(MAX(collection_id), 0) FROM collections")
-        self.collection_id = self.cursor.fetchone()[0] + 1
-
-        self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) FROM works")
-        self.work_id = self.cursor.fetchone()[0] + 1
-
-        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
-        self.section_id = self.cursor.fetchone()[0] + 1
-
-        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
-        self.verse_id = self.cursor.fetchone()[0] + 1
-
-        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
-        self.line_id = self.cursor.fetchone()[0] + 1
-
-        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
-        self.word_id = self.cursor.fetchone()[0] + 1
-
-        # In-memory data structures (lists of dicts)
-        self.collections_to_create = []
-        self.works = []
-        self.work_collections = []
-        self.sections = []
-        self.verses = []
-        self.lines = []
-        self.words = []
-
-        # Counters for progress reporting
+        # Counters for progress reporting (not IDs - those are in parent)
         self.section_counter = 0
         self.verse_counter = 0
         self.line_counter = 0
         self.word_counter = 0
 
         print(f"Initialized BharathiyarBulkImporter")
-        print(f"  Next IDs: work={self.work_id}, section={self.section_id}, verse={self.verse_id}")
         print(f"  Collection 328 will be created if not exists")
 
-    def _ensure_collection_exists(self):
-        """Check if collection 328 exists, create if not"""
-        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 328")
-        existing = self.cursor.fetchone()
+    def _setup_collection(self):
+        """Setup collection 328 (uses parent method)"""
+        super()._ensure_collection_exists(
+            collection_id=328,
+            collection_name='Bharathiyar Works',
+            collection_name_tamil='பாரதியார் படைப்புகள்',
+            description='Poetry of Subramania Bharathiyar (1882-1921 CE) - National, devotional, and social reform poetry'
+        )
 
-        if not existing:
-            print(f"\nCreating Collection 328 (இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம் - Modern Tamil Literature)")
-            self.collections_to_create.append((
-                328,
-                'Bharathiyar Works',
-                'பாரதியார் படைப்புகள்',
-                'period',
-                'Poetry of Subramania Bharathiyar (1882-1921 CE) - National, devotional, and social reform poetry',
-                1,  # Parent: தமிழ் இலக்கியம் (designated filter collection)
-                7   # After Thirumurai=1, NDPD=2, Devotional=3, Five Minor Epics=4, நீதிநூல்கள்=5, சித்தர் பாடல்கள்=6
-            ))
-            self.collection_id = 328
-            print(f"  [OK] Collection 328 will be created")
-        else:
-            print(f"  Found existing collection 328")
-            self.collection_id = 328
-
-    def _create_work(self, work_num: int) -> int:
-        """Create work entry from WORK_METADATA and return work_id"""
+    def _create_work_from_metadata(self, work_num: int) -> int:
+        """Create work entry from WORK_METADATA using parent class method"""
         if work_num not in WORK_METADATA:
             raise ValueError(f"Invalid work number: {work_num}")
 
         metadata = WORK_METADATA[work_num]
 
-        # Check if work already exists
-        self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s AND work_name_tamil = %s",
-                          (metadata['work_name'], metadata['work_name_tamil']))
-        existing = self.cursor.fetchone()
-
-        if existing:
-            print(f"  [ERROR] Work {metadata['work_name']} already exists (ID: {existing[0]})")
+        try:
+            work_id = super()._create_work(
+                work_name=metadata['work_name'],
+                work_name_tamil=metadata['work_name_tamil'],
+                metadata=metadata  # Includes period, author, description, canonical_order, position_in_collection
+            )
+            print(f"  Created work: {metadata['work_name_tamil']} (ID: {work_id}, Canonical: {metadata['canonical_order']})")
+            return work_id
+        except ValueError as e:
+            print(f"  [ERROR] {e}")
             return None
-
-        # Use pre-allocated work_id and increment
-        work_id = self.work_id
-        self.work_id += 1
-
-        self.works.append({
-            'work_id': work_id,
-            'work_name': metadata['work_name'],
-            'work_name_tamil': metadata['work_name_tamil'],
-            'author': metadata['author'],
-            'author_tamil': metadata['author_tamil'],
-            'period': metadata['period'],
-            'description': metadata.get('description', ''),
-            'canonical_order': metadata['canonical_order']
-        })
-
-        # Link work to collection 328
-        self.work_collections.append({
-            'work_id': work_id,
-            'collection_id': self.collection_id,
-            'position_in_collection': metadata['position_in_collection']
-        })
-
-        print(f"  Created work: {metadata['work_name_tamil']} (ID: {work_id}, Canonical: {metadata['canonical_order']})")
-        return work_id
 
     def _parse_metadata_line(self, line: str, poem_metadata: dict, verse_metadata: dict):
         """Parse ** metadata markers and accumulate into metadata dicts"""
@@ -356,15 +292,18 @@ class BharathiyarBulkImporter:
             self.line_id += 1
             self.line_counter += 1
 
+            # Clean line text (removes trailing numbers like "35", dots, markers)
+            cleaned_line = clean_line_text(line_text)
+
             self.lines.append({
                 'line_id': line_id,
                 'verse_id': verse_id,
                 'line_number': line_num,
-                'line_text': line_text.strip()
+                'line_text': cleaned_line
             })
 
-            # Word segmentation
-            words = split_and_clean_words(line_text)
+            # Word segmentation (use cleaned line)
+            words = split_and_clean_words(cleaned_line)
             for word_pos, word_text in enumerate(words, start=1):
                 word_id = self.word_id
                 self.word_id += 1
@@ -416,6 +355,10 @@ class BharathiyarBulkImporter:
                         current_verse_lines = []
                         verse_metadata = {}  # Reset verse metadata after use
                         in_verse = False
+                    continue
+
+                # FILTER OUT STANDALONE ASTERISK (file terminator)
+                if line == '*':
                     continue
 
                 # &N MARKER → Create Level 1 section (directly under work)
@@ -531,162 +474,48 @@ class BharathiyarBulkImporter:
 
         print(f"    Parsed {poem_counter} poems")
 
-    def bulk_insert(self):
-        """Phase 2: Bulk COPY all data into database"""
-        print(f"\n{'='*60}")
-        print(f"Phase 2: Bulk inserting into database")
-        print(f"{'='*60}")
+    def _bulk_copy(self, table_name, data, columns):
+        """Override parent to handle JSONB in both sections and verses tables"""
+        import io
+        import csv
 
-        try:
-            # 1. Insert collections
-            if self.collections_to_create:
-                print(f"\n1. Inserting {len(self.collections_to_create)} collection(s)...")
-                for collection_data in self.collections_to_create:
-                    self.cursor.execute("""
-                        INSERT INTO collections
-                        (collection_id, collection_name, collection_name_tamil, collection_type, description, parent_collection_id, sort_order)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """, collection_data)
-                print(f"  [OK] Collections inserted")
+        if not data:
+            return
 
-            # 2. Insert works
-            print(f"\n2. Inserting {len(self.works)} work(s)...")
-            works_buffer = io.StringIO()
-            writer = csv.writer(works_buffer, delimiter='\t')
-            for work in self.works:
-                writer.writerow([
-                    work['work_id'],
-                    work['work_name'],
-                    work['work_name_tamil'],
-                    work['author'],
-                    work['author_tamil'],
-                    work['period'],
-                    work.get('description', ''),
-                    work['canonical_order']
-                ])
-            works_buffer.seek(0)
-            self.cursor.copy_from(works_buffer, 'works',
-                                columns=['work_id', 'work_name', 'work_name_tamil', 'author',
-                                        'author_tamil', 'period', 'description', 'canonical_order'],
-                                null='')
-            print(f"  [OK] {len(self.works)} works inserted")
+        buffer = io.StringIO()
 
-            # 3. Insert work_collections
-            print(f"\n3. Inserting {len(self.work_collections)} work-collection links...")
-            wc_buffer = io.StringIO()
-            writer = csv.writer(wc_buffer, delimiter='\t')
-            for wc in self.work_collections:
-                writer.writerow([wc['work_id'], wc['collection_id'], wc['position_in_collection']])
-            wc_buffer.seek(0)
-            self.cursor.copy_from(wc_buffer, 'work_collections',
-                                columns=['work_id', 'collection_id', 'position_in_collection'],
-                                null='')
-            print(f"  [OK] Work-collection links inserted")
+        # Special handling for tables with metadata (JSONB) column
+        if table_name in ['sections', 'verses'] and 'metadata' in columns:
+            # Manually format rows to avoid CSV escaping of JSON
+            for row in data:
+                metadata_value = row.get('metadata', None)
+                if metadata_value:
+                    # If it's a dict, serialize to JSON
+                    if isinstance(metadata_value, dict):
+                        metadata_value = json.dumps(metadata_value, ensure_ascii=False)
+                    # Replace tab characters in JSON to avoid breaking the format
+                    metadata_value = metadata_value.replace('\t', ' ')
 
-            # 4. Insert sections (with JSONB metadata)
-            print(f"\n4. Inserting {len(self.sections)} section(s) with JSONB metadata...")
-            sections_buffer = io.StringIO()
-            for section in self.sections:
-                # Serialize metadata to JSON
-                metadata_json = ''
-                if section.get('metadata'):
-                    metadata_json = json.dumps(section['metadata'], ensure_ascii=False)
-                    metadata_json = metadata_json.replace('\t', ' ')  # Remove tabs for COPY
+                # Build row values in column order
+                values = []
+                for col in columns:
+                    if col == 'metadata':
+                        values.append(metadata_value if metadata_value else '')
+                    else:
+                        val = row.get(col)
+                        values.append(str(val) if val is not None else '')
 
-                # Manual row formatting (CSV writer breaks JSONB)
-                row = [
-                    str(section['section_id']),
-                    str(section['work_id']),
-                    str(section['parent_section_id']) if section.get('parent_section_id') else '',
-                    section['level_type'],
-                    section['level_type_tamil'],
-                    str(section['section_number']),
-                    section.get('section_name', ''),
-                    section.get('section_name_tamil', ''),
-                    str(section['sort_order']),
-                    metadata_json
-                ]
-                sections_buffer.write('\t'.join(row) + '\n')
+                buffer.write('\t'.join(values) + '\n')
 
-            sections_buffer.seek(0)
-            self.cursor.copy_from(sections_buffer, 'sections',
-                                columns=['section_id', 'work_id', 'parent_section_id', 'level_type',
-                                        'level_type_tamil', 'section_number', 'section_name',
-                                        'section_name_tamil', 'sort_order', 'metadata'],
-                                null='')
-            print(f"  [OK] {len(self.sections)} sections inserted")
-
-            # 5. Insert verses (with JSONB metadata)
-            print(f"\n5. Inserting {len(self.verses)} verse(s) with JSONB metadata...")
-            verses_buffer = io.StringIO()
-            for verse in self.verses:
-                # Serialize metadata to JSON
-                metadata_json = ''
-                if verse.get('metadata'):
-                    metadata_json = json.dumps(verse['metadata'], ensure_ascii=False)
-                    metadata_json = metadata_json.replace('\t', ' ')
-
-                row = [
-                    str(verse['verse_id']),
-                    str(verse['work_id']),
-                    str(verse['section_id']),
-                    str(verse['verse_number']),
-                    verse.get('verse_type', '') or '',
-                    verse.get('verse_type_tamil', '') or '',
-                    str(verse['total_lines']),
-                    str(verse['sort_order']),
-                    metadata_json
-                ]
-                verses_buffer.write('\t'.join(row) + '\n')
-
-            verses_buffer.seek(0)
-            self.cursor.copy_from(verses_buffer, 'verses',
-                                columns=['verse_id', 'work_id', 'section_id', 'verse_number',
-                                        'verse_type', 'verse_type_tamil', 'total_lines',
-                                        'sort_order', 'metadata'],
-                                null='')
-            print(f"  [OK] {len(self.verses)} verses inserted")
-
-            # 6. Insert lines
-            print(f"\n6. Inserting {len(self.lines)} line(s)...")
-            lines_buffer = io.StringIO()
-            writer = csv.writer(lines_buffer, delimiter='\t')
-            for line in self.lines:
-                writer.writerow([line['line_id'], line['verse_id'], line['line_number'], line['line_text']])
-            lines_buffer.seek(0)
-            self.cursor.copy_from(lines_buffer, 'lines',
-                                columns=['line_id', 'verse_id', 'line_number', 'line_text'],
-                                null='')
-            print(f"  [OK] {len(self.lines)} lines inserted")
-
-            # 7. Insert words
-            print(f"\n7. Inserting {len(self.words)} word(s)...")
-            words_buffer = io.StringIO()
-            writer = csv.writer(words_buffer, delimiter='\t')
-            for word in self.words:
-                writer.writerow([
-                    word['word_id'],
-                    word['line_id'],
-                    word['word_position'],
-                    word['word_text'],
-                    word.get('sandhi_split', '') or ''
-                ])
-            words_buffer.seek(0)
-            self.cursor.copy_from(words_buffer, 'words',
-                                columns=['word_id', 'line_id', 'word_position', 'word_text', 'sandhi_split'],
-                                null='')
-            print(f"  [OK] {len(self.words)} words inserted")
-
-            # Commit all changes
-            self.conn.commit()
-            print(f"\n{'='*60}")
-            print(f"✓ SUCCESS: All data committed to database")
-            print(f"{'='*60}")
-
-        except Exception as e:
-            print(f"\n✗ ERROR during bulk insert: {e}")
-            self.conn.rollback()
-            raise
+            buffer.seek(0)
+            self.cursor.copy_from(buffer, table_name, columns=columns, null='')
+        else:
+            # Use CSV writer for tables without JSON
+            writer = csv.writer(buffer, delimiter='\t')
+            for row in data:
+                writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+            buffer.seek(0)
+            self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
 
     def run(self, source_dir: Path):
         """Main execution: Parse all files and bulk insert"""
@@ -694,16 +523,16 @@ class BharathiyarBulkImporter:
         print(f"Bharathiyar Poetry Bulk Import")
         print(f"{'='*60}")
 
-        # Ensure collection 328 exists
-        self._ensure_collection_exists()
+        # Setup collection 328
+        self._setup_collection()
 
         print(f"\n{'='*60}")
         print(f"Phase 1: Parsing files into memory")
         print(f"{'='*60}")
 
-        # Work 1: National & Social Reform (Files 1, 4, 5, 11)
+        # Work 1: National & Social Reform (Files 1, 4, 5)
         print(f"\nWork 1: National & Social Reform Poetry")
-        work1_id = self._create_work(1)
+        work1_id = self._create_work_from_metadata(1)
         if work1_id:
             for file_num in WORK_METADATA[1]['files']:
                 file_path = source_dir / WORK_METADATA[1]['file_names'][file_num]
@@ -714,7 +543,7 @@ class BharathiyarBulkImporter:
 
         # Work 2: Devotional & Spiritual (Files 2, 3, 7)
         print(f"\nWork 2: Devotional & Spiritual Poetry")
-        work2_id = self._create_work(2)
+        work2_id = self._create_work_from_metadata(2)
         if work2_id:
             for file_num in WORK_METADATA[2]['files']:
                 file_path = source_dir / WORK_METADATA[2]['file_names'][file_num]
@@ -725,7 +554,7 @@ class BharathiyarBulkImporter:
 
         # Work 3: Epic & Narrative (Files 6, 8, 9)
         print(f"\nWork 3: Epic & Narrative Poetry")
-        work3_id = self._create_work(3)
+        work3_id = self._create_work_from_metadata(3)
         if work3_id:
             for file_num in WORK_METADATA[3]['files']:
                 file_path = source_dir / WORK_METADATA[3]['file_names'][file_num]
@@ -736,7 +565,7 @@ class BharathiyarBulkImporter:
 
         # Work 4: Modern Free Verse (File 10)
         print(f"\nWork 4: Modern Free Verse Poetry")
-        work4_id = self._create_work(4)
+        work4_id = self._create_work_from_metadata(4)
         if work4_id:
             for file_num in WORK_METADATA[4]['files']:
                 file_path = source_dir / WORK_METADATA[4]['file_names'][file_num]
@@ -755,12 +584,11 @@ class BharathiyarBulkImporter:
         print(f"  Lines: {len(self.lines)}")
         print(f"  Words: {len(self.words)}")
 
-        # Bulk insert
+        # Bulk insert (from parent class)
         self.bulk_insert()
 
-        # Close connection
-        self.cursor.close()
-        self.conn.close()
+        # Close connection (from parent class)
+        self.close()
         print(f"\nDatabase connection closed")
 
 

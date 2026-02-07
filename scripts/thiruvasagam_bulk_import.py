@@ -27,6 +27,7 @@ import io
 import csv
 import psycopg2
 from typing import List, Dict
+from word_cleaning import split_and_clean_words
 
 class ThiruvasagamBulkImporter:
     def __init__(self, db_connection_string: str):
@@ -184,14 +185,12 @@ class ThiruvasagamBulkImporter:
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
-        # Create a default section for this work (fallback if no pathigams found)
-        # This ensures verse_hierarchy and word_details views work correctly
-        default_section = self._get_or_create_section_id(self.current_work_id)
-
+        # Track sections found (don't create default unless needed)
+        sections_found = []
         current_pathigam_number = None
         current_pathigam_name = None
         current_pathigam_lines = []
-        current_section_id = default_section  # Start with default, update when pathigam found
+        current_section_id = None  # Will create on-demand
 
         for line in lines:
             line_stripped = line.strip()
@@ -200,8 +199,8 @@ class ThiruvasagamBulkImporter:
             if '^' in line_stripped:
                 continue
 
-            # Pathigam marker: @number pathigam_name
-            pathigam_match = re.match(r'^@(\d+)\s+(.+)', line_stripped)
+            # Pathigam marker: @number pathigam_name (allow optional space after number)
+            pathigam_match = re.match(r'^@(\d+)\.?\s*(.+)', line_stripped)
             if pathigam_match:
                 # Save previous pathigam
                 if current_pathigam_lines:
@@ -237,12 +236,17 @@ class ThiruvasagamBulkImporter:
                 }
                 self.sections.append(section_dict)
                 current_section_id = self.section_id
+                sections_found.append(self.section_id)  # Track pathigam found
                 self.section_id += 1
                 continue
 
             # End of pathigam
             if line_stripped == 'மேல்':
                 if current_pathigam_lines:
+                    # Ensure we have a section_id (create default if no pathigam found yet)
+                    if current_section_id is None:
+                        current_section_id = self._get_or_create_section_id(self.current_work_id)
+                        sections_found.append(current_section_id)
                     self.create_pathigam_verse(
                         current_pathigam_number,
                         current_pathigam_name,
@@ -254,13 +258,26 @@ class ThiruvasagamBulkImporter:
 
             # Collect pathigam lines (remove line numbers on right)
             if line_stripped and current_pathigam_number is not None:
+                # Skip lines that look like markers (formatting artifacts)
+                if re.match(r'^[@#&]\d+', line_stripped):
+                    # Line starts with marker pattern - skip it
+                    continue
+
                 # Remove trailing line numbers (appear as \t followed by digits)
                 clean_line = re.sub(r'\t+\d+\s*$', '', line_stripped)
+
+                # Clean embedded marker references (e.g., "word#1" -> "word")
+                clean_line = re.sub(r'[#@&]\d+', '', clean_line).strip()
+
                 if clean_line:
                     current_pathigam_lines.append(clean_line)
 
         # Handle last pathigam
         if current_pathigam_lines:
+            # Ensure we have a section_id (create default if no pathigam found yet)
+            if current_section_id is None:
+                current_section_id = self._get_or_create_section_id(self.current_work_id)
+                sections_found.append(current_section_id)
             self.create_pathigam_verse(
                 current_pathigam_number,
                 current_pathigam_name,
@@ -317,8 +334,8 @@ class ThiruvasagamBulkImporter:
         current_line_id = self.line_id
         self.line_id += 1
 
-        # Segment into words
-        words = self.segment_line(line_text)
+        # Segment into words using word_cleaning module
+        words = split_and_clean_words(line_text)
         for word_position, word_text in enumerate(words, 1):
             word_dict = {
                 'word_id': self.word_id,

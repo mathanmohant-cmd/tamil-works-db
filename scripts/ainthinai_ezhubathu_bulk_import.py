@@ -217,9 +217,11 @@ class AinthinaiEzhubathuBulkImporter:
         for line_num, line_text in enumerate(paadal_lines, start=1):
             # Clean line
             cleaned_line = line_text.replace('.', '').replace('…', '')
-            cleaned_line = re.sub(r'^[#@$&*]+\s*', '', cleaned_line)
+            cleaned_line = re.sub(r'^[#@$&*]+\s*', '', cleaned_line)  # Remove markers at start
             cleaned_line = re.sub(r'\*\*\*?', '', cleaned_line)
             cleaned_line = re.sub(r'\s+\d+$', '', cleaned_line)
+            # Remove embedded marker references (e.g., "word#1" -> "word")
+            cleaned_line = re.sub(r'[#@&]\d+', '', cleaned_line)
 
             line_id = self.line_id
             self.line_id += 1

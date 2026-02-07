@@ -128,6 +128,7 @@ CREATE TABLE verses (
     meter VARCHAR(100),  -- Poetic meter if applicable
     total_lines INTEGER NOT NULL,
     sort_order INTEGER NOT NULL,
+    verse_tag VARCHAR(100),  -- Special verse classification: 'migai_padal' for additional verses, NULL for regular
     metadata JSONB,  -- Flexible metadata: saint/alvar, deity, raga/talam, themes, literary devices, divya desam, etc.
     FOREIGN KEY (work_id) REFERENCES works(work_id),
     FOREIGN KEY (section_id) REFERENCES sections(section_id),
@@ -136,6 +137,9 @@ CREATE TABLE verses (
 
 CREATE INDEX idx_verses_section ON verses(section_id);
 CREATE INDEX idx_verses_work ON verses(work_id);
+CREATE INDEX idx_verses_verse_tag ON verses(verse_tag);
+
+COMMENT ON COLUMN verses.verse_tag IS 'Special verse classification: "migai_padal" for additional verses, NULL for regular verses';
 
 -- Lines table
 CREATE TABLE lines (

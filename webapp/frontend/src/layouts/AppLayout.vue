@@ -18,9 +18,8 @@
 </template>
 
 <script setup>
-// import AppHeader from '../components/AppHeader.vue' // OLD
-import AppHeader from '../components/AppHeaderEnhanced.vue' // NEW Enhanced Header
-import AppFooter from '../components/AppFooter.vue'
+import AppHeader from '../shared/AppHeaderEnhanced.vue' // NEW Enhanced Header
+import AppFooter from '../shared/AppFooter.vue'
 </script>
 
 <style scoped>

@@ -15,15 +15,19 @@ Works (5 Jain minor epics):
 3. யசோதர காவியம் (Yasodara Kaviyam) - Unknown, 5th-10th century CE
 4. சூளாமணி (Choolamani) - Tholamozhithevar, before 10th century CE
 5. நீலகேசி (Nilakesi) - Unknown, 10th century CE
+   NOTE: Section 9 missing in source file (jumps from @8 to @10)
 
 File Structure:
-- @N. Kandam/Sarrukkam (Level 1 sections)
-- ** Topic/Subsection headings (Level 2 sections)
-- #N Verse markers
+- @N. Kandam/Sarrukkam (Level 1 sections - காண்டம்/சருக்கம்)
+- ** Topic/Subsection headings (Level 2 sections - தலைப்பு)
+- #N Verse markers (verses - பாடல்)
 - 4 lines per verse (typical)
 
-Note: Files do NOT contain &N work markers. Works are created based on
-filename matching in WORK_METADATA dictionary.
+Notes:
+- Files do NOT contain &N work markers. Works are created based on
+  filename matching in WORK_METADATA dictionary.
+- Filenames have number prefixes: "1 ", "2 ", "3 ", "4 ", "5 "
+- நீலகேசி source file is missing section @9 (data gap in original text)
 """
 
 import re
@@ -45,7 +49,7 @@ WORK_METADATA = {
         'period': '3rd century CE',
         'canonical_order': 324001,
         'position_in_collection': 1,
-        'file': 'உதயணகுமார காவியம்.txt'
+        'file': '1 உதயணகுமார காவியம்.txt'
     },
     2: {
         'work_name': 'Nagakumara Kaviyam',
@@ -55,7 +59,7 @@ WORK_METADATA = {
         'period': '5th-10th century CE',
         'canonical_order': 324002,
         'position_in_collection': 2,
-        'file': 'நாககுமார காவியம்.txt'
+        'file': '2 நாககுமார காவியம்.txt'
     },
     3: {
         'work_name': 'Yasodara Kaviyam',
@@ -65,7 +69,7 @@ WORK_METADATA = {
         'period': '5th-10th century CE',
         'canonical_order': 324003,
         'position_in_collection': 3,
-        'file': 'யசோதர காவியம்.txt'
+        'file': '3 யசோதர காவியம்.txt'
     },
     4: {
         'work_name': 'Choolamani',
@@ -75,7 +79,7 @@ WORK_METADATA = {
         'period': 'Before 10th century CE',
         'canonical_order': 324004,
         'position_in_collection': 4,
-        'file': 'சூளாமணி.txt'
+        'file': '4 சூளாமணி.txt'
     },
     5: {
         'work_name': 'Nilakesi',
@@ -85,7 +89,8 @@ WORK_METADATA = {
         'period': '10th century CE',
         'canonical_order': 324005,
         'position_in_collection': 5,
-        'file': 'நீலகேசி.txt'
+        'file': '5 நீலகேசி.txt',
+        'note': 'Section 9 missing in source file (jumps from @8 to @10)'
     }
 }
 
@@ -359,6 +364,8 @@ class SitrIlakkiyangalBulkImporter:
                 section_name = line.replace('**', '').strip()
                 level2_counter += 1
 
+                # NOTE: Using 'தலைப்பு' (Topic/Heading) for Level 2 sections
+                # Alternative options: 'பகுதி' (Part), 'துணைப்பகுதி' (Subsection), 'பிரிவு' (Division)
                 current_level2_section = self._add_section(
                     current_work_id,
                     parent_id=current_level1_section,

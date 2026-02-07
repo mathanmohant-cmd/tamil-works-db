@@ -15,6 +15,7 @@ from pathlib import Path
 import csv
 import io
 import sys
+import json
 from word_cleaning import split_and_clean_words
 
 
@@ -117,6 +118,7 @@ class KarNarpathuBulkImporter:
 
         current_paadal_lines = []
         current_paadal_num = None
+        current_verse_title = None
         paadal_count = 0
 
         for line in lines_text:
@@ -124,17 +126,25 @@ class KarNarpathuBulkImporter:
             if not line:
                 continue
 
-            # Check for paadal marker (#)
-            paadal_match = re.match(r'^#(\d+)$', line)
+            # Check for paadal marker (# or #N TITLE)
+            paadal_match = re.match(r'^#(\d+)(?:\s+(.+))?$', line)
             if paadal_match:
+                verse_num = int(paadal_match.group(1))
+                verse_title = paadal_match.group(2).strip() if paadal_match.group(2) else None
+
+                # Skip duplicate verse numbers (e.g., duplicate #0 in some works)
+                if verse_num == current_paadal_num:
+                    continue
+
                 # Save previous paadal if exists
                 if current_paadal_num is not None and current_paadal_lines:
-                    self._add_paadal(current_paadal_num, current_paadal_lines)
+                    self._add_paadal(current_paadal_num, current_paadal_lines, current_verse_title)
                     paadal_count += 1
                     if paadal_count % 10 == 0:
                         print(f"  Parsed {paadal_count} paadals...")
 
-                current_paadal_num = int(paadal_match.group(1))
+                current_paadal_num = verse_num
+                current_verse_title = verse_title
                 current_paadal_lines = []
                 continue
 
@@ -144,7 +154,7 @@ class KarNarpathuBulkImporter:
 
         # Save last paadal
         if current_paadal_num is not None and current_paadal_lines:
-            self._add_paadal(current_paadal_num, current_paadal_lines)
+            self._add_paadal(current_paadal_num, current_paadal_lines, current_verse_title)
             paadal_count += 1
 
         print(f"[OK] Phase 1 complete: Parsed {paadal_count} paadals")
@@ -153,10 +163,35 @@ class KarNarpathuBulkImporter:
         print(f"  - Lines: {len(self.lines)}")
         print(f"  - Words: {len(self.words)}")
 
-    def _add_paadal(self, paadal_num, paadal_lines):
-        """Add paadal to memory"""
+    def _classify_verse_type(self, title):
+        """Classify verse type from title text"""
+        if not title:
+            return "regular"
+
+        if "கடவுள்" in title or "வாழ்த்து" in title:
+            return "invocation"
+        elif "பாயிரம்" in title:
+            return "prelim"
+        elif "மிகை" in title:
+            return "surplus"
+        elif "புறத்திரட்" in title:
+            return "external"
+        else:
+            return "annotated"
+
+    def _add_paadal(self, paadal_num, paadal_lines, verse_title=None):
+        """Add paadal to memory with optional title metadata"""
         verse_id = self.verse_id
         self.verse_id += 1
+
+        # Build metadata if title exists
+        verse_metadata = None
+        if verse_title:
+            verse_metadata = {
+                "title": verse_title,
+                "type": self._classify_verse_type(verse_title),
+                "type_tamil": verse_title
+            }
 
         self.verses.append({
             'verse_id': verse_id,
@@ -166,7 +201,8 @@ class KarNarpathuBulkImporter:
             'verse_type': 'paadal',
             'verse_type_tamil': 'பாடல்',
             'total_lines': len(paadal_lines),
-            'sort_order': paadal_num
+            'sort_order': paadal_num,
+            'metadata': json.dumps(verse_metadata, ensure_ascii=False) if verse_metadata else None
         })
 
         for line_num, line_text in enumerate(paadal_lines, start=1):
@@ -217,7 +253,7 @@ class KarNarpathuBulkImporter:
         print(f"  Inserting {len(self.verses)} paadals...")
         self._bulk_copy('verses', self.verses,
                        ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
-                        'verse_type_tamil', 'total_lines', 'sort_order'])
+                        'verse_type_tamil', 'total_lines', 'sort_order', 'metadata'])
 
         # Insert lines
         print(f"  Inserting {len(self.lines)} lines...")
@@ -233,21 +269,41 @@ class KarNarpathuBulkImporter:
         print("[OK] Phase 2 complete: All data inserted")
 
     def _bulk_copy(self, table_name, data, columns):
-        """Use COPY for bulk insert"""
+        """Use COPY for bulk insert, with special handling for JSON columns"""
         if not data:
             return
 
-        # Create StringIO buffer
         buffer = io.StringIO()
-        writer = csv.writer(buffer, delimiter='\t')
 
-        for row in data:
-            writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+        # Check if this is the verses table with metadata
+        if table_name == 'verses' and 'metadata' in columns:
+            # Manually format rows to avoid CSV escaping of JSON
+            for row in data:
+                metadata_value = row.get('metadata', None)
+                if metadata_value:
+                    # Replace tab characters in JSON to avoid breaking the format
+                    metadata_value = metadata_value.replace('\t', ' ')
 
-        buffer.seek(0)
+                # Build row values in column order
+                values = []
+                for col in columns:
+                    if col == 'metadata':
+                        values.append(metadata_value if metadata_value else '')
+                    else:
+                        val = row.get(col)
+                        values.append(str(val) if val is not None else '')
 
-        # Use COPY command
-        self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
+                buffer.write('\t'.join(values) + '\n')
+
+            buffer.seek(0)
+            self.cursor.copy_from(buffer, table_name, columns=columns, null='')
+        else:
+            # Use CSV writer for tables without JSON
+            writer = csv.writer(buffer, delimiter='\t')
+            for row in data:
+                writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+            buffer.seek(0)
+            self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
 
     def close(self):
         """Close connection"""

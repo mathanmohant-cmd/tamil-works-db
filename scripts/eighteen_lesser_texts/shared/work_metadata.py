@@ -1,0 +1,366 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Metadata for all 18 Eighteen Lesser Texts (பதினெண்கீழ்க்கணக்கு)
+
+Each entry contains:
+- work_name: English name
+- work_name_tamil: Tamil name
+- period: Time period
+- author: English author name
+- author_tamil: Tamil author name
+- description: Work description
+- chronology_start_year: Estimated start year
+- chronology_end_year: Estimated end year
+- chronology_confidence: Confidence level (low/medium/high)
+- chronology_notes: Notes about dating
+- canonical_order: Standard ordering in collection
+- position_in_collection: Position within collection 201
+- structure: Parser type (flat/thinai/paththu/adhikaram/thirukkural)
+- folder: Text file folder name
+- filename: Text file name
+"""
+
+WORK_METADATA = {
+    # Work 1: Naladiyar (Adhikaram structure)
+    'naladiyar': {
+        'work_name': 'Naladiyar',
+        'work_name_tamil': 'நாலடியார்',
+        'period': '5th-10th century CE',
+        'author': 'Jain ascetics',
+        'author_tamil': 'சமண முனிவர்கள்',
+        'description': 'Collection of 400 four-line moral verses organized into 40 adhikarams, part of Eighteen Lesser Texts',
+        'chronology_start_year': 400,
+        'chronology_end_year': 900,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 5th-10th century CE. Jain didactic work with unknown individual authors.',
+        'canonical_order': 201001,
+        'position_in_collection': 1,
+        'structure': 'adhikaram',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '1-நாலடியார்'
+    },
+
+    # Work 2: Nanmanikkadigai (Flat structure)
+    'nanmanikkadigai': {
+        'work_name': 'Nanmanikkadigai',
+        'work_name_tamil': 'நான்மணிக்கடிகை',
+        'period': '10th century CE',
+        'author': 'Vilambi Naganar',
+        'author_tamil': 'விளம்பி நாகனார்',
+        'description': 'Collection of 106 four-line ethical verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Jain didactic work attributed to Vilambi Naganar.',
+        'canonical_order': 201002,
+        'position_in_collection': 2,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '2-நான்மணிக்கடிகை'
+    },
+
+    # Work 3: Inna Narpathu (Flat structure)
+    'inna_narpathu': {
+        'work_name': 'Inna Narpathu',
+        'work_name_tamil': 'இன்னா நாற்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Poigaiyar',
+        'author_tamil': 'பொய்கையார்',
+        'description': 'Collection of 40 four-line verses on unpleasant/disagreeable things, part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Jain poet Poigaiyar.',
+        'canonical_order': 201003,
+        'position_in_collection': 3,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '3-இன்னா நாற்பது'
+    },
+
+    # Work 4: Iniyavai Narpathu (Flat structure)
+    'iniyavai_narpathu': {
+        'work_name': 'Iniyavai Narpathu',
+        'work_name_tamil': 'இனியவை நாற்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Poodhanthevanar',
+        'author_tamil': 'பூதந்தேவனார்',
+        'description': 'Collection of 40 four-line verses on pleasant/agreeable things, part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Poodhanthevanar.',
+        'canonical_order': 201004,
+        'position_in_collection': 4,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '4-இனியவை நாற்பது'
+    },
+
+    # Work 5: Kar Narpathu (Flat structure)
+    'kar_narpathu': {
+        'work_name': 'Kar Narpathu',
+        'work_name_tamil': 'கார் நாற்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Kannanaar',
+        'author_tamil': 'கண்ணனார்',
+        'description': 'Collection of 40 four-line verses on the rainy season, part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Kannanaar.',
+        'canonical_order': 201005,
+        'position_in_collection': 5,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '5-கார் நாற்பது'
+    },
+
+    # Work 6: Kalavazhi Narpathu (Flat structure)
+    'kalavazhi_narpathu': {
+        'work_name': 'Kalavazhi Narpathu',
+        'work_name_tamil': 'களவழி நாற்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Poigaiyar',
+        'author_tamil': 'பொய்கையார்',
+        'description': 'Collection of 40 four-line verses on clandestine love, part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Poigaiyar.',
+        'canonical_order': 201006,
+        'position_in_collection': 6,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '6-களவழி நாற்பது'
+    },
+
+    # Work 7: Ainthinai Aimbathu (Thinai structure)
+    'ainthinai_aimbathu': {
+        'work_name': 'Ainthinai Aimbathu',
+        'work_name_tamil': 'ஐந்திணை ஐம்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Maran Porunarraarriyaar',
+        'author_tamil': 'மாறன் பொருநராற்றியார்',
+        'description': 'Collection of 50 verses on five landscapes (thinai), part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Maran Porunarraarriyaar.',
+        'canonical_order': 201007,
+        'position_in_collection': 7,
+        'structure': 'thinai',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '7-ஐந்திணை ஐம்பது'
+    },
+
+    # Work 8: Ainthinai Ezhubathu (Thinai structure)
+    'ainthinai_ezhubathu': {
+        'work_name': 'Ainthinai Ezhubathu',
+        'work_name_tamil': 'ஐந்திணை எழுபது',
+        'period': 'Post-Sangam period',
+        'author': 'Mocheettuvaar',
+        'author_tamil': 'மோசீத்துவார்',
+        'description': 'Collection of 70 verses on five landscapes (thinai), part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Mocheettuvaar.',
+        'canonical_order': 201008,
+        'position_in_collection': 8,
+        'structure': 'thinai',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '8-ஐந்திணை எழுபது'
+    },
+
+    # Work 9: Thinaymozhi Aimbathu (Thinai structure)
+    'thinaymozhi_aimbathu': {
+        'work_name': 'Thinaymozhi Aimbathu',
+        'work_name_tamil': 'திணைமொழி ஐம்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Kandanaar',
+        'author_tamil': 'கண்டனார்',
+        'description': 'Collection of 50 verses on five landscapes (thinai), part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Kandanaar.',
+        'canonical_order': 201009,
+        'position_in_collection': 9,
+        'structure': 'thinai',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '9-திணைமொழி ஐம்பது'
+    },
+
+    # Work 10: Thinaimalai Noorraimpathu (Thinai structure)
+    'thinaimalai_noorraimpathu': {
+        'work_name': 'Thinaimalai Noorraimpathu',
+        'work_name_tamil': 'திணைமாலை நூற்றைம்பது',
+        'period': 'Post-Sangam period',
+        'author': 'Kanimedhaviyaar',
+        'author_tamil': 'கணிமேதவியார்',
+        'description': 'Collection of 150 verses on five landscapes (thinai), part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Kanimedhaviyaar.',
+        'canonical_order': 201010,
+        'position_in_collection': 10,
+        'structure': 'thinai',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '10-திணைமாலை நூற்றைம்பது'
+    },
+
+    # Work 12: Thirigadugam (Flat structure)
+    'thirigadugam': {
+        'work_name': 'Thirigadugam',
+        'work_name_tamil': 'திரிகடுகம்',
+        'period': '10th century CE',
+        'author': 'Nallathanaaar',
+        'author_tamil': 'நல்லாதனார்',
+        'description': 'Collection of 100 four-line satirical verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Satirical work attributed to Nallathanaaar.',
+        'canonical_order': 201012,
+        'position_in_collection': 12,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '12-திரிகடுகம்'
+    },
+
+    # Work 13: Asarakkovai (Flat structure)
+    'asarakkovai': {
+        'work_name': 'Asarakkovai',
+        'work_name_tamil': 'ஆசாரக்கோவை',
+        'period': '10th century CE',
+        'author': 'Perungkoottanaaar',
+        'author_tamil': 'பெருங்கூத்தனார்',
+        'description': 'Collection of 100 four-line verses on ethical conduct, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Ethical work attributed to Perungkoottanaaar.',
+        'canonical_order': 201013,
+        'position_in_collection': 13,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '13-ஆசாரக்கோவை'
+    },
+
+    # Work 14: Pazhamozhi Nanuru (Flat structure)
+    'pazhamozhi_nanuru': {
+        'work_name': 'Pazhamozhi Nanuru',
+        'work_name_tamil': 'பழமொழி நானூறு',
+        'period': '10th century CE',
+        'author': 'Mundi Naayaganaaar',
+        'author_tamil': 'முண்டி நாயகனார்',
+        'description': 'Collection of 400 proverbs in four-line verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Collection of Tamil proverbs attributed to Mundi Naayaganaaar.',
+        'canonical_order': 201014,
+        'position_in_collection': 14,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '14-பழமொழி நானூறு'
+    },
+
+    # Work 15: Sirupanchamoolam (Flat structure)
+    'sirupanchamoolam': {
+        'work_name': 'Sirupanchamoolam',
+        'work_name_tamil': 'சிறுபஞ்சமூலம்',
+        'period': '10th century CE',
+        'author': 'Kariyaasaan',
+        'author_tamil': 'காரியாசான்',
+        'description': 'Collection of 100 four-line moral verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Moral verses attributed to Kariyaasaan.',
+        'canonical_order': 201015,
+        'position_in_collection': 15,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '15-சிறுபஞ்சமூலம்'
+    },
+
+    # Work 16: Muthumozhikkanchi (Paththu structure)
+    'muthumozhikkanchi': {
+        'work_name': 'Muthumozhikkanchi',
+        'work_name_tamil': 'முதுமொழிக்காஞ்சி',
+        'period': '10th century CE',
+        'author': 'Koodaloor Kizhaar',
+        'author_tamil': 'கூடலூர் கிழார்',
+        'description': 'Collection of 100 ancient sayings organized into 10 paththu, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Ancient sayings attributed to Koodaloor Kizhaar.',
+        'canonical_order': 201016,
+        'position_in_collection': 16,
+        'structure': 'paththu',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '16-முதுமொழிக்காஞ்சி'
+    },
+
+    # Work 17: Elathi (Flat structure)
+    'elathi': {
+        'work_name': 'Elathi',
+        'work_name_tamil': 'ஏலாதி',
+        'period': '10th century CE',
+        'author': 'Kannanaar',
+        'author_tamil': 'கண்ணனார்',
+        'description': 'Collection of 80 four-line verses on medical plants, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Medical plant verses attributed to Kannanaar.',
+        'canonical_order': 201017,
+        'position_in_collection': 17,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '17-ஏலாதி'
+    },
+
+    # Work 18: Kainnilai (Thinai structure)
+    'kainnilai': {
+        'work_name': 'Kainnilai',
+        'work_name_tamil': 'கைந்நிலை',
+        'period': 'Post-Sangam period',
+        'author': 'Pullandhiyaar',
+        'author_tamil': 'புல்லந்தியார்',
+        'description': 'Collection of 71 verses on ethical conduct organized by thinai, part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Pullandhiyaar.',
+        'canonical_order': 201018,
+        'position_in_collection': 18,
+        'structure': 'thinai',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '18-கைந்நிலை'
+    },
+
+    # Work 11: Thirukkural (Special 3-level hierarchy)
+    'thirukkural': {
+        'work_name': 'Thirukkural',
+        'work_name_tamil': 'திருக்குறள்',
+        'period': 'Ancient Tamil period',
+        'author': 'Thiruvalluvar',
+        'author_tamil': 'திருவள்ளுவர்',
+        'description': '1,330 kurals organized into 3 paals, 10 iyals, 133 adhikarams - masterwork of Tamil ethics',
+        'chronology_start_year': -300,
+        'chronology_end_year': 500,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Debated dating: estimates range from 300 BCE to 5th century CE. Most scholars favor 1st-5th century CE.',
+        'canonical_order': 201011,
+        'position_in_collection': 11,
+        'structure': 'thirukkural',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '11-திருக்குறள்'
+    }
+}

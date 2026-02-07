@@ -11,6 +11,19 @@ Works deleted:
 
 All poetry by Subramania Bharathiyar (1882-1921 CE)
 
+Collection ID: 328 (இருபதாம் நூற்றாண்டு தமிழ் இலக்கியம் - Modern Tamil Literature)
+
+Deletion Order (respects foreign key constraints):
+1. words (deepest level)
+2. lines
+3. verse_collections (before verses)
+4. verses
+5. section_collections (before sections)
+6. sections
+7. work_collections (before works)
+8. works
+9. collection (if empty after work deletion)
+
 Usage:
     python delete_bharathiyar.py [database_url]
 
@@ -21,16 +34,7 @@ Examples:
 
 import os
 import sys
-import io
 import psycopg2
-
-# Work names for deletion (English names from WORK_METADATA)
-WORK_NAMES = [
-    'Bharathiyar National and Social Reform Poetry',
-    'Bharathiyar Devotional and Spiritual Poetry',
-    'Bharathiyar Epic and Narrative Poetry',
-    'Bharathiyar Modern Free Verse Poetry'
-]
 
 COLLECTION_ID = 328
 
@@ -48,87 +52,85 @@ def get_connection_string():
     return "postgresql://postgres:postgres@localhost/tamil_literature"
 
 
-def delete_single_work(cursor, work_name: str):
+def delete_collection_works(cursor, collection_id: int):
     """
-    Delete a single work following referential integrity order
+    Delete all works in a collection following referential integrity order
 
-    Deletion order:
-    1. Delete words (deepest level)
-    2. Delete lines
-    3. Delete verse_collections (before verses)
-    4. Delete verses
-    5. Delete section_collections (before sections)
-    6. Delete sections
-    7. Delete work_collections (before work)
-    8. Delete work
+    Returns:
+        tuple: (works_deleted, sections_deleted, verses_deleted, lines_deleted, words_deleted)
     """
-    # Get work ID
+    # Get all work IDs in the collection
     cursor.execute("""
-        SELECT work_id, work_name, work_name_tamil
-        FROM works
-        WHERE work_name = %s OR work_name_tamil = %s
-    """, [work_name, work_name])
+        SELECT w.work_id, w.work_name_tamil
+        FROM works w
+        JOIN work_collections wc ON w.work_id = wc.work_id
+        WHERE wc.collection_id = %s
+        ORDER BY wc.position_in_collection
+    """, [collection_id])
 
-    result = cursor.fetchone()
-    if not result:
-        print(f"  ✗ Work '{work_name}' not found")
-        return False
+    works = cursor.fetchall()
+    if not works:
+        return (0, 0, 0, 0, 0)
 
-    work_id, work_name_en, work_name_ta = result
+    work_ids = [w[0] for w in works]
+    work_names = [w[1] for w in works]
 
-    # Delete words
+    print(f"\nDeleting {len(works)} works:")
+    for name in work_names:
+        print(f"  - {name}")
+
+    # Delete words (deepest level)
     cursor.execute("""
         DELETE FROM words
         WHERE line_id IN (
             SELECT l.line_id FROM lines l
             JOIN verses v ON l.verse_id = v.verse_id
-            WHERE v.work_id = %s
+            WHERE v.work_id = ANY(%s)
         )
-    """, [work_id])
+    """, [work_ids])
     words_deleted = cursor.rowcount
 
     # Delete lines
     cursor.execute("""
         DELETE FROM lines
         WHERE verse_id IN (
-            SELECT verse_id FROM verses WHERE work_id = %s
+            SELECT verse_id FROM verses WHERE work_id = ANY(%s)
         )
-    """, [work_id])
+    """, [work_ids])
     lines_deleted = cursor.rowcount
 
     # Delete verse collections
     cursor.execute("""
         DELETE FROM verse_collections
         WHERE verse_id IN (
-            SELECT verse_id FROM verses WHERE work_id = %s
+            SELECT verse_id FROM verses WHERE work_id = ANY(%s)
         )
-    """, [work_id])
+    """, [work_ids])
 
     # Delete verses
-    cursor.execute("DELETE FROM verses WHERE work_id = %s", [work_id])
+    cursor.execute("DELETE FROM verses WHERE work_id = ANY(%s)", [work_ids])
     verses_deleted = cursor.rowcount
 
     # Delete section collections
     cursor.execute("""
         DELETE FROM section_collections
         WHERE section_id IN (
-            SELECT section_id FROM sections WHERE work_id = %s
+            SELECT section_id FROM sections WHERE work_id = ANY(%s)
         )
-    """, [work_id])
+    """, [work_ids])
 
     # Delete sections
-    cursor.execute("DELETE FROM sections WHERE work_id = %s", [work_id])
+    cursor.execute("DELETE FROM sections WHERE work_id = ANY(%s)", [work_ids])
     sections_deleted = cursor.rowcount
 
     # Delete work_collections
-    cursor.execute("DELETE FROM work_collections WHERE work_id = %s", [work_id])
+    cursor.execute("DELETE FROM work_collections WHERE work_id = ANY(%s)", [work_ids])
 
-    # Delete work
-    cursor.execute("DELETE FROM works WHERE work_id = %s", [work_id])
+    # Delete works
+    cursor.execute("DELETE FROM works WHERE work_id = ANY(%s)", [work_ids])
+    works_deleted = cursor.rowcount
 
-    print(f"  ✓ Deleted {work_name_ta}: {sections_deleted} sections, {verses_deleted} verses, "
-          f"{lines_deleted} lines, {words_deleted} words")
-    return True
+    return (works_deleted, sections_deleted, verses_deleted, lines_deleted, words_deleted)
 
 
 def main():
@@ -210,28 +212,23 @@ def main():
             print("Deletion cancelled.")
             sys.exit(0)
 
-        # 4. Delete each work
-        print("\nDeleting works...")
-        for work_name in WORK_NAMES:
-            delete_single_work(cursor, work_name)
+        # 4. Delete all works in collection
+        works_del, sections_del, verses_del, lines_del, words_del = delete_collection_works(cursor, COLLECTION_ID)
 
-        # 5. Check if collection has remaining works
-        cursor.execute("""
-            SELECT COUNT(*) FROM work_collections
-            WHERE collection_id = %s
-        """, (COLLECTION_ID,))
-        remaining = cursor.fetchone()[0]
+        print(f"\nDeletion summary:")
+        print(f"  Works: {works_del}")
+        print(f"  Sections: {sections_del}")
+        print(f"  Verses: {verses_del}")
+        print(f"  Lines: {lines_del}")
+        print(f"  Words: {words_del}")
 
-        # 6. Delete collection if empty
-        if remaining == 0:
+        # 5. Delete collection (now empty)
+        if works_del > 0:
             print(f"\nDeleting collection {COLLECTION_ID}...")
-            cursor.execute("DELETE FROM collections WHERE collection_id = %s",
-                          (COLLECTION_ID,))
+            cursor.execute("DELETE FROM collections WHERE collection_id = %s", (COLLECTION_ID,))
             print(f"  ✓ Deleted collection {COLLECTION_ID}")
-        else:
-            print(f"\n⚠ Collection {COLLECTION_ID} has {remaining} remaining works, keeping collection.")
 
-        # 7. Commit transaction
+        # 6. Commit transaction
         conn.commit()
         print("\n✓ Deletion complete!")
 

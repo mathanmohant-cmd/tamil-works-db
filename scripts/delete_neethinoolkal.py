@@ -15,7 +15,7 @@ Works deleted:
 9. நீதி நூல் (Neethi Nool)
 10. நன்னெறி (Nanneri)
 11. நீதி சூடாமணி (Neethi Chudamani)
-12. சோமேசர் (Somesar)
+12. முதுமொழி வெண்பா (Muthumozhi Venpa)
 13. விவேக சிந்தாமணி (Viveka Chinthamani)
 14. ஆத்திசூடி வெண்பா (Aathichudi Venpa)
 15. நீதி வெண்பா (Neethi Venpa)
@@ -52,7 +52,7 @@ WORK_NAMES = [
     'Neethi Nool',
     'Nanneri',
     'Neethi Chudamani',
-    'Somesar',
+    'Muthumozhi Venpa',
     'Viveka Chinthamani',
     'Aathichudi Venpa',
     'Neethi Venpa',

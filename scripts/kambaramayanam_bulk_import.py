@@ -114,23 +114,52 @@ def parse_kandam_file(file_path):
                 current_padalam['verses'].append(current_verse)
                 current_verse = None
 
-            # Parse padalam header (format: @1 மங்கல வாழ்த்துப் படலம்)
-            match = re.match(r'^@(\d+)\s+(.+)$', line)
-            if match:
-                padalam_number = int(match.group(1))
-                padalam_name = match.group(2).strip()
+            # Two formats:
+            # Regular: @14 எழுச்சிப்படலம்
+            # Migai:   @14.பால காண்டம் - எழுச்சிப்படலம் - மிகைப் பாடல்கள்
 
-                # Keep " படலம்" in the name for natural reading
-                # If missing, add it
+            # Try migai format first (has dot after number)
+            migai_match = re.match(r'^@(\d+)\.(.+)$', line)
+            if migai_match:
+                padalam_number = int(migai_match.group(1))
+                full_text = migai_match.group(2).strip()
+
+                # Extract padalam name from " - " separated format
+                # Format: "காண்டம் name - படலம் name - மிகைப் பாடல்கள்"
+                parts = [p.strip() for p in full_text.split(' - ')]
+                if len(parts) >= 2:
+                    padalam_name = parts[1]
+                else:
+                    # Fallback: remove migai text
+                    padalam_name = full_text.replace('மிகைப் பாடல்கள்', '').replace('மிகைப்பாடல்கள்', '').strip()
+
+                # Ensure " படலம்" suffix
                 if not padalam_name.endswith(' படலம்'):
                     padalam_name = padalam_name + ' படலம்'
 
-                current_padalam = {
-                    'number': padalam_number,
-                    'name': padalam_name,
-                    'verses': []
-                }
-                kandam_info['padalams'].append(current_padalam)
+                is_migai = True
+            else:
+                # Try regular format: @14 எழுச்சிப்படலம்
+                regular_match = re.match(r'^@(\d+)\s+(.+)$', line)
+                if regular_match:
+                    padalam_number = int(regular_match.group(1))
+                    padalam_name = regular_match.group(2).strip()
+
+                    if not padalam_name.endswith(' படலம்'):
+                        padalam_name = padalam_name + ' படலம்'
+
+                    is_migai = False
+                else:
+                    # Skip malformed @ lines
+                    continue
+
+            current_padalam = {
+                'number': padalam_number,
+                'name': padalam_name,
+                'is_migai': is_migai,  # NEW: Track migai status
+                'verses': []
+            }
+            kandam_info['padalams'].append(current_padalam)
             continue
 
         # Check for verse marker (#)
@@ -150,6 +179,9 @@ def parse_kandam_file(file_path):
             continue
 
         # Regular content line
+        # Skip annotation/editorial lines (start with *)
+        if line.startswith('*'):
+            continue
         cleaned = clean_line(line)
         if cleaned and current_verse is not None:
             current_verse['lines'].append(cleaned)
@@ -287,6 +319,9 @@ class KambaramayanamBulkImporter:
         """Phase 1: Parse all Kandam files into memory"""
         print("\nPhase 1: Parsing all files...")
 
+        # Track global padalam counter per kandam (handles Yuddha across 4 files)
+        global_padalam_counter = {}  # key: kandam_section_id, value: next sort_order
+
         for filename, kandam_tamil, kandam_english, kandam_num in KANDAM_FILES:
             file_path = self.source_dir / filename
 
@@ -338,14 +373,19 @@ class KambaramayanamBulkImporter:
                     'sort_order': kandam_num
                 })
 
+            # Initialize global counter for this kandam if not exists
+            if kandam_section_id not in global_padalam_counter:
+                global_padalam_counter[kandam_section_id] = 1
+
             # Track Padalam sections by (kandam_section_id, padalam_number) to handle duplicates
             padalam_sections = {}  # key: (kandam_section_id, padalam_number), value: section_id
 
             # Process each Padalam (subsection)
-            # Note: Padalam numbers restart for each Kandam part, so use padalam_idx for unique ordering
-            for padalam_idx, padalam_data in enumerate(kandam_data['padalams'], 1):
+            # Use global counter for sort_order instead of within-file index
+            for padalam_data in kandam_data['padalams']:
                 padalam_name = padalam_data['name']
                 padalam_number = padalam_data['number']
+                is_migai = padalam_data.get('is_migai', False)
 
                 # Check if this Padalam number already exists (e.g., மிகைப் பாடல்கள்)
                 padalam_key = (kandam_section_id, padalam_number)
@@ -360,7 +400,10 @@ class KambaramayanamBulkImporter:
                     padalam_section_id = self.section_id
                     self.section_id += 1
 
-                    # Use padalam_idx for sort_order since padalam_number repeats across Kandam parts
+                    # Get next sort_order from global counter (handles Yuddha across multiple files)
+                    sort_order = global_padalam_counter[kandam_section_id]
+                    global_padalam_counter[kandam_section_id] += 1
+
                     self.sections.append({
                         'section_id': padalam_section_id,
                         'work_id': self.work_id,
@@ -370,7 +413,7 @@ class KambaramayanamBulkImporter:
                         'section_number': padalam_number,
                         'section_name': padalam_name,
                         'section_name_tamil': padalam_name,
-                        'sort_order': padalam_idx  # Use sequential index instead of padalam_number
+                        'sort_order': sort_order  # Use global counter for correct ordering
                     })
 
                     padalam_sections[padalam_key] = padalam_section_id
@@ -399,6 +442,9 @@ class KambaramayanamBulkImporter:
                     verse_id = self.verse_id
                     self.verse_id += 1
 
+                    # Determine verse_tag based on padalam type
+                    verse_tag = 'migai_padal' if is_migai else None
+
                     self.verses.append({
                         'verse_id': verse_id,
                         'work_id': self.work_id,
@@ -407,7 +453,8 @@ class KambaramayanamBulkImporter:
                         'verse_type': 'poem',
                         'verse_type_tamil': 'பாடல்',
                         'total_lines': len(verse_lines),
-                        'sort_order': verse_number
+                        'sort_order': verse_number,
+                        'verse_tag': verse_tag
                     })
 
                     # Process lines
@@ -456,7 +503,7 @@ class KambaramayanamBulkImporter:
         print(f"  Inserting {len(self.verses)} verses...")
         self._bulk_copy('verses', self.verses,
                        ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
-                        'verse_type_tamil', 'total_lines', 'sort_order'])
+                        'verse_type_tamil', 'total_lines', 'sort_order', 'verse_tag'])
 
         # Insert lines
         print(f"  Inserting {len(self.lines)} lines...")

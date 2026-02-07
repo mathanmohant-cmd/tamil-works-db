@@ -133,6 +133,16 @@ class WorkPositionUpdate(BaseModel):
     position: int
 
 
+class PhonemePatternSearchResponse(BaseModel):
+    pattern: dict
+    results: List[dict]
+    total_count: int
+    total_verses: Optional[int]
+    limit: int
+    offset: int
+    expand: bool
+
+
 # API Endpoints
 
 @app.get("/")
@@ -650,6 +660,74 @@ def reorder_collection_works(collection_id: int, positions: List[WorkPositionUpd
         db.reorder_collection_works(collection_id, positions_dicts)
         return {"message": f"Reordered {len(positions)} works in collection {collection_id}"}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================================
+# Phoneme Pattern Search Endpoints (Insights Feature)
+# =========================================================================
+
+@app.get("/search/phoneme-patterns")
+def get_phoneme_patterns():
+    """
+    Get list of available phoneme search patterns
+
+    Returns all predefined grammatical patterns (plural, vocative, etc.)
+    with metadata (name, description, examples, SQL condition).
+    """
+    try:
+        return db.get_phoneme_patterns()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/search/phoneme-pattern/{pattern_id}", response_model=PhonemePatternSearchResponse)
+def search_phoneme_pattern(
+    pattern_id: str,
+    work_ids: Optional[str] = Query(None, description="Comma-separated work IDs"),
+    collection_id: Optional[int] = Query(None, description="Collection ID filter"),
+    limit: int = Query(100, ge=0, le=500, description="Maximum results"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    expand: bool = Query(False, description="Return full word details (True) or distinct words (False)")
+):
+    """
+    Search for words matching a phoneme pattern
+
+    - **pattern_id**: Pattern identifier (e.g., "plural", "vocative", "reduplication")
+    - **work_ids**: Optional comma-separated work IDs to filter
+    - **collection_id**: Optional collection ID to filter
+    - **limit**: Maximum results (0-500)
+    - **offset**: Pagination offset
+    - **expand**: If true, returns full word details with line/verse context; if false, returns distinct words with counts
+
+    Returns list of words matching the phoneme pattern with usage statistics.
+    """
+    try:
+        # Parse work_ids if provided
+        work_id_list = None
+        if work_ids:
+            work_id_list = [int(x.strip()) for x in work_ids.split(",")]
+
+        results = db.search_phoneme_pattern(
+            pattern_id=pattern_id,
+            work_ids=work_id_list,
+            collection_id=collection_id,
+            limit=limit,
+            offset=offset,
+            expand=expand
+        )
+        return results
+    except ValueError as e:
+        # Invalid pattern_id or work_ids
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import traceback
+        import sys
+        sys.stderr.write(f"\nERROR in /search/phoneme-pattern/{pattern_id}:\n")
+        sys.stderr.write(f"Work IDs: {work_ids}, Collection: {collection_id}\n")
+        sys.stderr.write(f"Error: {str(e)}\n")
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.flush()
         raise HTTPException(status_code=500, detail=str(e))
 
 

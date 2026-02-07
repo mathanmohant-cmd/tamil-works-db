@@ -15,6 +15,164 @@ import bcrypt
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Phoneme search pattern definitions
+# Maps pattern_id → pattern metadata and SQL condition
+# NOTE: Use %% to escape % in LIKE patterns for psycopg2
+PHONEME_PATTERNS = {
+    "plural": {
+        "name": "Plural (-கள்)",
+        "name_tamil": "பன்மை (-கள்)",
+        "description": "Words ending with plural marker -கள் (க்அள் in phonemes)",
+        "sql_condition": "w.phoneme LIKE '%%க்அள்'",
+        "example": "மனிதர்கள், பூக்கள், நூல்கள்",
+        "category": "Number & Person"
+    },
+    "people_nar": {
+        "name": "People (-நர்)",
+        "name_tamil": "மக்கள் (-நர்)",
+        "description": "Words ending with -நர் (people, plural honorific)",
+        "sql_condition": "w.phoneme LIKE '%%ந்அர்'",
+        "example": "வந்தார், செய்தனர்",
+        "category": "Number & Person"
+    },
+    "people_nar_dental": {
+        "name": "People (-னர்)",
+        "name_tamil": "மக்கள் (-னர்)",
+        "description": "Words ending with -னர் (people, plural honorific)",
+        "sql_condition": "w.phoneme LIKE '%%ன்அர்'",
+        "example": "பேசினர், வாழ்ந்தனர்",
+        "category": "Number & Person"
+    },
+    "vocative": {
+        "name": "Vocative (-ஓ)",
+        "name_tamil": "விளி (-ஓ)",
+        "description": "Words ending with vocative particle -ஓ",
+        "sql_condition": "w.phoneme LIKE '%%ஓ'",
+        "example": "தோழனோ, நண்பனே",
+        "category": "Other"
+    },
+    "alaveedai": {
+        "name": "Prolongation (அளபெடை)",
+        "name_tamil": "அளபெடை",
+        "description": "Vowel prolongation for metrical lengthening",
+        "sql_condition": "(w.phoneme LIKE '%%ஆஅ%%' OR w.phoneme LIKE '%%ஈஇ%%' OR w.phoneme LIKE '%%ஊஉ%%' OR w.phoneme LIKE '%%ஏஎ%%' OR w.phoneme LIKE '%%ஓஒ%%')",
+        "example": "காஅடு (காடு + அளபெடை)",
+        "category": "Other"
+    },
+    "adverbial_ena": {
+        "name": "Adverbial (-என)",
+        "name_tamil": "வினையடை (-என)",
+        "description": "Adverbial marker -என (like, as)",
+        "sql_condition": "w.phoneme LIKE '%%என்அ'",
+        "example": "நல்லன என, பெரியன என",
+        "category": "Derivational"
+    },
+    "accusative": {
+        "name": "Accusative (-ஐ)",
+        "name_tamil": "வினைமுற்று (-ஐ)",
+        "description": "Accusative case marker -ஐ",
+        "sql_condition": "w.phoneme LIKE '%%ஐ'",
+        "example": "அவனை, நூலை",
+        "category": "Case Markers"
+    },
+    "instrumental_aal": {
+        "name": "Instrumental (-ஆல்)",
+        "name_tamil": "கருவி (-ஆல்)",
+        "description": "Instrumental case marker -ஆல் (by, with)",
+        "sql_condition": "w.phoneme LIKE '%%ஆல்'",
+        "example": "கையால், கல்வியால்",
+        "category": "Case Markers"
+    },
+    "instrumental_aan": {
+        "name": "Instrumental (-ஆன்)",
+        "name_tamil": "கருவி (-ஆன்)",
+        "description": "Instrumental case marker -ஆன் (by, with)",
+        "sql_condition": "w.phoneme LIKE '%%ஆன்'",
+        "example": "அதனால், இவையால்",
+        "category": "Case Markers"
+    },
+    "sociative_odu": {
+        "name": "Sociative (-ஒடு / -ஓடு)",
+        "name_tamil": "சேர்க்கை (-ஒடு / -ஓடு)",
+        "description": "Sociative case marker -ஒடு/-ஓடு (with, along with)",
+        "sql_condition": "(w.phoneme LIKE '%%ஒட்உ' OR w.phoneme LIKE '%%ஓட்உ')",
+        "example": "நண்பனொடு, தோழியோடு",
+        "category": "Case Markers"
+    },
+    "sociative_udan": {
+        "name": "Sociative (-உடன்)",
+        "name_tamil": "சேர்க்கை (-உடன்)",
+        "description": "Sociative case marker -உடன் (with, along with)",
+        "sql_condition": "w.phoneme LIKE '%%உட்அன்'",
+        "example": "தந்தையுடன், தாயுடன்",
+        "category": "Case Markers"
+    },
+    "dative": {
+        "name": "Dative (-கு)",
+        "name_tamil": "எண்ணுமை (-கு)",
+        "description": "Dative case marker -கு (to, for)",
+        "sql_condition": "w.phoneme LIKE '%%க்உ'",
+        "example": "அவனுக்கு, நமக்கு",
+        "category": "Case Markers"
+    },
+    "locative_il": {
+        "name": "Locative (-இல்)",
+        "name_tamil": "இடம் (-இல்)",
+        "description": "Locative case marker -இல் (in, at)",
+        "sql_condition": "w.phoneme LIKE '%%இல்'",
+        "example": "வீட்டில், நாட்டில்",
+        "category": "Case Markers"
+    },
+    "locative_in": {
+        "name": "Locative (-இன்)",
+        "name_tamil": "இடம் (-இன்)",
+        "description": "Locative/ablative case marker -இன்",
+        "sql_condition": "w.phoneme LIKE '%%இன்'",
+        "example": "தமிழின், நூலின்",
+        "category": "Case Markers"
+    },
+    "relative_athu": {
+        "name": "Relative Participle (-அது)",
+        "name_tamil": "பெயரெச்சம் (-அது)",
+        "description": "Relative participle marker -அது",
+        "sql_condition": "w.phoneme LIKE '%%அத்உ'",
+        "example": "செய்தது, வந்தது",
+        "category": "Derivational"
+    },
+    "relative_udaiya": {
+        "name": "Relative Participle (-உடைய)",
+        "name_tamil": "பெயரெச்சம் (-உடைய)",
+        "description": "Relative participle marker -உடைய (having, possessing)",
+        "sql_condition": "w.phoneme LIKE '%%உட்ஐய்அ'",
+        "example": "அறிவுடைய, மரியாதையுடைய",
+        "category": "Derivational"
+    },
+    "agent_kan": {
+        "name": "Agent Noun (-கன்)",
+        "name_tamil": "செய்யுள் (-கன்)",
+        "description": "Agent noun marker -கன் (one who does)",
+        "sql_condition": "w.phoneme LIKE '%%க்அன்'",
+        "example": "ஆள்கன், செய்தகன்",
+        "category": "Derivational"
+    },
+    "adjectival_maana": {
+        "name": "Adjectival (-மான)",
+        "name_tamil": "பெயரடை (-மான)",
+        "description": "Adjectival suffix -மான",
+        "sql_condition": "w.phoneme LIKE '%%ம்ஆன்அ'",
+        "example": "நல்லமான, பெரியமான",
+        "category": "Derivational"
+    },
+    "reduplication": {
+        "name": "Reduplication (பல பல)",
+        "name_tamil": "இரட்டைச் சொற்கள் (பல பல)",
+        "description": "Reduplicated words (word_word pattern with underscore)",
+        "sql_condition": "w.word_text LIKE '%%\\_%%' ESCAPE '\\' AND split_part(w.word_text, '_', 1) = split_part(w.word_text, '_', 2)",
+        "example": "பல_பல, நல்ல_நல்ல",
+        "category": "Other"
+    }
+}
+
 
 class Database:
     def __init__(self, connection_string: str = None):
@@ -596,6 +754,209 @@ class Database:
                         (SELECT COUNT(DISTINCT word_root) FROM words WHERE word_root IS NOT NULL) as unique_roots
                 """)
                 return dict(cur.fetchone())
+
+    # =========================================================================
+    # Phoneme Pattern Search Methods (Insights Feature)
+    # =========================================================================
+
+    def get_phoneme_patterns(self) -> List[Dict]:
+        """
+        Get list of available phoneme search patterns
+
+        Returns:
+            List of pattern definitions with metadata
+        """
+        return [
+            {
+                "pattern_id": pattern_id,
+                **pattern_info
+            }
+            for pattern_id, pattern_info in PHONEME_PATTERNS.items()
+        ]
+
+    def search_phoneme_pattern(
+        self,
+        pattern_id: str,
+        work_ids: Optional[List[int]] = None,
+        collection_id: Optional[int] = None,
+        limit: int = 100,
+        offset: int = 0,
+        expand: bool = False
+    ) -> Dict:
+        """
+        Search for words matching a phoneme pattern
+
+        Args:
+            pattern_id: Pattern identifier (e.g., "plural", "vocative")
+            work_ids: Optional list of work IDs to filter by
+            collection_id: Optional collection ID to filter by
+            limit: Maximum number of results (0 = count only)
+            offset: Pagination offset
+            expand: If True, return full word details; if False, return distinct words only
+
+        Returns:
+            Dictionary with results and metadata
+        """
+        # Validate pattern exists
+        if pattern_id not in PHONEME_PATTERNS:
+            raise ValueError(f"Invalid pattern_id: {pattern_id}. Available: {list(PHONEME_PATTERNS.keys())}")
+
+        pattern = PHONEME_PATTERNS[pattern_id]
+
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # Build base query depending on expand mode
+                if expand:
+                    # Mode B: Full word details (with line, verse, hierarchy)
+                    query = f"""
+                        SELECT
+                            wd.word_id,
+                            wd.word_text,
+                            wd.word_position,
+                            wd.line_id,
+                            wd.line_number,
+                            wd.line_text,
+                            wd.verse_id,
+                            wd.verse_number,
+                            wd.verse_type,
+                            wd.verse_type_tamil,
+                            wd.work_name,
+                            wd.work_name_tamil,
+                            wd.hierarchy_path,
+                            wd.hierarchy_path_tamil,
+                            wd.work_id,
+                            w.phoneme,
+                            COUNT(*) OVER() as total_count
+                        FROM word_details wd
+                        JOIN words w ON wd.word_id = w.word_id
+                        WHERE ({pattern['sql_condition']})
+                    """
+                    params = []
+
+                    # Add work filter
+                    if work_ids:
+                        placeholders = ','.join(['%s'] * len(work_ids))
+                        query += f" AND wd.work_id IN ({placeholders})"
+                        params.extend(work_ids)
+
+                    # Add collection filter
+                    if collection_id:
+                        query = query.replace(
+                            "FROM word_details wd",
+                            "FROM word_details wd JOIN work_collections wc ON wd.work_id = wc.work_id"
+                        )
+                        query += " AND wc.collection_id = %s"
+                        params.append(collection_id)
+
+                    # Add ordering and pagination
+                    query += " ORDER BY wd.work_name, wd.verse_sort_order, wd.line_number, wd.word_position"
+                    query += " LIMIT %s OFFSET %s"
+                    params.extend([limit, offset])
+
+                else:
+                    # Mode A: Distinct words only (aggregate)
+                    query = f"""
+                        SELECT
+                            w.word_text,
+                            w.phoneme,
+                            COUNT(*) as usage_count,
+                            COUNT(DISTINCT l.verse_id) as verse_count
+                        FROM words w
+                        JOIN lines l ON w.line_id = l.line_id
+                    """
+                    params = []
+                    where_clauses = [f"({pattern['sql_condition']})"]
+
+                    # Add work filter
+                    if work_ids:
+                        query += " JOIN verses v ON l.verse_id = v.verse_id"
+                        placeholders = ','.join(['%s'] * len(work_ids))
+                        where_clauses.append(f"v.work_id IN ({placeholders})")
+                        params.extend(work_ids)
+
+                    # Add collection filter
+                    if collection_id:
+                        if work_ids:
+                            # verses table already joined above
+                            query += " JOIN work_collections wc ON v.work_id = wc.work_id"
+                        else:
+                            query += """ JOIN verses v ON l.verse_id = v.verse_id
+                                         JOIN work_collections wc ON v.work_id = wc.work_id"""
+                        where_clauses.append("wc.collection_id = %s")
+                        params.append(collection_id)
+
+                    # Construct WHERE clause
+                    query += " WHERE " + " AND ".join(where_clauses)
+
+                    # Add grouping and ordering
+                    query += """
+                        GROUP BY w.word_text, w.phoneme
+                        ORDER BY usage_count DESC, w.word_text
+                        LIMIT %s OFFSET %s
+                    """
+                    params.extend([limit, offset])
+
+                # Execute query with timing
+                self._execute_query_with_timing(
+                    cur, query, params,
+                    f"phoneme_pattern_{pattern_id}_{'expand' if expand else 'distinct'}"
+                )
+                results = [dict(row) for row in cur.fetchall()]
+
+                # Get total count
+                if results and expand:
+                    total_count = results[0].get('total_count', 0)
+                    for row in results:
+                        row.pop('total_count', None)
+                elif not expand:
+                    # For distinct mode, run count query
+                    count_query = f"""
+                        SELECT
+                            COUNT(DISTINCT w.word_text) as total_words,
+                            COUNT(DISTINCT l.verse_id) as total_verses
+                        FROM words w
+                        JOIN lines l ON w.line_id = l.line_id
+                    """
+                    count_params = []
+                    count_where = [f"({pattern['sql_condition']})"]
+
+                    if work_ids:
+                        count_query += " JOIN verses v ON l.verse_id = v.verse_id"
+                        placeholders = ','.join(['%s'] * len(work_ids))
+                        count_where.append(f"v.work_id IN ({placeholders})")
+                        count_params.extend(work_ids)
+
+                    if collection_id:
+                        if work_ids:
+                            count_query += " JOIN work_collections wc ON v.work_id = wc.work_id"
+                        else:
+                            count_query += """ JOIN verses v ON l.verse_id = v.verse_id
+                                              JOIN work_collections wc ON v.work_id = wc.work_id"""
+                        count_where.append("wc.collection_id = %s")
+                        count_params.append(collection_id)
+
+                    count_query += " WHERE " + " AND ".join(count_where)
+
+                    cur.execute(count_query, count_params)
+                    count_result = cur.fetchone()
+                    total_count = count_result['total_words']
+                    total_verses = count_result['total_verses']
+                else:
+                    total_count = 0
+                    total_verses = 0
+
+                return {
+                    "pattern": {
+                        "pattern_id": pattern_id,
+                        **pattern
+                    },
+                    "results": results,
+                    "total_count": total_count,
+                    "total_verses": total_verses if not expand else None,
+                    "limit": limit,
+                    "offset": offset,
+                    "expand": expand
+                }
 
     # =========================================================================
     # Collection Management Methods

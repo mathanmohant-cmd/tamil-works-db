@@ -143,14 +143,14 @@ WORK_METADATA = {
         'file': '11.நீதி சூடாமணி.txt'
     },
     12: {
-        'work_name': 'Somesar',
-        'work_name_tamil': 'சோமேசர்',
+        'work_name': 'Muthumozhi Venpa',
+        'work_name_tamil': 'முதுமொழி வெண்பா',
         'author': 'Unknown',
         'author_tamil': 'அறியப்படாத ஆசிரியர்',
         'period': '10th-15th century CE',
         'canonical_order': 325012,
         'position_in_collection': 12,
-        'file': '12.சோமேசர்.txt'
+        'file': '12.முதுமொழி வெண்பா.txt'
     },
     13: {
         'work_name': 'Viveka Chinthamani',
@@ -548,6 +548,9 @@ class NeethinoolkalBulkImporter:
 
             # Regular line (verse content)
             elif current_verse_num is not None:
+                # Skip annotation/glossary lines (start with *)
+                if line.startswith('*'):
+                    continue
                 # Accumulate verse line
                 current_verse_lines.append(line)
 

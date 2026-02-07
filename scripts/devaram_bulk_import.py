@@ -117,11 +117,11 @@ class DevaramBulkImporter:
             {
                 'file': '7.ஏழாம் திருமுறை.txt',
                 'work_name': "Sundarar Devaram",
-                'work_name_tamil': "சுந்தரர் தேவாரம் (1-101)",
+                'work_name_tamil': "சுந்தரர் தேவாரம் (1 - 1037)",
                 'author': "Sundarar",
                 'author_tamil': "சுந்தரர்",
                 'thirumurai_number': 7,
-                'verse_range': (1, 101)
+                'verse_range': (1, 1037)
             }
         ]
 
@@ -369,11 +369,9 @@ class DevaramBulkImporter:
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
-        # Create a default section for this work (fallback if no pathigams found)
-        # This ensures verse_hierarchy and word_details views work correctly
-        default_section = self._get_or_create_section_id(self.current_work_id)
-
-        current_section = default_section  # Start with default, update when pathigam found
+        # Track sections and verses found
+        sections_found = []  # Track pathigam section IDs
+        current_section = None
         current_pann = None
         current_verse_lines = []
         verse_number = 0
@@ -385,6 +383,11 @@ class DevaramBulkImporter:
             if not line or line == 'மேல்':
                 # End of verse
                 if in_verse and current_verse_lines:
+                    # Ensure we have a section_id (create default if no pathigam found yet)
+                    if current_section is None:
+                        current_section = self._get_or_create_section_id(self.current_work_id)
+                        sections_found.append(current_section)
+                    self.current_section_id = current_section
                     self.create_verse(current_verse_lines, verse_number, current_pann)
                     current_verse_lines = []
                     in_verse = False
@@ -394,21 +397,27 @@ class DevaramBulkImporter:
             if '^' in line:
                 continue
 
-            # Section marker: " 1. Section name : பண் - pann_name" or "பண் : pann_name"
-            section_match = re.match(r'^\s*(\d+)\.\s*(.+?)\s*:\s*பண்\s*[-:]\s*(.+)', line)
+            # Section marker: " 1. Section name : பண் - pann_name" or "1. Section name"
+            # பண்: is optional (some pathigams don't have it)
+            # Format 1: "23. கோயில் - திருநேரிசை : பண் - கொல்லி"
+            # Format 2: "24. திருவதிகை வீரட்டானம் - திருநேரிசை"
+            section_match = re.match(r'^\s*(\d+)\.\s*(.+?)(?:\s*:\s*பண்\s*[-:]\s*(.+))?$', line)
             if section_match:
                 section_num = int(section_match.group(1))
                 section_name = section_match.group(2).strip()
-                current_pann = section_match.group(3).strip()
+                current_pann = section_match.group(3).strip() if section_match.group(3) else None
 
                 # Create section (pathigam)
                 self.section_sort_order += 1
                 section_metadata = {
                     'section_type': 'pathigam',
-                    'section_type_tamil': 'பதிகம்',
-                    'pann': current_pann,
-                    'musical_mode': True
+                    'section_type_tamil': 'பதிகம்'
                 }
+
+                # Only add pann if present
+                if current_pann:
+                    section_metadata['pann'] = current_pann
+                    section_metadata['musical_mode'] = True
 
                 section_dict = {
                     'section_id': self.section_id,
@@ -424,6 +433,7 @@ class DevaramBulkImporter:
                 }
                 self.sections.append(section_dict)
                 current_section = self.section_id
+                sections_found.append(self.section_id)  # Track that we found a pathigam
                 self.section_id += 1
                 continue
 
@@ -446,6 +456,11 @@ class DevaramBulkImporter:
 
         # Handle last verse
         if current_verse_lines:
+            # Ensure we have a section_id (create default if no pathigam found yet)
+            if current_section is None:
+                current_section = self._get_or_create_section_id(self.current_work_id)
+                sections_found.append(current_section)
+            self.current_section_id = current_section
             self.create_verse(current_verse_lines, verse_number, current_pann)
 
     def create_verse(self, verse_lines: List[str], verse_number: int, pann: Optional[str]):

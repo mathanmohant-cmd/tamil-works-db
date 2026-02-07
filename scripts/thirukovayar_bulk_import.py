@@ -180,7 +180,33 @@ class ThirukovayarBulkImporter:
             if not line or line == 'மேல்' or line.startswith('**'):
                 continue
 
-            # Check for main division: * [name] - [description]
+            # Check for இயல் marker: & followed by இயல் name
+            # Format: &களவியல் or &கற்பியல்
+            iyal_marker_match = re.match(r'^&\s*(.+)', line)
+            if iyal_marker_match:
+                # Save previous verse if any
+                if current_verse_lines and current_adhikaram_section:
+                    self._add_verse(current_adhikaram_section, verse_count, current_verse_lines, current_thurai)
+                    current_verse_lines = []
+
+                iyal_name = iyal_marker_match.group(1).strip()
+                iyal_number = 1 if 'களவியல்' in iyal_name else 2
+
+                current_iyal_section = self._get_or_create_section_id(
+                    self.current_work_id,
+                    parent_section_id=None,
+                    level_type='Iyal',
+                    level_type_tamil='இயல்',
+                    section_number=iyal_number,
+                    section_name=iyal_name
+                )
+                print(f"  Found இயல்: {iyal_name}")
+                current_adhikaram_section = None
+                current_thurai = None
+                verse_count = 0
+                continue
+
+            # Check for main division (OLD FORMAT): * [name] - [description]
             main_match = re.match(r'^\*\s+([^-*\d]+)\s*-\s*(.+)', line)
             if main_match and not line.startswith('**'):
                 # Save previous verse if any
@@ -254,6 +280,9 @@ class ThirukovayarBulkImporter:
 
             # Regular verse line
             if verse_count > 0 and current_adhikaram_section:
+                # Skip annotation/glossary lines (start with *)
+                if line.startswith('*'):
+                    continue
                 cleaned = line.replace('…', '').strip()
                 if cleaned:
                     current_verse_lines.append(cleaned)

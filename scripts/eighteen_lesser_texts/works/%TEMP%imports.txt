@@ -1,0 +1,9 @@
+import_ainthinai_aimbathu.py   import_muthumozhikkanchi.py
+import_ainthinai_ezhubathu.py  import_naladiyar.py
+import_asarakkovai.py	       import_nanmanikkadigai.py
+import_elathi.py	       import_pazhamozhi_nanuru.py
+import_iniyavai_narpathu.py    import_sirupanchamoolam.py
+import_inna_narpathu.py        import_thinaimalai_noorraimpathu.py
+import_kainnilai.py	       import_thinaymozhi_aimbathu.py
+import_kalavazhi_narpathu.py   import_thirigadugam.py
+import_kar_narpathu.py	       import_thirukkural.py
