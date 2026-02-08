@@ -88,9 +88,9 @@
             @blur="handleHelpBlur"
             class="nav-tab profile-tab-button"
             :class="{ 'profile-active': helpMenuOpen }"
-            title="Help and Docs"
+            title="Search Help"
           >
-            <span>Help and Docs</span>
+            <span>Search Help</span>
             <span class="dropdown-arrow">▼</span>
           </button>
 
@@ -122,9 +122,9 @@
             @blur="handleStoryBlur"
             class="nav-tab profile-tab-button"
             :class="{ 'profile-active': storyMenuOpen }"
-            title="The Story Behind"
+            title="About Us"
           >
-            <span>The Story Behind</span>
+            <span>About Us</span>
             <span class="dropdown-arrow">▼</span>
           </button>
 
@@ -132,11 +132,11 @@
           <div v-if="storyMenuOpen" class="profile-tab-menu">
             <router-link :to="{ name: 'Journey' }" @click="storyMenuOpen = false" class="profile-menu-item">
               <span class="menu-item-icon">🚀</span>
-              <span>The Journey</span>
+              <span>Our Story</span>
             </router-link>
             <router-link :to="{ name: 'Inspiration' }" @click="storyMenuOpen = false" class="profile-menu-item">
               <span class="menu-item-icon">✨</span>
-              <span>Guiding Exemplars</span>
+              <span>Inspiring Exemplars</span>
             </router-link>
           </div>
         </div>

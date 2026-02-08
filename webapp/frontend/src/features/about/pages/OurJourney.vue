@@ -4,7 +4,7 @@
       <h1>The Paths Opened by a Few Curious Words</h1>
   
       <section class="intro-section">
-        <!-- Introduction
+        
         <p class="intro">
           It started within the Chicago Thamizh Sangam community. A paper presented at the 5th International Conference on Thirukkural offered an early glimpse into how the ideas sown by the Thirukkural continue to shape thought and values even today.
         </p>
@@ -14,7 +14,7 @@
         <p class="intro">
           What might have remained a dormant wish came alive through the தமிழ்ச் சான்றோர்—the scholars, and exemplars whose lifelong work illuminated the path and shaped my understanding.
         </p>
-        -->
+        
         <p class="intro">
           When reading the texts, certain words and usages often stand out and spark curiosity—prompting a pause, comparison, and a return to the text with fresh questions.
         </p>

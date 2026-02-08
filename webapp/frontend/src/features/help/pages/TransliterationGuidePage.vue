@@ -48,7 +48,7 @@
             <div class="quick-ref-item">
               <span class="tamil-char">ன்</span>
               <span class="english-trans">nn, n2</span>
-              <span>→ மதன் (mathann)</span>
+              <span>→ மகன் (makann)</span>
             </div>
             <div class="quick-ref-item">
               <span class="tamil-char">ங்</span>
@@ -68,7 +68,7 @@
               <li><strong>Unique Tamil:</strong> <code>zh</code> = ழ, <code>R</code> = ற, <code>nn</code> or <code>n2</code> = ன</li>
               <li><strong>Long vowels:</strong> <code>aa</code> or <code>A</code> → ஆ</li>
               <li><strong>Three N sounds:</strong> <code>n</code> (ந), <code>N</code> (ண), <code>nn</code> or <code>n2</code> (ன)</li>
-              <li><strong>Examples:</strong> thirukkural → திருக்குறள், azhagu → அழகு, mathann → மதன்</li>
+              <li><strong>Examples:</strong> thirukkural → திருக்குறள், azhagu → அழகு, makann → மகன்</li>
             </ul>
           </div>
         </section>
@@ -89,7 +89,7 @@
                 <tr>
                   <td><span class="tamil-char">அ</span> <span class="english-trans">a</span></td>
                   <td>Short</td>
-                  <td class="example">அரம் (aram)</td>
+                  <td class="example">அறம் (aRam)</td>
                 </tr>
                 <tr>
                   <td><span class="tamil-char">ஆ</span> <span class="english-trans">aa, A</span></td>
@@ -177,7 +177,7 @@
                 <tr>
                   <td><span class="tamil-char">ட்</span> <span class="english-trans">T</span></td>
                   <td>Hard</td>
-                  <td class="example">டமிழர் (Tamilar)</td>
+                  <td class="example">தமிழர் (thamizhar)</td>
                 </tr>
                 <tr>
                   <td><span class="tamil-char">த்</span> <span class="english-trans">t</span></td>
@@ -222,7 +222,7 @@
                 <tr class="unique-row">
                   <td><span class="tamil-char">ன்</span> <span class="english-trans">nn, n2</span></td>
                   <td>Nasal ⭐</td>
-                  <td class="example">மதன் (mathann)</td>
+                  <td class="example">மகன் (makann)</td>
                 </tr>
                 <tr>
                   <td><span class="tamil-char">ய்</span> <span class="english-trans">y</span></td>
@@ -237,7 +237,7 @@
                 <tr>
                   <td><span class="tamil-char">ல்</span> <span class="english-trans">l</span></td>
                   <td>Medium</td>
-                  <td class="example">லட்சுமி (lakshmi)</td>
+                  <td class="example">கல்வி (kalvi)</td>
                 </tr>
                 <tr>
                   <td><span class="tamil-char">வ்</span> <span class="english-trans">v</span></td>
