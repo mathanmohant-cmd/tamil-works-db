@@ -655,7 +655,6 @@ class Database:
                         w.work_name_tamil,
                         w.author,
                         w.author_tamil,
-                        w.period,
                         w.description,
                         w.chronology_start_year,
                         w.chronology_end_year,
@@ -1306,7 +1305,6 @@ class Database:
                         w.work_name_tamil,
                         w.author,
                         w.author_tamil,
-                        w.period,
                         wc.position_in_collection,
                         wc.is_primary
                     FROM works w
@@ -1433,7 +1431,6 @@ class Database:
                         w.work_name_tamil,
                         w.author,
                         w.author_tamil,
-                        w.period,
                         w.description,
                         w.chronology_start_year,
                         w.chronology_end_year,

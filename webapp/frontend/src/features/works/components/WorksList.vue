@@ -113,11 +113,6 @@
                 </span>
               </div>
 
-              <div v-if="work.period" class="work-meta">
-                <span class="meta-label">Period:</span>
-                <span class="meta-value">{{ work.period }}</span>
-              </div>
-
               <div v-if="work.chronology_start_year || work.chronology_end_year" class="work-meta">
                 <span class="meta-label">Dating:</span>
                 <span class="meta-value">

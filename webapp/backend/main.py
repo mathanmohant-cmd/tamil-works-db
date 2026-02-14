@@ -80,7 +80,6 @@ class Work(BaseModel):
     work_name_tamil: str
     author: Optional[str]
     author_tamil: Optional[str]
-    period: Optional[str]
     description: Optional[str]
     canonical_position: Optional[int]  # Position in Traditional Canon collection (if applicable)
     chronology_start_year: Optional[int]

@@ -28,7 +28,6 @@ CREATE TABLE works (
     work_id SERIAL PRIMARY KEY,
     work_name VARCHAR(200) NOT NULL,
     work_name_tamil VARCHAR(200) NOT NULL,
-    period VARCHAR(100),
     author VARCHAR(200),
     author_tamil VARCHAR(200),
     description TEXT,
@@ -141,6 +140,8 @@ CREATE INDEX idx_verses_verse_tag ON verses(verse_tag);
 
 COMMENT ON COLUMN verses.verse_tag IS 'Special verse classification: "migai_padal" for additional verses, NULL for regular verses';
 
+COMMENT ON COLUMN words.phoneme IS 'Phonemic representation with decomposed consonant+vowel combinations. Example: ஒல்லென → ஒல்ல்என';
+
 -- Lines table
 CREATE TABLE lines (
     line_id SERIAL PRIMARY KEY,
@@ -166,6 +167,7 @@ CREATE TABLE words (
     word_root VARCHAR(200),  -- Root/base form of the word
     word_type VARCHAR(50),  -- noun, verb, adjective, etc.
     sandhi_split VARCHAR(500),  -- If word is result of sandhi, show components
+    phoneme VARCHAR(200),  -- Phonemic representation with decomposed consonant+vowel combinations
     meaning TEXT,
     metadata JSONB,  -- Flexible metadata: etymology, semantic field, theological significance, frequency, etc.
     FOREIGN KEY (line_id) REFERENCES lines(line_id),
@@ -177,6 +179,7 @@ CREATE INDEX idx_words_text ON words(word_text);
 CREATE INDEX idx_words_root ON words(word_root);
 CREATE INDEX idx_words_text_line ON words(word_text, line_id);
 CREATE INDEX idx_words_root_text ON words(word_root, word_text) WHERE word_root IS NOT NULL;
+CREATE INDEX idx_words_phoneme ON words(phoneme) WHERE phoneme IS NOT NULL;
 
 -- Junction table: Sections can belong to multiple collections
 -- Enables collections by theme (thinai), structure type, etc.
