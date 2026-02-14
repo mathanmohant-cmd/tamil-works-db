@@ -52,23 +52,14 @@
         :class="{ expanded: expandedWords.has(word.word_text) }"
       >
         <!-- Word Header Row -->
-        <div class="word-header-row">
+        <div class="word-header-row" @click="toggleWordExpansion(word.word_text)">
           <div class="word-info">
             <span class="word-number">{{ index + 1 }}.</span>
-            <a
-              :href="`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(word.word_text)}&searchhws=yes&matchtype=default`"
-              target="_blank"
-              class="word-text word-link"
-              @click.stop
-              title="Link to UChicago Combined Thamizh Dictionary"
-            >
-              {{ word.word_text }}
-            </a>
+            <span class="word-text">{{ word.word_text }}</span>
             <span class="word-count-badge">({{ word.count }})</span>
           </div>
           <div class="word-actions">
             <button
-              @click="toggleWordExpansion(word.word_text)"
               class="expand-collapse-button"
               :class="{ expanded: expandedWords.has(word.word_text) }"
               :title="expandedWords.has(word.word_text) ? 'Collapse' : 'Expand to see the lines'"
@@ -92,20 +83,26 @@
               <span class="summary-item">{{ word.verse_count || 0 }} Verse{{ (word.verse_count || 0) !== 1 ? 's' : '' }}</span>
             </div>
             <div class="export-buttons-group">
-              <span class="export-label">Export</span>
+              <button
+                @click="openLexicon(word.word_text)"
+                class="export-button-compact"
+                title="UChicago Tamil Dictionary"
+              >
+                📖 Lexicon
+              </button>
               <button
                 @click="showLinesExportMenu(word.word_text)"
-                class="export-button-combined"
+                class="export-button-compact"
                 title="Export all lines for this word"
               >
-                📄 Lines
+                💾 All Lines
               </button>
               <button
                 @click="showVersesExportMenu(word.word_text)"
-                class="export-button-combined"
+                class="export-button-compact"
                 title="Export complete verses for this word"
               >
-                📜 Verses
+                💾 All Verses
               </button>
             </div>
           </div>
@@ -457,6 +454,12 @@ const loadMoreOccurrences = async (wordText) => {
   } finally {
     loadingWord.value = null
   }
+}
+
+// Open lexicon in new tab
+const openLexicon = (wordText) => {
+  const url = `https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${encodeURIComponent(wordText)}&searchhws=yes&matchtype=default`
+  window.open(url, '_blank')
 }
 
 // Show export menus
@@ -956,15 +959,26 @@ const exportVersesToTXT = (wordText, verses) => {
 .export-buttons-group {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
 }
 
-.export-label {
+.export-button-compact {
+  padding: 0.4rem 0.7rem;
+  background-color: #d89a5f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
   font-weight: 600;
-  font-size: 0.9rem;
-  color: #495057;
-  margin-right: 0.25rem;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.export-button-compact:hover {
+  background-color: #c17a3a;
 }
 
 .export-button-combined {
@@ -1083,16 +1097,6 @@ const exportVersesToTXT = (wordText, verses) => {
   font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
-}
-
-.word-link {
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.word-link:hover {
-  color: #4a90e2;
-  text-decoration: underline;
 }
 
 .word-count-badge {
@@ -1477,6 +1481,24 @@ const exportVersesToTXT = (wordText, verses) => {
 
   .occurrence-line {
     font-size: 0.95rem;
+  }
+
+  .expanded-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .export-buttons-group {
+    gap: 0.35rem;
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .export-button-compact {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
   }
 }
 </style>
