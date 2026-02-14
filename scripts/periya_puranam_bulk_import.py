@@ -150,7 +150,13 @@ class PeriyaPuranamBulkImporter:
             'work_name_tamil': work_name,
             'author': 'Sekkizhar',
             'author_tamil': author_name,
-            'period': '12th century CE',
+            'chronology_start_year': 1100,
+
+            'chronology_end_year': 1200,
+
+            'chronology_confidence': 'low',
+
+            'chronology_notes': 'Estimated 12th century CE. Dating based on manuscript evidence and historical context.',
             'canonical_order': 383,
                         'metadata': work_metadata
         })

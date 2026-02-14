@@ -25,16 +25,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))  # scripts/ for glo
 sys.path.insert(0, str(Path(__file__).parent.parent / 'shared'))  # local shared/ for work_metadata
 from shared.base_importer import BaseWorkImporter
 from shared.utils import clean_line_text, classify_verse_type, split_and_clean_words
-from work_metadata import WORK_METADATA
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'metadata'))
+from eighteen_lesser_texts_metadata import WORK_METADATA, COLLECTION_ID, COLLECTION_NAME, COLLECTION_NAME_TAMIL
 
 
 class AinthinaiEzhubathuImporter(BaseWorkImporter):
     """Atomic importer for Ainthinai Ezhubathu"""
 
     # Default collection for this work
-    DEFAULT_COLLECTION_ID = 201
-    DEFAULT_COLLECTION_NAME = 'Eighteen Lesser Texts'
-    DEFAULT_COLLECTION_NAME_TAMIL = 'பதினெண்கீழ்க்கணக்கு'
+    DEFAULT_COLLECTION_ID = COLLECTION_ID
+    DEFAULT_COLLECTION_NAME = COLLECTION_NAME
+    DEFAULT_COLLECTION_NAME_TAMIL = COLLECTION_NAME_TAMIL
 
     def __init__(self, db_connection_string, collection_id=None, position=None):
         # Use default collection if not specified

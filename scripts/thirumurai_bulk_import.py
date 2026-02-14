@@ -1,1055 +1,556 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Thirumurai Bulk Import - Fast 2-phase import using PostgreSQL COPY
+Thirumurai Bulk Import - Using BaseWorkImporter Pattern
 Phase 1: Parse text → Build data structures in memory
 Phase 2: Bulk COPY into database (1000x faster than INSERT)
 
-Thirumurai Collection (திருமுறை) - 12 files, Collection ID: 321
+Thirumurai Collection (திருமுறை) - 60 works across 13 files
+12 Thirumurai subcollections under Devotional Literature (323)
 
 Structure:
-- Files 1-7: Devaram (தேவாரம்) - 7 works by 3 authors
-- File 8.1: Thiruvasagam (திருவாசகம்) - 1 work
-- File 8.2: Thirukkovayar (திருக்கோவையார்) - 1 work
-- File 9: Thiruvisaippa child collection (ID: 3211)
-  - Each author creates a work: "Author பதிகங்கள்" (~10 works)
-  - @ sections become sections within each author's work
-- File 10: Thirumanthiram (திருமந்திரம்) - 1 work
-- File 11: Each author creates a separate work (~11 works)
-  - Author names with "பாசுரங்கள்" suffix are cleaned
-  - @ sections become sections within each author's work
-- File 12: Periya Puranam (பெரியபுராணம்) - 1 work
+- Files 1-7: Devaram (தேவாரம்) - 7 works by 3 Nayanmars
+- File 8.1: Thiruvasagam - 1 work
+- File 8.2: Thirukkovayar - 1 work
+- File 9: Thiruvisaippa + Thiruppallandu - 10 works
+- File 10: Thirumanthiram - 1 work
+- File 11: Saiva Prabandha Malai - 39 works
+- File 12: Periya Puranam - 1 work
 """
 
 import re
-import psycopg2
-from pathlib import Path
-import csv
-import io
 import sys
 import os
-from word_cleaning import split_and_clean_words
+from pathlib import Path
 
-class ThirumuraiBulkImporter:
-    def __init__(self, db_connection_string: str):
-        """Initialize importer"""
-        self.conn = psycopg2.connect(db_connection_string)
-        self.cursor = self.conn.cursor()
+# Add shared directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
+sys.path.insert(0, str(script_dir / 'shared'))
+sys.path.insert(0, str(script_dir / 'metadata'))
 
-        # Data containers
-        self.works = []
-        self.sections = []
-        self.verses = []
-        self.lines = []
-        self.words = []
+from shared.base_importer import BaseWorkImporter
+from shared.utils import split_and_clean_words
+from thirumurai_metadata import (
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    SUBCOLLECTIONS,
+    WORK_METADATA
+)
 
-        # Get existing max IDs from database
-        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
-        self.section_id = self.cursor.fetchone()[0] + 1
 
-        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
-        self.verse_id = self.cursor.fetchone()[0] + 1
+class ThirumuraiImporter(BaseWorkImporter):
+    """Import all 60 Thirumurai works using BaseWorkImporter pattern"""
 
-        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
-        self.line_id = self.cursor.fetchone()[0] + 1
+    def __init__(self, db_connection_string):
+        # Initialize with Devotional Literature as parent collection
+        super().__init__(db_connection_string, collection_id=None)
 
-        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
-        self.word_id = self.cursor.fetchone()[0] + 1
+        # Ensure Devotional Literature collection exists (parent)
+        self._ensure_devotional_literature_exists()
 
-        self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) FROM works")
-        self.work_id = self.cursor.fetchone()[0] + 1
+        # Create main Thirumurai collection
+        self._ensure_thirumurai_collection_exists()
 
-        print(f"  Starting IDs: work={self.work_id}, section={self.section_id}, verse={self.verse_id}, line={self.line_id}, word={self.word_id}")
+        # Create 12 Thirumurai subcollections
+        self._create_thirumurai_subcollections()
 
-        # Track current parsing state
-        self.current_work_id = None
-        self.section_cache = {}
-
-    def _ensure_collection_exists(self):
-        """Ensure Thirumurai collection exists"""
-        # Check if collection exists
-        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (self.collection_id,))
-        existing = self.cursor.fetchone()
-
-        if not existing:
-            print(f"  Creating Thirumurai collection (ID: {self.collection_id})...")
-            self.cursor.execute("""
-                INSERT INTO collections (
-                    collection_id, collection_name, collection_name_tamil,
-                    collection_type, description, sort_order
-                )
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (
-                self.collection_id, 'Thirumurai', 'திருமுறை',
-                'tradition',
-                'Twelve books of Shaivite devotional hymns by various Nayanmars',
-                1  # Before Naalayira Divya Prabandham
-            ))
-            print(f"  [OK] Collection created (will commit with bulk data)")
-        else:
-            print(f"  Found existing Thirumurai collection (ID: {self.collection_id})")
-
-    def _create_child_collection(self, collection_id, collection_name, collection_name_tamil, parent_id, sort_order, description=None):
-        """Create or get a child collection"""
-        # Check if collection exists
-        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
-        existing = self.cursor.fetchone()
-
-        if not existing:
-            print(f"  Creating child collection: {collection_name_tamil} (ID: {collection_id})...")
+    def _ensure_devotional_literature_exists(self):
+        """Ensure Devotional Literature collection (323) exists"""
+        self.cursor.execute(
+            "SELECT collection_id FROM collections WHERE collection_id = 323"
+        )
+        if not self.cursor.fetchone():
+            print("  Creating Devotional Literature collection (323)...")
             self.cursor.execute("""
                 INSERT INTO collections (
                     collection_id, collection_name, collection_name_tamil,
                     collection_type, description, parent_collection_id, sort_order
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
-                collection_id, collection_name, collection_name_tamil,
-                'tradition', description, parent_id, sort_order
+                323, 'Devotional Literature', 'பக்தி இலக்கியம்',
+                'period', 'Devotional hymns and religious poetry from 6th-19th century CE',
+                1, 4
             ))
-            print(f"  [OK] Child collection created (will commit with bulk data)")
         else:
-            print(f"  Found existing child collection: {collection_name_tamil} (ID: {collection_id})")
+            print("  Devotional Literature collection (323) already exists")
 
-        return collection_id
-
-    def _create_work(self, work_name, work_name_tamil, author, author_tamil, canonical_order, period='6th-12th century CE'):
-        """Create a work entry and return work_id"""
-        # Check if work already exists
-        self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s AND work_name_tamil = %s",
-                          (work_name, work_name_tamil))
-        existing = self.cursor.fetchone()
-
-        if existing:
-            print(f"  [ERROR] Work {work_name_tamil} already exists (ID: {existing[0]})")
-            return None
-
-        # Use pre-allocated work_id and increment
-        work_id = self.work_id
-        self.work_id += 1
-
-        self.works.append({
-            'work_id': work_id,
-            'work_name': work_name,
-            'work_name_tamil': work_name_tamil,
-            'author': author,
-            'author_tamil': author_tamil,
-            'period': period,
-            'canonical_order': canonical_order
-        })
-
-        print(f"  Created work: {work_name_tamil} (ID: {work_id}, Canonical: {canonical_order})")
-        return work_id
-
-    def parse_devaram_file(self, file_path, file_num):
-        """
-        Parse Devaram files (Files 1-7)
-        Structure: Numbered temple sections → # verses
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines_text = f.readlines()
-
-        # Parse first line to get author and work name
-        first_line = lines_text[0].strip()
-        match = re.match(r'(.+?)\s*-\s*(.+?)\s+\d+\.', first_line)
-        if match:
-            author_tamil = match.group(1).strip()
-            work_base = match.group(2).strip()
+    def _ensure_thirumurai_collection_exists(self):
+        """Ensure Thirumurai main collection (321) exists"""
+        self.cursor.execute(
+            "SELECT collection_id FROM collections WHERE collection_id = %s",
+            (COLLECTION_ID,)
+        )
+        if not self.cursor.fetchone():
+            print(f"  Creating Thirumurai collection ({COLLECTION_ID})...")
+            self.cursor.execute("""
+                INSERT INTO collections (
+                    collection_id, collection_name, collection_name_tamil,
+                    collection_type, description, parent_collection_id, sort_order
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                COLLECTION_ID, COLLECTION_NAME, COLLECTION_NAME_TAMIL,
+                'tradition', 'Twelve books of Shaivite devotional hymns',
+                323, 1
+            ))
         else:
-            author_tamil = "Unknown"
-            work_base = "தேவாரம்"
+            print(f"  Thirumurai collection ({COLLECTION_ID}) already exists")
 
-        # Map file number to Thirumurai name
-        thirumurai_names = {
-            1: "முதலாம் திருமுறை", 2: "இரண்டாம் திருமுறை", 3: "மூன்றாம் திருமுறை",
-            4: "நான்காம் திருமுறை", 5: "ஐந்தாம் திருமுறை", 6: "ஆறாம் திருமுறை",
-            7: "ஏழாம் திருமுறை"
-        }
+    def _create_thirumurai_subcollections(self):
+        """Create 12 Thirumurai subcollections under Thirumurai (321)"""
+        for num, subinfo in SUBCOLLECTIONS.items():
+            self.cursor.execute(
+                "SELECT collection_id FROM collections WHERE collection_id = %s",
+                (subinfo['id'],)
+            )
+            if not self.cursor.fetchone():
+                print(f"  Creating {subinfo['name']} ({subinfo['id']})...")
+                self.cursor.execute("""
+                    INSERT INTO collections (
+                        collection_id, collection_name, collection_name_tamil,
+                        collection_type, description, parent_collection_id, sort_order
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    subinfo['id'], subinfo['name_en'], subinfo['name'],
+                    'subcollection', f'Thirumurai {num}',
+                    COLLECTION_ID, num
+                ))
+            else:
+                print(f"  {subinfo['name']} ({subinfo['id']}) already exists")
 
-        work_name_tamil = f"{work_base} - {thirumurai_names[file_num]}"
-        author_english = author_tamil  # Can add transliteration if needed
+    def parse_and_import_all_works(self, source_dir: Path):
+        """Parse all 60 works from 13 source files"""
+        print("\n=== PHASE 1: Parsing all Thirumurai files ===")
 
-        # Create work (canonical_order = 320 + file_num)
+        # Group works by source file
+        works_by_file = {}
+        for work_key, work_meta in WORK_METADATA.items():
+            file_name = work_meta['file']
+            if file_name not in works_by_file:
+                works_by_file[file_name] = []
+            works_by_file[file_name].append((work_key, work_meta))
+
+        # Parse each file
+        for file_name, works_list in sorted(works_by_file.items()):
+            file_path = source_dir / file_name
+            if not file_path.exists():
+                print(f"  [WARNING] File not found: {file_path}")
+                continue
+
+            print(f"\n  Parsing {file_name} ({len(works_list)} work(s))...")
+
+            # Different parsing logic based on file type
+            if file_name.startswith('1.') or file_name.startswith('2.') or \
+               file_name.startswith('3.') or file_name.startswith('4.') or \
+               file_name.startswith('5.') or file_name.startswith('6.') or \
+               file_name.startswith('7.'):
+                # Devaram files (1 work per file)
+                self._parse_devaram_file(file_path, works_list[0])
+            elif file_name.startswith('8.1'):
+                # Thiruvasagam
+                self._parse_file8_single_work(file_path, works_list[0])
+            elif file_name.startswith('8.2'):
+                # Thirukkovayar
+                self._parse_file8_single_work(file_path, works_list[0])
+            elif file_name.startswith('9.'):
+                # File 9: 10 works with & markers for authors
+                self._parse_file9_multi_work(file_path, works_list)
+            elif file_name.startswith('10.'):
+                # Thirumanthiram
+                self._parse_file10_single_work(file_path, works_list[0])
+            elif file_name.startswith('11.'):
+                # File 11: 39 works with & markers for authors
+                self._parse_file11_multi_work(file_path, works_list)
+            elif file_name.startswith('12.'):
+                # Periya Puranam
+                self._parse_file12_single_work(file_path, works_list[0])
+
+    def _parse_devaram_file(self, file_path: Path, work_tuple):
+        """Parse Devaram files (Files 1-7) - numbered sections → # verses"""
+        work_key, work_meta = work_tuple
+
+        # Create work
         work_id = self._create_work(
-            work_name=work_name_tamil,
-            work_name_tamil=work_name_tamil,
-            author=author_english,
-            author_tamil=author_tamil,
-            canonical_order=320 + file_num
+            work_name=work_meta['work_name'],
+            work_name_tamil=work_meta['work_name_tamil'],
+            metadata=work_meta
         )
 
-        if not work_id:
-            return
+        # Link to subcollection
+        self.work_collections.append({
+            'work_id': work_id,
+            'collection_id': work_meta['subcollection_id'],
+            'position_in_collection': work_meta['position_in_collection']
+        })
 
-        self.current_work_id = work_id
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
         current_section_id = None
         current_verse_lines = []
         verse_count = 0
 
-        for line in lines_text[1:]:  # Skip first line
+        for line in lines[1:]:  # Skip header line
             line = line.strip()
             if not line or line == 'மேல்' or line.startswith('**'):
                 continue
 
-            # Check for numbered section (temple)
+            # Check for numbered section (temple/location)
             section_match = re.match(r'^(\d+)\.\s*(.+)', line)
             if section_match:
                 section_num = int(section_match.group(1))
                 section_name = section_match.group(2).strip()
 
-                # Remove பண் part if present
-                section_name = re.sub(r':\s*பண்\s*-\s*.+$', '', section_name).strip()
-
-                current_section_id = self._get_or_create_section(
-                    work_id, None, 'Temple', 'தலம்', section_num, section_name
-                )
+                # Create section
+                current_section_id = self.section_id
+                self.section_id += 1
+                self.sections.append({
+                    'section_id': current_section_id,
+                    'work_id': work_id,
+                    'parent_section_id': None,
+                    'level_type': 'Location',
+                    'level_type_tamil': 'இடம்',
+                    'section_number': section_num,
+                    'section_name': section_name,
+                    'section_name_tamil': section_name,
+                    'sort_order': section_num
+                })
                 continue
 
             # Check for verse marker
             verse_match = re.match(r'^#(\d+)', line)
             if verse_match:
-                if current_verse_lines:
-                    self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
+                # Save previous verse if exists
+                if current_verse_lines and current_section_id:
+                    self._save_verse(work_id, current_section_id, verse_count,
+                                   current_verse_lines, 'Verse', 'பாடல்')
 
                 verse_count += 1
+                current_verse_lines = []
                 continue
 
-            # Regular verse line
-            if verse_count > 0:
-                cleaned = line.replace('…', '').strip()
-                if cleaned:
-                    current_verse_lines.append(cleaned)
+            # Accumulate verse lines
+            if current_section_id and line:
+                current_verse_lines.append(line)
 
         # Save last verse
-        if current_verse_lines:
-            self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
+        if current_verse_lines and current_section_id:
+            self._save_verse(work_id, current_section_id, verse_count,
+                           current_verse_lines, 'Verse', 'பாடல்')
 
-        print(f"  [OK] Parsed {len([v for v in self.verses if v['work_id'] == work_id])} verses")
+        print(f"    ✓ {work_meta['work_name_tamil']}: {verse_count} verses")
 
-    def parse_thiruvasagam(self, file_path, file_num):
-        """
-        Parse Thiruvasagam (File 8.1)
-        Structure: @ sections → continuous verses (some #, some not)
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
+    def _parse_file8_single_work(self, file_path: Path, work_tuple):
+        """Parse File 8 works (Thiruvasagam, Thirukkovayar) - @ sections → # verses"""
+        work_key, work_meta = work_tuple
 
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines_text = f.readlines()
-
-        work_name_tamil = "திருவாசகம் - எட்டாம் திருமுறை"
+        # Create work
         work_id = self._create_work(
-            work_name=work_name_tamil,
-            work_name_tamil=work_name_tamil,
-            author="Manikkavasagar",
-            author_tamil="மாணிக்கவாசகர்",
-            canonical_order=328,
-            period='9th century CE'
+            work_name=work_meta['work_name'],
+            work_name_tamil=work_meta['work_name_tamil'],
+            metadata=work_meta
         )
 
-        if not work_id:
-            return
-
-        self.current_work_id = work_id
-        current_section_id = None
-        current_verse_lines = []
-        verse_count = 0
-
-        for line in lines_text[1:]:
-            line = line.strip()
-            if not line or line == 'மேல்' or line.startswith('**'):
-                continue
-
-            # Check for @ section marker
-            section_match = re.match(r'^@(\d+)\s+(.+)', line)
-            if section_match:
-                # Save accumulated lines from previous section as ONE verse
-                if current_verse_lines:
-                    # If no # markers were used, this is verse 1 of the section
-                    if verse_count == 0:
-                        verse_count = 1
-                    self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(section_match.group(1))
-                section_name = section_match.group(2).strip()
-                current_section_id = self._get_or_create_section(
-                    work_id, None, 'Pathigam', 'பதிகம்', section_num, section_name
-                )
-                verse_count = 0
-                continue
-
-            # Check for # verse marker (some sections have them)
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match:
-                if current_verse_lines:
-                    self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular line - accumulate for current section
-            if current_section_id:
-                # Remove line numbers and clean
-                cleaned = re.sub(r'\s+\d+\s*$', '', line)
-                cleaned = cleaned.replace('…', '').strip()
-
-                # Skip standalone line numbers
-                if re.match(r'^\d+$', cleaned):
-                    continue
-
-                # Accumulate Tamil text lines
-                if cleaned and re.search(r'[\u0B80-\u0BFF]', cleaned):
-                    current_verse_lines.append(cleaned)
-
-        # Save last verse
-        if current_verse_lines:
-            if verse_count == 0:
-                verse_count = 1
-            self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {len([v for v in self.verses if v['work_id'] == work_id])} verses")
-
-    def parse_thirukkovayar(self, file_path, file_num):
-        """
-        Parse Thirukkovayar (File 8.2)
-        Structure: * main → *N sub → *N.M subsub → # verses
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines_text = f.readlines()
-
-        work_name_tamil = "திருக்கோவையார் - எட்டாம் திருமுறை"
-        work_id = self._create_work(
-            work_name=work_name_tamil,
-            work_name_tamil=work_name_tamil,
-            author="Manikkavasagar",
-            author_tamil="மாணிக்கவாசகர்",
-            canonical_order=329,
-            period='9th century CE'
-        )
-
-        if not work_id:
-            return
-
-        self.current_work_id = work_id
-        main_section_id = None
-        sub_section_id = None
-        subsub_section_id = None
-        current_verse_lines = []
-        verse_count = 0
-
-        for line in lines_text[1:]:
-            line = line.strip()
-            if not line or line == 'மேல்' or line.startswith('**'):
-                continue
-
-            # Check for main section: * [name] - [tamil]
-            main_match = re.match(r'^\*\s+([^-*]+)\s*-\s*(.+)', line)
-            if main_match and not line.startswith('**'):
-                section_name = main_match.group(2).strip()
-                main_section_id = self._get_or_create_section(
-                    work_id, None, 'Adhikaram', 'அதிகாரம்', 1, section_name
-                )
-                sub_section_id = None
-                subsub_section_id = None
-                continue
-
-            # Check for subsection: *N [name]
-            sub_match = re.match(r'^\*(\d+)\s+(.+)', line)
-            if sub_match and '.' not in sub_match.group(1):
-                section_num = int(sub_match.group(1))
-                section_name = sub_match.group(2).strip()
-                sub_section_id = self._get_or_create_section(
-                    work_id, main_section_id, 'Subsection', 'துறை', section_num, section_name
-                )
-                subsub_section_id = None
-                continue
-
-            # Check for sub-subsection: *N.M [name]
-            subsub_match = re.match(r'^\*(\d+)\.(\d+)\s+(.+)', line)
-            if subsub_match:
-                section_num = int(subsub_match.group(2))
-                section_name = subsub_match.group(3).strip()
-                subsub_section_id = self._get_or_create_section(
-                    work_id, sub_section_id, 'Subtopic', 'இயல்', section_num, section_name
-                )
-                continue
-
-            # Check for verse marker
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match:
-                if current_verse_lines:
-                    active_section = subsub_section_id or sub_section_id or main_section_id
-                    self._add_verse(work_id, active_section, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular verse line
-            if verse_count > 0:
-                cleaned = line.replace('…', '').strip()
-                if cleaned:
-                    current_verse_lines.append(cleaned)
-
-        if current_verse_lines:
-            active_section = subsub_section_id or sub_section_id or main_section_id
-            self._add_verse(work_id, active_section, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {len([v for v in self.verses if v['work_id'] == work_id])} verses")
-
-    def parse_file_9(self, file_path, file_num):
-        """
-        Parse File 9: Thiruvisaippa and Thiruppallandu
-        - Each author gets a separate work: "Author பதிகங்கள்"
-        - @ sections become sections within each author's work
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        # Split at ** திருப்பல்லாண்டு marker
-        parts = re.split(r'\*\*\s*திருப்பல்லாண்டு', content, maxsplit=1)
-
-        # Parse Thiruvisaippa (first part) - authors 1-9, canonical orders 330-338
-        self._parse_file_9_authors(parts[0], 330, max_author=9)
-
-        # Parse Thiruppallandu (second part) - author 10, canonical order 339
-        if len(parts) > 1:
-            self._parse_file_9_authors(parts[1], 339, author_offset=10)
-
-    def _parse_file_9_authors(self, content, base_canonical_order, max_author=None, author_offset=0):
-        """
-        Parse File 9 with each author as a separate work: "Author பதிகங்கள்"
-        @ sections become sections within each work
-        """
-        lines = content.split('\n')
-        current_work_id = None
-        current_section_id = None
-        current_verse_lines = []
-        verse_count = 0
-        author_count = 0
-
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith('**') or line.startswith('****') or line == '*':
-                continue
-
-            # Check for & author marker - creates a new work
-            author_match = re.match(r'^&(\d+)\s+(.+)', line)
-            if author_match:
-                author_num = int(author_match.group(1))
-
-                # Skip if outside range
-                if max_author and author_num > max_author:
-                    break
-                if author_offset and author_num < author_offset:
-                    continue
-
-                # Save previous verse if any
-                if current_verse_lines and current_section_id and current_work_id:
-                    self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                # Extract author name
-                author_name_tamil = author_match.group(2).strip()
-
-                # Create work: "Author பதிகங்கள்"
-                work_name_tamil = f"{author_name_tamil} பதிகங்கள்"
-                author_count += 1
-
-                current_work_id = self._create_work(
-                    work_name=work_name_tamil,
-                    work_name_tamil=work_name_tamil,
-                    author=author_name_tamil,
-                    author_tamil=author_name_tamil,
-                    canonical_order=base_canonical_order + author_count - 1,
-                    period='6th-12th century CE'
-                )
-
-                current_section_id = None
-                verse_count = 0
-                continue
-
-            # Check for @ section marker
-            section_match = re.match(r'^@(\d+)\s+(.+)', line)
-            if section_match and current_work_id:
-                if current_verse_lines and current_section_id:
-                    self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(section_match.group(1))
-                section_name = section_match.group(2).strip()
-                current_section_id = self._get_or_create_section(
-                    current_work_id, None, 'Pathigam', 'பதிகம்', section_num, section_name
-                )
-                verse_count = 0
-                continue
-
-            # Check for verse marker
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match and current_work_id:
-                if current_verse_lines and current_section_id:
-                    self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular verse line
-            if verse_count > 0 and current_section_id and current_work_id:
-                cleaned = line.replace('…', '').strip()
-                if cleaned and not re.match(r'^\d+$', cleaned):
-                    current_verse_lines.append(cleaned)
-
-        # Save last verse
-        if current_verse_lines and current_section_id and current_work_id:
-            self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {author_count} author works from File 9 section")
-
-    def _parse_multi_author_work(self, work_id, content, max_author=None, author_offset=0):
-        """
-        Parse work with & author markers and @ section markers
-        Creates hierarchy: Author section → Work sections → Verses
-        """
-        lines = content.split('\n')
-        current_author_section = None
-        current_work_section = None
-        current_verse_lines = []
-        verse_count = 0
-
-        for line in lines:
-            line = line.strip()
-            if not line or line == 'மேல்' or line.startswith('**') or line.startswith('****'):
-                continue
-
-            # Check for & author marker
-            author_match = re.match(r'^&(\d+)\s+(.+)', line)
-            if author_match:
-                author_num = int(author_match.group(1))
-                if max_author and author_num > max_author:
-                    break
-                if author_offset and author_num < author_offset:
-                    continue
-
-                if current_verse_lines and current_work_section:
-                    self._add_verse(work_id, current_work_section, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                author_name = author_match.group(2).strip()
-                current_author_section = self._get_or_create_section(
-                    work_id, None, 'Author', 'ஆசிரியர்', author_num, author_name
-                )
-                current_work_section = None
-                verse_count = 0
-                continue
-
-            # Check for @ work section marker
-            section_match = re.match(r'^@(\d+)\s+(.+)', line)
-            if section_match:
-                if current_verse_lines and current_work_section:
-                    self._add_verse(work_id, current_work_section, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(section_match.group(1))
-                section_name = section_match.group(2).strip()
-                current_work_section = self._get_or_create_section(
-                    work_id, current_author_section, 'Work', 'படைப்பு', section_num, section_name
-                )
-                verse_count = 0
-                continue
-
-            # Check for verse marker
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match:
-                if current_verse_lines and current_work_section:
-                    self._add_verse(work_id, current_work_section, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular verse line
-            if verse_count > 0 and current_work_section:
-                cleaned = line.replace('…', '').strip()
-                if cleaned and not re.match(r'^\d+$', cleaned):
-                    current_verse_lines.append(cleaned)
-
-        if current_verse_lines and current_work_section:
-            self._add_verse(work_id, current_work_section, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {len([v for v in self.verses if v['work_id'] == work_id])} verses")
-
-    def parse_thirumanthiram(self, file_path, file_num):
-        """
-        Parse Thirumanthiram (File 10)
-        Structure: @ Thanthiram sections → # verses
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines_text = f.readlines()
-
-        work_name_tamil = "திருமந்திரம் - பத்தாம் திருமுறை"
-        work_id = self._create_work(
-            work_name=work_name_tamil,
-            work_name_tamil=work_name_tamil,
-            author="Thirumular",
-            author_tamil="திருமூலர்",
-            canonical_order=340,
-            period='6th-10th century CE'
-        )
-
-        if not work_id:
-            return
-
-        self.current_work_id = work_id
-        current_section_id = None
-        current_verse_lines = []
-        verse_count = 0
-
-        for line in lines_text[1:]:
-            line = line.strip()
-            if not line or line == 'மேல்' or line.startswith('**'):
-                continue
-
-            # Check for @ section (Thanthiram)
-            section_match = re.match(r'^@(\d+)\s+(.+)', line)
-            if section_match:
-                if current_verse_lines:
-                    self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(section_match.group(1))
-                section_name = section_match.group(2).strip()
-                current_section_id = self._get_or_create_section(
-                    work_id, None, 'Thanthiram', 'தந்திரம்', section_num, section_name
-                )
-                verse_count = 0
-                continue
-
-            # Check for verse marker
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match:
-                if current_verse_lines:
-                    self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular verse line
-            if verse_count > 0:
-                cleaned = line.replace('…', '').strip()
-                if cleaned and not re.match(r'^\d+$', cleaned):
-                    current_verse_lines.append(cleaned)
-
-        if current_verse_lines:
-            self._add_verse(work_id, current_section_id, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {len([v for v in self.verses if v['work_id'] == work_id])} verses")
-
-    def parse_file_11(self, file_path, file_num):
-        """
-        Parse File 11: Saiva Prabandha Malai
-        Each & author creates a separate work (not a combined work)
-        Structure: & author → @ sections → # verses
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        # Parse each author as a separate work
-        self._parse_file_11_multi_works(content, file_num)
-
-    def _parse_file_11_multi_works(self, content, file_num):
-        """
-        Parse File 11 with each author as a separate work
-        """
-        lines = content.split('\n')
-        current_work_id = None
-        current_section_id = None
-        current_verse_lines = []
-        verse_count = 0
-        author_count = 0
-        base_canonical_order = 341  # Starting order for File 11 works (after File 10 at 340)
-
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith('**') or line.startswith('****') or line == '*':
-                continue
-
-            # Check for & author marker - creates a new work
-            author_match = re.match(r'^&(\d+)\s+(.+)', line)
-            if author_match:
-                # Save previous verse if any
-                if current_verse_lines and current_section_id and current_work_id:
-                    self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                # Extract author name and remove "பாசுரங்கள்" if present
-                author_name_tamil = author_match.group(2).strip()
-                author_name_clean = re.sub(r'\s*பாசுரங்கள்\s*$', '', author_name_tamil)
-
-                # Create a new work for this author
-                work_name_tamil = f"{author_name_clean} - பதினொன்றாம் திருமுறை"
-                author_count += 1
-
-                current_work_id = self._create_work(
-                    work_name=work_name_tamil,
-                    work_name_tamil=work_name_tamil,
-                    author=author_name_clean,
-                    author_tamil=author_name_clean,
-                    canonical_order=base_canonical_order + author_count - 1,
-                    period='6th-12th century CE'
-                )
-
-                current_section_id = None
-                verse_count = 0
-                continue
-
-            # Check for @ section marker
-            section_match = re.match(r'^@(\d+)\s+(.+)', line)
-            if section_match and current_work_id:
-                if current_verse_lines and current_section_id:
-                    self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(section_match.group(1))
-                section_name = section_match.group(2).strip()
-                current_section_id = self._get_or_create_section(
-                    current_work_id, None, 'Section', 'பகுதி', section_num, section_name
-                )
-                verse_count = 0
-                continue
-
-            # Check for verse marker
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match and current_work_id:
-                if current_verse_lines and current_section_id:
-                    self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular verse line
-            if verse_count > 0 and current_section_id and current_work_id:
-                cleaned = line.replace('…', '').strip()
-                if cleaned and not re.match(r'^\d+$', cleaned):
-                    current_verse_lines.append(cleaned)
-
-        # Save last verse
-        if current_verse_lines and current_section_id and current_work_id:
-            self._add_verse(current_work_id, current_section_id, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {author_count} works from File 11")
-
-    def parse_periya_puranam(self, file_path, file_num):
-        """
-        Parse Periya Puranam (File 12)
-        Structure: & or numbered Sarrukkam → @ Puranam → # verses
-        """
-        print(f"\nParsing File {file_num}: {Path(file_path).name}")
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines_text = f.readlines()
-
-        work_name_tamil = "பெரியபுராணம் - பன்னிரண்டாம் திருமுறை"
-        work_id = self._create_work(
-            work_name=work_name_tamil,
-            work_name_tamil=work_name_tamil,
-            author="Sekkizhar",
-            author_tamil="சேக்கிழார்",
-            canonical_order=352,
-            period='12th century CE'
-        )
-
-        if not work_id:
-            return
-
-        self.current_work_id = work_id
-        current_sarrukkam_id = None
-        current_puranam_id = None
-        current_verse_lines = []
-        verse_count = 0
-
-        for line in lines_text[1:]:
-            line = line.strip()
-            if not line or line == 'மேல்' or line.startswith('**') or line.startswith('****') or line == '*':
-                continue
-
-            # Check for Sarrukkam: & or numbered format
-            sarrukkam_match = re.match(r'^&(\d+)\s+(.+)', line)
-            if not sarrukkam_match:
-                sarrukkam_match = re.match(r'^(\d+)\.\s*(.+?)\s*சருக்கம்', line)
-
-            if sarrukkam_match:
-                if current_verse_lines and current_puranam_id:
-                    self._add_verse(work_id, current_puranam_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(sarrukkam_match.group(1))
-                section_name = sarrukkam_match.group(2).strip()
-                if not section_name.endswith('சருக்கம்'):
-                    section_name += ' சருக்கம்'
-
-                current_sarrukkam_id = self._get_or_create_section(
-                    work_id, None, 'Sarrukkam', 'சருக்கம்', section_num, section_name
-                )
-                current_puranam_id = None
-                verse_count = 0
-                continue
-
-            # Check for @ Puranam (subsection)
-            puranam_match = re.match(r'^@(\d+)\s+(.+)', line)
-            if puranam_match:
-                if current_verse_lines and current_puranam_id:
-                    self._add_verse(work_id, current_puranam_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-
-                section_num = int(puranam_match.group(1))
-                section_name = puranam_match.group(2).strip()
-                current_puranam_id = self._get_or_create_section(
-                    work_id, current_sarrukkam_id, 'Puranam', 'புராணம்', section_num, section_name
-                )
-                verse_count = 0
-                continue
-
-            # Check for verse marker
-            verse_match = re.match(r'^#(\d+)', line)
-            if verse_match:
-                if current_verse_lines and current_puranam_id:
-                    self._add_verse(work_id, current_puranam_id, verse_count, current_verse_lines)
-                    current_verse_lines = []
-                verse_count += 1
-                continue
-
-            # Regular verse line
-            if verse_count > 0 and current_puranam_id:
-                cleaned = line.replace('…', '').strip()
-                if cleaned and not re.match(r'^\d+$', cleaned):
-                    current_verse_lines.append(cleaned)
-
-        if current_verse_lines and current_puranam_id:
-            self._add_verse(work_id, current_puranam_id, verse_count, current_verse_lines)
-
-        print(f"  [OK] Parsed {len([v for v in self.verses if v['work_id'] == work_id])} verses")
-
-    def _get_or_create_section(self, work_id, parent_id, level_type, level_type_tamil, section_num, section_name):
-        """Get or create section and return section_id"""
-        cache_key = (work_id, parent_id, level_type, section_num, section_name)
-
-        if cache_key in self.section_cache:
-            return self.section_cache[cache_key]
-
-        section_id = self.section_id
-        self.section_id += 1
-
-        self.sections.append({
-            'section_id': section_id,
+        # Link to subcollection
+        self.work_collections.append({
             'work_id': work_id,
-            'parent_section_id': parent_id,
-            'level_type': level_type,
-            'level_type_tamil': level_type_tamil,
-            'section_number': section_num,
-            'section_name': section_name,
-            'section_name_tamil': section_name,
-            'sort_order': section_num
+            'collection_id': work_meta['subcollection_id'],
+            'position_in_collection': work_meta['position_in_collection']
         })
 
-        self.section_cache[cache_key] = section_id
-        return section_id
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
 
-    def _add_verse(self, work_id, section_id, verse_num, verse_lines):
-        """Add verse with lines and words to memory"""
+        current_section_id = None
+        current_verse_lines = []
+        verse_count = 0
+        section_count = 0
+
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith('**'):
+                continue
+
+            # Check for @ section marker
+            section_match = re.match(r'^@(\d+)\s*(.+)', line)
+            if section_match:
+                section_num = int(section_match.group(1))
+                section_name = section_match.group(2).strip()
+
+                section_count += 1
+                current_section_id = self.section_id
+                self.section_id += 1
+                self.sections.append({
+                    'section_id': current_section_id,
+                    'work_id': work_id,
+                    'parent_section_id': None,
+                    'level_type': 'Section',
+                    'level_type_tamil': 'பகுதி',
+                    'section_number': section_num,
+                    'section_name': section_name,
+                    'section_name_tamil': section_name,
+                    'sort_order': section_num
+                })
+                continue
+
+            # Check for verse marker
+            verse_match = re.match(r'^#(\d+)', line)
+            if verse_match:
+                # Save previous verse if exists
+                if current_verse_lines and current_section_id:
+                    self._save_verse(work_id, current_section_id, verse_count,
+                                   current_verse_lines, 'Verse', 'பாடல்')
+
+                verse_count += 1
+                current_verse_lines = []
+                continue
+
+            # Accumulate verse lines
+            if current_section_id and line:
+                current_verse_lines.append(line)
+
+        # Save last verse
+        if current_verse_lines and current_section_id:
+            self._save_verse(work_id, current_section_id, verse_count,
+                           current_verse_lines, 'Verse', 'பாடல்')
+
+        print(f"    ✓ {work_meta['work_name_tamil']}: {section_count} sections, {verse_count} verses")
+
+    def _parse_file9_multi_work(self, file_path: Path, works_list):
+        """Parse File 9 - Multiple works with & author markers"""
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        # Build work lookup by author marker number
+        work_by_author_num = {}
+        for work_key, work_meta in works_list:
+            if work_key.startswith('file9_') or work_key.startswith('file11_'):
+                author_num = int(work_key.split('_')[1])
+                work_by_author_num[author_num] = (work_key, work_meta)
+
+        current_work_id = None
+        current_section_id = None
+        current_verse_lines = []
+        verse_count = 0
+        section_count = 0
+        current_work_meta = None
+
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith('**'):
+                continue
+
+            # Check for & author marker (new work)
+            author_match = re.match(r'^&(\d+)\s+(.+?)\s*\^\s*(.+)', line)
+            if author_match:
+                # Save last verse of previous work before starting new work
+                if current_verse_lines and current_section_id and current_work_id and verse_count > 0:
+                    self._save_verse(current_work_id, current_section_id, verse_count,
+                                   current_verse_lines, 'Verse', 'பதிகம்')
+                    current_verse_lines = []
+
+                    # Print completion stats for previous work
+                    if current_work_meta:
+                        total_verses = len([v for v in self.verses if v['work_id'] == current_work_id])
+                        print(f"    ✓ {current_work_meta['work_name_tamil']}: {total_verses} verses")
+
+                author_num = int(author_match.group(1))
+
+                if author_num in work_by_author_num:
+                    work_key, work_meta = work_by_author_num[author_num]
+
+                    # Create new work
+                    current_work_id = self._create_work(
+                        work_name=work_meta['work_name'],
+                        work_name_tamil=work_meta['work_name_tamil'],
+                        metadata=work_meta
+                    )
+
+                    # Link to subcollection
+                    self.work_collections.append({
+                        'work_id': current_work_id,
+                        'collection_id': work_meta['subcollection_id'],
+                        'position_in_collection': work_meta['position_in_collection']
+                    })
+
+                    current_work_meta = work_meta
+                    current_section_id = None
+                    verse_count = 0
+                    section_count = 0
+                continue
+
+            # Check for @ section marker
+            section_match = re.match(r'^@(\d+)\s*(.+)', line)
+            if section_match and current_work_id:
+                # Save previous verse before changing sections
+                if current_verse_lines and current_section_id and verse_count > 0:
+                    self._save_verse(current_work_id, current_section_id, verse_count,
+                                   current_verse_lines, 'Verse', 'பதிகம்')
+                    current_verse_lines = []
+
+                section_num = int(section_match.group(1))
+                section_name = section_match.group(2).strip()
+
+                section_count += 1
+                current_section_id = self.section_id
+                self.section_id += 1
+                self.sections.append({
+                    'section_id': current_section_id,
+                    'work_id': current_work_id,
+                    'parent_section_id': None,
+                    'level_type': 'Section',
+                    'level_type_tamil': 'பகுதி',
+                    'section_number': section_num,
+                    'section_name': section_name,
+                    'section_name_tamil': section_name,
+                    'sort_order': section_num
+                })
+                verse_count = 0  # Reset verse count for new section
+                continue
+
+            # Check for verse marker
+            verse_match = re.match(r'^#(\d+)', line)
+            if verse_match and current_work_id:
+                # Create default section if none exists (before saving verse)
+                if not current_section_id:
+                    current_section_id = self.section_id
+                    self.section_id += 1
+                    self.sections.append({
+                        'section_id': current_section_id,
+                        'work_id': current_work_id,
+                        'parent_section_id': None,
+                        'level_type': 'Section',
+                        'level_type_tamil': 'பகுதி',
+                        'section_number': 1,
+                        'section_name': 'Main',
+                        'section_name_tamil': 'முதன்மை',
+                        'sort_order': 1
+                    })
+
+                # Save previous verse if exists
+                if current_verse_lines and current_section_id:
+                    self._save_verse(current_work_id, current_section_id, verse_count,
+                                   current_verse_lines, 'Verse', 'பதிகம்')
+                    current_verse_lines = []
+
+                verse_count += 1
+                continue
+
+            # Accumulate verse lines (only if we've started a verse with #)
+            if current_work_id and verse_count > 0 and line:
+                current_verse_lines.append(line)
+
+        # Save last verse of last work
+        if current_verse_lines and current_section_id and current_work_id and verse_count > 0:
+            self._save_verse(current_work_id, current_section_id, verse_count,
+                           current_verse_lines, 'Verse', 'பதிகம்')
+
+        # Print final work stats
+        if current_work_meta and current_work_id:
+            total_verses = len([v for v in self.verses if v['work_id'] == current_work_id])
+            print(f"    ✓ {current_work_meta['work_name_tamil']}: {total_verses} verses")
+
+    def _parse_file10_single_work(self, file_path: Path, work_tuple):
+        """Parse File 10 (Thirumanthiram) - @ sections → # verses"""
+        self._parse_file8_single_work(file_path, work_tuple)
+
+    def _parse_file11_multi_work(self, file_path: Path, works_list):
+        """Parse File 11 - Multiple works with & author markers (39 works)"""
+        # Same pattern as File 9
+        self._parse_file9_multi_work(file_path, works_list)
+
+    def _parse_file12_single_work(self, file_path: Path, work_tuple):
+        """Parse File 12 (Periya Puranam) - @ sections → # verses"""
+        self._parse_file8_single_work(file_path, work_tuple)
+
+    def _save_verse(self, work_id, section_id, verse_num, verse_lines,
+                    verse_type, verse_type_tamil):
+        """Save a complete verse with lines and words"""
         if not verse_lines:
             return
 
+        # Create verse
         verse_id = self.verse_id
         self.verse_id += 1
-
         self.verses.append({
             'verse_id': verse_id,
             'work_id': work_id,
             'section_id': section_id,
             'verse_number': verse_num,
-            'verse_type': 'verse',
-            'verse_type_tamil': 'பாடல்',
+            'verse_type': verse_type,
+            'verse_type_tamil': verse_type_tamil,
             'total_lines': len(verse_lines),
-            'sort_order': verse_num
+            'sort_order': verse_num,
+            'metadata': None
         })
 
-        for line_num, line_text in enumerate(verse_lines, start=1):
+        # Create lines and words
+        for line_num, line_text in enumerate(verse_lines, 1):
             line_id = self.line_id
             self.line_id += 1
-
-            # Clean line text: remove trailing numbers, normalize whitespace, remove tabs
-            cleaned_line = re.sub(r'\s+\d+\s*$', '', line_text)  # Remove trailing numbers
-            cleaned_line = re.sub(r'\s+', ' ', cleaned_line)  # Normalize whitespace
-            cleaned_line = cleaned_line.strip()
-
             self.lines.append({
                 'line_id': line_id,
                 'verse_id': verse_id,
                 'line_number': line_num,
-                'line_text': cleaned_line
+                'line_text': line_text
             })
 
-            # Parse words
-            cleaned_words = split_and_clean_words(cleaned_line)
-            for word_position, word_text in enumerate(cleaned_words, start=1):
-                word_id = self.word_id
-                self.word_id += 1
-
+            # Split line into words
+            words = split_and_clean_words(line_text)
+            for word_pos, word_text in enumerate(words, 1):
                 self.words.append({
-                    'word_id': word_id,
+                    'word_id': self.word_id,
                     'line_id': line_id,
-                    'word_position': word_position,
+                    'word_position': word_pos,
                     'word_text': word_text,
                     'sandhi_split': None
                 })
-
-    def bulk_insert(self):
-        """Phase 2: Bulk insert using COPY"""
-        print("\nPhase 2: Bulk inserting into database...")
-
-        # Insert works
-        if self.works:
-            print(f"  Inserting {len(self.works)} works...")
-            self._bulk_copy('works', self.works,
-                           ['work_id', 'work_name', 'work_name_tamil', 'period', 'author',
-                            'author_tamil', 'canonical_order'])
-
-        # Insert sections
-        if self.sections:
-            print(f"  Inserting {len(self.sections)} sections...")
-            self._bulk_copy('sections', self.sections,
-                           ['section_id', 'work_id', 'parent_section_id', 'level_type', 'level_type_tamil',
-                            'section_number', 'section_name', 'section_name_tamil', 'sort_order'])
-
-        # Insert verses
-        if self.verses:
-            print(f"  Inserting {len(self.verses)} verses...")
-            self._bulk_copy('verses', self.verses,
-                           ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
-                            'verse_type_tamil', 'total_lines', 'sort_order'])
-
-        # Insert lines
-        if self.lines:
-            print(f"  Inserting {len(self.lines)} lines...")
-            self._bulk_copy('lines', self.lines,
-                           ['line_id', 'verse_id', 'line_number', 'line_text'])
-
-        # Insert words
-        if self.words:
-            print(f"  Inserting {len(self.words)} words...")
-            self._bulk_copy('words', self.words,
-                           ['word_id', 'line_id', 'word_position', 'word_text', 'sandhi_split'])
-
-        self.conn.commit()
-        print("[OK] Phase 2 complete: All data inserted")
-
-    def _bulk_copy(self, table_name, data, columns):
-        """Use COPY for bulk insert"""
-        if not data:
-            return
-
-        buffer = io.StringIO()
-        writer = csv.writer(buffer, delimiter='\t')
-
-        for row in data:
-            writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
-
-        buffer.seek(0)
-        self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
-
-    def close(self):
-        """Close connection"""
-        self.cursor.close()
-        self.conn.close()
+                self.word_id += 1
 
 
 def main():
-    # Get database URL
-    db_connection = os.getenv('DATABASE_URL', "postgresql://postgres:postgres@localhost/tamil_literature")
+    """Main import function"""
+    import os
+
+    # Get database URL from environment or command line
+    db_url = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost/tamil_literature')
     if len(sys.argv) > 1:
-        db_connection = sys.argv[1]
+        db_url = sys.argv[1]
 
-    # Text file paths
-    script_dir = Path(__file__).parent
-    project_dir = script_dir.parent
-    base_dir = project_dir / "Tamil-Source-TamilConcordence" / "6_பக்தி இலக்கியம்"
+    print("=" * 70)
+    print("THIRUMURAI BULK IMPORT - 60 WORKS")
+    print("=" * 70)
+    print(f"Database: {db_url}")
 
-    # Define all Thirumurai files
-    files = [
-        (1, base_dir / "1.முதலாம் திருமுறை.txt", "devaram"),
-        (2, base_dir / "2.இரண்டாம் திருமுறை.txt", "devaram"),
-        (3, base_dir / "3.மூன்றாம் திருமுறை.txt", "devaram"),
-        (4, base_dir / "4.நான்காம்_திருமுறை.txt", "devaram"),
-        (5, base_dir / "5.ஐந்தாம் திருமுறை.txt", "devaram"),
-        (6, base_dir / "6.ஆறாம் திருமுறை.txt", "devaram"),
-        (7, base_dir / "7.ஏழாம் திருமுறை.txt", "devaram"),
-        (8.1, base_dir / "8.1எட்டாம் திருமுறை.txt", "thiruvasagam"),
-        (8.2, base_dir / "8.2 எட்டாம் திருமுறை.txt", "thirukkovayar"),
-        (9, base_dir / "9.ஒன்பதாம் திருமுறை.txt", "file_9"),
-        (10, base_dir / "10.பத்தாம் திருமுறை.txt", "thirumanthiram"),
-        (11, base_dir / "11.பதினொன்றாம் திருமுறை.txt", "file_11"),
-        (12, base_dir / "12.பன்னிரண்டாம் திருமுறை.txt", "periya_puranam"),
-    ]
+    # Locate source directory
+    project_dir = Path(__file__).parent.parent
+    source_dir = project_dir / "Tamil-Source-TamilConcordence" / "6_பக்தி இலக்கியம்"
 
-    print("="*70)
-    print("Thirumurai Bulk Import - Fast 2-Phase Import")
-    print("="*70)
-    print(f"Database: {db_connection[:50]}...")
-    print(f"Files: 13 (Files 1-12, with 8 split into 8.1 and 8.2)")
+    if not source_dir.exists():
+        print(f"\n[ERROR] Source directory not found: {source_dir}")
+        return 1
 
-    importer = ThirumuraiBulkImporter(db_connection)
+    print(f"Source: {source_dir}")
 
     try:
-        # Parse all files
-        for file_num, file_path, file_type in files:
-            if not file_path.exists():
-                print(f"  [ERROR] File not found: {file_path}")
-                continue
-
-            if file_type == "devaram":
-                importer.parse_devaram_file(str(file_path), int(file_num))
-            elif file_type == "thiruvasagam":
-                importer.parse_thiruvasagam(str(file_path), int(file_num))
-            elif file_type == "thirukkovayar":
-                importer.parse_thirukkovayar(str(file_path), int(file_num))
-            elif file_type == "file_9":
-                importer.parse_file_9(str(file_path), int(file_num))
-            elif file_type == "thirumanthiram":
-                importer.parse_thirumanthiram(str(file_path), int(file_num))
-            elif file_type == "file_11":
-                importer.parse_file_11(str(file_path), int(file_num))
-            elif file_type == "periya_puranam":
-                importer.parse_periya_puranam(str(file_path), int(file_num))
-
-        # Bulk insert
+        importer = ThirumuraiImporter(db_url)
+        importer.parse_and_import_all_works(source_dir)
         importer.bulk_insert()
 
-        print("\n" + "="*70)
-        print("[OK] Import complete!")
-        print(f"  - Works created: {len(importer.works)}")
-        print(f"  - Sections imported: {len(importer.sections)}")
-        print(f"  - Verses imported: {len(importer.verses)}")
-        print(f"  - Lines imported: {len(importer.lines)}")
-        print(f"  - Words imported: {len(importer.words)}")
-        print("="*70)
+        print("\n" + "=" * 70)
+        print("[SUCCESS] All 60 Thirumurai works imported successfully!")
+        print("=" * 70)
+
+        importer.close()
+        return 0
 
     except Exception as e:
-        print(f"\n[ERROR] Error: {e}")
+        print(f"\n[ERROR] Import failed: {e}")
         import traceback
         traceback.print_exc()
-        importer.conn.rollback()
-    finally:
-        importer.close()
+        return 1
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

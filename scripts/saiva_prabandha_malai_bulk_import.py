@@ -250,7 +250,13 @@ class SaivaPrabandhaMalaiBulkImporter:
             'work_name_tamil': work_name,
             'author': author_name,
             'author_tamil': author_name,
-            'period': '6th-13th century CE',
+            'chronology_start_year': 500,
+
+            'chronology_end_year': 1300,
+
+            'chronology_confidence': 'low',
+
+            'chronology_notes': 'Estimated 6th-13th century CE. Wide date range reflects scholarly uncertainty.',
             'canonical_order': 342 + work_num,  # 343-382 (40 works)
                         'metadata': work_metadata
         })

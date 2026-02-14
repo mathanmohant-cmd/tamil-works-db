@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Seerapuranam Parser for Tamil Literature Database - Bulk COPY Import
+Seerapuranam Bulk Import Script
+================================
+Imports Seerapuranam (சீறாப்புராணம்) by Umaruppulavar
 
-This script parses Seerapuranam text file and imports it into the database.
-Uses 2-phase bulk import for high performance.
+Work: Seerapuranam (சீறாப்புராணம்) - Islamic epic about Prophet Muhammad
+Author: Umaruppulavar (உமறுப்புலவர்)
+Tradition: Islamic devotional literature
+Collection: பக்தி இலக்கியம் (Devotional Literature) - Collection 323
 
 Structure:
-- Work: Seerapuranam (சீறாப்புராணம்)
 - Level 1 (Kandam): 3 chapters marked with "* N காண்டம்"
   - விலாதத்துக் காண்டம் (Vilaadhaththu Kandam) - Birth
   - நுபுவ்வத்துக் காண்டம் (Nupuvvaththu Kandam) - Prophethood
@@ -16,16 +19,29 @@ Structure:
 - Verses: Each # section is ONE complete verse
 - $ markers contain verse metadata (stored in verse metadata)
 - மேல் marks end of verse
+
+Uses 2-phase bulk COPY pattern with BaseWorkImporter for optimal performance.
 """
 
 import os
-import re
 import sys
-import psycopg2
-import csv
-import io
+import re
 from pathlib import Path
-from word_cleaning import split_and_clean_words
+from typing import List
+
+# Import shared utilities
+sys.path.insert(0, str(Path(__file__).parent))
+from shared.base_importer import BaseWorkImporter
+from shared.utils import split_and_clean_words
+
+# Import metadata
+sys.path.insert(0, str(Path(__file__).parent / 'metadata'))
+from seerapuranam_metadata import (
+    WORK_METADATA,
+    COLLECTION_ID,
+    VERSE_METADATA,
+    FILE_INFO
+)
 
 
 def clean_line(line):
@@ -60,260 +76,124 @@ def clean_line(line):
     return line.strip()
 
 
-def parse_seerapuranam_file(file_path):
+class SeerapuranamBulkImporter(BaseWorkImporter):
     """
-    Parse Seerapuranam file and extract structure.
+    Imports Seerapuranam using 2-phase bulk COPY pattern.
 
-    Structure:
-    - * N காண்டம் = Kandam (top level)
-    - *N படலம் = Padalam (sub level)
-    - $ = verse metadata (e.g., $1.0.1, $1.1.2)
-    - # = verse number
-    - மேல் = end of verse
-
-    Returns:
-    {
-        'kandams': [
-            {
-                'number': int,
-                'name': str,
-                'padalams': [
-                    {
-                        'number': int,
-                        'name': str,
-                        'verses': [
-                            {
-                                'verse_number': int,
-                                'verse_id': str,  # from $ marker
-                                'lines': [str, str, ...]
-                            },
-                            ...
-                        ]
-                    },
-                    ...
-                ]
-            },
-            ...
-        ]
-    }
+    Hierarchy:
+    - Collection 323: பக்தி இலக்கியம்
+      - Work: சீறாப்புராணம்
+        - Level 1 Sections: Kandams (காண்டம்)
+          - Level 2 Sections: Padalams (படலம்)
+            - Verses: #N markers
+              - Lines: Individual lines
+                - Words: Word segmentation
     """
-    print(f"  Parsing file: {file_path.name}")
 
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
+    def __init__(self, db_connection_string="postgresql://postgres:postgres@localhost/tamil_literature"):
+        """Initialize with database connection using BaseWorkImporter"""
+        super().__init__(db_connection_string, collection_id=COLLECTION_ID)
 
-    kandams = []
-    current_kandam = None
-    current_padalam = None
-    current_verse = None
-    current_verse_id = None
+        # Current parsing state
+        self.current_work_id = None
 
-    for line in lines:
-        line = line.rstrip('\n')
+        print(f"Initialized SeerapuranamBulkImporter")
+        print(f"  Collection {COLLECTION_ID} will be linked")
 
-        # Skip empty lines
-        if not line.strip():
-            continue
+    def _setup_collection(self):
+        """Ensure collection 323 exists"""
+        super()._ensure_collection_exists(
+            collection_id=COLLECTION_ID,
+            collection_name='Devotional Literature',
+            collection_name_tamil='பக்தி இலக்கியம்',
+            description='Standalone devotional works from various traditions'
+        )
 
-        # Check for Kandam marker: "* N காண்டம்" or "* N name காண்டம்"
-        kandam_match = re.match(r'^\*\s*(\d+)\s+(.+?காண்டம்.*?)$', line)
-        if kandam_match:
-            # Save previous padalam and kandam
-            if current_padalam is not None and current_kandam is not None:
-                if current_verse is not None:
-                    current_padalam['verses'].append(current_verse)
-                    current_verse = None
-                current_kandam['padalams'].append(current_padalam)
-                current_padalam = None
-            if current_kandam is not None:
-                kandams.append(current_kandam)
-
-            kandam_number = int(kandam_match.group(1))
-            kandam_name = kandam_match.group(2).strip()
-
-            current_kandam = {
-                'number': kandam_number,
-                'name': kandam_name,
-                'padalams': []
-            }
-            print(f"  Found Kandam {kandam_number}: {kandam_name}")
-            continue
-
-        # Check for Padalam marker: "*N படலம்" or "*N. name படலம்"
-        # Examples: "*0 காப்பு", "*1கடவுள் வாழ்த்துப் படலம்", "*2. நாட்டுப்படலம்"
-        padalam_match = re.match(r'^\*(\d+)\.?\s*(.+?)$', line)
-        if padalam_match and current_kandam is not None:
-            # Save previous padalam
-            if current_padalam is not None:
-                if current_verse is not None:
-                    current_padalam['verses'].append(current_verse)
-                    current_verse = None
-                current_kandam['padalams'].append(current_padalam)
-
-            padalam_number = int(padalam_match.group(1))
-            padalam_name = padalam_match.group(2).strip()
-
-            current_padalam = {
-                'number': padalam_number,
-                'name': padalam_name,
-                'verses': []
-            }
-            continue
-
-        # Check for verse metadata: $1.0.1, $1.1.2, etc.
-        if line.startswith('$'):
-            current_verse_id = line[1:].strip()
-            continue
-
-        # Check for verse marker: #N
-        verse_match = re.match(r'^#(\d+)$', line)
-        if verse_match and current_padalam is not None:
-            # Save previous verse
-            if current_verse is not None:
-                current_padalam['verses'].append(current_verse)
-
-            verse_number = int(verse_match.group(1))
-            current_verse = {
-                'verse_number': verse_number,
-                'verse_id': current_verse_id or '',
-                'lines': []
-            }
-            current_verse_id = None
-            continue
-
-        # Check for verse end marker
-        if line.strip() == 'மேல்':
-            # Verse ends here, but we'll append it when we hit the next verse or padalam
-            continue
-
-        # Regular content line - add to current verse's lines
-        cleaned = clean_line(line)
-        if cleaned and current_verse is not None:
-            current_verse['lines'].append(cleaned)
-
-    # Save last verse, padalam, and kandam
-    if current_verse is not None and current_padalam is not None:
-        current_padalam['verses'].append(current_verse)
-    if current_padalam is not None and current_kandam is not None:
-        current_kandam['padalams'].append(current_padalam)
-    if current_kandam is not None:
-        kandams.append(current_kandam)
-
-    return {'kandams': kandams}
-
-
-class SeerapuranamBulkImporter:
-    def __init__(self, db_connection_string: str, source_file: Path):
-        """Initialize bulk importer"""
-        self.conn = psycopg2.connect(db_connection_string)
-        self.cursor = self.conn.cursor()
-        self.source_file = source_file
-
-        # Data containers for bulk insert
-        self.sections = []
-        self.verses = []
-        self.lines = []
-        self.words = []
-
-        # ID counters - will be set properly in _ensure_work_exists()
-        self.section_id = None
-        self.verse_id = None
-        self.line_id = None
-        self.word_id = None
-        self.work_id = None
-
-    def _ensure_work_exists(self):
-        """Ensure Seerapuranam work exists"""
-        work_name_tamil = 'சீறாப்புராணம்'
-        work_name_english = 'Seerapuranam'
-
-        # Check if work already exists by name
-        self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
-        existing = self.cursor.fetchone()
-
-        if existing:
-            self.work_id = existing[0]
-            print(f"\n✗ Work {work_name_tamil} already exists (ID: {self.work_id})")
-            print(f"To re-import, first delete the existing work:")
-            print(f'  python scripts/delete_seerapuranam.py')
-            self.cursor.close()
-            self.conn.close()
+    def _create_work_from_metadata(self) -> int:
+        """Create work entry from WORK_METADATA using parent class method"""
+        try:
+            work_id = super()._create_work(
+                work_name=WORK_METADATA['work_name'],
+                work_name_tamil=WORK_METADATA['work_name_tamil'],
+                metadata=WORK_METADATA
+            )
+            print(f"  Created work: {WORK_METADATA['work_name_tamil']} (ID: {work_id})")
+            return work_id
+        except ValueError as e:
+            print(f"  [ERROR] {e}")
+            print(f"  To re-import, first delete: python scripts/delete_seerapuranam.py")
             sys.exit(1)
-        else:
-            # Get next available work_id
-            self.cursor.execute("SELECT COALESCE(MAX(work_id), 0) + 1 FROM works")
-            self.work_id = self.cursor.fetchone()[0]
 
-            print(f"Creating work entry for {work_name_tamil}...")
-            self.cursor.execute("""
-                INSERT INTO works (
-                    work_id, work_name, work_name_tamil, description, period, author, author_tamil,
-                    chronology_start_year, chronology_end_year,
-                    chronology_confidence, chronology_notes, canonical_order
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                self.work_id,
-                work_name_english,
-                work_name_tamil,
-                'Islamic epic about Prophet Muhammad',
-                '16th century CE',
-                'Umaruppulavar',
-                'உமறுப்புலவர்',
-                1550, 1600, 'high',
-                'Islamic devotional epic by Umaruppulavar',
-                502  # Devotional Literature standalone
-            ))
-            self.conn.commit()
-            print(f"  ✓ Work created (ID: {self.work_id}). Standalone work, no collection assignment needed.")
+    def parse_file(self, file_path: str):
+        """Parse Seerapuranam file"""
+        print("\n=== PHASE 1: Parsing Seerapuranam into memory ===")
 
-        # Get starting IDs for batch processing
-        self.cursor.execute("SELECT COALESCE(MAX(section_id), 0) FROM sections")
-        self.section_id = self.cursor.fetchone()[0] + 1
+        # Setup collection and create work
+        self._setup_collection()
+        self.current_work_id = self._create_work_from_metadata()
 
-        self.cursor.execute("SELECT COALESCE(MAX(verse_id), 0) FROM verses")
-        self.verse_id = self.cursor.fetchone()[0] + 1
+        # Parse file
+        print(f"  Parsing file: {Path(file_path).name}")
 
-        self.cursor.execute("SELECT COALESCE(MAX(line_id), 0) FROM lines")
-        self.line_id = self.cursor.fetchone()[0] + 1
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
 
-        self.cursor.execute("SELECT COALESCE(MAX(word_id), 0) FROM words")
-        self.word_id = self.cursor.fetchone()[0] + 1
+        current_kandam_id = None
+        current_padalam_id = None
+        current_verse_number = None
+        current_verse_id = None
+        current_verse_lines = []
 
-    def parse_file(self):
-        """Phase 1: Parse file into memory"""
-        print("\nPhase 1: Parsing file...")
+        for line in lines:
+            line = line.rstrip('\n')
 
-        # Parse the file
-        data = parse_seerapuranam_file(self.source_file)
+            # Skip empty lines
+            if not line.strip():
+                continue
 
-        # Process each Kandam
-        for kandam_data in data['kandams']:
-            kandam_name = kandam_data['name']
-            kandam_number = kandam_data['number']
+            # Check for Kandam marker: "* N காண்டம்" or "* N name காண்டம்"
+            kandam_match = re.match(r'^\*\s*(\d+)\s+(.+?காண்டம்.*?)$', line)
+            if kandam_match:
+                # Save previous verse
+                if current_verse_lines and current_verse_number is not None:
+                    self._create_verse(current_verse_number, current_verse_lines, current_padalam_id)
+                    current_verse_lines = []
+                    current_verse_number = None
 
-            print(f"\nProcessing Kandam {kandam_number}: {kandam_name}")
+                kandam_number = int(kandam_match.group(1))
+                kandam_name = kandam_match.group(2).strip()
 
-            # Create Kandam section
-            kandam_section_id = self.section_id
-            self.section_id += 1
+                # Create Kandam section
+                kandam_section_id = self.section_id
+                self.section_id += 1
 
-            self.sections.append({
-                'section_id': kandam_section_id,
-                'work_id': self.work_id,
-                'parent_section_id': None,
-                'level_type': 'kandam',
-                'level_type_tamil': 'காண்டம்',
-                'section_number': kandam_number,
-                'section_name': kandam_name,
-                'section_name_tamil': kandam_name,
-                'sort_order': kandam_number
-            })
+                self.sections.append({
+                    'section_id': kandam_section_id,
+                    'work_id': self.current_work_id,
+                    'parent_section_id': None,
+                    'level_type': 'kandam',
+                    'level_type_tamil': 'காண்டம்',
+                    'section_number': kandam_number,
+                    'section_name': kandam_name,
+                    'section_name_tamil': kandam_name,
+                    'sort_order': kandam_number
+                })
 
-            # Process each Padalam (subsection)
-            for padalam_data in kandam_data['padalams']:
-                padalam_name = padalam_data['name']
-                padalam_number = padalam_data['number']
+                current_kandam_id = kandam_section_id
+                print(f"  Found Kandam {kandam_number}: {kandam_name}")
+                continue
+
+            # Check for Padalam marker: "*N படலம்" or "*N. name படலம்"
+            padalam_match = re.match(r'^\*(\d+)\.?\s*(.+?)$', line)
+            if padalam_match and current_kandam_id is not None:
+                # Save previous verse
+                if current_verse_lines and current_verse_number is not None:
+                    self._create_verse(current_verse_number, current_verse_lines, current_padalam_id)
+                    current_verse_lines = []
+                    current_verse_number = None
+
+                padalam_number = int(padalam_match.group(1))
+                padalam_name = padalam_match.group(2).strip()
 
                 # Create Padalam section
                 padalam_section_id = self.section_id
@@ -321,8 +201,8 @@ class SeerapuranamBulkImporter:
 
                 self.sections.append({
                     'section_id': padalam_section_id,
-                    'work_id': self.work_id,
-                    'parent_section_id': kandam_section_id,
+                    'work_id': self.current_work_id,
+                    'parent_section_id': current_kandam_id,
                     'level_type': 'padalam',
                     'level_type_tamil': 'படலம்',
                     'section_number': padalam_number,
@@ -331,254 +211,126 @@ class SeerapuranamBulkImporter:
                     'sort_order': padalam_number
                 })
 
-                verse_count = len(padalam_data['verses'])
-                total_lines = sum(len(v['lines']) for v in padalam_data['verses'])
-                print(f"  Padalam #{padalam_number}: {padalam_name} ({verse_count} verses, {total_lines} lines)")
+                current_padalam_id = padalam_section_id
+                continue
 
-                # Process each verse
-                for verse_data in padalam_data['verses']:
-                    verse_number = verse_data['verse_number']
-                    verse_lines = verse_data['lines']
+            # Check for verse metadata: $1.0.1, $1.1.2, etc.
+            if line.startswith('$'):
+                current_verse_id = line[1:].strip()
+                continue
 
-                    if not verse_lines:
-                        continue
+            # Check for verse marker: #N
+            verse_match = re.match(r'^#(\d+)$', line)
+            if verse_match and current_padalam_id is not None:
+                # Save previous verse
+                if current_verse_lines and current_verse_number is not None:
+                    self._create_verse(current_verse_number, current_verse_lines, current_padalam_id)
+                    current_verse_lines = []
 
-                    # Create verse
-                    verse_id = self.verse_id
-                    self.verse_id += 1
+                current_verse_number = int(verse_match.group(1))
+                continue
 
-                    # Note: $ verse_id markers in source file are for reference only, not stored
+            # Check for verse end marker
+            if line.strip() == 'மேல்':
+                # Verse ends here
+                continue
 
-                    self.verses.append({
-                        'verse_id': verse_id,
-                        'work_id': self.work_id,
-                        'section_id': padalam_section_id,
-                        'verse_number': verse_number,
-                        'verse_type': 'verse',
-                        'verse_type_tamil': 'பாடல்',
-                        'total_lines': len(verse_lines),
-                        'sort_order': verse_number,
-                        'metadata': {}
-                    })
+            # Regular content line - add to current verse's lines
+            cleaned = clean_line(line)
+            if cleaned and current_verse_number is not None:
+                current_verse_lines.append(cleaned)
 
-                    # Process lines
-                    for line_num, line_text in enumerate(verse_lines, 1):
-                        line_id = self.line_id
-                        self.line_id += 1
+        # Save last verse
+        if current_verse_lines and current_verse_number is not None:
+            self._create_verse(current_verse_number, current_verse_lines, current_padalam_id)
 
-                        self.lines.append({
-                            'line_id': line_id,
-                            'verse_id': verse_id,
-                            'line_number': line_num,
-                            'line_text': line_text
-                        })
+        print(f"  [OK] Parsed {len(self.sections)} sections, {len(self.verses)} verses")
+        print(f"       {len(self.lines)} lines, {len(self.words)} words")
 
-                        # Process words
-                        cleaned_words = split_and_clean_words(line_text)
-                        for word_pos, word_text in enumerate(cleaned_words, 1):
-                            word_id = self.word_id
-                            self.word_id += 1
-
-                            self.words.append({
-                                'word_id': word_id,
-                                'line_id': line_id,
-                                'word_position': word_pos,
-                                'word_text': word_text,
-                                'sandhi_split': None
-                            })
-
-        print(f"\n✓ Phase 1 complete: Parsed file")
-        print(f"  - Sections: {len(self.sections)}")
-        print(f"  - Verses: {len(self.verses)}")
-        print(f"  - Lines: {len(self.lines)}")
-        print(f"  - Words: {len(self.words)}")
-
-    def bulk_insert(self):
-        """Phase 2: Bulk insert using PostgreSQL COPY"""
-        print("\nPhase 2: Bulk inserting into database...")
-
-        # Insert sections
-        print(f"  Inserting {len(self.sections)} sections...")
-        self._bulk_copy('sections', self.sections,
-                       ['section_id', 'work_id', 'parent_section_id', 'level_type', 'level_type_tamil',
-                        'section_number', 'section_name', 'section_name_tamil', 'sort_order'])
-
-        # Insert verses
-        print(f"  Inserting {len(self.verses)} verses...")
-        self._bulk_copy_with_jsonb('verses', self.verses,
-                       ['verse_id', 'work_id', 'section_id', 'verse_number', 'verse_type',
-                        'verse_type_tamil', 'total_lines', 'sort_order', 'metadata'])
-
-        # Insert lines
-        print(f"  Inserting {len(self.lines)} lines...")
-        self._bulk_copy('lines', self.lines,
-                       ['line_id', 'verse_id', 'line_number', 'line_text'])
-
-        # Insert words
-        print(f"  Inserting {len(self.words)} words...")
-        self._bulk_copy('words', self.words,
-                       ['word_id', 'line_id', 'word_position', 'word_text', 'sandhi_split'])
-
-        self.conn.commit()
-        print("✓ Phase 2 complete: All data inserted")
-
-    def _bulk_copy(self, table_name, data, columns):
-        """Use PostgreSQL COPY for bulk insert"""
-        if not data:
+    def _create_verse(self, verse_num: int, verse_lines: List[str], section_id: int):
+        """Create a verse with lines and words"""
+        if not verse_lines:
             return
 
-        # Create StringIO buffer
-        buffer = io.StringIO()
-        writer = csv.writer(buffer, delimiter='\t')
+        verse_dict = {
+            'verse_id': self.verse_id,
+            'work_id': self.current_work_id,
+            'section_id': section_id,
+            'verse_number': verse_num,
+            'verse_type': VERSE_METADATA['verse_type'],
+            'verse_type_tamil': VERSE_METADATA['verse_type_tamil'],
+            'total_lines': len(verse_lines),
+            'sort_order': verse_num,
+            'metadata': {}
+        }
+        self.verses.append(verse_dict)
+        current_verse_id = self.verse_id
+        self.verse_id += 1
 
-        for row in data:
-            writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+        # Process lines
+        for line_num, line_text in enumerate(verse_lines, 1):
+            line_id = self.line_id
+            self.line_id += 1
 
-        buffer.seek(0)
+            self.lines.append({
+                'line_id': line_id,
+                'verse_id': current_verse_id,
+                'line_number': line_num,
+                'line_text': line_text
+            })
 
-        # Use COPY command
-        self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
+            # Process words
+            cleaned_words = split_and_clean_words(line_text)
+            for word_pos, word_text in enumerate(cleaned_words, 1):
+                word_id = self.word_id
+                self.word_id += 1
 
-    def _bulk_copy_with_jsonb(self, table_name, data, columns):
-        """Use PostgreSQL COPY for bulk insert with JSONB support"""
-        if not data:
-            return
-
-        import json
-
-        # Create StringIO buffer - manual TSV construction (NO csv.writer)
-        buffer = io.StringIO()
-
-        for row in data:
-            row_data = []
-            for col in columns:
-                val = row.get(col)
-                if val is None:
-                    row_data.append('')
-                elif col == 'metadata' and isinstance(val, dict):
-                    # Convert dict to JSON string
-                    row_data.append(json.dumps(val, ensure_ascii=False))
-                else:
-                    # Clean text fields - escape tabs and newlines
-                    if isinstance(val, str):
-                        val = str(val).replace('\t', ' ').replace('\n', ' ').replace('\r', '')
-                    row_data.append(str(val))
-
-            # Manual TSV construction
-            buffer.write('\t'.join(row_data) + '\n')
-
-        buffer.seek(0)
-
-        # Use COPY command
-        self.cursor.copy_from(buffer, table_name, columns=columns, null='')
-
-    def close(self):
-        """Close database connection"""
-        self.cursor.close()
-        self.conn.close()
-
-
-def ensure_collection_exists(cursor):
-    """
-    Ensure shared collection 323 (பக்தி இலக்கியம்) exists.
-    This is the parent collection for all devotional literature.
-    """
-    cursor.execute("SELECT collection_id FROM collections WHERE collection_id = 323")
-    if cursor.fetchone():
-        return  # Collection already exists
-
-    print("\nCreating shared collection 323 (பக்தி இலக்கியம்)...")
-    cursor.execute("""
-        INSERT INTO collections (
-            collection_id, collection_name, collection_name_tamil,
-            description, parent_collection_id, sort_order
-        )
-        VALUES (
-            323,
-            'Bhakti Literature',
-            'பக்தி இலக்கியம்',
-            'Devotional literature spanning Shaivite, Vaishnavite, Murugan, Christian, and Islamic traditions',
-            NULL,
-            300
-        )
-    """)
-    print("  ✓ Collection 323 created")
-
-
-def link_work_to_collection(cursor, work_id):
-    """
-    Link the work to shared collection 323 (பக்தி இலக்கியம்).
-    Position 43 = Seerapuranam in devotional literature.
-    """
-    # Check if link already exists
-    cursor.execute("""
-        SELECT 1 FROM work_collections
-        WHERE work_id = %s AND collection_id = 323
-    """, (work_id,))
-
-    if cursor.fetchone():
-        print(f"  ℹ Work already linked to collection 323")
-        return
-
-    print(f"\nLinking work {work_id} to collection 323 (பக்தி இலக்கியம்)...")
-    cursor.execute("""
-        INSERT INTO work_collections (work_id, collection_id, position_in_collection)
-        VALUES (%s, 323, 43)
-    """, (work_id,))
-    print(f"  ✓ Work linked to collection 323 at position 43")
+                self.words.append({
+                    'word_id': word_id,
+                    'line_id': line_id,
+                    'word_position': word_pos,
+                    'word_text': word_text,
+                    'sandhi_split': None
+                })
 
 
 def main():
-    """Main execution function."""
-    # Fix Windows console encoding for Tamil characters
-    if sys.platform == 'win32':
-        os.environ['PYTHONIOENCODING'] = 'utf-8'
-
-    # Database connection - check for environment variable or use default
-    db_connection = os.getenv('DATABASE_URL',
-                             "postgresql://postgres:postgres@localhost/tamil_literature")
-
-    # Source file path
-    script_dir = Path(__file__).parent
-    project_dir = script_dir.parent
-    source_file = project_dir / "Tamil-Source-TamilConcordence" / "6_பக்தி இலக்கியம்" / "19.சீறாப்புராணம்.txt"
-
-    # Allow database URL as command line argument
+    """Main entry point"""
     if len(sys.argv) > 1:
-        db_connection = sys.argv[1]
+        db_url = sys.argv[1]
+    else:
+        db_url = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost/tamil_literature')
+
+    file_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        'Tamil-Source-TamilConcordence',
+        FILE_INFO['source_directory'],
+        FILE_INFO['source_file']
+    )
 
     print("=" * 70)
-    print("Seerapuranam Parser - Bulk COPY Import")
+    print("SEERAPURANAM BULK IMPORT")
     print("=" * 70)
-    print(f"Database: {db_connection.split('@')[-1] if '@' in db_connection else db_connection}")
-    print(f"Source: {source_file}")
-    print("=" * 70)
+    print(f"Database: {db_url}")
+    print(f"Source file: {file_path}")
 
-    if not source_file.exists():
-        print(f"\n✗ Error: Source file not found: {source_file}")
+    if not Path(file_path).exists():
+        print(f"\n✗ Error: Source file not found: {file_path}")
         sys.exit(1)
 
-    # Create importer
-    importer = SeerapuranamBulkImporter(db_connection, source_file)
+    importer = SeerapuranamBulkImporter(db_url)
 
     try:
-        importer._ensure_work_exists()
-        importer.parse_file()
+        importer.parse_file(file_path)
         importer.bulk_insert()
-
-        # Add to shared collection (பக்தி இலக்கியம்)
-        ensure_collection_exists(importer.cursor)
-        link_work_to_collection(importer.cursor, importer.work_id)
-
-        # Commit collection changes
-        importer.conn.commit()
-
-        print("\n" + "=" * 70)
-        print("✓ Seerapuranam import completed successfully!")
-        print("=" * 70)
+        print("\n[SUCCESS] Seerapuranam imported successfully!")
+    except Exception as e:
+        print(f"\n[ERROR] Import failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
     finally:
         importer.close()
-        print("\n✓ Database connection closed")
 
 
 if __name__ == '__main__':

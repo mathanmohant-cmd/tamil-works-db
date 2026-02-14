@@ -147,7 +147,13 @@ class ThirumanthiramBulkImporter:
             'work_name_tamil': work_name,
             'author': 'Thirumoolar',
             'author_tamil': author_name,
-            'period': '6th-10th century CE',
+            'chronology_start_year': 500,
+
+            'chronology_end_year': 1000,
+
+            'chronology_confidence': 'low',
+
+            'chronology_notes': 'Estimated 6th-10th century CE. Wide date range reflects scholarly uncertainty.',
             'canonical_order': 341,
                         'metadata': work_metadata
         })

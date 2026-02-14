@@ -253,7 +253,13 @@ class ThiruvisaippaBulkImporter:
             'work_name_tamil': work_name,
             'author': author_name,
             'author_tamil': author_name,
-            'period': '6th-12th century CE',
+            'chronology_start_year': 500,
+
+            'chronology_end_year': 1200,
+
+            'chronology_confidence': 'low',
+
+            'chronology_notes': 'Estimated 6th-12th century CE. Wide date range reflects scholarly uncertainty.',
             'canonical_order': 330 + work_num,  # 331-340
                         'metadata': work_metadata
         })

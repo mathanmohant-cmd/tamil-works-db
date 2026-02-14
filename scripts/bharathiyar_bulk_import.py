@@ -44,85 +44,16 @@ sys.path.insert(0, str(Path(__file__).parent))  # Add scripts/ to path
 from shared.base_importer import BaseWorkImporter
 from shared.utils import split_and_clean_words, clean_line_text
 
-# Work metadata for all 4 thematic groups
-WORK_METADATA = {
-    1: {
-        'work_name': 'Bharathiyar National and Social Reform Poetry',
-        'work_name_tamil': 'பாரதியார் தேசிய மற்றும் சமூகச் சீர்திருத்தக் கவிதைகள்',
-        'author': 'Subramania Bharathiyar',
-        'author_tamil': 'சுப்பிரமணிய பாரதியார்',
-        'period': '1882-1921 CE',
-        'canonical_order': 328001,
-        'position_in_collection': 1,
-        'files': [1, 4, 5],
-        'file_names': {
-            1: '1.தேசீய கீதங்கள்.txt',
-            4: '4.பல்வகைப் பாடல்கள்.txt',
-            5: '5.தனிப் பாடல்கள்.txt'
-        },
-        'description': 'National songs, women\'s liberation, education, social reform, and miscellaneous poems by Bharathiyar'
-    },
-    2: {
-        'work_name': 'Bharathiyar Devotional and Spiritual Poetry',
-        'work_name_tamil': 'பாரதியார் பக்தி மற்றும் ஆன்மிகக் கவிதைகள்',
-        'author': 'Subramania Bharathiyar',
-        'author_tamil': 'சுப்பிரமணிய பாரதியார்',
-        'period': '1882-1921 CE',
-        'canonical_order': 328002,
-        'position_in_collection': 2,
-        'files': [2, 3, 7],
-        'file_names': {
-            2: '2.தோத்திரப் பாடல்கள்.txt',
-            3: '3.வேதாந்தப் பாடல்கள் - ஞானப் பாடல்கள்.txt',
-            7: '7.கண்ணன் பாட்டு.txt'
-        },
-        'description': 'Devotional hymns, Vedantic songs, and Krishna devotional poetry by Bharathiyar'
-    },
-    3: {
-        'work_name': 'Bharathiyar Epic and Narrative Poetry',
-        'work_name_tamil': 'பாரதியார் காப்பியக் கவிதைகள்',
-        'author': 'Subramania Bharathiyar',
-        'author_tamil': 'சுப்பிரமணிய பாரதியார்',
-        'period': '1882-1921 CE',
-        'canonical_order': 328003,
-        'position_in_collection': 3,
-        'files': [6, 8, 9],
-        'file_names': {
-            6: '6.சுயசரிதை.txt',
-            8: '8.பாஞ்சாலி சபதம்.txt',
-            9: '9.குயில் பாட்டு.txt'
-        },
-        'description': 'Autobiography, Panchali\'s Oath (Mahabharata epic), and Song of the Koel (narrative poetry) by Bharathiyar'
-    },
-    4: {
-        'work_name': 'Bharathiyar Modern Free Verse Poetry',
-        'work_name_tamil': 'பாரதியார் நவீன வசனக் கவிதை',
-        'author': 'Subramania Bharathiyar',
-        'author_tamil': 'சுப்பிரமணிய பாரதியார்',
-        'period': '1882-1921 CE',
-        'canonical_order': 328004,
-        'position_in_collection': 4,
-        'files': [10],
-        'file_names': {
-            10: '10.வசன கவிதை.txt'
-        },
-        'description': 'Modern free verse poetry by Bharathiyar'
-    }
-}
-
-# File-level section names (Level 1 - extracted from filenames)
-FILE_SECTION_NAMES = {
-    1: 'தேசீய கீதங்கள்',
-    2: 'தோத்திரப் பாடல்கள்',
-    3: 'வேதாந்தப் பாடல்கள் - ஞானப் பாடல்கள்',
-    4: 'பல்வகைப் பாடல்கள்',
-    5: 'தனிப் பாடல்கள்',
-    6: 'சுயசரிதை',
-    7: 'கண்ணன் பாட்டு',
-    8: 'பாஞ்சாலி சபதம்',
-    9: 'குயில் பாட்டு',
-    10: 'வசன கவிதை'
-}
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent / 'metadata'))
+from bharathiyar_metadata import (
+    WORK_METADATA,
+    FILE_SECTION_NAMES,
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    COLLECTION_DESCRIPTION
+)
 
 
 class BharathiyarBulkImporter(BaseWorkImporter):
@@ -145,7 +76,7 @@ class BharathiyarBulkImporter(BaseWorkImporter):
     def __init__(self, db_connection_string="postgresql://postgres:postgres@localhost/tamil_literature"):
         """Initialize with database connection using BaseWorkImporter"""
         # Call parent constructor with collection ID
-        super().__init__(db_connection_string, collection_id=328)
+        super().__init__(db_connection_string, collection_id=COLLECTION_ID)
 
         # Counters for progress reporting (not IDs - those are in parent)
         self.section_counter = 0
@@ -154,15 +85,15 @@ class BharathiyarBulkImporter(BaseWorkImporter):
         self.word_counter = 0
 
         print(f"Initialized BharathiyarBulkImporter")
-        print(f"  Collection 328 will be created if not exists")
+        print(f"  Collection {COLLECTION_ID} will be created if not exists")
 
     def _setup_collection(self):
-        """Setup collection 328 (uses parent method)"""
+        """Setup collection (uses parent method)"""
         super()._ensure_collection_exists(
-            collection_id=328,
-            collection_name='Bharathiyar Works',
-            collection_name_tamil='பாரதியார் படைப்புகள்',
-            description='Poetry of Subramania Bharathiyar (1882-1921 CE) - National, devotional, and social reform poetry'
+            collection_id=COLLECTION_ID,
+            collection_name=COLLECTION_NAME,
+            collection_name_tamil=COLLECTION_NAME_TAMIL,
+            description=COLLECTION_DESCRIPTION
         )
 
     def _create_work_from_metadata(self, work_num: int) -> int:
@@ -176,7 +107,7 @@ class BharathiyarBulkImporter(BaseWorkImporter):
             work_id = super()._create_work(
                 work_name=metadata['work_name'],
                 work_name_tamil=metadata['work_name_tamil'],
-                metadata=metadata  # Includes period, author, description, canonical_order, position_in_collection
+                metadata=metadata  # Includes chronology, author, description, canonical_order, position_in_collection
             )
             print(f"  Created work: {metadata['work_name_tamil']} (ID: {work_id}, Canonical: {metadata['canonical_order']})")
             return work_id

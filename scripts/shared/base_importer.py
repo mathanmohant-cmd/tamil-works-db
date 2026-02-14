@@ -35,6 +35,7 @@ import psycopg2
 import csv
 import io
 import sys
+from .metadata_validator import MetadataValidator
 
 
 class BaseWorkImporter:
@@ -58,6 +59,9 @@ class BaseWorkImporter:
         self.conn = psycopg2.connect(db_connection_string)
         self.cursor = self.conn.cursor()
         self.collection_id = collection_id
+
+        # Initialize metadata validator
+        self.validator = MetadataValidator()
 
         # Query MAX IDs ONCE at initialization
         self._initialize_id_counters()
@@ -130,16 +134,10 @@ class BaseWorkImporter:
             work_id: Assigned work ID
 
         Raises:
-            ValueError: If work already exists
+            ValueError: If work already exists or metadata validation fails
         """
-        # Check for duplicate
-        self.cursor.execute(
-            "SELECT work_id FROM works WHERE work_name = %s",
-            (work_name,)
-        )
-        if self.cursor.fetchone():
-            raise ValueError(f"Work {work_name} already exists. "
-                           f"Delete it first using the delete script.")
+        # Validate metadata before processing
+        self.validator.validate(metadata, work_name)
 
         work_id = self.work_id
         self.work_id += 1
@@ -149,7 +147,6 @@ class BaseWorkImporter:
             'work_id': work_id,
             'work_name': work_name,
             'work_name_tamil': work_name_tamil,
-            'period': metadata.get('period'),
             'author': metadata.get('author'),
             'author_tamil': metadata.get('author_tamil'),
             'description': metadata.get('description'),
@@ -190,7 +187,7 @@ class BaseWorkImporter:
         if self.works:
             print(f"  Inserting {len(self.works)} work(s)...")
             self._bulk_copy('works', self.works,
-                          ['work_id', 'work_name', 'work_name_tamil', 'period',
+                          ['work_id', 'work_name', 'work_name_tamil',
                            'author', 'author_tamil', 'description',
                            'chronology_start_year', 'chronology_end_year',
                            'chronology_confidence', 'chronology_notes', 'canonical_order'])
@@ -244,6 +241,10 @@ class BaseWorkImporter:
             for row in data:
                 metadata_value = row.get('metadata', None)
                 if metadata_value:
+                    # Convert dict to JSON string if needed
+                    if isinstance(metadata_value, dict):
+                        import json
+                        metadata_value = json.dumps(metadata_value)
                     # Replace tab characters in JSON to avoid breaking the format
                     metadata_value = metadata_value.replace('\t', ' ')
 
@@ -264,7 +265,18 @@ class BaseWorkImporter:
             # Use CSV writer for tables without JSON
             writer = csv.writer(buffer, delimiter='\t')
             for row in data:
-                writer.writerow([row.get(col) if row.get(col) is not None else '\\N' for col in columns])
+                # Clean tab characters from text fields to avoid breaking COPY format
+                cleaned_row = []
+                for col in columns:
+                    val = row.get(col)
+                    if val is not None:
+                        # Replace tabs in string values (especially line_text and word_text)
+                        if isinstance(val, str):
+                            val = val.replace('\t', ' ')
+                        cleaned_row.append(val)
+                    else:
+                        cleaned_row.append('\\N')
+                writer.writerow(cleaned_row)
             buffer.seek(0)
             self.cursor.copy_from(buffer, table_name, columns=columns, null='\\N')
 

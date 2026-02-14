@@ -2,8 +2,18 @@
 # -*- coding: utf-8 -*-
 """
 Siddhar Padalgal Work Metadata
-Centralized metadata for all 36 Siddhar works
+Centralized metadata for all 36 Siddhar works (Collection 327)
+
+This file contains complete metadata for all works in the Siddhar Padalgal collection.
+These mystical and spiritual poetry works were composed by Tamil Siddhars between
+the 7th-19th centuries CE.
 """
+
+# Collection-level constants
+COLLECTION_ID = 327
+COLLECTION_NAME = 'Siddhar Padalgal'
+COLLECTION_NAME_TAMIL = 'சித்தர் பாடல்கள்'
+COLLECTION_DESCRIPTION = 'Mystical and spiritual poetry by Tamil Siddhars covering spiritual wisdom (ஞானம்), yogic states (யோக நிலை), and worship methods (பூஜாவிதி). 36 works spanning 7th-19th century CE.'
 
 # Work metadata for all 36 works
 WORK_METADATA = {
@@ -13,11 +23,8 @@ WORK_METADATA = {
         'author': 'Agathiyar',
         'author_tamil': 'அகத்தியர்',
         'chronology_start_year': 600,
-
         'chronology_end_year': 900,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 7th-9th century CE (attributed). Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327001,
         'position_in_collection': 1,
@@ -30,11 +37,8 @@ WORK_METADATA = {
         'author': 'Agappey Siddhar',
         'author_tamil': 'அகப்பேய்ச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327002,
         'position_in_collection': 2,
@@ -47,11 +51,8 @@ WORK_METADATA = {
         'author': 'Azhugani Siddhar',
         'author_tamil': 'அழுகணிச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327003,
         'position_in_collection': 3,
@@ -64,11 +65,8 @@ WORK_METADATA = {
         'author': 'Adhinathar (Vedantha Siddhar)',
         'author_tamil': 'ஆதிநாதர் (வேதாந்தச் சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327004,
         'position_in_collection': 4,
@@ -81,11 +79,8 @@ WORK_METADATA = {
         'author': 'Idaikkaadu Siddhar',
         'author_tamil': 'இடைக்காட்டுச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327005,
         'position_in_collection': 5,
@@ -98,11 +93,8 @@ WORK_METADATA = {
         'author': 'Ramadhevar',
         'author_tamil': 'இராமதேவர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327006,
         'position_in_collection': 6,
@@ -115,11 +107,8 @@ WORK_METADATA = {
         'author': 'Uroma Rishi',
         'author_tamil': 'உரோம ரிஷி',
         'chronology_start_year': 600,
-
         'chronology_end_year': 1000,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 7th-10th century CE (attributed). Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327007,
         'position_in_collection': 7,
@@ -132,11 +121,8 @@ WORK_METADATA = {
         'author': 'Ekanathar (Brahmanantha Siddhar)',
         'author_tamil': 'ஏகநாதர் (பிரம்மானந்தச் சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327008,
         'position_in_collection': 8,
@@ -149,11 +135,8 @@ WORK_METADATA = {
         'author': 'Kanjamalai Siddhar',
         'author_tamil': 'கஞ்சமலைச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327009,
         'position_in_collection': 9,
@@ -166,11 +149,8 @@ WORK_METADATA = {
         'author': 'Kaduveli Siddhar',
         'author_tamil': 'கடுவெளிச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327010,
         'position_in_collection': 10,
@@ -183,11 +163,8 @@ WORK_METADATA = {
         'author': 'Kadaendra Nathar (Vilaiyaadu Siddhar)',
         'author_tamil': 'கடேந்திர நாதர் (விளையாட்டுச் சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327011,
         'position_in_collection': 11,
@@ -200,11 +177,8 @@ WORK_METADATA = {
         'author': 'Karuvurar',
         'author_tamil': 'கருவூரார்',
         'chronology_start_year': 800,
-
         'chronology_end_year': 1000,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 9th-10th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327012,
         'position_in_collection': 12,
@@ -217,11 +191,8 @@ WORK_METADATA = {
         'author': 'Kalluli Siddhar',
         'author_tamil': 'கல்லுளிச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327013,
         'position_in_collection': 13,
@@ -234,11 +205,8 @@ WORK_METADATA = {
         'author': 'Kaagapusundar',
         'author_tamil': 'காகபுசுண்டர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE (attributed). Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327014,
         'position_in_collection': 14,
@@ -251,11 +219,8 @@ WORK_METADATA = {
         'author': 'Unknown Siddhar',
         'author_tamil': 'அறியப்படாத சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1500,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-15th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327015,
         'position_in_collection': 15,
@@ -268,11 +233,8 @@ WORK_METADATA = {
         'author': 'Kaarai Siddhar',
         'author_tamil': 'காரைச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327016,
         'position_in_collection': 16,
@@ -285,11 +247,8 @@ WORK_METADATA = {
         'author': 'Kudhambai Siddhar',
         'author_tamil': 'குதம்பைச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327017,
         'position_in_collection': 17,
@@ -302,11 +261,8 @@ WORK_METADATA = {
         'author': 'Kongana Siddhar',
         'author_tamil': 'கொங்கண சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327018,
         'position_in_collection': 18,
@@ -319,11 +275,8 @@ WORK_METADATA = {
         'author': 'Kailayakka Kampali Sattai Muni',
         'author_tamil': 'கைலாயக் கம்பளிச் சட்டை முனி',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327019,
         'position_in_collection': 19,
@@ -336,11 +289,8 @@ WORK_METADATA = {
         'author': 'Sangili Siddhar',
         'author_tamil': 'சங்கிலிச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327020,
         'position_in_collection': 20,
@@ -353,11 +303,8 @@ WORK_METADATA = {
         'author': 'Sattai Muni',
         'author_tamil': 'சட்டை முனி',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327021,
         'position_in_collection': 21,
@@ -370,11 +317,8 @@ WORK_METADATA = {
         'author': 'Sathiya Nathar (Gnana Siddhar)',
         'author_tamil': 'சத்திய நாதர் (ஞானச் சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327022,
         'position_in_collection': 22,
@@ -387,11 +331,8 @@ WORK_METADATA = {
         'author': 'Sadhotha Nathar (Yoga Siddhar)',
         'author_tamil': 'சதோத நாதர் (யோகச் சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327023,
         'position_in_collection': 23,
@@ -404,11 +345,8 @@ WORK_METADATA = {
         'author': 'Sivavaakiyar',
         'author_tamil': 'சிவவாக்கியர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1200,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-12th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327024,
         'position_in_collection': 24,
@@ -421,11 +359,8 @@ WORK_METADATA = {
         'author': 'Sooriyaanandhar',
         'author_tamil': 'சூரியானந்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327025,
         'position_in_collection': 25,
@@ -438,11 +373,8 @@ WORK_METADATA = {
         'author': 'Thadangan Siddhar',
         'author_tamil': 'தடங்கண் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327026,
         'position_in_collection': 26,
@@ -455,11 +387,8 @@ WORK_METADATA = {
         'author': 'Thirikona Siddhar',
         'author_tamil': 'திரிகோணச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327027,
         'position_in_collection': 27,
@@ -472,11 +401,8 @@ WORK_METADATA = {
         'author': 'Thirumoolar',
         'author_tamil': 'திருமூலர்',
         'chronology_start_year': 700,
-
         'chronology_end_year': 900,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 8th-9th century CE (traditional). Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327028,
         'position_in_collection': 28,
@@ -489,11 +415,8 @@ WORK_METADATA = {
         'author': 'Attributed to Thiruvalluvar',
         'author_tamil': 'திருவள்ளுவர் (பெயரில்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1500,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-15th century CE (attributed). Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327029,
         'position_in_collection': 29,
@@ -506,11 +429,8 @@ WORK_METADATA = {
         'author': 'Pattinatthu Siddhar (Thiruvenkadar)',
         'author_tamil': 'பட்டினத்துச் சித்தர் (திருவெங்கதர்)',
         'chronology_start_year': 1000,
-
         'chronology_end_year': 1200,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 11th-12th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327030,
         'position_in_collection': 30,
@@ -523,11 +443,8 @@ WORK_METADATA = {
         'author': 'Pathiragiriyaar',
         'author_tamil': 'பத்திரகிரியார்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327031,
         'position_in_collection': 31,
@@ -540,11 +457,8 @@ WORK_METADATA = {
         'author': 'Paambaatti Siddhar',
         'author_tamil': 'பாம்பாட்டிச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327032,
         'position_in_collection': 32,
@@ -557,11 +471,8 @@ WORK_METADATA = {
         'author': 'Punnaakku Siddhar',
         'author_tamil': 'புண்ணாக்குச் சித்தர்',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327033,
         'position_in_collection': 33,
@@ -574,11 +485,8 @@ WORK_METADATA = {
         'author': 'Machaendhira Nathar (Nondi Siddhar)',
         'author_tamil': 'மச்சேந்திர நாதர் (நொண்டிச் சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327034,
         'position_in_collection': 34,
@@ -591,11 +499,8 @@ WORK_METADATA = {
         'author': 'Vagulinathar (Mauna Siddhar)',
         'author_tamil': 'வகுளிநாதர் (மௌனச்சித்தர்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1400,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-14th century CE. Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327035,
         'position_in_collection': 35,
@@ -608,11 +513,8 @@ WORK_METADATA = {
         'author': 'Attributed to Valmiki',
         'author_tamil': 'வால்மீகர் (பெயரில்)',
         'chronology_start_year': 900,
-
         'chronology_end_year': 1500,
-
         'chronology_confidence': 'low',
-
         'chronology_notes': 'Estimated 10th-15th century CE (attributed). Wide date range reflects scholarly uncertainty.',
         'canonical_order': 327036,
         'position_in_collection': 36,

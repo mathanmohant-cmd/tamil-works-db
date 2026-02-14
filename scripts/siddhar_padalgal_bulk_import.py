@@ -38,7 +38,17 @@ import json
 sys.path.insert(0, str(Path(__file__).parent))
 from shared.base_importer import BaseWorkImporter
 from shared.utils import clean_line_text, split_and_clean_words
-from siddhar_padalgal_work_metadata import WORK_METADATA, VERSE_TAG_PATTERNS, SECTION_NAME_REPLACEMENTS
+
+# Import centralized metadata
+from metadata.siddhar_padalgal_metadata import (
+    WORK_METADATA,
+    VERSE_TAG_PATTERNS,
+    SECTION_NAME_REPLACEMENTS,
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    COLLECTION_DESCRIPTION
+)
 
 
 class SiddharPadalgalBulkImporter:
@@ -55,7 +65,7 @@ class SiddharPadalgalBulkImporter:
     def __init__(self, db_connection_string: str):
         """Initialize master importer"""
         self.db_connection_string = db_connection_string
-        self.collection_id = 327
+        self.collection_id = COLLECTION_ID  # From centralized metadata
 
         # Connect to database for collection creation
         self.conn = psycopg2.connect(db_connection_string)
@@ -69,13 +79,13 @@ class SiddharPadalgalBulkImporter:
         self.conn.close()
 
     def _ensure_collection_exists(self):
-        """Create collection 327 if missing"""
+        """Create collection if missing (uses centralized metadata)"""
         self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s",
                           (self.collection_id,))
         existing = self.cursor.fetchone()
 
         if not existing:
-            print(f"  Creating Siddhar Padalgal collection (ID: {self.collection_id})...")
+            print(f"  Creating {COLLECTION_NAME_TAMIL} collection (ID: {self.collection_id})...")
             self.cursor.execute("""
                 INSERT INTO collections (
                     collection_id, collection_name, collection_name_tamil,
@@ -84,17 +94,17 @@ class SiddharPadalgalBulkImporter:
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 self.collection_id,
-                'Siddhar Padalgal',
-                'சித்தர் பாடல்கள்',
+                COLLECTION_NAME,
+                COLLECTION_NAME_TAMIL,
                 'tradition',
-                'Thirty-six mystical and spiritual poetry works by Tamil Siddhars (7th-19th century CE) - Songs of enlightened yogis and mystics',
+                COLLECTION_DESCRIPTION,
                 1,  # Parent: தமிழ் இலக்கியம் (designated filter collection)
                 6   # After Thirumurai=1, NDPD=2, Devotional=3, சிற்றிலக்கியங்கள்=4, நீதிநூல்கள்=5
             ))
             self.conn.commit()
             print(f"  [OK] Collection created")
         else:
-            print(f"  Found existing Siddhar Padalgal collection (ID: {self.collection_id})")
+            print(f"  Found existing {COLLECTION_NAME_TAMIL} collection (ID: {self.collection_id})")
 
     def import_work(self, work_num: int, file_path: str):
         """

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Metadata for all 18 Eighteen Lesser Texts (பதினெண்கீழ்க்கணக்கு)
+Eighteen Lesser Texts (பதினெண்கீழ்க்கணக்கு) Work Metadata
+Centralized metadata for all 18 works in Collection 201
 
 Each entry contains:
 - work_name: English name
@@ -20,6 +21,12 @@ Each entry contains:
 - folder: Text file folder name
 - filename: Text file name
 """
+
+# Collection-level constants
+COLLECTION_ID = 201
+COLLECTION_NAME = 'Eighteen Lesser Texts'
+COLLECTION_NAME_TAMIL = 'பதினெண்கீழ்க்கணக்கு'
+COLLECTION_DESCRIPTION = 'Post-Sangam didactic and ethical literature - 18 works on morality, conduct, and wisdom (3rd-10th century CE)'
 
 WORK_METADATA = {
     # Work 1: Naladiyar (Adhikaram structure)
@@ -212,140 +219,7 @@ WORK_METADATA = {
         'filename': '10-திணைமாலை நூற்றைம்பது'
     },
 
-    # Work 11: Thirigadugam (Flat structure)
-    'thirigadugam': {
-        'work_name': 'Thirigadugam',
-        'work_name_tamil': 'திரிகடுகம்',
-        'period': '10th century CE',
-        'author': 'Nallathanaaar',
-        'author_tamil': 'நல்லாதனார்',
-        'description': 'Collection of 100 four-line satirical verses, part of Eighteen Lesser Texts',
-        'chronology_start_year': 900,
-        'chronology_end_year': 1000,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated 10th century CE. Satirical work attributed to Nallathanaaar.',
-        'canonical_order': 201011,
-        'position_in_collection': 11,
-        'structure': 'flat',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '11-திரிகடுகம்'
-    },
-
-    # Work 12: Asarakkovai (Flat structure)
-    'asarakkovai': {
-        'work_name': 'Asarakkovai',
-        'work_name_tamil': 'ஆசாரக்கோவை',
-        'period': '10th century CE',
-        'author': 'Perungkoottanaaar',
-        'author_tamil': 'பெருங்கூத்தனார்',
-        'description': 'Collection of 100 four-line verses on ethical conduct, part of Eighteen Lesser Texts',
-        'chronology_start_year': 900,
-        'chronology_end_year': 1000,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated 10th century CE. Ethical work attributed to Perungkoottanaaar.',
-        'canonical_order': 201012,
-        'position_in_collection': 12,
-        'structure': 'flat',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '12-ஆசாரக்கோவை'
-    },
-
-    # Work 13: Pazhamozhi Nanuru (Flat structure)
-    'pazhamozhi_nanuru': {
-        'work_name': 'Pazhamozhi Nanuru',
-        'work_name_tamil': 'பழமொழி நானூறு',
-        'period': '10th century CE',
-        'author': 'Mundi Naayaganaaar',
-        'author_tamil': 'முண்டி நாயகனார்',
-        'description': 'Collection of 400 proverbs in four-line verses, part of Eighteen Lesser Texts',
-        'chronology_start_year': 900,
-        'chronology_end_year': 1000,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated 10th century CE. Collection of Tamil proverbs attributed to Mundi Naayaganaaar.',
-        'canonical_order': 201013,
-        'position_in_collection': 13,
-        'structure': 'flat',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '13-பழமொழி நானூறு'
-    },
-
-    # Work 14: Sirupanchamoolam (Flat structure)
-    'sirupanchamoolam': {
-        'work_name': 'Sirupanchamoolam',
-        'work_name_tamil': 'சிறுபஞ்சமூலம்',
-        'period': '10th century CE',
-        'author': 'Kariyaasaan',
-        'author_tamil': 'காரியாசான்',
-        'description': 'Collection of 100 four-line moral verses, part of Eighteen Lesser Texts',
-        'chronology_start_year': 900,
-        'chronology_end_year': 1000,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated 10th century CE. Moral verses attributed to Kariyaasaan.',
-        'canonical_order': 201014,
-        'position_in_collection': 14,
-        'structure': 'flat',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '14-சிறுபஞ்சமூலம்'
-    },
-
-    # Work 15: Muthumozhikkanchi (Paththu structure)
-    'muthumozhikkanchi': {
-        'work_name': 'Muthumozhikkanchi',
-        'work_name_tamil': 'முதுமொழிக் காஞ்சி',
-        'period': '10th century CE',
-        'author': 'Koodaloor Kizhaar',
-        'author_tamil': 'கூடலூர் கிழார்',
-        'description': 'Collection of 100 ancient sayings organized into 10 paththu, part of Eighteen Lesser Texts',
-        'chronology_start_year': 900,
-        'chronology_end_year': 1000,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated 10th century CE. Ancient sayings attributed to Koodaloor Kizhaar.',
-        'canonical_order': 201015,
-        'position_in_collection': 15,
-        'structure': 'paththu',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '15-முதுமொழிக் காஞ்சி'
-    },
-
-    # Work 16: Elathi (Flat structure)
-    'elathi': {
-        'work_name': 'Elathi',
-        'work_name_tamil': 'ஏலாதி',
-        'period': '10th century CE',
-        'author': 'Kannanaar',
-        'author_tamil': 'கண்ணனார்',
-        'description': 'Collection of 80 four-line verses on medical plants, part of Eighteen Lesser Texts',
-        'chronology_start_year': 900,
-        'chronology_end_year': 1000,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated 10th century CE. Medical plant verses attributed to Kannanaar.',
-        'canonical_order': 201016,
-        'position_in_collection': 16,
-        'structure': 'flat',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '16-ஏலாதி'
-    },
-
-    # Work 17: Kainnilai (Thinai structure)
-    'kainnilai': {
-        'work_name': 'Kainnilai',
-        'work_name_tamil': 'கைந்நிலை',
-        'period': 'Post-Sangam period',
-        'author': 'Pullandhiyaar',
-        'author_tamil': 'புல்லந்தியார்',
-        'description': 'Collection of 71 verses on ethical conduct organized by thinai, part of Eighteen Lesser Texts',
-        'chronology_start_year': 300,
-        'chronology_end_year': 600,
-        'chronology_confidence': 'low',
-        'chronology_notes': 'Estimated post-Sangam period. Attributed to Pullandhiyaar.',
-        'canonical_order': 201017,
-        'position_in_collection': 17,
-        'structure': 'thinai',
-        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '17-கைந்நிலை'
-    },
-
-    # Work 18: Thirukkural (Special 3-level hierarchy)
+    # Work 11: Thirukkural (Special 3-level hierarchy)
     'thirukkural': {
         'work_name': 'Thirukkural',
         'work_name_tamil': 'திருக்குறள்',
@@ -357,10 +231,143 @@ WORK_METADATA = {
         'chronology_end_year': 500,
         'chronology_confidence': 'low',
         'chronology_notes': 'Debated dating: estimates range from 300 BCE to 5th century CE. Most scholars favor 1st-5th century CE.',
-        'canonical_order': 201018,
-        'position_in_collection': 18,
+        'canonical_order': 201011,
+        'position_in_collection': 11,
         'structure': 'thirukkural',
         'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
-        'filename': '18-திருக்குறள்'
+        'filename': '11-திருக்குறள்'
+    },
+
+    # Work 12: Thirigadugam (Flat structure)
+    'thirigadugam': {
+        'work_name': 'Thirigadugam',
+        'work_name_tamil': 'திரிகடுகம்',
+        'period': '10th century CE',
+        'author': 'Nallathanaaar',
+        'author_tamil': 'நல்லாதனார்',
+        'description': 'Collection of 100 four-line satirical verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Satirical work attributed to Nallathanaaar.',
+        'canonical_order': 201012,
+        'position_in_collection': 12,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '12-திரிகடுகம்'
+    },
+
+    # Work 13: Asarakkovai (Flat structure)
+    'asarakkovai': {
+        'work_name': 'Asarakkovai',
+        'work_name_tamil': 'ஆசாரக்கோவை',
+        'period': '10th century CE',
+        'author': 'Perungkoottanaaar',
+        'author_tamil': 'பெருங்கூத்தனார்',
+        'description': 'Collection of 100 four-line verses on ethical conduct, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Ethical work attributed to Perungkoottanaaar.',
+        'canonical_order': 201013,
+        'position_in_collection': 13,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '13-ஆசாரக்கோவை'
+    },
+
+    # Work 14: Pazhamozhi Nanuru (Flat structure)
+    'pazhamozhi_nanuru': {
+        'work_name': 'Pazhamozhi Nanuru',
+        'work_name_tamil': 'பழமொழி நானூறு',
+        'period': '10th century CE',
+        'author': 'Mundi Naayaganaaar',
+        'author_tamil': 'முண்டி நாயகனார்',
+        'description': 'Collection of 400 proverbs in four-line verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Collection of Tamil proverbs attributed to Mundi Naayaganaaar.',
+        'canonical_order': 201014,
+        'position_in_collection': 14,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '14-பழமொழி நானூறு'
+    },
+
+    # Work 15: Sirupanchamoolam (Flat structure)
+    'sirupanchamoolam': {
+        'work_name': 'Sirupanchamoolam',
+        'work_name_tamil': 'சிறுபஞ்சமூலம்',
+        'period': '10th century CE',
+        'author': 'Kariyaasaan',
+        'author_tamil': 'காரியாசான்',
+        'description': 'Collection of 100 four-line moral verses, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Moral verses attributed to Kariyaasaan.',
+        'canonical_order': 201015,
+        'position_in_collection': 15,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '15-சிறுபஞ்சமூலம்'
+    },
+
+    # Work 16: Muthumozhikkanchi (Paththu structure)
+    'muthumozhikkanchi': {
+        'work_name': 'Muthumozhikkanchi',
+        'work_name_tamil': 'முதுமொழிக்காஞ்சி',
+        'period': '10th century CE',
+        'author': 'Koodaloor Kizhaar',
+        'author_tamil': 'கூடலூர் கிழார்',
+        'description': 'Collection of 100 ancient sayings organized into 10 paththu, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Ancient sayings attributed to Koodaloor Kizhaar.',
+        'canonical_order': 201016,
+        'position_in_collection': 16,
+        'structure': 'paththu',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '16-முதுமொழிக்காஞ்சி'
+    },
+
+    # Work 17: Elathi (Flat structure)
+    'elathi': {
+        'work_name': 'Elathi',
+        'work_name_tamil': 'ஏலாதி',
+        'period': '10th century CE',
+        'author': 'Kannanaar',
+        'author_tamil': 'கண்ணனார்',
+        'description': 'Collection of 80 four-line verses on medical plants, part of Eighteen Lesser Texts',
+        'chronology_start_year': 900,
+        'chronology_end_year': 1000,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated 10th century CE. Medical plant verses attributed to Kannanaar.',
+        'canonical_order': 201017,
+        'position_in_collection': 17,
+        'structure': 'flat',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '17-ஏலாதி'
+    },
+
+    # Work 18: Kainnilai (Thinai structure)
+    'kainnilai': {
+        'work_name': 'Kainnilai',
+        'work_name_tamil': 'கைந்நிலை',
+        'period': 'Post-Sangam period',
+        'author': 'Pullandhiyaar',
+        'author_tamil': 'புல்லந்தியார்',
+        'description': 'Collection of 71 verses on ethical conduct organized by thinai, part of Eighteen Lesser Texts',
+        'chronology_start_year': 300,
+        'chronology_end_year': 600,
+        'chronology_confidence': 'low',
+        'chronology_notes': 'Estimated post-Sangam period. Attributed to Pullandhiyaar.',
+        'canonical_order': 201018,
+        'position_in_collection': 18,
+        'structure': 'thinai',
+        'folder': '3_சங்க_இலக்கியம்_பதினெண்கீழ்க்கணக்கு',
+        'filename': '18-கைந்நிலை'
     }
 }

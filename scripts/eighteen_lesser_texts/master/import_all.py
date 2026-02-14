@@ -16,11 +16,12 @@ import sys
 from pathlib import Path
 import subprocess
 
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'metadata'))
+from eighteen_lesser_texts_metadata import COLLECTION_ID, COLLECTION_NAME, COLLECTION_NAME_TAMIL
 
-# Collection metadata
-COLLECTION_ID = 201
-COLLECTION_NAME_ENGLISH = 'Eighteen Lesser Texts'
-COLLECTION_NAME_TAMIL = 'பதினெண்கீழ்க்கணக்கு'
+# Legacy aliases for compatibility
+COLLECTION_NAME_ENGLISH = COLLECTION_NAME
 
 # Work orchestration order (matches canonical ordering)
 # Format: (script_name, position_in_collection, work_display_name)

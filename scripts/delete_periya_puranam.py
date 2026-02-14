@@ -26,7 +26,7 @@ def delete_periya_puranam(connection_string):
         conn.autocommit = False  # Use transaction
         cursor = conn.cursor()
 
-        # Check what exists
+        # Check what exists - try by collection first, then by name
         cursor.execute("""
             SELECT w.work_id, w.work_name, w.work_name_tamil
             FROM works w
@@ -34,6 +34,15 @@ def delete_periya_puranam(connection_string):
             WHERE wc.collection_id = 32119
         """)
         work_row = cursor.fetchone()
+
+        if not work_row:
+            # Try finding by work name (for standalone imports)
+            cursor.execute("""
+                SELECT work_id, work_name, work_name_tamil
+                FROM works
+                WHERE work_name = 'Periya Puranam' OR work_name_tamil = 'பெரியபுராணம்'
+            """)
+            work_row = cursor.fetchone()
 
         if not work_row:
             print("\n✗ Periya Puranam work not found")

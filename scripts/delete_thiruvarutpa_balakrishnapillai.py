@@ -28,11 +28,11 @@ def delete_thiruvarutpa_balakrishnapillai(connection_string):
         conn.autocommit = False  # Use transaction
         cursor = conn.cursor()
 
-        # Check what exists
+        # Check what exists (match by Tamil name for compatibility)
         cursor.execute("""
             SELECT work_id, work_name, work_name_tamil
             FROM works
-            WHERE work_name = 'Thiruvarutpa - Balakrishnapillai Edition'
+            WHERE work_name_tamil = 'திருவருட்பா - பாலகிருஷ்ணபிள்ளை பதிப்பு'
         """)
         works = cursor.fetchall()
 

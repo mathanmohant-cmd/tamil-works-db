@@ -40,119 +40,21 @@ import os
 import json
 import sys
 
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent / 'metadata'))
+from sangam_metadata import (
+    WORK_METADATA,
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    COLLECTION_DESCRIPTION
+)
+
 class SangamBulkImporter:
     # Map filenames to work information (work_id assigned dynamically)
     # Ordered by standard Sangam literature sequence (1-18)
-    SANGAM_WORKS = {
-        '1 நற்றிணை.txt': {
-            'work_name': 'Natrrinai', 'work_name_tamil': 'நற்றிணை',
-            'type': 'thogai', 'description': 'Collection of 400 poems',
-            'traditional_order': 2, 'start_year': -100, 'end_year': 100,
-            'confidence': 'high', 'notes': 'Considered among the earliest Sangam works'
-        },
-        '2 குறுந்தொகை.txt': {
-            'work_name': 'Kurunthokai', 'work_name_tamil': 'குறுந்தொகை',
-            'type': 'thogai', 'description': 'Short poems on love and war',
-            'traditional_order': 3, 'start_year': -100, 'end_year': 100,
-            'confidence': 'high', 'notes': 'Early Sangam anthology'
-        },
-        '3 ஐங்குறுநூறு.txt': {
-            'work_name': 'Ainkurunuru', 'work_name_tamil': 'ஐங்குறுநூறு',
-            'type': 'thogai', 'description': 'Five hundred short poems',
-            'traditional_order': 4, 'start_year': -100, 'end_year': 200,
-            'confidence': 'high', 'notes': 'Sangam anthology of 500 short love poems'
-        },
-        '4 பதிற்றுப்பத்து.txt': {
-            'work_name': 'Pathitrupathu', 'work_name_tamil': 'பதிற்றுப்பத்து',
-            'type': 'thogai', 'description': 'Ten tens of poems',
-            'traditional_order': 5, 'start_year': 100, 'end_year': 200,
-            'confidence': 'high', 'notes': 'Features Chera kings, slightly later than other anthologies'
-        },
-        '5 பரிபாடல்.txt': {
-            'work_name': 'Paripaadal', 'work_name_tamil': 'பரிபாடல்',
-            'type': 'thogai', 'description': 'Songs in Paripadal meter',
-            'traditional_order': 6, 'start_year': 100, 'end_year': 200,
-            'confidence': 'high', 'notes': 'Religious hymns to Murugan and Thirumal'
-        },
-        '6 கலித்தொகை.txt': {
-            'work_name': 'Kalithokai', 'work_name_tamil': 'கலித்தொகை',
-            'type': 'thogai', 'description': 'Collection of Kali meter poems',
-            'traditional_order': 7, 'start_year': 100, 'end_year': 250,
-            'confidence': 'medium', 'notes': 'Some scholars date to later Sangam period'
-        },
-        '7 அகநானூறு.txt': {
-            'work_name': 'Aganaanuru', 'work_name_tamil': 'அகநானூறு',
-            'type': 'thogai', 'description': 'Four hundred poems on love',
-            'traditional_order': 8, 'start_year': -100, 'end_year': 200,
-            'confidence': 'high', 'notes': '400 love poems from Sangam period'
-        },
-        '8 புறநானூறு.txt': {
-            'work_name': 'Puranaanuru', 'work_name_tamil': 'புறநானூறு',
-            'type': 'thogai', 'description': 'Four hundred poems on war and ethics',
-            'traditional_order': 9, 'start_year': -100, 'end_year': 200,
-            'confidence': 'high', 'notes': 'Historical references help date some poems precisely'
-        },
-        '9 திருமுருகாற்றுப்படை.txt': {
-            'work_name': 'Thirumurugaatruppadai', 'work_name_tamil': 'திருமுருகாற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to Lord Murugan',
-            'traditional_order': 10, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '10 பொருநராற்றுப்படை.txt': {
-            'work_name': 'Porunaraatruppadai', 'work_name_tamil': 'பொருநராற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to patron',
-            'traditional_order': 11, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '11 சிறுபாணாற்றுப்படை.txt': {
-            'work_name': 'Sirupanaatruppadai', 'work_name_tamil': 'சிறுபாணாற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to small drum player',
-            'traditional_order': 12, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '12 பெரும்பாணாற்றுப்படை.txt': {
-            'work_name': 'Perumpanaatruppadai', 'work_name_tamil': 'பெரும்பாணாற்றுப்படை',
-            'type': 'padal', 'description': 'Guide to great drum player',
-            'traditional_order': 13, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '13 முல்லைப்பாட்டு.txt': {
-            'work_name': 'Mullaippaattu', 'work_name_tamil': 'முல்லைப்பாட்டு',
-            'type': 'padal', 'description': 'Song of Mullai landscape',
-            'traditional_order': 14, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '14 மதுரைக்காஞ்சி.txt': {
-            'work_name': 'Madurai kanchi', 'work_name_tamil': 'மதுரைக்காஞ்சி',
-            'type': 'padal', 'description': 'Description of Madurai city',
-            'traditional_order': 15, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '15 நெடுநல்வாடை.txt': {
-            'work_name': 'Nedunalvaadai', 'work_name_tamil': 'நெடுநல்வாடை',
-            'type': 'padal', 'description': 'The long north wind',
-            'traditional_order': 16, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '16 குறிஞ்சிப்பாட்டு.txt': {
-            'work_name': 'Kurinchippaattu', 'work_name_tamil': 'குறிஞ்சிப்பாட்டு',
-            'type': 'padal', 'description': 'Song of Kurinji landscape',
-            'traditional_order': 17, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '17 பட்டினப்பாலை.txt': {
-            'work_name': 'Pattinappaalai', 'work_name_tamil': 'பட்டினப்பாலை',
-            'type': 'padal', 'description': 'Description of seaport',
-            'traditional_order': 18, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        },
-        '18 மலைபடுகடாம்.txt': {
-            'work_name': 'Malaipadukataam', 'work_name_tamil': 'மலைபடுகடாம்',
-            'type': 'padal', 'description': 'Mountain-traversing journey',
-            'traditional_order': 19, 'start_year': 150, 'end_year': 250,
-            'confidence': 'high', 'notes': 'Part of Pathupaattu (Ten Idylls)'
-        }
-    }
+    # Now loaded from centralized metadata file
+    SANGAM_WORKS = WORK_METADATA
 
     def __init__(self, db_connection_string: str):
         """Initialize importer"""
@@ -218,22 +120,21 @@ class SangamBulkImporter:
             # Assign next available work_id and increment
             work_info['work_id'] = next_work_id
 
-            # Calculate canonical order: Sangam works are 200-217
-            # Map traditional_order (2-19) to canonical_order (200-217)
-            canonical_order = 198 + work_info['traditional_order']  # 198 + 2 = 200, 198 + 19 = 217
+            # Use canonical_order from metadata (already pre-computed)
+            canonical_order = work_info.get('canonical_order', 198 + work_info['traditional_order'])
 
             self.works.append({
                 'work_id': next_work_id,
                 'work_name': work_info['work_name'],
                 'work_name_tamil': work_info['work_name_tamil'],
-                'period': '300 BCE - 300 CE',
-                'author': 'Various',
-                'author_tamil': 'பல்வேறு புலவர்கள்',
+                'period': work_info.get('period', '100 BCE - 250 CE'),
+                'author': work_info.get('author', 'Multiple poets'),
+                'author_tamil': work_info.get('author_tamil', 'பல புலவர்கள்'),
                 'description': work_info['description'],
-                'chronology_start_year': work_info['start_year'],
-                'chronology_end_year': work_info['end_year'],
-                'chronology_confidence': work_info['confidence'],
-                'chronology_notes': work_info['notes'],
+                'chronology_start_year': work_info['chronology_start_year'],
+                'chronology_end_year': work_info.get('chronology_end_year'),
+                'chronology_confidence': work_info.get('chronology_confidence'),
+                'chronology_notes': work_info.get('chronology_notes'),
                 'canonical_order': canonical_order
             })
 
@@ -252,10 +153,11 @@ class SangamBulkImporter:
             self._create_collection_and_link_works()
 
     def _create_collection_and_link_works(self):
-        """Create பதினெண்மேல்கணக்கு collection and link all 18 Sangam works to it"""
-        collection_id = 51
-        collection_name = 'Eighteen Major Works'
-        collection_name_tamil = 'பதினெண்மேல்கணக்கு'
+        """Create Sangam Literature collection and link all 18 works to it"""
+        # Use constants from centralized metadata
+        collection_id = COLLECTION_ID
+        collection_name = COLLECTION_NAME
+        collection_name_tamil = COLLECTION_NAME_TAMIL
 
         # Check if collection exists
         self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
@@ -268,9 +170,9 @@ class SangamBulkImporter:
                 'collection_name': collection_name,
                 'collection_name_tamil': collection_name_tamil,
                 'collection_type': 'period',
-                'description': 'Sangam Literature - Classical Tamil poetry anthologies from 300 BCE to 300 CE',
+                'description': COLLECTION_DESCRIPTION,
                 'parent_collection_id': None,
-                'sort_order': 51
+                'sort_order': collection_id
             }]
             self._bulk_copy('collections', collection_data,
                            ['collection_id', 'collection_name', 'collection_name_tamil',
@@ -280,14 +182,13 @@ class SangamBulkImporter:
         else:
             print(f"  Collection {collection_name_tamil} already exists")
 
-        # Link all works to collection using traditional_order as position
+        # Link all works to collection using position from metadata
         print(f"  Linking {len(self.works)} Sangam works to collection...")
         work_collections = []
 
         for filename, work_info in self.SANGAM_WORKS.items():
-            # Position in collection is based on traditional_order minus 1
-            # (traditional_order goes 2-19, so positions will be 1-18)
-            position = work_info['traditional_order'] - 1
+            # Use position_in_collection from metadata (already correct)
+            position = work_info.get('position_in_collection', work_info['traditional_order'] - 1)
 
             work_collections.append({
                 'work_id': work_info['work_id'],

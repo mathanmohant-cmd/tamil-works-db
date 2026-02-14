@@ -24,7 +24,17 @@ import psycopg2
 import csv
 import io
 from pathlib import Path
-from word_cleaning import split_and_clean_words
+from utilities.word_cleaning import split_and_clean_words
+
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent / 'metadata'))
+from kambaramayanam_metadata import (
+    WORK_METADATA,
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    COLLECTION_DESCRIPTION
+)
 
 # Kandam files (ordered) - Yuddha Kandam (6) is split across 4 files for convenience
 # Note: Section names include "Kandam"/"காண்டம்" and "Padalam"/"படலம்" for natural reading
@@ -221,8 +231,9 @@ class KambaramayanamBulkImporter:
 
     def _ensure_work_exists(self):
         """Ensure Kambaramayanam work exists"""
-        work_name_tamil = 'கம்பராமாயணம்'
-        work_name_english = 'Kambaramayanam'
+        metadata = WORK_METADATA['kambaramayanam']
+        work_name_tamil = metadata['work_name_tamil']
+        work_name_english = metadata['work_name']
 
         # Check if work already exists by name
         self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
@@ -253,13 +264,15 @@ class KambaramayanamBulkImporter:
                 self.work_id,
                 work_name_english,
                 work_name_tamil,
-                'Tamil retelling of the Ramayana epic',
-                '12th century CE',
-                'Kambar',
-                'கம்பர்',
-                1100, 1200, 'high',
-                'Medieval epic by Kambar during Chola period.',
-                400  # Medieval epic
+                metadata['description'],
+                f"{metadata['chronology_start_year']}-{metadata['chronology_end_year']} CE",
+                metadata['author'],
+                metadata['author_tamil'],
+                metadata['chronology_start_year'],
+                metadata['chronology_end_year'],
+                metadata['chronology_confidence'],
+                metadata['chronology_notes'],
+                metadata['canonical_order']
             ))
             self.conn.commit()
             print(f"  ✓ Work created (ID: {self.work_id}).")
@@ -282,27 +295,25 @@ class KambaramayanamBulkImporter:
 
     def _create_collection_and_link(self):
         """Create காப்பியங்கள் collection and link Kambaramayanam to it"""
-        collection_id = 500
-        collection_name = 'Epics'
-        collection_name_tamil = 'காப்பியங்கள்'
+        metadata = WORK_METADATA['kambaramayanam']
 
         # Check if collection exists
-        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (COLLECTION_ID,))
         existing = self.cursor.fetchone()
 
         if not existing:
-            print(f"  Creating collection: {collection_name_tamil}")
+            print(f"  Creating collection: {COLLECTION_NAME_TAMIL}")
             self.cursor.execute("""
                 INSERT INTO collections (collection_id, collection_name, collection_name_tamil,
                                         collection_type, description, parent_collection_id, sort_order)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (collection_id, collection_name, collection_name_tamil, 'genre',
-                  'Tamil Epic Poetry - Major epic works in Tamil literature',
+            """, (COLLECTION_ID, COLLECTION_NAME, COLLECTION_NAME_TAMIL, 'genre',
+                  COLLECTION_DESCRIPTION,
                   None, 500))
             self.conn.commit()
-            print(f"  ✓ Created collection {collection_name_tamil}")
+            print(f"  ✓ Created collection {COLLECTION_NAME_TAMIL}")
         else:
-            print(f"  Collection {collection_name_tamil} already exists")
+            print(f"  Collection {COLLECTION_NAME_TAMIL} already exists")
 
         # Link work to collection
         print(f"  Linking Kambaramayanam to collection...")
@@ -310,10 +321,10 @@ class KambaramayanamBulkImporter:
             INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary, notes)
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (work_id, collection_id) DO NOTHING
-        """, (self.work_id, collection_id, 1, True, 'Tamil retelling of Ramayana by Kambar'))
+        """, (self.work_id, COLLECTION_ID, metadata['position_in_collection'], True, metadata['description']))
 
         self.conn.commit()
-        print(f"  ✓ Linked Kambaramayanam to collection (position 1)")
+        print(f"  ✓ Linked Kambaramayanam to collection (position {metadata['position_in_collection']})")
 
     def parse_all_files(self):
         """Phase 1: Parse all Kandam files into memory"""

@@ -160,7 +160,13 @@ class ThirukovayarBulkImporter:
             'work_name_tamil': 'திருக்கோவையார்',
             'author': 'Manikkavasagar',
             'author_tamil': 'மாணிக்கவாசகர்',
-            'period': '9th century CE',
+            'chronology_start_year': 800,
+
+            'chronology_end_year': 900,
+
+            'chronology_confidence': 'low',
+
+            'chronology_notes': 'Estimated 9th century CE. Dating based on manuscript evidence and historical context.',
             'canonical_order': 329,
                         'metadata': work_metadata
         })

@@ -25,7 +25,7 @@ from pathlib import Path
 
 # Add parent directory to path to access word_cleaning module
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from word_cleaning import split_and_clean_words, clean_tamil_word
+from utilities.word_cleaning import split_and_clean_words, clean_tamil_word
 
 
 def clean_line_text(line_text):

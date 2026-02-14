@@ -26,6 +26,17 @@ import csv
 import io
 import os
 import json
+import sys
+
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent / 'metadata'))
+from tolkappiyam_metadata import (
+    WORK_METADATA,
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    COLLECTION_DESCRIPTION
+)
 
 class TolkappiyamBulkImporter:
     # Tolkappiyam has 3 Adhikarams (major divisions)
@@ -130,8 +141,9 @@ class TolkappiyamBulkImporter:
 
     def _ensure_work_exists(self):
         """Create Tolkappiyam work entry if it doesn't exist"""
-        work_name_english = 'Tolkappiyam'
-        work_name_tamil = 'தொல்காப்பியம்'
+        metadata = WORK_METADATA['tolkappiyam']
+        work_name_english = metadata['work_name']
+        work_name_tamil = metadata['work_name_tamil']
 
         # Check if work already exists by name
         self.cursor.execute("SELECT work_id FROM works WHERE work_name = %s", (work_name_english,))
@@ -155,15 +167,15 @@ class TolkappiyamBulkImporter:
                 'work_id': self.work_id,
                 'work_name': work_name_english,
                 'work_name_tamil': work_name_tamil,
-                'period': '3rd century BCE - 5th century CE',
-                'author': 'Tolkappiyar',
-                'author_tamil': 'தொல்காப்பியர்',
-                'description': 'Ancient Tamil grammar text covering phonology, morphology, and poetics',
-                'chronology_start_year': -200,
-                'chronology_end_year': 100,
-                'chronology_confidence': 'disputed',
-                'chronology_notes': 'Dating highly disputed: ranges from 500 BCE to 500 CE. Conservative estimate: 3rd century BCE to 1st century CE.',
-                'canonical_order': 100
+                'period': f"{abs(metadata['chronology_start_year'])} BCE - {metadata['chronology_end_year']} CE" if metadata['chronology_start_year'] < 0 else f"{metadata['chronology_start_year']}-{metadata['chronology_end_year']} CE",
+                'author': metadata['author'],
+                'author_tamil': metadata['author_tamil'],
+                'description': metadata['description'],
+                'chronology_start_year': metadata['chronology_start_year'],
+                'chronology_end_year': metadata['chronology_end_year'],
+                'chronology_confidence': metadata['chronology_confidence'],
+                'chronology_notes': metadata['chronology_notes'],
+                'canonical_order': metadata['canonical_order']
             }]
 
             self._bulk_copy('works', work_data,
@@ -179,22 +191,20 @@ class TolkappiyamBulkImporter:
 
     def _create_collection_and_link(self):
         """Create தமிழ் இலக்கண நூல்கள் collection and link Tolkappiyam to it"""
-        collection_id = 11
-        collection_name = 'Tamil Grammar Works'
-        collection_name_tamil = 'தமிழ் இலக்கண நூல்கள்'
+        metadata = WORK_METADATA['tolkappiyam']
 
         # Check if collection exists
-        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (collection_id,))
+        self.cursor.execute("SELECT collection_id FROM collections WHERE collection_id = %s", (COLLECTION_ID,))
         existing = self.cursor.fetchone()
 
         if not existing:
-            print(f"  Creating collection: {collection_name_tamil}")
+            print(f"  Creating collection: {COLLECTION_NAME_TAMIL}")
             collection_data = [{
-                'collection_id': collection_id,
-                'collection_name': collection_name,
-                'collection_name_tamil': collection_name_tamil,
+                'collection_id': COLLECTION_ID,
+                'collection_name': COLLECTION_NAME,
+                'collection_name_tamil': COLLECTION_NAME_TAMIL,
                 'collection_type': 'genre',
-                'description': 'Tamil Grammar Texts - Classical Tamil grammatical works',
+                'description': COLLECTION_DESCRIPTION,
                 'parent_collection_id': None,
                 'sort_order': 11
             }]
@@ -202,18 +212,18 @@ class TolkappiyamBulkImporter:
                            ['collection_id', 'collection_name', 'collection_name_tamil',
                             'collection_type', 'description', 'parent_collection_id', 'sort_order'])
             self.conn.commit()
-            print(f"  ✓ Created collection {collection_name_tamil}")
+            print(f"  ✓ Created collection {COLLECTION_NAME_TAMIL}")
         else:
-            print(f"  Collection {collection_name_tamil} already exists")
+            print(f"  Collection {COLLECTION_NAME_TAMIL} already exists")
 
         # Link work to collection
         print(f"  Linking Tolkappiyam to collection...")
         work_collection_data = [{
             'work_id': self.work_id,
-            'collection_id': collection_id,
-            'position_in_collection': 1,
+            'collection_id': COLLECTION_ID,
+            'position_in_collection': metadata['position_in_collection'],
             'is_primary': True,
-            'notes': 'First and foremost Tamil grammar text'
+            'notes': metadata['description']
         }]
 
         # Use INSERT with ON CONFLICT to handle duplicates
@@ -221,7 +231,7 @@ class TolkappiyamBulkImporter:
             INSERT INTO work_collections (work_id, collection_id, position_in_collection, is_primary, notes)
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (work_id, collection_id) DO NOTHING
-        """, (self.work_id, collection_id, 1, True, 'First and foremost Tamil grammar text'))
+        """, (self.work_id, COLLECTION_ID, metadata['position_in_collection'], True, metadata['description']))
 
         self.conn.commit()
         print(f"  ✓ Linked Tolkappiyam to collection (position 1)")

@@ -33,6 +33,16 @@ sys.path.insert(0, str(Path(__file__).parent))
 from shared.base_importer import BaseWorkImporter
 from shared.utils import clean_line_text, split_and_clean_words
 
+# Import from centralized metadata
+sys.path.insert(0, str(Path(__file__).parent / 'metadata'))
+from sitrilakkiyangal_metadata import (
+    WORK_METADATA,
+    COLLECTION_ID,
+    COLLECTION_NAME,
+    COLLECTION_NAME_TAMIL,
+    COLLECTION_DESCRIPTION
+)
+
 # Level 1 section names for முக்கூடற்பள்ளு nested_double_star pattern
 LEVEL1_SECTION_NAMES = [
     'காப்பு', 'கடவுள் வணக்கம்', 'நூல்', 'மங்கலம்',
@@ -55,270 +65,6 @@ MUKUDAL_PALLU_SECTIONS = [
     (152, 175, 'பள்ளியர் ஏசல் -முடிவு')
 ]
 
-# Work metadata for all 20 works
-WORK_METADATA = {
-    1: {
-        'work_name': 'Abhirami Andhadhi',
-        'work_name_tamil': 'அபிராமி அந்தாதி',
-        'author': 'Abhirami Pattar',
-        'author_tamil': 'அபிராமி பட்டர்',
-        'period': '18th century CE',
-        'canonical_order': 326001,
-        'position_in_collection': 1,
-        'file': 'அபிராமி அந்தாதி.txt',
-        'structure_pattern': 'simple',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    2: {
-        'work_name': 'Azhagar Killai Viduthootu',
-        'work_name_tamil': 'அழகர் கிள்ளை விடுதூது',
-        'author': 'Balapattu Chokkanathar',
-        'author_tamil': 'பலபட்டடைச் சொக்கநாதர்',
-        'period': '17th-18th century CE',
-        'canonical_order': 326002,
-        'position_in_collection': 2,
-        'file': 'அழகர் கிள்ளை விடுதூது.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    3: {
-        'work_name': 'Kachchi Kalambagam',
-        'work_name_tamil': 'கச்சிக் கலம்பகம்',
-        'author': 'Poonthi Aranganatha Mudaliar',
-        'author_tamil': 'பூண்டி அரங்கநாத முதலியார்',
-        'period': '17th-18th century CE',
-        'canonical_order': 326003,
-        'position_in_collection': 3,
-        'file': 'கச்சிக் கலம்பகம்.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': True
-    },
-    4: {
-        'work_name': 'Kalingathu Parani',
-        'work_name_tamil': 'கலிங்கத்துப்பரணி',
-        'author': 'Cheyangkonttar',
-        'author_tamil': 'செயங்கொண்டார்',
-        'period': '12th century CE',
-        'canonical_order': 326004,
-        'position_in_collection': 4,
-        'file': 'கலிங்கத்துப்பரணி.txt',
-        'structure_pattern': 'dual_star',
-        'verse_numbering': 'global',
-        'extract_metadata': True
-    },
-    5: {
-        'work_name': 'Kasi Kalambagam',
-        'work_name_tamil': 'காசிக் கலம்பகம்',
-        'author': 'Kumarakuruparar',
-        'author_tamil': 'குமரகுருபரர்',
-        'period': '17th century CE',
-        'canonical_order': 326005,
-        'position_in_collection': 5,
-        'file': 'காசிக் கலம்பகம்.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': True
-    },
-    6: {
-        'work_name': 'Kavadi Chindu',
-        'work_name_tamil': 'காவடிச் சிந்து',
-        'author': 'Annamalai Rettiyar',
-        'author_tamil': 'அண்ணாமலை ரெட்டியார்',
-        'period': '19th century CE',
-        'canonical_order': 326006,
-        'position_in_collection': 6,
-        'file': 'காவடிச் சிந்து.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': False
-    },
-    7: {
-        'work_name': 'Kuselopakyanam',
-        'work_name_tamil': 'குசேலோபாக்கியானம்',
-        'author': 'Vallur Devaraja Pillai',
-        'author_tamil': 'வல்லூர் தேவராச பிள்ளை',
-        'period': '18th-19th century CE',
-        'canonical_order': 326007,
-        'position_in_collection': 7,
-        'file': 'குசேலோபாக்கியானம்.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': True
-    },
-    8: {
-        'work_name': 'Kumaresa Sadhagam',
-        'work_name_tamil': 'குமரேச சதகம்',
-        'author': 'Gurubatha Dasar',
-        'author_tamil': 'குருபாத தாசர்',
-        'period': '18th-19th century CE',
-        'canonical_order': 326008,
-        'position_in_collection': 8,
-        'file': 'குமரேச சதகம்.txt',
-        'structure_pattern': 'simple',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': True
-    },
-    9: {
-        'work_name': 'Thakayaga Parani',
-        'work_name_tamil': 'தக்கயாகப்பரணி',
-        'author': 'Ottakkuttar',
-        'author_tamil': 'ஒட்டக்கூத்தர்',
-        'period': '12th century CE',
-        'canonical_order': 326009,
-        'position_in_collection': 9,
-        'file': 'தக்கயாகப்பரணி.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    10: {
-        'work_name': 'Thanjai Vanan Kovai',
-        'work_name_tamil': 'தஞ்சைவாணன் கோவை',
-        'author': 'Poyyamozhipulavar',
-        'author_tamil': 'பொய்யாமொழிப்புலவர்',
-        'period': '15th-16th century CE',
-        'canonical_order': 326010,
-        'position_in_collection': 10,
-        'file': 'தஞ்சைவாணன் கோவை.txt',
-        'structure_pattern': 'triple_ampersand_at',
-        'verse_numbering': 'global',
-        'extract_metadata': True
-    },
-    11: {
-        'work_name': 'Thamizh Vidu Thootu',
-        'work_name_tamil': 'தமிழ்விடு தூது',
-        'author': 'Madurai Chokkanathar',
-        'author_tamil': 'மதுரைச் சொக்கநாதர்',
-        'period': '17th century CE',
-        'canonical_order': 326011,
-        'position_in_collection': 11,
-        'file': 'தமிழ்விடு தூது.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    12: {
-        'work_name': 'Thirukkutrala Kuravanji',
-        'work_name_tamil': 'திருக்குற்றாலக் குறவஞ்சி',
-        'author': 'Unknown',
-        'author_tamil': 'அறியப்படாத ஆசிரியர்',
-        'period': '17th-18th century CE',
-        'canonical_order': 326012,
-        'position_in_collection': 12,
-        'file': 'திருக்குற்றாலக் குறவஞ்சி.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': True  # Has extensive ragam/thalam metadata (51+ occurrences)
-    },
-    13: {
-        'work_name': 'Nandhi Kalambagam',
-        'work_name_tamil': 'நந்திக் கலம்பகம்',
-        'author': 'Unknown',
-        'author_tamil': 'அறியப்படாத ஆசிரியர்',
-        'period': '17th-18th century CE',
-        'canonical_order': 326013,
-        'position_in_collection': 13,
-        'file': 'நந்திக் கலம்பகம்.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': True
-    },
-    14: {
-        'work_name': 'Nala Venba',
-        'work_name_tamil': 'நளவெண்பா',
-        'author': 'Pugazhenthi Pulavar',
-        'author_tamil': 'புகழேந்திப் புலவர்',
-        'period': '16th-17th century CE',
-        'canonical_order': 326014,
-        'position_in_collection': 14,
-        'file': 'நளவெண்பா.txt',
-        'structure_pattern': 'kandam_in_verse',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    15: {
-        'work_name': 'Pandi Kovai',
-        'work_name_tamil': 'பாண்டிக்கோவை',
-        'author': 'Unknown',
-        'author_tamil': 'அறியப்படாத ஆசிரியர்',
-        'period': '15th-16th century CE',
-        'canonical_order': 326015,
-        'position_in_collection': 15,
-        'file': 'பாண்டிக்கோவை.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    16: {
-        'work_name': 'Bethlakema Kuravanji',
-        'work_name_tamil': 'பெத்லகேம் குறவஞ்சி',
-        'author': 'Vedhanayaga Sasthriyar',
-        'author_tamil': 'வேதநாயக சாஸ்திரியார்',
-        'period': '19th century CE',
-        'canonical_order': 326016,
-        'position_in_collection': 16,
-        'file': 'பெத்லகேம் குறவஞ்சி.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    17: {
-        'work_name': 'Madurai Meenakshiyammai Pillai Thamizh',
-        'work_name_tamil': 'மதுரை மீனாட்சியம்மை பிள்ளைத் தமிழ்',
-        'author': 'Kumarakuruparar',
-        'author_tamil': 'குமரகுருபரர்',
-        'period': '17th century CE',
-        'canonical_order': 326017,
-        'position_in_collection': 17,
-        'file': 'மதுரை மீனாட்சியம்மை பிள்ளைத் தமிழ்.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'global',
-        'extract_metadata': False
-    },
-    18: {
-        'work_name': 'Madurai Kalambagam',
-        'work_name_tamil': 'மதுரைக் கலம்பகம்',
-        'author': 'Kumarakuruparar',
-        'author_tamil': 'குமரகுருபரர்',
-        'period': '17th century CE',
-        'canonical_order': 326018,
-        'position_in_collection': 18,
-        'file': 'மதுரைக் கலம்பகம்.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': True
-    },
-    19: {
-        'work_name': 'Mukkudal Pallu',
-        'work_name_tamil': 'முக்கூடற் பள்ளு',
-        'author': 'Unknown',
-        'author_tamil': 'அறியப்படாத ஆசிரியர்',
-        'period': '18th-19th century CE',
-        'canonical_order': 326019,
-        'position_in_collection': 19,
-        'file': 'முக்கூடற் பள்ளு.txt',
-        'structure_pattern': 'mukudal_fixed_sections',
-        'verse_numbering': 'global',
-        'extract_metadata': True
-    },
-    20: {
-        'work_name': 'Muvarula',
-        'work_name_tamil': 'மூவருலா',
-        'author': 'Kavichakravarthi Ottakkuttar',
-        'author_tamil': 'கவிச்சக்கரவர்த்தி ஒட்டக்கூத்தர்',
-        'period': '12th century CE',
-        'canonical_order': 326020,
-        'position_in_collection': 20,
-        'file': 'மூவருலா.txt',
-        'structure_pattern': 'dual_at',
-        'verse_numbering': 'section_reset',
-        'extract_metadata': False
-    }
-}
-
 
 def is_paa_type(text: str) -> bool:
     """Check if text is a poetic form (paa type)"""
@@ -334,21 +80,16 @@ def is_paa_type(text: str) -> bool:
 class SitrilakkiyangalBulkImporter(BaseWorkImporter):
     """Import all 20 minor literary works using 2-phase bulk COPY pattern"""
 
-    # Default collection for this importer
-    COLLECTION_ID = 326
-    COLLECTION_NAME = 'Sitrilakkiyangal'
-    COLLECTION_NAME_TAMIL = 'சிற்றிலக்கியங்கள்'
-
     def __init__(self, db_connection_string: str):
         """Initialize importer and create collection"""
-        super().__init__(db_connection_string, collection_id=self.COLLECTION_ID)
+        super().__init__(db_connection_string, collection_id=COLLECTION_ID)
 
         # Ensure collection exists (idempotent)
         self._ensure_collection_exists(
-            collection_id=self.COLLECTION_ID,
-            collection_name=self.COLLECTION_NAME,
-            collection_name_tamil=self.COLLECTION_NAME_TAMIL,
-            description='Minor literary works collection (சிற்றிலக்கியங்கள்) - 20 works spanning 12th-19th century CE'
+            collection_id=COLLECTION_ID,
+            collection_name=COLLECTION_NAME,
+            collection_name_tamil=COLLECTION_NAME_TAMIL,
+            description=COLLECTION_DESCRIPTION
         )
 
     def _create_work(self, work_num: int) -> int:
